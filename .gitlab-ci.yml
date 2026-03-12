@@ -1,0 +1,40 @@
+stages:
+  - verify
+
+default:
+  image: python:3.12-alpine3.20
+
+.verify-rules:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+
+verify-skills-list:
+  stage: verify
+  extends: .verify-rules
+  script:
+    - python3 scripts/update_skills_list.py --ci --debug
+
+validate-frontmatter:
+  stage: verify
+  extends: .verify-rules
+  script:
+    - python3 scripts/validate_frontmatter.py --ci --debug
+
+check-claude-drift:
+  stage: verify
+  extends: .verify-rules
+  script:
+    - python3 scripts/check_claude_drift.py --ci --debug
+
+verify-catalog:
+  stage: verify
+  extends: .verify-rules
+  script:
+    - python3 scripts/generate_catalog.py --ci --debug
+
+verify-claude-plugin:
+  stage: verify
+  extends: .verify-rules
+  script:
+    - python3 scripts/generate_claude_plugin.py --ci --debug

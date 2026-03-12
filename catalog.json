@@ -1,0 +1,11 @@
+{
+  "skills": [
+    {
+      "name": "glab",
+      "description": "GitLab workflow automation using glab CLI",
+      "license": "MIT",
+      "compatibility": "opencode",
+      "path": "skills/glab/SKILL.md"
+    }
+  ]
+}

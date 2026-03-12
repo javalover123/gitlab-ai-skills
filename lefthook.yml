@@ -1,0 +1,25 @@
+pre-push:
+  parallel: true
+  skip:
+    - ref: main
+  commands:
+    verify-skills-list:
+      run: python3 scripts/update_skills_list.py --ci
+    validate-frontmatter:
+      run: python3 scripts/validate_frontmatter.py --ci
+    check-claude-drift:
+      run: python3 scripts/check_claude_drift.py --ci
+    verify-catalog:
+      run: python3 scripts/generate_catalog.py --ci
+    verify-claude-plugin:
+      run: python3 scripts/generate_claude_plugin.py --ci
+
+auto-fix:
+  parallel: false
+  commands:
+    skills-list:
+      run: python3 scripts/update_skills_list.py
+    catalog:
+      run: python3 scripts/generate_catalog.py
+    claude-plugin:
+      run: python3 scripts/generate_claude_plugin.py

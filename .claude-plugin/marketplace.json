@@ -1,0 +1,23 @@
+{
+  "name": "gitlab-ai-skills",
+  "owner": {
+    "name": "GitLab",
+    "email": "ai-skills@gitlab.com"
+  },
+  "plugins": [
+    {
+      "name": "glab",
+      "source": {
+        "source": "git-subdir",
+        "url": "https://gitlab.com/gitlab-org/ai/skills.git",
+        "path": "skills/glab"
+      },
+      "description": "GitLab workflow automation using glab CLI",
+      "version": "1.0.0",
+      "author": {
+        "name": "GitLab"
+      },
+      "license": "MIT"
+    }
+  ]
+}
