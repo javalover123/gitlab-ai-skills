@@ -13,12 +13,16 @@ pre-push:
       run: python3 scripts/generate_catalog.py --ci
     verify-claude-plugin:
       run: python3 scripts/generate_claude_plugin.py --ci
+    verify-toc:
+      run: python3 scripts/update_toc.py --ci
 
 auto-fix:
   parallel: false
   commands:
     skills-list:
       run: python3 scripts/update_skills_list.py
+    toc:
+      run: python3 scripts/update_toc.py
     catalog:
       run: python3 scripts/generate_catalog.py
     claude-plugin:

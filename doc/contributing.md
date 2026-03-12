@@ -20,15 +20,11 @@
    ...skill content...
    ```
 
-3. Run the auto-fix to regenerate all derived files:
+3. Regenerate all derived files:
 
    ```bash
-   python3 scripts/update_skills_list.py     # Update README skills table
-   python3 scripts/generate_catalog.py        # Update catalog.json
-   python3 scripts/generate_claude_plugin.py  # Update .claude-plugin/ manifests
+   lefthook run auto-fix
    ```
-
-   Or if you have lefthook installed: `lefthook run auto-fix`
 
 4. Commit everything: the new skill, updated README, catalog.json, and .claude-plugin/ manifests
 
@@ -60,6 +56,17 @@ You don't need to do anything special — just ensure `description` is present a
 
 ## Development
 
+### Install lefthook (recommended)
+
+```bash
+brew install lefthook
+lefthook install
+```
+
+With lefthook installed:
+- **Pre-push**: all six checks run automatically (blocks push on failure)
+- **Auto-fix**: `lefthook run auto-fix` regenerates all derived files
+
 ### Regenerate all derived files
 
 ```bash
@@ -70,6 +77,7 @@ Or run each script individually:
 
 ```bash
 python3 scripts/update_skills_list.py      # README skills table
+python3 scripts/update_toc.py              # README table of contents
 python3 scripts/generate_catalog.py         # catalog.json
 python3 scripts/generate_claude_plugin.py   # .claude-plugin/ manifests
 ```
@@ -78,19 +86,9 @@ python3 scripts/generate_claude_plugin.py   # .claude-plugin/ manifests
 
 ```bash
 python3 scripts/update_skills_list.py --ci
+python3 scripts/update_toc.py --ci
 python3 scripts/validate_frontmatter.py --ci
 python3 scripts/check_claude_drift.py --ci
 python3 scripts/generate_catalog.py --ci
 python3 scripts/generate_claude_plugin.py --ci
 ```
-
-### Install lefthook (optional, for auto-fix on push)
-
-```bash
-gem install lefthook   # or: brew install lefthook
-lefthook install
-```
-
-With lefthook installed:
-- **Pre-push**: all five checks run automatically (blocks push on failure)
-- **Auto-fix**: `lefthook run auto-fix` regenerates all derived files

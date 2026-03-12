@@ -38,3 +38,9 @@ verify-claude-plugin:
   extends: .verify-rules
   script:
     - python3 scripts/generate_claude_plugin.py --ci --debug
+
+verify-toc:
+  stage: verify
+  extends: .verify-rules
+  script:
+    - python3 scripts/update_toc.py --ci --debug

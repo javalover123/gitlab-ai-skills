@@ -4,6 +4,19 @@
 
 Reusable agent skills for GitLab projects. Skills are structured prompt files that AI coding assistants (like [OpenCode](https://opencode.ai) and [Claude Code](https://code.claude.com)) can load on demand to gain domain-specific knowledge and workflows.
 
+## Table of Contents
+
+<!-- TOC_START -->
+  - [Table of Contents](#table-of-contents)
+  - [What is a Skill?](#what-is-a-skill)
+  - [Skills](#skills)
+  - [Installing Skills](#installing-skills)
+    - [Claude Code](#claude-code)
+    - [OpenCode](#opencode)
+  - [Contributing](#contributing)
+  - [Related](#related)
+<!-- TOC_END -->
+
 ## What is a Skill?
 
 A skill is a directory containing a `SKILL.md` file with:
@@ -24,9 +37,19 @@ Skills are loaded explicitly by the agent when relevant to a task (e.g. "load th
 
 ## Installing Skills
 
-<!-- TODO: replace @dgruzd/skills with @gitlab/skills once released, or upstream GitLab support to https://github.com/vercel-labs/skills -->
+### Claude Code
 
-### Via `npx @dgruzd/skills` (Recommended)
+This repo is a [Claude Code plugin marketplace](https://code.claude.com/docs/en/plugin-marketplaces). Install skills as plugins directly:
+
+```shell
+/plugin marketplace add https://gitlab.com/gitlab-org/ai/skills.git
+/plugin install glab@gitlab-ai-skills
+```
+
+### OpenCode
+
+> [!warning]
+> TODO: We should strongly consider creating `@gitlab/skills` or, better yet, upstream GitLab support to [`vercel-labs/skills`](https://github.com/vercel-labs/skills)
 
 [`@dgruzd/skills`](https://github.com/dgruzd/skills) is a fork of [`vercel-labs/skills`](https://github.com/vercel-labs/skills) that adds GitLab update detection — without it, `skills check` and `skills update` silently skip GitLab-hosted skills. It handles symlinking, multi-agent installs, updates, and discovery with no global install required.
 
@@ -46,35 +69,15 @@ npx @dgruzd/skills list -g
 
 The `--agent opencode` flag installs to `~/.agents/skills/`, which is the standard location for OpenCode.
 
-### Via Claude Code Plugin Marketplace
-
-This repo is also a [Claude Code plugin marketplace](https://code.claude.com/docs/en/plugin-marketplaces). Install skills as plugins directly in Claude Code:
-
-```shell
-/plugin marketplace add https://gitlab.com/gitlab-org/ai/skills.git
-/plugin install glab@gitlab-ai-skills
-```
-
-### Manual Symlink (Alternative)
-
-If you prefer no external tooling:
-
-```bash
-# Run from your local clone of this repo
-cd /path/to/ai-skills
-
-mkdir -p ~/.config/opencode/skills
-for skill in skills/*/; do
-  name=$(basename "$skill")
-  ln -s "$(pwd)/$skill" ~/.config/opencode/skills/"$name"
-done
-```
-
-Symlinking the skill directory (rather than just `SKILL.md`) ensures any future additions to a skill folder are automatically picked up.
-
 ## Contributing
 
-See [doc/contributing.md](doc/contributing.md) for how to add a new skill and development setup.
+To add a new skill:
+
+1. Create `skills/<skill-name>/SKILL.md` with required frontmatter (`name`, `description`, `license`, `compatibility`)
+2. Run `lefthook run auto-fix` to regenerate all derived files (README table, ToC, catalog, plugin manifests)
+3. Commit and push — six CI checks verify everything is in sync
+
+See [doc/contributing.md](doc/contributing.md) for full details, frontmatter reference, and development setup (including lefthook installation).
 
 ## Related
 
