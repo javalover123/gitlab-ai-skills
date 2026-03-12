@@ -1,8 +1,7 @@
 {
-  "name": "gitlab-ai-skills",
+  "name": "gitlab-skills",
   "owner": {
-    "name": "GitLab",
-    "email": "ai-skills@gitlab.com"
+    "name": "GitLab"
   },
   "plugins": [
     {

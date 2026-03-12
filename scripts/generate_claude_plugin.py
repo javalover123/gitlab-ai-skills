@@ -22,8 +22,8 @@ SKILLS_DIR = os.path.join(REPO_ROOT, "skills")
 MARKETPLACE_FILE = os.path.join(REPO_ROOT, ".claude-plugin", "marketplace.json")
 
 # Marketplace metadata
-MARKETPLACE_NAME = "gitlab-ai-skills"
-MARKETPLACE_OWNER = {"name": "GitLab", "email": "ai-skills@gitlab.com"}
+MARKETPLACE_NAME = "gitlab-skills"
+MARKETPLACE_OWNER = {"name": "GitLab"}
 MARKETPLACE_REPO_URL = "https://gitlab.com/gitlab-org/ai/skills.git"
 
 # Debug flag

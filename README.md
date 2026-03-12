@@ -43,7 +43,7 @@ This repo is a [Claude Code plugin marketplace](https://code.claude.com/docs/en/
 
 ```shell
 /plugin marketplace add https://gitlab.com/gitlab-org/ai/skills.git
-/plugin install glab@gitlab-ai-skills
+/plugin install glab@gitlab-skills
 ```
 
 ### OpenCode
