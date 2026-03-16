@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:handbook.gitlab.com)",
+      "WebFetch(domain:gitlab.com)",
+      "Bash(python3 scripts/generate_catalog.py)",
+      "Bash(python3 scripts/generate_claude_plugin.py)",
+      "Bash(python3 scripts/check_claude_drift.py)",
+      "Bash(python3 scripts/update_skills_list.py)",
+      "Bash(python3:*)",
+      "Bash(wc -l /Users/johnmcdonnell/dev/gitlab-org/quality/performance/k6/tests/api/*.js)",
+      "Bash(wc -l skills/self-service-performance-testing/references/*.md)"
+    ]
+  }
+}
