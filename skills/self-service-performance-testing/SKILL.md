@@ -52,6 +52,7 @@ Match the engineer's situation to the right path:
 | "Should I perf test this?" / Unsure what to do | [getting-started.md](references/getting-started.md) - decision framework, which tool, regression budgets |
 | Need to set up GPT, Sitespeed Runway, or CPT | [ptk-tools.md](references/ptk-tools.md) - setup, quick starts, links |
 | Writing or reviewing a k6 test (GPT or custom) | [quick-reference.md](references/quick-reference.md) - principles, patterns, output shape |
+| Need deep k6 help (executors, thresholds, data) | [k6-patterns.md](references/k6-patterns.md) - comprehensive k6 guide |
 | Adding perf tests to CI pipeline | [gitlab-ci-integration.md](references/gitlab-ci-integration.md) - CPT, GPT, custom CI |
 | Stuck or need human input | **#g_performance_enablement** on Slack |
 

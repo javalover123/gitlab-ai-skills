@@ -87,6 +87,9 @@ project, you'll write a custom k6 test.
 dedicated test project in your perf environment. Never target real projects —
 test artifacts pollute real review threads and confuse other engineers.
 
+See [examples/](../examples/) for complete, annotated k6 tests including a
+single-endpoint load test and a multi-step user journey. Each follows the
+principles from the quick-reference guide.
 
 ## Frontend Testing with Sitespeed Runway
 
