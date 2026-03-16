@@ -19,6 +19,8 @@ Reusable agent skills for GitLab projects. Skills are structured prompt files th
 
 ## What is a Skill?
 
+This repo follows the [Agent Skills](https://agentskills.io) open format ([spec](https://agentskills.io/specification)).
+
 A skill is a directory containing a `SKILL.md` file with:
 - **YAML frontmatter** — `name`, `description`, `license`, `compatibility`, and optional `metadata` fields
 - **Markdown content** — step-by-step workflows, code examples, reference tables, checklists, and anything else the agent needs
