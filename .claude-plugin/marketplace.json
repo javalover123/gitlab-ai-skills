@@ -31,7 +31,7 @@
       "name": "self-service-performance-testing",
       "source": "./skills/self-service-performance-testing",
       "description": "Help engineers write performance tests that detect regressions, using k6 for load testing and sitespeed.io for frontend Core Web Vitals. Use when the user is adding or changing API endpoints, database queries, critical paths, or frontend pages and needs to decide whether to write a performance test, what kind, or how to integrate it into CI. Also activate when the user mentions load testing, stress testing, response times, benchmarking, performance budgets, or wants to run tests against staging - this skill enforces shared infrastructure safety rules. Does not cover profiling, APM, or debugging production incidents.",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "author": {
         "name": "GitLab"
       },
