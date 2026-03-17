@@ -69,7 +69,7 @@ def generate_plugin_json(skill_name, fields):
     return {
         "name": fields.get("name", skill_name),
         "description": fields.get("description", ""),
-        "version": "1.0.0",
+        "version": fields.get("version", "0.0.0"),
         "author": {"name": "GitLab"},
         "license": fields.get("license", "MIT"),
     }
@@ -85,7 +85,7 @@ def generate_marketplace_entry(skill_name, fields):
             "path": f"skills/{skill_name}",
         },
         "description": fields.get("description", ""),
-        "version": "1.0.0",
+        "version": fields.get("version", "0.0.0"),
         "author": {"name": "GitLab"},
         "license": fields.get("license", "MIT"),
     }

@@ -8,6 +8,7 @@ Usage:
 """
 
 import os
+import re
 import sys
 
 # Paths relative to the script's directory
@@ -16,7 +17,10 @@ REPO_ROOT = os.path.join(SCRIPT_DIR, "..")
 SKILLS_DIR = os.path.join(REPO_ROOT, "skills")
 
 # Required frontmatter fields
-REQUIRED_FIELDS = ["name", "description", "license", "compatibility"]
+REQUIRED_FIELDS = ["name", "description", "version", "license", "compatibility"]
+
+# Semver pattern (major.minor.patch, no pre-release/build metadata for simplicity)
+SEMVER_RE = re.compile(r"^\d+\.\d+\.\d+$")
 
 # Debug flag
 DEBUG = "--debug" in sys.argv
@@ -82,12 +86,22 @@ def validate_skills():
 
         fields = parse_frontmatter(skill_file)
         missing = [f for f in REQUIRED_FIELDS if f not in fields or not fields[f]]
+        format_errors = []
 
-        if missing:
+        # Validate version format if present
+        if "version" in fields and fields["version"]:
+            if not SEMVER_RE.match(fields["version"]):
+                format_errors.append(
+                    f"version '{fields['version']}' is not valid semver (expected X.Y.Z)"
+                )
+
+        if missing or format_errors:
             has_errors = True
 
-        results.append((skill_name, skill_file, missing))
-        log_debug(f"Validated {skill_name}: missing={missing}")
+        results.append((skill_name, skill_file, missing, format_errors))
+        log_debug(
+            f"Validated {skill_name}: missing={missing}, format_errors={format_errors}"
+        )
 
     return results, has_errors
 
@@ -101,15 +115,18 @@ def main():
         print("No skills found.")
         sys.exit(0)
 
-    for skill_name, skill_file, missing in results:
+    for skill_name, skill_file, missing, format_errors in results:
         rel_path = os.path.relpath(skill_file, REPO_ROOT)
         if missing:
             print(f"FAIL: {rel_path} — missing required fields: {', '.join(missing)}")
-        else:
+        if format_errors:
+            for err in format_errors:
+                print(f"FAIL: {rel_path} — {err}")
+        if not missing and not format_errors:
             print(f"  OK: {rel_path}")
 
     total = len(results)
-    failed = sum(1 for _, _, m in results if m)
+    failed = sum(1 for _, _, m, f in results if m or f)
     passed = total - failed
     print(f"\n{total} skills checked: {passed} passed, {failed} failed.")
 
