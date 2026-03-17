@@ -1,30 +1,30 @@
-# Epics (Group-Level Work Items)
+# Epics — CRUD Reference
 
 Epics are group-level. `glab issue` commands don't work — use `glab api` with the REST API.
+
+For **comments/notes** → [epic-comments.md](epic-comments.md)  
+For **nested group paths** → [nested-groups.md](nested-groups.md)
 
 ## Finding IDs
 
 ```bash
-# Group ID (use URL-encoded path or numeric ID)
-glab api "groups/my-org%2Fmy-group" | jq '.id'
+# Group ID from path
+glab api "groups/my-group" | jq '.id'
 
-# Project ID
-glab api "projects/my-org%2Fmy-project" | jq '.id'
-
-# Epic internal ID (id) vs display ID (iid) — some endpoints need the internal id
-glab api "groups/<group_id>/epics/<iid>" | jq '{id, iid, title}'
+# Epic: response includes id (internal global), iid (display number), work_item_id
+glab api "groups/<group_id>/epics/<iid>" | jq '{id, iid, title, work_item_id}'
 ```
 
 ## List and view
 
 ```bash
-# List epics
+# List epics in a group
 glab api "groups/<group_id>/epics" | jq '.[] | {iid, title, state}'
 
-# View single epic
+# View a single epic
 glab api "groups/<group_id>/epics/<iid>"
 
-# List issues in an epic
+# List issues linked to an epic
 glab api "groups/<group_id>/epics/<epic_iid>/issues" | jq '.[] | {iid, title, state}'
 ```
 
@@ -36,7 +36,7 @@ glab api --method POST "groups/<group_id>/epics" \
   -f title="My Epic" \
   -f "description=$(cat /tmp/epic-description.md)"
 
-# With parent epic (parent_id is the INTERNAL id, not iid)
+# With parent epic — parent_id is the INTERNAL id (not iid)
 PARENT_ID=$(glab api "groups/<group_id>/epics/<parent_iid>" | jq '.id')
 glab api --method POST "groups/<group_id>/epics" \
   -f title="Child Epic" \
@@ -44,55 +44,56 @@ glab api --method POST "groups/<group_id>/epics" \
   -f parent_id=$PARENT_ID
 ```
 
-## Add issues to an epic
-
-**Preferred method** — update the issue's `epic_id` directly:
-
-```bash
-# Get the epic's internal id (not iid)
-EPIC_ID=$(glab api "groups/<group_id>/epics/<epic_iid>" | jq '.id')
-
-# Attach issue to epic
-glab api --method PUT "projects/<project_id>/issues/<iid>" -f epic_id=$EPIC_ID
-```
-
-**Alternative** — the epic issues endpoint (may 404 depending on permissions/plan):
-
-```bash
-ISSUE_ID=$(glab api "projects/<project_id>/issues/<iid>" | jq '.id')
-glab api --method POST "groups/<group_id>/epics/<epic_iid>/issues/$ISSUE_ID"
-```
-
 ## Update
 
 ```bash
-# Update description
 glab api --method PUT "groups/<group_id>/epics/<iid>" \
+  -f title="New Title" \
   -f "description=$(cat /tmp/epic-description.md)"
-
-# Update title
-glab api --method PUT "groups/<group_id>/epics/<iid>" \
-  -f title="New Title"
 ```
 
-## Remove issue from epic
+## Close and reopen
 
-**Preferred method** — set `epic_id` to 0:
+Epic state transitions work via REST — no GraphQL needed:
 
 ```bash
+glab api --method PUT "groups/<group_id>/epics/<iid>" -f state_event=close
+glab api --method PUT "groups/<group_id>/epics/<iid>" -f state_event=reopen
+```
+
+## Add / remove issues
+
+```bash
+# Add — preferred: update the issue's epic_id directly
+EPIC_ID=$(glab api "groups/<group_id>/epics/<epic_iid>" | jq '.id')
+glab api --method PUT "projects/<project_id>/issues/<iid>" -f epic_id=$EPIC_ID
+
+# Add — alternative (may 404 depending on plan)
+ISSUE_ID=$(glab api "projects/<project_id>/issues/<iid>" | jq '.id')
+glab api --method POST "groups/<group_id>/epics/<epic_iid>/issues/$ISSUE_ID"
+
+# Remove — preferred: set epic_id to 0
 glab api --method PUT "projects/<project_id>/issues/<iid>" -f epic_id=0
-```
 
-**Alternative** — the epic issues endpoint (needs `epic_issue_id` from add/list response):
-
-```bash
+# Remove — alternative (needs epic_issue_id from list response, not the issue iid)
 glab api --method DELETE "groups/<group_id>/epics/<epic_iid>/issues/<epic_issue_id>"
 ```
 
-## Common gotchas
+## URL parsing
 
-- **`parent_id` vs `parent_iid`**: Creating a child epic needs the parent's internal `id` field, not its `iid`
-- **Global id only needed for the alternative endpoint**: The preferred `epic_id` approach uses the issue `iid`. Only the alternative `epics/<epic_iid>/issues/<issue_id>` endpoint requires the internal global `id` (`jq '.id'`)
-- **`glab issue` doesn't work**: Epics are group-level work items — always use `glab api`
-- **`note` field on PUT is ignored**: To add a comment when closing/updating an issue, use a separate `POST issues/<iid>/notes` call (see issue-links.md gotchas)
-- **jq and control characters**: Issue descriptions with embedded newlines/tabs cause `jq` parse failures. Extract only specific fields (`jq '.iid'`, `jq '{iid, title}'`) rather than piping full responses. For encoding, use `jq '@json'` to safely stringify a field
+```
+https://gitlab.com/groups/<group-path>/-/epics/<iid>
+```
+
+Example: `https://gitlab.com/groups/gitlab-org/-/epics/16428`
+- Group path: `gitlab-org` → `glab api "groups/gitlab-org" | jq '.id'` → `9970`
+- Epic IID: `16428`
+
+For nested group paths like `gitlab-org/foundations`, see [nested-groups.md](nested-groups.md).
+
+## Gotchas
+
+- **`parent_id` is the internal id, not iid** — use `jq '.id'`, not `jq '.iid'`
+- **`glab issue` doesn't work** — always use `glab api` for epics
+- **No `-R` flag** — `-R` expects `OWNER/REPO`. Group endpoints don't use it
+- **jq and multiline content** — descriptions with newlines break jq pipelines. Extract specific fields: `jq '{id, iid, title}'`. Never pipe raw epic JSON through jq selection on full output
