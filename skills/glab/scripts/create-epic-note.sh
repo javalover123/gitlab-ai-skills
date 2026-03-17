@@ -33,23 +33,23 @@ if [[ ! -f "$TEMPLATE" ]]; then
   exit 1
 fi
 
+_err=$(mktemp)
+trap 'rm -f "$_err"' EXIT
+
 # Get the epic's internal (global) ID — the createNote mutation requires it
-EPIC_DATA=$(glab api "groups/${GROUP_ID}/epics/${EPIC_IID}" 2>&1)
-if echo "$EPIC_DATA" | grep -q '^glab:'; then
-  echo "ERROR fetching epic: $EPIC_DATA" >&2
+if ! EPIC_DATA=$(glab api "groups/${GROUP_ID}/epics/${EPIC_IID}" 2>"$_err"); then
+  echo "ERROR fetching epic: $(cat "$_err")" >&2
   exit 1
 fi
 
 EPIC_INTERNAL_ID=$(echo "$EPIC_DATA" | jq -r '.id')
 NOTEABLE_ID="gid://gitlab/Epic/${EPIC_INTERNAL_ID}"
 
-# Escape the body for safe embedding in the GraphQL string:
-# backslash → \\, double-quote → \", newline → \n
-ESCAPED_BODY=$(printf '%s' "$BODY" \
-  | sed 's/\\/\\\\/g' \
-  | sed 's/"/\\"/g' \
-  | awk '{printf "%s\\n", $0}' \
-  | sed 's/\\n$//')
+# Escape the body for safe embedding in a GraphQL string.
+# jq -Rs produces a fully JSON-encoded string (handles \, ", \n, \t, control chars, etc.)
+# Strip the surrounding quotes since they're already in the template.
+ESCAPED_BODY=$(jq -Rs . <<<"$BODY")
+ESCAPED_BODY=${ESCAPED_BODY:1:${#ESCAPED_BODY}-2}
 
 # Substitute placeholders in the template
 query=$(sed \
@@ -57,11 +57,8 @@ query=$(sed \
   -e "s|\\\$BODY|${ESCAPED_BODY}|g" \
   "$TEMPLATE")
 
-response=$(glab api graphql -f "query=${query}" 2>&1)
-
-# Detect glab errors
-if echo "$response" | grep -q '^glab:'; then
-  echo "ERROR from glab: $response" >&2
+if ! response=$(glab api graphql -f "query=${query}" 2>"$_err"); then
+  echo "ERROR from glab: $(cat "$_err")" >&2
   exit 1
 fi
 

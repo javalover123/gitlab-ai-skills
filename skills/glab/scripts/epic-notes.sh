@@ -38,15 +38,19 @@ fi
 cursor=""
 page=0
 all_notes='[]'
+_err=$(mktemp)
+trap 'rm -f "$_err"' EXIT
 
 while true; do
   page=$((page + 1))
 
   # Build the discussions argument: add after: cursor on pages > 1
+  # JSON-encode the cursor via jq to safely embed it in the GraphQL string
   if [[ -z "$cursor" ]]; then
     discussions_arg="discussions(first: ${PAGE_SIZE})"
   else
-    discussions_arg="discussions(first: ${PAGE_SIZE}, after: \"${cursor}\")"
+    escaped_cursor=$(jq -rn --arg c "$cursor" '$c | @json')
+    discussions_arg="discussions(first: ${PAGE_SIZE}, after: ${escaped_cursor})"
   fi
 
   # Substitute placeholders in the template
@@ -56,11 +60,8 @@ while true; do
     -e "s|discussions(first: \\\$PAGE_SIZE)|${discussions_arg}|g" \
     "$TEMPLATE")
 
-  response=$(glab api graphql -f "query=${query}" 2>&1)
-
-  # Detect glab errors
-  if echo "$response" | grep -q '^glab:'; then
-    echo "ERROR from glab: $response" >&2
+  if ! response=$(glab api graphql -f "query=${query}" 2>"$_err"); then
+    echo "ERROR from glab: $(cat "$_err")" >&2
     exit 1
   fi
 
