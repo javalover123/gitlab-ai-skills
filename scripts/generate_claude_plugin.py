@@ -15,6 +15,8 @@ import json
 import os
 import sys
 
+from lib.frontmatter import parse_frontmatter
+
 # Paths relative to the script's directory
 SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 REPO_ROOT = os.path.join(SCRIPT_DIR, "..")
@@ -34,34 +36,6 @@ def log_debug(message):
     """Log debug messages to stderr if debugging is enabled."""
     if DEBUG:
         print(f"DEBUG: {message}", file=sys.stderr)
-
-
-def parse_frontmatter(skill_file):
-    """Extract top-level key-value pairs from YAML frontmatter.
-
-    Returns a dict of field_name -> value. Only handles simple top-level keys.
-    """
-    log_debug(f"Parsing frontmatter from {skill_file}")
-    fields = {}
-
-    with open(skill_file, "r") as f:
-        lines = f.readlines()
-
-    if not lines or lines[0].strip() != "---":
-        return fields
-
-    for line in lines[1:]:
-        stripped = line.strip()
-        if stripped == "---":
-            break
-
-        if not line[0].isspace() and ":" in stripped:
-            key = stripped.split(":", 1)[0].strip()
-            value = stripped.split(":", 1)[1].strip().strip("\"'")
-            fields[key] = value
-            log_debug(f"Found field: '{key}' = '{value}'")
-
-    return fields
 
 
 def generate_plugin_json(skill_name, fields):

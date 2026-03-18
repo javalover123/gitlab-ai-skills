@@ -11,6 +11,8 @@ import os
 import re
 import sys
 
+from lib.frontmatter import parse_frontmatter as _parse_frontmatter
+
 # Paths relative to the script's directory
 SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 REPO_ROOT = os.path.join(SCRIPT_DIR, "..")
@@ -34,32 +36,12 @@ def log_debug(message):
 def parse_frontmatter(skill_file):
     """Extract name and description from YAML frontmatter in a SKILL.md file.
 
-    Expects frontmatter delimited by --- on the first line and a closing ---.
     Returns (name, description) tuple. Falls back to empty strings if not found.
     """
-    log_debug(f"Parsing frontmatter from {skill_file}")
-    name = ""
-    description = ""
-
-    with open(skill_file, "r") as f:
-        lines = f.readlines()
-
-    if not lines or lines[0].strip() != "---":
-        log_debug("No frontmatter found (first line is not ---)")
-        return name, description
-
-    for line in lines[1:]:
-        stripped = line.strip()
-        if stripped == "---":
-            break  # End of frontmatter
-
-        if stripped.startswith("name:"):
-            name = stripped.split(":", 1)[1].strip().strip("\"'")
-            log_debug(f"Found name: '{name}'")
-        elif stripped.startswith("description:"):
-            description = stripped.split(":", 1)[1].strip().strip("\"'")
-            log_debug(f"Found description: '{description}'")
-
+    fields = _parse_frontmatter(skill_file)
+    name = fields.get("name", "")
+    description = fields.get("description", "")
+    log_debug(f"Parsed {skill_file}: name='{name}', description='{description}'")
     return name, description
 
 
