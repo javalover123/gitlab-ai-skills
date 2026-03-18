@@ -44,3 +44,13 @@ verify-toc:
   extends: .verify-rules
   script:
     - python3 scripts/update_toc.py --ci --debug
+
+check-version-bump:
+  stage: verify
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+  before_script:
+    - apk add --no-cache git
+    - git fetch origin $CI_DEFAULT_BRANCH --depth=1
+  script:
+    - python3 scripts/check_version_bump.py --ci --debug

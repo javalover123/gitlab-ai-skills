@@ -9,6 +9,7 @@
    ---
    name: my-workflow
    description: One-line description of what this skill provides
+   version: 1.0.0
    license: MIT
    compatibility: opencode
    metadata:
@@ -36,12 +37,14 @@ The CI pipeline will fail if any generated files are out of sync with the skill 
 |-------|-------------|
 | `name` | Skill identifier (kebab-case, matches directory name) |
 | `description` | One-line description — shown in README table and catalog |
+| `version` | Semver version string (e.g. `1.0.0`) — **must be bumped** when any skill file changes |
 | `license` | SPDX license identifier (typically `MIT`) |
 | `compatibility` | Agent framework (`opencode`) |
 
 Optional fields: `metadata` (with nested `audience`, `workflow`, etc.)
 
-The `validate-frontmatter` CI job enforces these required fields.
+The `validate-frontmatter` CI job enforces these required fields. The `check-version-bump` job
+verifies that the `version` field is incremented whenever files under `skills/<name>/` change.
 
 ## Claude.ai Compatibility
 
@@ -91,4 +94,5 @@ python3 scripts/validate_frontmatter.py --ci
 python3 scripts/check_claude_drift.py --ci
 python3 scripts/generate_catalog.py --ci
 python3 scripts/generate_claude_plugin.py --ci
+python3 scripts/check_version_bump.py --ci
 ```

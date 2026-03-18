@@ -21,7 +21,7 @@ SKILLS_DIR = os.path.join(REPO_ROOT, "skills")
 
 # Fields recognized by claude.ai SKILL.md format
 # See: https://code.claude.com/docs/en/plugins
-CLAUDE_KNOWN_FIELDS = {"description", "disable-model-invocation", "name"}
+CLAUDE_KNOWN_FIELDS = {"description", "disable-model-invocation", "name", "version"}
 
 # Debug flag
 DEBUG = "--debug" in sys.argv
