@@ -1,0 +1,74 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+usage() {
+  cat >&2 <<EOF
+Usage: $(basename "$0") <command> [args...]
+
+Run a command in a temporary tmux pane with full interactive zsh environment.
+Output is captured and printed to stdout; exits with the command's exit code.
+
+Requires \$TMUX to be set (must be running inside tmux).
+EOF
+  exit 1
+}
+
+[[ $# -eq 0 ]] && usage
+[[ "$1" == "-h" || "$1" == "--help" ]] && usage
+
+if [[ -z "${TMUX:-}" ]]; then
+  echo "Error: not running inside tmux" >&2
+  exit 1
+fi
+
+if [[ -n "${TMUX_PANE_LINGER:-}" && ! "${TMUX_PANE_LINGER}" =~ ^[0-9]+$ ]]; then
+  unset TMUX_PANE_LINGER
+fi
+linger=${TMUX_PANE_LINGER:-3}
+
+if [[ -n "${TMUX_PANE_TAIL_LINES:-}" && ! "${TMUX_PANE_TAIL_LINES}" =~ ^[1-9][0-9]*$ ]]; then
+  unset TMUX_PANE_TAIL_LINES
+fi
+TAIL_LINES=${TMUX_PANE_TAIL_LINES:-20}
+
+tmpfile=$(mktemp)
+trap 'rm -f "$tmpfile"' EXIT
+
+if [[ $# -eq 1 ]]; then
+  cmd="$1"
+else
+  cmd=$(printf "%q " "$@")
+fi
+escaped_cmd="${cmd//\'/\'\\\'\'}"
+
+pane_id=$(tmux split-window -v -l 30% -d -P -F '#{pane_id}' \
+  "zsh -ilc '${escaped_cmd}; echo \"EXIT_CODE:\$?\"' 2>&1 | tee '${tmpfile}'; sleep ${linger}")
+
+while tmux list-panes -F '#{pane_id}' 2>/dev/null | grep -q "^${pane_id}$"; do
+  sleep 0.5
+done
+
+strip_escape_sequences() {
+  perl -pe 's/\e][^\a]*\a//g; s/\e\[[0-9;? ]*[a-zA-Z]//g'
+}
+
+exit_code=0
+last_line=$(tail -n 1 "$tmpfile" || true)
+
+if [[ "$last_line" == EXIT_CODE:* ]]; then
+  exit_code="${last_line#EXIT_CODE:}"
+  sed '$d' "$tmpfile" > "${tmpfile}.out"
+else
+  cp "$tmpfile" "${tmpfile}.out"
+fi
+
+total=$(wc -l < "${tmpfile}.out" | tr -d ' ')
+if [[ "$exit_code" -eq 0 && "$total" -gt "$TAIL_LINES" ]]; then
+  echo "[$(( total - TAIL_LINES )) lines truncated]"
+  tail -n "$TAIL_LINES" "${tmpfile}.out" | strip_escape_sequences
+else
+  strip_escape_sequences < "${tmpfile}.out"
+fi
+
+rm -f "${tmpfile}.out"
+exit "${exit_code}"

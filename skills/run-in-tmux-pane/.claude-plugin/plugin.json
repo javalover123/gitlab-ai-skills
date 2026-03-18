@@ -1,0 +1,9 @@
+{
+  "name": "run-in-tmux-pane",
+  "description": ">",
+  "version": "1.0.0",
+  "author": {
+    "name": "GitLab"
+  },
+  "license": "MIT"
+}
