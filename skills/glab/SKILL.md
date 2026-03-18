@@ -1,7 +1,7 @@
 ---
 name: glab
 description: GitLab workflow automation using glab CLI
-version: 1.1.0
+version: 1.2.0
 license: MIT
 compatibility: opencode
 metadata:
