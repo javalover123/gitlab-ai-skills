@@ -11,6 +11,8 @@ import os
 import re
 import sys
 
+from lib.frontmatter import parse_frontmatter as _parse_frontmatter
+
 # Paths relative to the script's directory
 SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 REPO_ROOT = os.path.join(SCRIPT_DIR, "..")
@@ -34,62 +36,12 @@ def log_debug(message):
 def parse_frontmatter(skill_file):
     """Extract name and description from YAML frontmatter in a SKILL.md file.
 
-    Expects frontmatter delimited by --- on the first line and a closing ---.
     Returns (name, description) tuple. Falls back to empty strings if not found.
-    Supports YAML multi-line scalars (``>``, ``>-``, ``|``, ``|-``).
     """
-    log_debug(f"Parsing frontmatter from {skill_file}")
-    name = ""
-    description = ""
-
-    with open(skill_file, "r") as f:
-        lines = f.readlines()
-
-    if not lines or lines[0].strip() != "---":
-        log_debug("No frontmatter found (first line is not ---)")
-        return name, description
-
-    current_multiline = None  # which field is being collected ("description" or None)
-    multiline_parts = []
-    multiline_folded = False
-
-    def _flush_multiline():
-        nonlocal description
-        if current_multiline == "description":
-            joiner = " " if multiline_folded else "\n"
-            description = joiner.join(multiline_parts)
-            log_debug(f"Found description: '{description}'")
-
-    for line in lines[1:]:
-        stripped = line.strip()
-        if stripped == "---":
-            _flush_multiline()
-            break  # End of frontmatter
-
-        # Indented continuation line for a multi-line scalar
-        if current_multiline and line[0:1].isspace() and stripped:
-            multiline_parts.append(stripped)
-            continue
-
-        # New top-level key — flush any previous multi-line value
-        _flush_multiline()
-        current_multiline = None
-        multiline_parts = []
-        multiline_folded = False
-
-        if stripped.startswith("name:"):
-            name = stripped.split(":", 1)[1].strip().strip("\"'")
-            log_debug(f"Found name: '{name}'")
-        elif stripped.startswith("description:"):
-            value = stripped.split(":", 1)[1].strip().strip("\"'")
-            if value in (">", ">-", "|", "|-"):
-                current_multiline = "description"
-                multiline_parts = []
-                multiline_folded = value.startswith(">")
-            else:
-                description = value
-                log_debug(f"Found description: '{description}'")
-
+    fields = _parse_frontmatter(skill_file)
+    name = fields.get("name", "")
+    description = fields.get("description", "")
+    log_debug(f"Parsed {skill_file}: name='{name}', description='{description}'")
     return name, description
 
 
