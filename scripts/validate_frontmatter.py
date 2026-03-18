@@ -37,6 +37,9 @@ def parse_frontmatter(skill_file):
 
     Returns a dict of field_name -> value (as string). Only handles simple
     top-level keys (not nested YAML). Returns empty dict if no frontmatter found.
+
+    Supports YAML multi-line scalars (``>``, ``>-``, ``|``, ``|-``) by collecting
+    subsequent indented lines and joining them.
     """
     log_debug(f"Parsing frontmatter from {skill_file}")
     fields = {}
@@ -48,17 +51,43 @@ def parse_frontmatter(skill_file):
         log_debug("No frontmatter found (first line is not ---)")
         return fields
 
+    current_key = None
+    multiline_parts = []
+    multiline_folded = False
+
+    def _flush_multiline():
+        if current_key and multiline_parts:
+            joiner = " " if multiline_folded else "\n"
+            fields[current_key] = joiner.join(multiline_parts)
+            log_debug(f"Found field: '{current_key}' = '{fields[current_key]}'")
+
     for line in lines[1:]:
         stripped = line.strip()
         if stripped == "---":
+            _flush_multiline()
             break  # End of frontmatter
 
+        # Indented continuation line for a multi-line scalar
+        if current_key and line[0:1].isspace() and stripped:
+            multiline_parts.append(stripped)
+            continue
+
+        # New top-level key — flush any previous multi-line value
+        _flush_multiline()
+        current_key = None
+        multiline_parts = []
+
         # Only match top-level keys (lines that don't start with whitespace)
-        if not line[0].isspace() and ":" in stripped:
+        if not line[0:1].isspace() and ":" in stripped:
             key = stripped.split(":", 1)[0].strip()
             value = stripped.split(":", 1)[1].strip().strip("\"'")
-            fields[key] = value
-            log_debug(f"Found field: '{key}' = '{value}'")
+            if value in (">", ">-", "|", "|-"):
+                current_key = key
+                multiline_parts = []
+                multiline_folded = value.startswith(">")
+            else:
+                fields[key] = value
+                log_debug(f"Found field: '{key}' = '{value}'")
 
     return fields
 
