@@ -48,6 +48,13 @@
       "license": "MIT",
       "compatibility": "opencode",
       "path": "skills/self-service-performance-testing/SKILL.md"
+    },
+    {
+      "name": "writing-commit-messages",
+      "description": "Use when creating git commits, writing commit messages, or when about to run git commit \u2014 enforces structured commit message format with imperative mood, capitalized subjects, 72-char wrapping, and atomic commits",
+      "license": "MIT",
+      "compatibility": "opencode",
+      "path": "skills/writing-commit-messages/SKILL.md"
     }
   ]
 }
