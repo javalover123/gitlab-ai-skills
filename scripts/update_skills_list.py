@@ -55,7 +55,7 @@ def parse_frontmatter(skill_file):
 
     def _flush_multiline():
         nonlocal description
-        if current_multiline == "description" and multiline_parts:
+        if current_multiline == "description":
             joiner = " " if multiline_folded else "\n"
             description = joiner.join(multiline_parts)
             log_debug(f"Found description: '{description}'")
@@ -75,6 +75,7 @@ def parse_frontmatter(skill_file):
         _flush_multiline()
         current_multiline = None
         multiline_parts = []
+        multiline_folded = False
 
         if stripped.startswith("name:"):
             name = stripped.split(":", 1)[1].strip().strip("\"'")

@@ -47,7 +47,7 @@ def parse_frontmatter(skill_file):
     multiline_folded = False
 
     def _flush_multiline():
-        if current_key and multiline_parts:
+        if current_key:
             joiner = " " if multiline_folded else "\n"
             fields[current_key] = joiner.join(multiline_parts)
             log_debug(f"Found field: '{current_key}' = '{fields[current_key]}'")
@@ -65,6 +65,7 @@ def parse_frontmatter(skill_file):
         _flush_multiline()
         current_key = None
         multiline_parts = []
+        multiline_folded = False
 
         if not line[0:1].isspace() and ":" in stripped:
             key = stripped.split(":", 1)[0].strip()
