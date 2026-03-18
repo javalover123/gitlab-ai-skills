@@ -193,7 +193,7 @@ The default style is **plain English imperative**, NOT Conventional Commits (`fe
 
 ## Attribution
 
-**Author:** Andrew Fontaine ([@abfontaine](https://gitlab.com/abfontaine))
+**Author:** Andrew Fontaine ([@afontaine](https://gitlab.com/afontaine))
 
 This skill is based on widely-accepted git commit message conventions, with inspiration from:
 
