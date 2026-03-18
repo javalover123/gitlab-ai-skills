@@ -1,0 +1,82 @@
+spec:
+  component: [version]
+  inputs:
+    stage:
+      default: verify
+      description: "Pipeline stage for verification jobs"
+    image:
+      default: "$CI_REGISTRY/gitlab-org/ai/skills/verify:$[[ component.version ]]"
+      description: "Container image with verification scripts"
+    work_dir:
+      default: $CI_PROJECT_DIR
+      description: "Path to the skills repository root"
+    job-prefix:
+      default: "skills"
+      description: "Prefix for job names to avoid conflicts"
+---
+
+"$[[ inputs.job-prefix ]]-verify-skills-list":
+  stage: $[[ inputs.stage ]]
+  image: $[[ inputs.image ]]
+  variables:
+    SKILLS_REPO_ROOT: $[[ inputs.work_dir ]]
+  script:
+    - python3 /opt/skills-verify/scripts/update_skills_list.py --ci --debug
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+
+"$[[ inputs.job-prefix ]]-validate-frontmatter":
+  stage: $[[ inputs.stage ]]
+  image: $[[ inputs.image ]]
+  variables:
+    SKILLS_REPO_ROOT: $[[ inputs.work_dir ]]
+  script:
+    - python3 /opt/skills-verify/scripts/validate_frontmatter.py --ci --debug
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+
+"$[[ inputs.job-prefix ]]-check-claude-drift":
+  stage: $[[ inputs.stage ]]
+  image: $[[ inputs.image ]]
+  variables:
+    SKILLS_REPO_ROOT: $[[ inputs.work_dir ]]
+  script:
+    - python3 /opt/skills-verify/scripts/check_claude_drift.py --ci --debug
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+
+"$[[ inputs.job-prefix ]]-verify-catalog":
+  stage: $[[ inputs.stage ]]
+  image: $[[ inputs.image ]]
+  variables:
+    SKILLS_REPO_ROOT: $[[ inputs.work_dir ]]
+  script:
+    - python3 /opt/skills-verify/scripts/generate_catalog.py --ci --debug
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+
+"$[[ inputs.job-prefix ]]-verify-claude-plugin":
+  stage: $[[ inputs.stage ]]
+  image: $[[ inputs.image ]]
+  variables:
+    SKILLS_REPO_ROOT: $[[ inputs.work_dir ]]
+  script:
+    - python3 /opt/skills-verify/scripts/generate_claude_plugin.py --ci --debug
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+
+"$[[ inputs.job-prefix ]]-verify-toc":
+  stage: $[[ inputs.stage ]]
+  image: $[[ inputs.image ]]
+  variables:
+    SKILLS_REPO_ROOT: $[[ inputs.work_dir ]]
+  script:
+    - python3 /opt/skills-verify/scripts/update_toc.py --ci --debug
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH

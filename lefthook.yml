@@ -4,26 +4,46 @@ pre-push:
     - ref: main
   commands:
     verify-skills-list:
+      env:
+        SKILLS_REPO_ROOT: $PWD
       run: python3 scripts/update_skills_list.py --ci
     validate-frontmatter:
+      env:
+        SKILLS_REPO_ROOT: $PWD
       run: python3 scripts/validate_frontmatter.py --ci
     check-claude-drift:
+      env:
+        SKILLS_REPO_ROOT: $PWD
       run: python3 scripts/check_claude_drift.py --ci
     verify-catalog:
+      env:
+        SKILLS_REPO_ROOT: $PWD
       run: python3 scripts/generate_catalog.py --ci
     verify-claude-plugin:
+      env:
+        SKILLS_REPO_ROOT: $PWD
       run: python3 scripts/generate_claude_plugin.py --ci
     verify-toc:
+      env:
+        SKILLS_REPO_ROOT: $PWD
       run: python3 scripts/update_toc.py --ci
 
 auto-fix:
   parallel: false
   commands:
     skills-list:
+      env:
+        SKILLS_REPO_ROOT: $PWD
       run: python3 scripts/update_skills_list.py
     toc:
+      env:
+        SKILLS_REPO_ROOT: $PWD
       run: python3 scripts/update_toc.py
     catalog:
+      env:
+        SKILLS_REPO_ROOT: $PWD
       run: python3 scripts/generate_catalog.py
     claude-plugin:
+      env:
+        SKILLS_REPO_ROOT: $PWD
       run: python3 scripts/generate_claude_plugin.py

@@ -1,46 +1,40 @@
 stages:
+  - build
   - verify
+  - release
 
-default:
-  image: python:3.12-alpine3.20
-
-.verify-rules:
+build-verify-image:
+  stage: build
+  image: docker:latest
+  services:
+    - docker:dind
+  variables:
+    DOCKER_IMAGE: $CI_REGISTRY_IMAGE/verify:$CI_COMMIT_SHA
+  script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - docker build -t $DOCKER_IMAGE -f templates/verify/Dockerfile templates/verify/
+    - docker push $DOCKER_IMAGE
+    - |
+      if [ -n "$CI_COMMIT_TAG" ]; then
+        docker tag $DOCKER_IMAGE $CI_REGISTRY_IMAGE/verify:$CI_COMMIT_TAG
+        docker push $CI_REGISTRY_IMAGE/verify:$CI_COMMIT_TAG
+      fi
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $CI_COMMIT_TAG
 
-verify-skills-list:
-  stage: verify
-  extends: .verify-rules
-  script:
-    - python3 scripts/update_skills_list.py --ci --debug
+include:
+  - component: $CI_SERVER_FQDN/$CI_PROJECT_PATH/verify@$CI_COMMIT_SHA
+    inputs:
+      image: $CI_REGISTRY_IMAGE/verify:$CI_COMMIT_SHA
 
-validate-frontmatter:
-  stage: verify
-  extends: .verify-rules
-  script:
-    - python3 scripts/validate_frontmatter.py --ci --debug
-
-check-claude-drift:
-  stage: verify
-  extends: .verify-rules
-  script:
-    - python3 scripts/check_claude_drift.py --ci --debug
-
-verify-catalog:
-  stage: verify
-  extends: .verify-rules
-  script:
-    - python3 scripts/generate_catalog.py --ci --debug
-
-verify-claude-plugin:
-  stage: verify
-  extends: .verify-rules
-  script:
-    - python3 scripts/generate_claude_plugin.py --ci --debug
-
-verify-toc:
-  stage: verify
-  extends: .verify-rules
-  script:
-    - python3 scripts/update_toc.py --ci --debug
+create-release:
+  stage: release
+  image: registry.gitlab.com/gitlab-org/cli:latest
+  script: echo "Creating release $CI_COMMIT_TAG"
+  rules:
+    - if: $CI_COMMIT_TAG
+  release:
+    tag_name: $CI_COMMIT_TAG
+    description: "Release $CI_COMMIT_TAG of components in $CI_PROJECT_PATH"
