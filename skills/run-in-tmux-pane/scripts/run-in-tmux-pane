@@ -25,6 +25,9 @@ if [[ -n "${TMUX_PANE_LINGER:-}" && ! "${TMUX_PANE_LINGER}" =~ ^[0-9]+$ ]]; then
   unset TMUX_PANE_LINGER
 fi
 linger=${TMUX_PANE_LINGER:-3}
+if [[ ! "$linger" =~ ^[0-9]+$ ]]; then
+  linger=3
+fi
 
 if [[ -n "${TMUX_PANE_TAIL_LINES:-}" && ! "${TMUX_PANE_TAIL_LINES}" =~ ^[1-9][0-9]*$ ]]; then
   unset TMUX_PANE_TAIL_LINES

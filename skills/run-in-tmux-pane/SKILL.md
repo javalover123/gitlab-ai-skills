@@ -1,10 +1,6 @@
 ---
 name: run-in-tmux-pane
-description: >
-  Run commands in a temporary tmux pane with full interactive zsh environment.
-  Use when a command needs the user's full shell environment (login shell, mise/asdf shims,
-  custom PATH, shell aliases), or when running interactive CLI tools (like `claude`) that
-  require a TTY. Keywords: tmux, shell, interactive, tty, zsh, environment, shims.
+description: Run commands in a temporary tmux pane with full interactive zsh environment (login shell, shims, PATH, aliases, TTY).
 version: 1.0.0
 license: MIT
 compatibility: opencode
@@ -74,9 +70,9 @@ run-in-tmux-pane 'claude -p "Hello, how are you?"'
 ## How it works
 
 1. Opens a tmux split-pane (30% height, detached)
-2. Runs the command inside `zsh -ic` (interactive login shell)
+2. Runs the command inside `zsh -ilc` (interactive login shell)
 3. Waits for the pane to close
-4. Returns captured stdout with ANSI escape codes stripped
+4. Returns captured stdout and stderr with ANSI escape codes stripped
 5. Exits with the command's exit code
 
 ## Output behavior
@@ -106,10 +102,11 @@ run-in-tmux-pane gdk start rails
 | Variable | Default | Description |
 |---|---|---|
 | `TMUX_PANE_LINGER` | `3` | Seconds to keep the tmux pane visible after the command finishes. Set to `0` to close immediately. |
+| `TMUX_PANE_TAIL_LINES` | `20` | Number of trailing lines to keep when truncating successful output. |
 
 ## Limitations
 
 - Requires an active tmux session (`$TMUX` must be set)
 - Cannot interact with the command after launch (no stdin) — use only for commands that
   run to completion on their own
-- The command runs in the user's home directory by default (zsh -ic behavior)
+- The command runs in the user's home directory by default (zsh -ilc behavior)
