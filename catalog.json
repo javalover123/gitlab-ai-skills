@@ -6,6 +6,13 @@
       "license": "MIT",
       "compatibility": "opencode",
       "path": "skills/glab/SKILL.md"
+    },
+    {
+      "name": "opencode-refine",
+      "description": "Iteratively test and refine prompts, skills, and agent configurations using opencode run",
+      "license": "MIT",
+      "compatibility": "opencode",
+      "path": "skills/opencode-refine/SKILL.md"
     }
   ]
 }
