@@ -33,6 +33,7 @@ Skills are loaded explicitly by the agent when relevant to a task (e.g. "load th
 | Skill | Description |
 | ----- | ----------- |
 | [`glab`](skills/glab/SKILL.md) | GitLab workflow automation using glab CLI |
+| [`opencode-refine`](skills/opencode-refine/SKILL.md) | Iteratively test and refine prompts, skills, and agent configurations using opencode run |
 <!-- SKILLS_END -->
 
 > The table above is auto-generated from skill frontmatter. Run `python3 scripts/update_skills_list.py` to regenerate after adding or modifying skills.
