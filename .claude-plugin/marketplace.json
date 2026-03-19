@@ -17,6 +17,20 @@
         "name": "GitLab"
       },
       "license": "MIT"
+    },
+    {
+      "name": "opencode-refine",
+      "source": {
+        "source": "git-subdir",
+        "url": "https://gitlab.com/gitlab-org/ai/skills.git",
+        "path": "skills/opencode-refine"
+      },
+      "description": "Iteratively test and refine prompts, skills, and agent configurations using opencode run",
+      "version": "1.0.0",
+      "author": {
+        "name": "GitLab"
+      },
+      "license": "MIT"
     }
   ]
 }
