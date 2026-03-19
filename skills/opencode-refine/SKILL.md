@@ -30,6 +30,8 @@ Runs a single non-interactive agent session. The agent executes, prints its resp
 
 **Important:** Make prompts self-contained and unambiguous. If the agent decides it needs to ask a clarifying question, `opencode run` will hang (see [Known Limitations](#known-limitations)).
 
+**Prerequisite:** Prompts that invoke shell commands (e.g. "run ls -al") require `bash` permission set to `"allow"` in your `opencode.json`. If set to `"ask"`, they will be auto-rejected in non-interactive mode.
+
 ## Useful Flags
 
 | Flag | Purpose |
@@ -124,27 +126,34 @@ opencode run 'run date'
 ```bash
 # Extract just the text response
 opencode run --format json 'what is 2+2?' | \
-  python3 -c "
+  python3 -c '
 import sys, json
 for line in sys.stdin:
     ev = json.loads(line.strip())
-    if ev.get('type') == 'text':
-        print(ev['part']['text'])
-"
+    if ev.get("type") == "text":
+        print(ev["part"]["text"])
+'
 
 # Get token usage from a run
 opencode run --format json 'run date' | \
-  python3 -c "
+  python3 -c '
 import sys, json
 for line in sys.stdin:
     ev = json.loads(line.strip())
-    if ev.get('type') == 'step_finish':
-        print('tokens:', ev['part']['tokens'])
-"
+    if ev.get("type") == "step_finish":
+        print("tokens:", ev["part"]["tokens"])
+'
 
-# Capture session ID for continuation
+# Capture session ID for continuation (first event with sessionID)
 SESSION_ID=$(opencode run --format json 'set up scenario X' | \
-  python3 -c "import sys,json; print(json.loads(sys.stdin.readline())['sessionID'])")
+  python3 -c '
+import sys, json
+for line in sys.stdin:
+    ev = json.loads(line.strip())
+    if "sessionID" in ev:
+        print(ev["sessionID"])
+        break
+')
 opencode run --session "$SESSION_ID" 'now test variation Y'
 ```
 
@@ -219,7 +228,11 @@ The `question` tool is technically `deny`-listed in non-interactive mode, but du
 **Workaround:** Write prompts that don't require clarification. If you must handle this, wrap calls with a timeout:
 
 ```bash
+# Linux/GNU:
 timeout 30 opencode run 'your prompt' || echo "Timed out — agent may have tried to ask a question"
+
+# macOS (requires coreutils: brew install coreutils):
+gtimeout 30 opencode run 'your prompt' || echo "Timed out — agent may have tried to ask a question"
 ```
 
 ### Permissions depend on your opencode.json
