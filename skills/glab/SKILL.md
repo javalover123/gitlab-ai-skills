@@ -1,7 +1,7 @@
 ---
 name: glab
 description: GitLab workflow automation using glab CLI
-version: 1.2.0
+version: 1.2.1
 license: MIT
 compatibility: opencode
 metadata:
@@ -202,6 +202,7 @@ git checkout -b fix/description
 16. **`groups/<id>/work_items` is 404** — use `groups/<id>/epics` (REST) or GraphQL
 17. **`project.workItems` not `project.workItem`** — singular doesn't exist; use `workItems(first: 1, iid: "IID")`; no `filter:` argument
 18. **Epic close/reopen via REST** — `state_event=close`/`reopen` on `PUT groups/<id>/epics/<iid>` works; no GraphQL needed
+19. **No `--body` flag** — glab uses `--description`, not `--body` (which is a `gh` flag); they are not interchangeable
 
 ## Contributing Improvements
 
