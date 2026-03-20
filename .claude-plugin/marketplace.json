@@ -26,6 +26,20 @@
         "name": "GitLab"
       },
       "license": "MIT"
+    },
+    {
+      "name": "run-in-tmux-pane",
+      "source": {
+        "source": "git-subdir",
+        "url": "https://gitlab.com/gitlab-org/ai/skills.git",
+        "path": "skills/run-in-tmux-pane"
+      },
+      "description": "Run commands in a temporary tmux pane with full interactive zsh environment (login shell, shims, PATH, aliases, TTY).",
+      "version": "1.0.0",
+      "author": {
+        "name": "GitLab"
+      },
+      "license": "MIT"
     }
   ]
 }
