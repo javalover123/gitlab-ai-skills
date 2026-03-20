@@ -25,8 +25,8 @@ MARKETPLACE_FILE = os.path.join(REPO_ROOT, ".claude-plugin", "marketplace.json")
 
 # Marketplace metadata
 MARKETPLACE_NAME = "gitlab-skills"
+MARKETPLACE_DESCRIPTION = "Reusable AI agent skills for GitLab workflows"
 MARKETPLACE_OWNER = {"name": "GitLab"}
-MARKETPLACE_REPO_URL = "https://gitlab.com/gitlab-org/ai/skills.git"
 
 # Debug flag
 DEBUG = "--debug" in sys.argv
@@ -46,6 +46,7 @@ def generate_plugin_json(skill_name, fields):
         "version": fields.get("version", "0.0.0"),
         "author": {"name": "GitLab"},
         "license": fields.get("license", "MIT"),
+        "skills": "./",
     }
 
 
@@ -53,11 +54,7 @@ def generate_marketplace_entry(skill_name, fields):
     """Generate a marketplace plugin entry for a skill."""
     return {
         "name": fields.get("name", skill_name),
-        "source": {
-            "source": "git-subdir",
-            "url": MARKETPLACE_REPO_URL,
-            "path": f"skills/{skill_name}",
-        },
+        "source": f"./skills/{skill_name}",
         "description": fields.get("description", ""),
         "version": fields.get("version", "0.0.0"),
         "author": {"name": "GitLab"},
@@ -107,6 +104,9 @@ def generate_all(skills):
     marketplace = {
         "name": MARKETPLACE_NAME,
         "owner": MARKETPLACE_OWNER,
+        "metadata": {
+            "description": MARKETPLACE_DESCRIPTION,
+        },
         "plugins": [
             generate_marketplace_entry(name, fields) for name, fields in skills
         ],
