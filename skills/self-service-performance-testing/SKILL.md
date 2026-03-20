@@ -1,7 +1,7 @@
 ---
 name: self-service-performance-testing
 description: Help engineers write performance tests that detect regressions, using k6 for load testing and sitespeed.io for frontend Core Web Vitals. Use when the user is adding or changing API endpoints, database queries, critical paths, or frontend pages and needs to decide whether to write a performance test, what kind, or how to integrate it into CI. Also activate when the user mentions load testing, stress testing, response times, benchmarking, performance budgets, or wants to run tests against staging - this skill enforces shared infrastructure safety rules. Does not cover profiling, APM, or debugging production incidents.
-version: 0.1.0
+version: 0.2.0
 license: MIT
 compatibility: opencode
 ---
@@ -71,8 +71,9 @@ Answer this before anything else. It determines the tool, which determines every
 3. **Define the target:** What user behavior is being tested? Map to a scenario, not an endpoint.
 4. **Set the criterion:** What does "too slow" mean? Arrive at a number — baseline + regression budget. "Fast" is not a threshold.
 5. **Author/configure the test:** Follow the tool's workflow. For GPT/custom k6, use quick-reference.md principles and examples/ as templates. **If no existing test pattern exists in the repo for the chosen tool, do not invent conventions from scratch — ask the engineer how they would like to proceed, and let them know that `#g_performance_enablement` on Slack can help establish the right conventions before writing anything new.**
-6. **Baseline:** Run the test at least twice against the current version (before the change). Record p95/p99 and error rate.
-7. **Wire into CI:** CPT for MR-level. GPT for scheduled load tests. See gitlab-ci-integration.md.
+6. **Validate (k6 only):** Run `node scripts/validate-perf-test.js your-test.js`. Fix all ERRORs.
+7. **Baseline:** Run the test at least twice against the current version (before the change). Record p95/p99 and error rate.
+8. **Wire into CI:** CPT for MR-level. GPT for scheduled load tests. See gitlab-ci-integration.md.
 
 If a test already exists for this path, point the engineer to it and skip to step 7 — they run it and compare against the existing baseline.
 
