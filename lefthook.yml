@@ -9,10 +9,8 @@ pre-push:
       run: python3 scripts/validate_frontmatter.py --ci
     check-claude-drift:
       run: python3 scripts/check_claude_drift.py --ci
-    verify-catalog:
-      run: python3 scripts/generate_catalog.py --ci
     verify-claude-plugin:
-      run: python3 scripts/generate_claude_plugin.py --ci
+      run: npx -y @anthropic-ai/claude-code plugin validate .
     verify-toc:
       run: python3 scripts/update_toc.py --ci
     check-version-bump:
@@ -25,7 +23,3 @@ auto-fix:
       run: python3 scripts/update_skills_list.py
     toc:
       run: python3 scripts/update_toc.py
-    catalog:
-      run: python3 scripts/generate_catalog.py
-    claude-plugin:
-      run: python3 scripts/generate_claude_plugin.py

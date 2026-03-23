@@ -27,17 +27,11 @@ check-claude-drift:
   script:
     - python3 scripts/check_claude_drift.py --ci --debug
 
-verify-catalog:
-  stage: verify
-  extends: .verify-rules
-  script:
-    - python3 scripts/generate_catalog.py --ci --debug
-
 verify-claude-plugin:
   stage: verify
   extends: .verify-rules
   script:
-    - python3 scripts/generate_claude_plugin.py --ci --debug
+    - npx -y @anthropic-ai/claude-code plugin validate .
 
 verify-toc:
   stage: verify
