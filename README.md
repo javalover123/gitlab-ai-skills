@@ -11,8 +11,7 @@ Reusable agent skills for GitLab projects. Skills are structured prompt files th
   - [What is a Skill?](#what-is-a-skill)
   - [Skills](#skills)
   - [Installing Skills](#installing-skills)
-    - [Claude Code](#claude-code)
-    - [OpenCode](#opencode)
+    - [Claude Code Plugin Marketplace (Experimental)](#claude-code-plugin-marketplace-experimental)
   - [Contributing](#contributing)
   - [Related](#related)
 <!-- TOC_END -->
@@ -41,25 +40,17 @@ Skills are loaded explicitly by the agent when relevant to a task (e.g. "load th
 
 ## Installing Skills
 
-### Claude Code
-
-This repo is a [Claude Code plugin marketplace](https://code.claude.com/docs/en/plugin-marketplaces). Install skills as plugins directly:
-
-```shell
-/plugin marketplace add https://gitlab.com/gitlab-org/ai/skills.git
-/plugin install glab@gitlab-skills
-```
-
-### OpenCode
-
-> [!warning]
-> TODO: We should strongly consider creating `@gitlab/skills` or, better yet, upstream GitLab support to [`vercel-labs/skills`](https://github.com/vercel-labs/skills)
-
 [`@dgruzd/skills`](https://github.com/dgruzd/skills) is a fork of [`vercel-labs/skills`](https://github.com/vercel-labs/skills) that adds GitLab update detection — without it, `skills check` and `skills update` silently skip GitLab-hosted skills. It handles symlinking, multi-agent installs, updates, and discovery with no global install required.
 
+> [!NOTE]
+> We should strongly consider creating `@gitlab/skills` or, better yet, upstream GitLab support to [`vercel-labs/skills`](https://github.com/vercel-labs/skills).
+
 ```bash
-# Install all skills from this repo globally
+# Install all skills from this repo globally (for OpenCode)
 npx @dgruzd/skills add https://gitlab.com/gitlab-org/ai/skills/-/tree/main/skills --global --agent opencode
+
+# Install all skills from this repo globally (for Claude Code)
+npx @dgruzd/skills add https://gitlab.com/gitlab-org/ai/skills/-/tree/main/skills --global --agent claude
 
 # Check for updates
 npx @dgruzd/skills check
@@ -71,7 +62,17 @@ npx @dgruzd/skills update
 npx @dgruzd/skills list -g
 ```
 
-The `--agent opencode` flag installs to `~/.agents/skills/`, which is the standard location for OpenCode.
+### Claude Code Plugin Marketplace (Experimental)
+
+> [!WARNING]
+> The Claude Code plugin marketplace integration is **experimental** and may change. The `npx @dgruzd/skills` method above is recommended for all agents.
+
+This repo also ships as a [Claude Code plugin marketplace](https://code.claude.com/docs/en/plugin-marketplaces):
+
+```shell
+/plugin marketplace add https://gitlab.com/gitlab-org/ai/skills.git
+/plugin install glab@gitlab-skills
+```
 
 ## Contributing
 
