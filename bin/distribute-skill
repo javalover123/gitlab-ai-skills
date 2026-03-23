@@ -1,0 +1,240 @@
+#!/usr/bin/env python3
+"""Distribute a skill into editor-specific directories.
+
+Supports: opencode, claudecode
+Usage:
+    bin/distribute-skill SKILLNAME # all envs
+    bin/distribute-skill SKILLNAME --env=opencode
+    bin/distribute-skill SKILLNAME --env=claudecode --plugin=PLUGINNAME
+    bin/distribute-skill SKILLNAME --env=opencode --overwrite   # removes from all other envs
+"""
+
+import json
+import os
+import sys
+
+SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
+REPO_ROOT = os.path.join(SCRIPT_DIR, "..")
+SKILLS_DIR = os.path.join(REPO_ROOT, "skills")
+
+sys.path.insert(0, os.path.join(REPO_ROOT, "scripts"))
+from lib.frontmatter import parse_frontmatter  # noqa: E402
+
+DEBUG = "--debug" in sys.argv
+
+
+def log_debug(msg):
+    if DEBUG:
+        print(f"DEBUG: {msg}", file=sys.stderr)
+
+
+def parse_args():
+    skill_name = None
+    envs = []
+    plugin_name = None
+    overwrite = "--overwrite" in sys.argv
+    for arg in sys.argv[1:]:
+        if arg.startswith("--env="):
+            envs = [e.strip() for e in arg[len("--env="):].split(",") if e.strip()]
+        elif arg.startswith("--plugin="):
+            plugin_name = arg[len("--plugin="):]
+        elif not arg.startswith("--"):
+            skill_name = arg
+    return skill_name, envs, plugin_name, overwrite
+
+
+def resolve_skill(skill_name):
+    skill_file = os.path.join(SKILLS_DIR, skill_name, "SKILL.md")
+    if not os.path.isfile(skill_file):
+        print(f"ERROR: No SKILL.md found for skill '{skill_name}'.", file=sys.stderr)
+        sys.exit(1)
+    log_debug(f"Resolved skill: {skill_name}")
+    return skill_name
+
+
+# ---------------------------------------------------------------------------
+# OpenCode
+# ---------------------------------------------------------------------------
+
+OPENCODE_SKILLS_DIR = os.path.join(REPO_ROOT, ".opencode", "skills")
+
+
+def _opencode_symlink(skill_name):
+    path = os.path.join(OPENCODE_SKILLS_DIR, skill_name)
+    target = os.path.join("..", "..", "skills", skill_name)
+    return path, target
+
+
+def distribute_opencode(skill_name, **_kwargs):
+    os.makedirs(OPENCODE_SKILLS_DIR, exist_ok=True)
+    path, target = _opencode_symlink(skill_name)
+    if os.path.islink(path):
+        if os.readlink(path) == target:
+            log_debug(f"Symlink already correct: {path}")
+            print(f"Already up to date: {os.path.relpath(path, REPO_ROOT)}")
+            return
+        os.remove(path)
+    os.symlink(target, path)
+    print(f"Created symlink: {os.path.relpath(path, REPO_ROOT)} -> {target}")
+
+
+def undistribute_opencode(skill_name):
+    path, _ = _opencode_symlink(skill_name)
+    if os.path.islink(path):
+        os.remove(path)
+        print(f"Removed symlink: {os.path.relpath(path, REPO_ROOT)}")
+    else:
+        log_debug(f"Not distributed to opencode: {skill_name}")
+
+
+# ---------------------------------------------------------------------------
+# Claude Code
+# ---------------------------------------------------------------------------
+
+PLUGINS_DIR = os.path.join(REPO_ROOT, ".claude-plugin", "plugins")
+MARKETPLACE_FILE = os.path.join(REPO_ROOT, ".claude-plugin", "marketplace.json")
+
+
+def _read_marketplace():
+    if os.path.isfile(MARKETPLACE_FILE):
+        with open(MARKETPLACE_FILE) as f:
+            return json.load(f)
+    return {
+        "name": "gitlab-skills",
+        "owner": {"name": "GitLab"},
+        "metadata": {"description": "Reusable AI agent skills for GitLab workflows"},
+        "plugins": [],
+    }
+
+
+def _write_marketplace(data):
+    os.makedirs(os.path.dirname(MARKETPLACE_FILE), exist_ok=True)
+    with open(MARKETPLACE_FILE, "w") as f:
+        f.write(json.dumps(data, indent=2) + "\n")
+
+
+def distribute_claudecode(skill_name, plugin_name=None, **_kwargs):
+    plugin_name = plugin_name or skill_name
+    plugin_dir = os.path.join(PLUGINS_DIR, plugin_name)
+
+    # plugin.json
+    skill_file = os.path.join(SKILLS_DIR, skill_name, "SKILL.md")
+    fields = parse_frontmatter(skill_file)
+    plugin_json = {
+        "name": fields.get("name", plugin_name),
+        "description": fields.get("description", ""),
+        "version": fields.get("version", "0.0.0"),
+        "author": {"name": "GitLab"},
+        "license": fields.get("license", "MIT"),
+        "skills": "./",
+    }
+    plugin_json_path = os.path.join(plugin_dir, "plugin.json")
+    os.makedirs(plugin_dir, exist_ok=True)
+    with open(plugin_json_path, "w") as f:
+        f.write(json.dumps(plugin_json, indent=2) + "\n")
+    print(f"Wrote: {os.path.relpath(plugin_json_path, REPO_ROOT)}")
+
+    # skills/<skill_name> symlink
+    skills_dir = os.path.join(plugin_dir, "skills")
+    os.makedirs(skills_dir, exist_ok=True)
+    symlink_path = os.path.join(skills_dir, skill_name)
+    symlink_target = os.path.join("..", "..", "..", "..", "skills", skill_name)
+    if os.path.islink(symlink_path):
+        if os.readlink(symlink_path) == symlink_target:
+            log_debug(f"Symlink already correct: {symlink_path}")
+            print(f"Already up to date: {os.path.relpath(symlink_path, REPO_ROOT)}")
+        else:
+            os.remove(symlink_path)
+            os.symlink(symlink_target, symlink_path)
+            print(f"Updated symlink: {os.path.relpath(symlink_path, REPO_ROOT)} -> {symlink_target}")
+    else:
+        os.symlink(symlink_target, symlink_path)
+        print(f"Created symlink: {os.path.relpath(symlink_path, REPO_ROOT)} -> {symlink_target}")
+
+    # marketplace.json — add entry if missing
+    marketplace = _read_marketplace()
+    entry_source = f"./.claude-plugin/plugins/{plugin_name}"
+    existing = [p for p in marketplace["plugins"] if p.get("source") == entry_source]
+    if not existing:
+        marketplace["plugins"].append({"name": plugin_name, "source": entry_source})
+        marketplace["plugins"].sort(key=lambda p: p["name"])
+        _write_marketplace(marketplace)
+        print(f"Added '{plugin_name}' to {os.path.relpath(MARKETPLACE_FILE, REPO_ROOT)}")
+    else:
+        log_debug(f"Plugin '{plugin_name}' already in marketplace.json")
+        print(f"Already in marketplace: {os.path.relpath(MARKETPLACE_FILE, REPO_ROOT)}")
+
+
+def undistribute_claudecode(skill_name):
+    if not os.path.isdir(PLUGINS_DIR):
+        return
+    for plugin_name in os.listdir(PLUGINS_DIR):
+        symlink_path = os.path.join(PLUGINS_DIR, plugin_name, "skills", skill_name)
+        if not os.path.islink(symlink_path):
+            continue
+        os.remove(symlink_path)
+        print(f"Removed symlink: {os.path.relpath(symlink_path, REPO_ROOT)}")
+
+        # Remove plugin from marketplace if its skills/ dir is now empty
+        skills_dir = os.path.join(PLUGINS_DIR, plugin_name, "skills")
+        if not any(True for _ in os.scandir(skills_dir)):
+            marketplace = _read_marketplace()
+            entry_source = f"./.claude-plugin/plugins/{plugin_name}"
+            before = len(marketplace["plugins"])
+            marketplace["plugins"] = [p for p in marketplace["plugins"] if p.get("source") != entry_source]
+            if len(marketplace["plugins"]) < before:
+                _write_marketplace(marketplace)
+                print(f"Removed '{plugin_name}' from {os.path.relpath(MARKETPLACE_FILE, REPO_ROOT)}")
+
+
+# ---------------------------------------------------------------------------
+# Main
+# ---------------------------------------------------------------------------
+
+HANDLERS = {
+    "opencode": distribute_opencode,
+    "claudecode": distribute_claudecode,
+}
+
+UNDISTRIBUTE_HANDLERS = {
+    "opencode": undistribute_opencode,
+    "claudecode": undistribute_claudecode,
+}
+
+
+def main():
+    skill_name, envs, plugin_name, overwrite = parse_args()
+
+    if not skill_name:
+        print(
+            "Usage: bin/distribute-skill SKILLNAME [--env=<env>[,<env>...]] [--plugin=PLUGINNAME] [--overwrite] [--debug]\n"
+            f"Available environments: {', '.join(HANDLERS)}",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+
+    if not envs:
+        envs = list(HANDLERS)
+
+    unknown = [e for e in envs if e not in HANDLERS]
+    if unknown:
+        print(
+            f"ERROR: Unknown environment(s): {', '.join(unknown)}\n"
+            f"Available: {', '.join(HANDLERS)}",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+
+    skill = resolve_skill(skill_name)
+
+    if overwrite:
+        for env in UNDISTRIBUTE_HANDLERS:
+            if env not in envs:
+                UNDISTRIBUTE_HANDLERS[env](skill)
+
+    for env in envs:
+        HANDLERS[env](skill, plugin_name=plugin_name)
+
+
+if __name__ == "__main__":
+    main()

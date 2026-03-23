@@ -4,21 +4,21 @@
       "name": "glab",
       "description": "GitLab workflow automation using glab CLI",
       "license": "MIT",
-      "compatibility": "opencode",
+      "compatibility": "",
       "path": "skills/glab/SKILL.md"
     },
     {
       "name": "opencode-refine",
       "description": "Iteratively test and refine prompts, skills, and agent configurations using opencode run",
       "license": "MIT",
-      "compatibility": "opencode",
+      "compatibility": "",
       "path": "skills/opencode-refine/SKILL.md"
     },
     {
       "name": "run-in-tmux-pane",
       "description": "Run commands in a temporary tmux pane with full interactive zsh environment (login shell, shims, PATH, aliases, TTY).",
       "license": "MIT",
-      "compatibility": "opencode",
+      "compatibility": "",
       "path": "skills/run-in-tmux-pane/SKILL.md"
     }
   ]
