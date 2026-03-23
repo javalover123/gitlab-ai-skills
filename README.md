@@ -50,7 +50,7 @@ Skills are loaded explicitly by the agent when relevant to a task (e.g. "load th
 npx @dgruzd/skills add https://gitlab.com/gitlab-org/ai/skills/-/tree/main/skills --global --agent opencode
 
 # Install all skills from this repo globally (for Claude Code)
-npx @dgruzd/skills add https://gitlab.com/gitlab-org/ai/skills/-/tree/main/skills --global --agent claude
+npx @dgruzd/skills add https://gitlab.com/gitlab-org/ai/skills/-/tree/main/skills --global --agent claude-code
 
 # Check for updates
 npx @dgruzd/skills check
