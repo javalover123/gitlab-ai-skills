@@ -85,7 +85,7 @@ def get_changed_skills(changed_files):
             continue
 
         parts = filepath.split("/")
-        if len(parts) < 2:
+        if len(parts) < 3:
             continue
 
         skill_name = parts[1]

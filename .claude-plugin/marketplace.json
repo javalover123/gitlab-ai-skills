@@ -9,23 +9,7 @@
   "plugins": [
     {
       "name": "glab",
-      "source": "./skills/glab",
-      "description": "GitLab workflow automation using glab CLI",
-      "version": "1.2.2",
-      "author": {
-        "name": "GitLab"
-      },
-      "license": "MIT"
-    },
-    {
-      "name": "opencode-refine",
-      "source": "./skills/opencode-refine",
-      "description": "Iteratively test and refine prompts, skills, and agent configurations using opencode run",
-      "version": "1.0.0",
-      "author": {
-        "name": "GitLab"
-      },
-      "license": "MIT"
+      "source": "./.claude-plugin/plugins/glab"
     },
     {
       "name": "playwright-cli",
@@ -39,13 +23,7 @@
     },
     {
       "name": "run-in-tmux-pane",
-      "source": "./skills/run-in-tmux-pane",
-      "description": "Run commands in a temporary tmux pane with full interactive zsh environment (login shell, shims, PATH, aliases, TTY).",
-      "version": "1.0.0",
-      "author": {
-        "name": "GitLab"
-      },
-      "license": "MIT"
+      "source": "./.claude-plugin/plugins/run-in-tmux-pane"
     }
   ]
 }

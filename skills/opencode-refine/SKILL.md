@@ -1,9 +1,8 @@
 ---
 name: opencode-refine
 description: Iteratively test and refine prompts, skills, and agent configurations using opencode run
-version: 1.0.0
+version: 1.0.1
 license: MIT
-compatibility: opencode
 metadata:
   audience: general
   workflow: local
