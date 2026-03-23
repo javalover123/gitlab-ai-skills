@@ -29,6 +29,7 @@ check-claude-drift:
 
 verify-claude-plugin:
   stage: verify
+  image: node:alpine3.23
   extends: .verify-rules
   script:
     - npx -y @anthropic-ai/claude-code plugin validate .
