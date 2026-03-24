@@ -1,8 +1,19 @@
 stages:
+  - lint
   - verify
+
+include:
+  - component: ${CI_SERVER_FQDN}/gitlab-org/components/danger-review/danger-review@2.1.0
 
 default:
   image: python:3.12-alpine3.20
+
+danger-review:
+  stage: lint
+  needs: []
+  before_script:
+    - bundle init
+    - bundle add gitlab-dangerfiles
 
 .verify-rules:
   rules:
