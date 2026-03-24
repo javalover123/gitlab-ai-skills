@@ -105,7 +105,6 @@ pw run-code "async page => {
 ## Setup
 
 `pw` is at `~/.agents/skills/playwright-cli/scripts/pw` (symlinked to `~/bin/pw`).
-`playwright-cli` also works — a wrapper in `bin/playwright-cli` applies the same filtering automatically.
 If the binary is missing: `npm install -g playwright-cli && npx playwright install chrome`.
 
 ## Contributing Improvements
