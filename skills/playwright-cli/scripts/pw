@@ -15,7 +15,10 @@ Usage: pw [playwright-cli args...]  or  playwright-cli [args...]
   Raw playwright-cli is the fallback if pw causes issues.
 """
 
-import sys, re, os, subprocess
+import os
+import re
+import subprocess
+import sys
 
 
 def filter_snapshot(content: str) -> str:
@@ -50,7 +53,8 @@ def inline_snapshots(text: str) -> str:
     def replace(m):
         path = m.group(1)
         if os.path.exists(path):
-            return filter_snapshot(open(path).read()).strip()
+            with open(path, encoding="utf-8") as f:
+                return filter_snapshot(f.read()).strip()
         return m.group(0)
     return re.sub(r'- \[Snapshot\]\(([^)]+)\)', replace, text)
 
@@ -101,10 +105,11 @@ def main():
         result = clean(raw)
         if result:
             print(result)
-    except Exception:
+    except (OSError, FileNotFoundError):
         env = os.environ.copy()
         bin_dir = os.path.realpath(os.path.expanduser('~/bin'))
         env['PATH'] = ':'.join(p for p in env['PATH'].split(':') if os.path.realpath(p) != bin_dir)
+        print("pw: filtering failed, falling back to raw playwright-cli", file=sys.stderr)
         os.execvpe('playwright-cli', ['playwright-cli'] + args, env)
 
 
