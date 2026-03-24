@@ -28,6 +28,16 @@
       "license": "MIT"
     },
     {
+      "name": "playwright-cli",
+      "source": "./skills/playwright-cli",
+      "description": "Automates browser interactions for web testing, form filling, screenshots, and data extraction. Use when the user needs to navigate websites, interact with web pages, fill forms, take screenshots, test web applications, or extract information from web pages.",
+      "version": "1.0.0",
+      "author": {
+        "name": "GitLab"
+      },
+      "license": "MIT"
+    },
+    {
       "name": "run-in-tmux-pane",
       "source": "./skills/run-in-tmux-pane",
       "description": "Run commands in a temporary tmux pane with full interactive zsh environment (login shell, shims, PATH, aliases, TTY).",
