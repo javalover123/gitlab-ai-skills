@@ -1,0 +1,9 @@
+{
+  "name": "gitlab-skills",
+  "description": "Reusable AI agent skills for GitLab workflows",
+  "version": "1.0.0",
+  "author": {
+    "name": "GitLab"
+  },
+  "license": "MIT"
+}

@@ -11,7 +11,7 @@ Reusable agent skills for GitLab projects. Skills are structured prompt files th
   - [What is a Skill?](#what-is-a-skill)
   - [Skills](#skills)
   - [Installing Skills](#installing-skills)
-    - [Claude Code Plugin Marketplace (Experimental)](#claude-code-plugin-marketplace-experimental)
+    - [Claude Code Plugin (Experimental)](#claude-code-plugin-experimental)
   - [Contributing](#contributing)
   - [Related](#related)
 <!-- TOC_END -->
@@ -62,16 +62,15 @@ npx @dgruzd/skills update
 npx @dgruzd/skills list -g
 ```
 
-### Claude Code Plugin Marketplace (Experimental)
+### Claude Code Plugin (Experimental)
 
 > [!WARNING]
 > The Claude Code plugin marketplace integration is **experimental** and may change. The `npx @dgruzd/skills` method above is recommended for all agents.
-
-This repo also ships as a [Claude Code plugin marketplace](https://code.claude.com/docs/en/plugin-marketplaces):
+> The experimental `gitlab-org/ai/marketplace` project can be used to install this project as a [Claude Code plugin](https://code.claude.com/docs/en/plugins-reference).
 
 ```shell
-/plugin marketplace add https://gitlab.com/gitlab-org/ai/skills.git
-/plugin install glab@gitlab-skills
+/plugin marketplace add https://gitlab.com/gitlab-org/ai/marketplace.git
+/plugin install skills@gitlab-org-ai
 ```
 
 ## Contributing
@@ -88,4 +87,4 @@ See [doc/contributing.md](doc/contributing.md) for full details, frontmatter ref
 
 - [Search Team AI Skills](https://gitlab.com/gitlab-org/search-team/ai/skills) — team-specific skills collection that inspired this repo's conventions
 - [OpenCode Documentation](https://opencode.ai/docs)
-- [Claude Code Plugin Marketplace Docs](https://code.claude.com/docs/en/plugin-marketplaces)
+- [Claude Code Plugin Docs](https://code.claude.com/docs/en/plugins-reference)

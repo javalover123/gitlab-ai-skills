@@ -27,7 +27,7 @@
    lefthook run auto-fix
    ```
 
-4. Commit everything: the new skill, updated README, catalog.json, and .claude-plugin/ manifests
+4. Commit everything: the new skill, updated README, and plugin manifest
 
 The CI pipeline will fail if any generated files are out of sync with the skill files.
 
@@ -81,8 +81,6 @@ Or run each script individually:
 ```bash
 python3 scripts/update_skills_list.py      # README skills table
 python3 scripts/update_toc.py              # README table of contents
-python3 scripts/generate_catalog.py         # catalog.json
-python3 scripts/generate_claude_plugin.py   # .claude-plugin/ manifests
 ```
 
 ### Verify everything is up to date (CI mode)
@@ -92,7 +90,6 @@ python3 scripts/update_skills_list.py --ci
 python3 scripts/update_toc.py --ci
 python3 scripts/validate_frontmatter.py --ci
 python3 scripts/check_claude_drift.py --ci
-python3 scripts/generate_catalog.py --ci
-python3 scripts/generate_claude_plugin.py --ci
+npx -y @anthropic-ai/claude-code plugin validate .
 python3 scripts/check_version_bump.py --ci
 ```
