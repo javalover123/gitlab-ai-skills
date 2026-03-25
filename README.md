@@ -33,6 +33,7 @@ Skills are loaded explicitly by the agent when relevant to a task (e.g. "load th
 | ----- | ----------- |
 | [`glab`](skills/glab/SKILL.md) | GitLab workflow automation using glab CLI |
 | [`opencode-refine`](skills/opencode-refine/SKILL.md) | Iteratively test and refine prompts, skills, and agent configurations using opencode run |
+| [`playwright-cli`](skills/playwright-cli/SKILL.md) | Automates browser interactions for web testing, form filling, screenshots, and data extraction. Use when the user needs to navigate websites, interact with web pages, fill forms, take screenshots, test web applications, or extract information from web pages. |
 | [`run-in-tmux-pane`](skills/run-in-tmux-pane/SKILL.md) | Run commands in a temporary tmux pane with full interactive zsh environment (login shell, shims, PATH, aliases, TTY). |
 <!-- SKILLS_END -->
 
