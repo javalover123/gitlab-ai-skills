@@ -11,7 +11,7 @@
       "name": "glab",
       "source": "./skills/glab",
       "description": "GitLab workflow automation using glab CLI",
-      "version": "1.2.1",
+      "version": "1.2.2",
       "author": {
         "name": "GitLab"
       },
