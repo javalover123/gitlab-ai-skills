@@ -6,6 +6,7 @@ include:
   - component: ${CI_SERVER_FQDN}/gitlab-org/components/danger-review/danger-review@2.1.0
     inputs:
       job_stage: lint
+  - component: ${CI_SERVER_FQDN}/gitlab-org/orbit/components/lgtm-agent/lgtm-agent@main
 
 default:
   image: python:3.12-alpine3.20
