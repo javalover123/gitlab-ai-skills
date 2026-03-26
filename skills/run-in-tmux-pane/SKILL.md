@@ -1,7 +1,7 @@
 ---
 name: run-in-tmux-pane
 description: Run commands in a temporary tmux pane with full interactive zsh environment (login shell, shims, PATH, aliases, TTY).
-version: 1.0.1
+version: 1.1.0
 license: MIT
 metadata:
   author: pedropombeiro
@@ -102,7 +102,19 @@ run-in-tmux-pane gdk start rails
 |---|---|---|
 | `TMUX_PANE_LINGER` | `3` | Seconds to keep the tmux pane visible after the command finishes. Set to `0` to close immediately. |
 | `TMUX_PANE_TAIL_LINES` | `20` | Number of trailing lines to keep when truncating successful output. |
-| `TMUX_PANE_TIMEOUT` | `120` | Maximum seconds to wait for the command to finish before killing the pane (exits with code 124). |
+| `TMUX_PANE_TIMEOUT` | `300` | Maximum seconds to wait for the command to finish before killing the pane (exits with code 124). |
+
+## Important: Bash tool timeout must exceed `TMUX_PANE_TIMEOUT`
+
+`TMUX_PANE_TIMEOUT` is measured in seconds, while the Bash tool's `timeout`
+parameter is measured in milliseconds. Set the Bash timeout to something greater
+than `TMUX_PANE_TIMEOUT * 1000`, plus a small buffer for pane startup and cleanup
+(for example, `timeout: 360000` for the default `TMUX_PANE_TIMEOUT=300`).
+
+If the Bash tool times out before the tmux pane finishes, you get partial output
+with no exit code, and the tmux command may still be running in the background.
+This can be mistaken for a completed run, leading to unnecessary retries or
+incorrect assumptions about the command's result.
 
 ## Limitations
 
