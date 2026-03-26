@@ -19,7 +19,7 @@ REPO_ROOT = os.path.join(SCRIPT_DIR, "..")
 SKILLS_DIR = os.path.join(REPO_ROOT, "skills")
 
 # Required frontmatter fields
-REQUIRED_FIELDS = ["name", "description", "version", "license", "compatibility"]
+REQUIRED_FIELDS = ["name", "description", "version", "license"]
 
 # Semver pattern (major.minor.patch, no pre-release/build metadata for simplicity)
 SEMVER_RE = re.compile(r"^\d+\.\d+\.\d+$")
