@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+# Run all CI checks locally. Exits 1 if any check fails.
+
+set -euo pipefail
+
+REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+cd "$REPO_ROOT"
+
+FAILED=()
+
+run() {
+  echo ">>> $*"
+  if ! "$@"; then
+    FAILED+=("$*")
+  fi
+  echo
+}
+
+run python3 scripts/update_skills_list.py --ci
+run python3 scripts/update_toc.py --ci
+run python3 scripts/update_claudecode_readme.py --ci
+run python3 scripts/validate_frontmatter.py --ci
+run python3 scripts/validate-opencode-distribution.py --ci
+run python3 scripts/validate-claudecode-distribution.py --ci
+run python3 scripts/check_version_bump.py --ci
+run bin/sync-skill --ci
+run python3 scripts/generate_catalog.py --ci
+
+if [ ${#FAILED[@]} -gt 0 ]; then
+  echo "FAILED checks:"
+  for check in "${FAILED[@]}"; do
+    echo "  - $check"
+  done
+  exit 1
+fi
+
+echo "All checks passed."

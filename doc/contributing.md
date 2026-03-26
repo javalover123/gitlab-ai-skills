@@ -21,13 +21,22 @@
    ...skill content...
    ```
 
-3. Regenerate all derived files:
+3. Register the skill for distribution to editor environments:
+
+   ```bash
+   bin/distribute-skill my-workflow
+   ```
+
+   This creates the necessary symlinks and manifests in `.opencode/` and `.claude-plugin/`.
+   To target a specific environment only: `--env=opencode` or `--env=claudecode`. See more in `bin/distribute-skill` manual.
+
+4. Regenerate all derived files:
 
    ```bash
    lefthook run auto-fix
    ```
 
-4. Commit everything: the new skill, updated README, catalog.json, and .claude-plugin/ manifests
+5. Commit everything: the new skill, updated README, catalog.json, and distribution manifests
 
 The CI pipeline will fail if any generated files are out of sync with the skill files.
 
@@ -39,23 +48,32 @@ The CI pipeline will fail if any generated files are out of sync with the skill 
 | `description` | One-line description — shown in README table and catalog |
 | `version` | Semver version string (e.g. `1.0.0`) — **must be bumped** when any skill file changes |
 | `license` | SPDX license identifier (typically `MIT`) |
-| `compatibility` | Agent framework (`opencode`) |
 
-Optional fields: `metadata` (with nested `audience`, `workflow`, etc.)
+Optional fields: `compatibility` (agent framework, e.g. `opencode`), `metadata` (with nested `audience`, `workflow`, etc.)
 
 The `validate-frontmatter` CI job enforces these required fields. The `check-version-bump` job
 verifies that the `version` field is incremented whenever files under `skills/<name>/` change.
 
-## Claude.ai Compatibility
+## Distribution
 
-Skills are automatically packaged as [Claude Code plugins](https://code.claude.com/docs/en/plugin-marketplaces). The `check-claude-drift` CI job verifies that SKILL.md files remain structurally compatible with the claude.ai format.
+Skills are distributed to editor-specific directories using `bin/distribute-skill`:
 
-Key differences between formats:
-- **opencode** uses `name`, `license`, `compatibility`, `metadata` in frontmatter — claude.ai silently ignores these
-- **claude.ai** requires `description` (which we also require) and optionally supports `disable-model-invocation`
-- Both formats use the same `SKILL.md` content body
+```bash
+bin/distribute-skill SKILLNAME                          # all environments
+bin/distribute-skill SKILLNAME --env=opencode           # opencode only
+bin/distribute-skill SKILLNAME --env=claudecode         # ClaudeCode only
+bin/distribute-skill SKILLNAME --env=claudecode --plugin=PLUGINNAME  # custom plugin name
+bin/distribute-skill SKILLNAME --env=opencode --overwrite  # remove from all other envs
+```
 
-You don't need to do anything special — just ensure `description` is present and the CI handles the rest.
+**opencode** (`.opencode/skills/`): creates a symlink to `skills/<name>/`.
+
+**ClaudeCode** (`.claude-plugin/plugins/<name>/`): writes a `plugin.json` manifest, creates a symlink under `skills/`, and registers the plugin in `marketplace.json`.
+
+CI jobs verify the distributed skills are format-compatible:
+
+- `validate-opencode-distribution` — checks `.opencode/skills/*/SKILL.md` for required opencode fields
+- `validate-claudecode-distribution` — checks `.claude-plugin/**/skills/*/SKILL.md` for required ClaudeCode fields
 
 ## Development
 
@@ -67,7 +85,8 @@ lefthook install
 ```
 
 With lefthook installed:
-- **Pre-push**: all six checks run automatically (blocks push on failure)
+
+- **Pre-push**: all checks run automatically (blocks push on failure)
 - **Auto-fix**: `lefthook run auto-fix` regenerates all derived files
 
 ### Regenerate all derived files
@@ -81,18 +100,14 @@ Or run each script individually:
 ```bash
 python3 scripts/update_skills_list.py      # README skills table
 python3 scripts/update_toc.py              # README table of contents
-python3 scripts/generate_catalog.py         # catalog.json
-python3 scripts/generate_claude_plugin.py   # .claude-plugin/ manifests
+python3 scripts/generate_catalog.py        # catalog.json
+bin/sync-skill                             # sync SKILL.md versions into plugin.json
 ```
 
 ### Verify everything is up to date (CI mode)
 
 ```bash
-python3 scripts/update_skills_list.py --ci
-python3 scripts/update_toc.py --ci
-python3 scripts/validate_frontmatter.py --ci
-python3 scripts/check_claude_drift.py --ci
-python3 scripts/generate_catalog.py --ci
-python3 scripts/generate_claude_plugin.py --ci
-python3 scripts/check_version_bump.py --ci
+bin/ci-checks
 ```
+
+This runs all checks in sequence and reports any failures at the end.
