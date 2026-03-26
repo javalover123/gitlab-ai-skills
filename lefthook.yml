@@ -7,16 +7,18 @@ pre-push:
       run: python3 scripts/update_skills_list.py --ci
     validate-frontmatter:
       run: python3 scripts/validate_frontmatter.py --ci
-    check-claude-drift:
-      run: python3 scripts/check_claude_drift.py --ci
+    validate-claudecode-distribution:
+      run: python3 scripts/validate-claudecode-distribution.py --ci
+    validate-opencode-distribution:
+      run: python3 scripts/validate-opencode-distribution.py --ci
     verify-catalog:
       run: python3 scripts/generate_catalog.py --ci
-    verify-claude-plugin:
-      run: python3 scripts/generate_claude_plugin.py --ci
     verify-toc:
       run: python3 scripts/update_toc.py --ci
     check-version-bump:
       run: python3 scripts/check_version_bump.py --ci
+    sync-distribution-versions:
+      run: bin/sync-skill --ci
 
 auto-fix:
   parallel: false
@@ -27,5 +29,7 @@ auto-fix:
       run: python3 scripts/update_toc.py
     catalog:
       run: python3 scripts/generate_catalog.py
-    claude-plugin:
-      run: python3 scripts/generate_claude_plugin.py
+    claudecode-readme:
+      run: python3 scripts/update_claudecode_readme.py
+    sync-distribution-versions:
+      run: bin/sync-skill

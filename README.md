@@ -11,7 +11,9 @@ Reusable agent skills for GitLab projects. Skills are structured prompt files th
   - [What is a Skill?](#what-is-a-skill)
   - [Skills](#skills)
   - [Installing Skills](#installing-skills)
-    - [Claude Code Plugin Marketplace (Experimental)](#claude-code-plugin-marketplace-experimental)
+    - [OpenCode (Native)](#opencode-native)
+    - [Via `@dgruzd/skills` CLI](#via-dgruzdskills-cli)
+    - [Claude Code Plugin Marketplace](#claude-code-plugin-marketplace)
   - [Contributing](#contributing)
   - [Related](#related)
 <!-- TOC_END -->
@@ -41,6 +43,34 @@ Skills are loaded explicitly by the agent when relevant to a task (e.g. "load th
 
 ## Installing Skills
 
+> [!NOTE]
+> **Windows users:** this repo uses symlinks for skill distribution. Before cloning, ensure Git is configured to create real symlinks:
+>
+> ```bash
+> git config --global core.symlinks true
+> ```
+>
+> You may also need to enable [Developer Mode](https://learn.microsoft.com/en-us/windows/apps/get-started/enable-your-device-for-development) or run Git as Administrator for symlink creation to work.
+
+### OpenCode (Native)
+
+This repo ships `.opencode/skills/` with symlinks for each skill. Clone the repo and OpenCode discovers them automatically — no extra install step needed.
+
+```bash
+git clone https://gitlab.com/gitlab-org/ai/skills.git ~/gitlab-skills
+# OpenCode picks up .opencode/skills/ from the cloned directory
+```
+
+Or symlink into your global OpenCode config:
+
+```bash
+for skill in ~/gitlab-skills/.opencode/skills/*/; do
+  ln -s "$skill" ~/.config/opencode/skills/
+done
+```
+
+### Via `@dgruzd/skills` CLI
+
 [`@dgruzd/skills`](https://github.com/dgruzd/skills) is a fork of [`vercel-labs/skills`](https://github.com/vercel-labs/skills) that adds GitLab update detection — without it, `skills check` and `skills update` silently skip GitLab-hosted skills. It handles symlinking, multi-agent installs, updates, and discovery with no global install required.
 
 > [!NOTE]
@@ -63,25 +93,31 @@ npx @dgruzd/skills update
 npx @dgruzd/skills list -g
 ```
 
-### Claude Code Plugin Marketplace (Experimental)
+### Claude Code Plugin Marketplace
 
-> [!WARNING]
-> The Claude Code plugin marketplace integration is **experimental** and may change. The `npx @dgruzd/skills` method above is recommended for all agents.
-
-This repo also ships as a [Claude Code plugin marketplace](https://code.claude.com/docs/en/plugin-marketplaces):
+This repo ships as a [Claude Code plugin marketplace](https://code.claude.com/docs/en/plugin-marketplaces):
 
 ```shell
 /plugin marketplace add https://gitlab.com/gitlab-org/ai/skills.git
 /plugin install glab@gitlab-skills
 ```
 
+<!-- CLAUDECODE_PLUGINS_START -->
+| Plugin | Skills | Description | Version |
+| ------ | ------ | ----------- | ------- |
+| [`glab`](.claude-plugin/plugins/glab) | [`glab`](skills/glab/SKILL.md) | GitLab workflow automation using glab CLI | 1.2.3 |
+| [`run-in-tmux-pane`](.claude-plugin/plugins/run-in-tmux-pane) | [`run-in-tmux-pane`](skills/run-in-tmux-pane/SKILL.md) | Run commands in a temporary tmux pane with full interactive zsh environment (login shell, shims, PATH, aliases, TTY). | 1.0.1 |
+<!-- CLAUDECODE_PLUGINS_END -->
+
 ## Contributing
 
 To add a new skill:
 
-1. Create `skills/<skill-name>/SKILL.md` with required frontmatter (`name`, `description`, `license`, `compatibility`)
-2. Run `lefthook run auto-fix` to regenerate all derived files (README table, ToC, catalog, plugin manifests)
-3. Commit and push — six CI checks verify everything is in sync
+1. Create `skills/<skill-name>/SKILL.md` with required frontmatter (`name`, `description`, `version`)
+2. Run `bin/distribute-skill <skill-name>` to register it in `.opencode/` and `.claude-plugin/`
+3. Run `lefthook run auto-fix` to regenerate all derived files (README table, ToC, catalog, plugin manifests)
+4. Run `bin/ci-checks` to verify CI checks locally.
+5. Commit, push and open a MR
 
 See [doc/contributing.md](doc/contributing.md) for full details, frontmatter reference, and development setup (including lefthook installation).
 

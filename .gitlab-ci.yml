@@ -16,11 +16,13 @@ default:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
 
-verify-skills-list:
+verify-readme:
   stage: verify
   extends: .verify-rules
   script:
     - python3 scripts/update_skills_list.py --ci --debug
+    - python3 scripts/update_toc.py --ci --debug
+    - python3 scripts/update_claudecode_readme.py --ci --debug
 
 validate-frontmatter:
   stage: verify
@@ -28,29 +30,23 @@ validate-frontmatter:
   script:
     - python3 scripts/validate_frontmatter.py --ci --debug
 
-check-claude-drift:
+validate-distribution-claudecode:
   stage: verify
   extends: .verify-rules
   script:
-    - python3 scripts/check_claude_drift.py --ci --debug
+    - python3 scripts/validate-claudecode-distribution.py --ci --debug
+
+validate-distribution-opencode:
+  stage: verify
+  extends: .verify-rules
+  script:
+    - python3 scripts/validate-opencode-distribution.py --ci --debug
 
 verify-catalog:
   stage: verify
   extends: .verify-rules
   script:
     - python3 scripts/generate_catalog.py --ci --debug
-
-verify-claude-plugin:
-  stage: verify
-  extends: .verify-rules
-  script:
-    - python3 scripts/generate_claude_plugin.py --ci --debug
-
-verify-toc:
-  stage: verify
-  extends: .verify-rules
-  script:
-    - python3 scripts/update_toc.py --ci --debug
 
 check-version-bump:
   stage: verify
@@ -61,3 +57,9 @@ check-version-bump:
     - git fetch origin $CI_DEFAULT_BRANCH --depth=1
   script:
     - python3 scripts/check_version_bump.py --ci --debug
+
+sync-distribution-versions:
+  stage: verify
+  extends: .verify-rules
+  script:
+    - python3 scripts/sync_skill.py --ci --debug
