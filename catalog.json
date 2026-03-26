@@ -15,6 +15,13 @@
       "path": "skills/opencode-refine/SKILL.md"
     },
     {
+      "name": "playwright-cli",
+      "description": "Automates browser interactions for web testing, form filling, screenshots, and data extraction. Use when the user needs to navigate websites, interact with web pages, fill forms, take screenshots, test web applications, or extract information from web pages.",
+      "license": "MIT",
+      "compatibility": "opencode",
+      "path": "skills/playwright-cli/SKILL.md"
+    },
+    {
       "name": "run-in-tmux-pane",
       "description": "Run commands in a temporary tmux pane with full interactive zsh environment (login shell, shims, PATH, aliases, TTY).",
       "license": "MIT",
