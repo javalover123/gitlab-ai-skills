@@ -1,7 +1,7 @@
 ---
 name: glab
 description: GitLab workflow automation using glab CLI
-version: 1.2.1
+version: 1.2.2
 license: MIT
 compatibility: opencode
 metadata:
@@ -15,12 +15,16 @@ GitLab workflow management using `glab` CLI for merge requests, issues, and Git 
 
 ## Creating Merge Requests
 
+Always pass `--push` and `-H <owner/repo>`. Without `--push`, the branch may not exist on
+any remote yet. Without `-H`, glab may pick the wrong remote (e.g. a security mirror) as
+the source project, creating the MR from the wrong fork.
+
 ```bash
 # Simple MR
-glab mr create --title "feat: add feature" --description "Brief description"
+glab mr create --push -H <owner/repo> --title "feat: add feature" --description "Brief description"
 
 # Complex MR - write description to file first
-glab mr create --title "feat: add feature" --description "$(cat /tmp/mr-description.md)"
+glab mr create --push -H <owner/repo> --title "feat: add feature" --description "$(cat /tmp/mr-description.md)"
 ```
 
 **Templates:** Check `.gitlab/merge_request_templates/` for project-specific templates.
@@ -184,25 +188,26 @@ git checkout -b fix/description
 
 ## Agent Guidelines
 
-1. **Read context first** — `glab issue view` / `glab mr view` before implementing
-2. **Use project templates** — check `.gitlab/issue_templates/` and `.gitlab/merge_request_templates/`
-3. **Write descriptions to files** — use `$(cat /tmp/description.md)` not inline strings
-4. **Reference with full URLs** — `Closes https://gitlab.com/org/project/-/issues/123`
-5. **Descriptive commits** — focus on the "why"
-6. **Single quotes for special chars** — `git commit -m 'fix: from MR !123'`
-7. **Label syntax** — `--label` to add, `--unlabel` to remove; never `+label`/`-label`
-8. **Scoped labels** — `--label "status::doing"` auto-removes old `status::*`; no `--unlabel` needed
-9. **No `--jq` flag** — glab has no `--jq`; use `| jq '...'` pipe
-10. **No `--state`/`--status` on `mr list`** — use `--all`, `--merged`, `--closed`
-11. **Work items use the issues API** — `/work_items/<iid>` URLs → `projects/.../issues/<iid>`
-12. **Epic comments need GraphQL** — REST `/notes` → 404; use `epic-notes.sh` or manual GraphQL with `first: 100` + pagination
-13. **No `-R` for group-level API** — `-R` expects `OWNER/REPO`; group endpoints use `glab api "groups/..."` directly
-14. **Nested groups REST: `%2F`** — `groups/org%2Fsubgroup/epics`; unencoded slashes → 404
-15. **GraphQL iid is a String** — `workItem(iid: "16428")` not `workItem(iid: 16428)`
-16. **`groups/<id>/work_items` is 404** — use `groups/<id>/epics` (REST) or GraphQL
-17. **`project.workItems` not `project.workItem`** — singular doesn't exist; use `workItems(first: 1, iid: "IID")`; no `filter:` argument
-18. **Epic close/reopen via REST** — `state_event=close`/`reopen` on `PUT groups/<id>/epics/<iid>` works; no GraphQL needed
-19. **No `--body` flag** — glab uses `--description`, not `--body` (which is a `gh` flag); they are not interchangeable
+1. **`glab mr create` always needs `--push -H <owner/repo>`** — omitting either causes the MR to be created from the wrong remote or fail entirely
+2. **Read context first** — `glab issue view` / `glab mr view` before implementing
+3. **Use project templates** — check `.gitlab/issue_templates/` and `.gitlab/merge_request_templates/`
+4. **Write descriptions to files** — use `$(cat /tmp/description.md)` not inline strings
+5. **Reference with full URLs** — `Closes https://gitlab.com/org/project/-/issues/123`
+6. **Descriptive commits** — focus on the "why"
+7. **Single quotes for special chars** — `git commit -m 'fix: from MR !123'`
+8. **Label syntax** — `--label` to add, `--unlabel` to remove; never `+label`/`-label`
+9. **Scoped labels** — `--label "status::doing"` auto-removes old `status::*`; no `--unlabel` needed
+10. **No `--jq` flag** — glab has no `--jq`; use `| jq '...'` pipe
+11. **No `--state`/`--status` on `mr list`** — use `--all`, `--merged`, `--closed`
+12. **Work items use the issues API** — `/work_items/<iid>` URLs → `projects/.../issues/<iid>`
+13. **Epic comments need GraphQL** — REST `/notes` → 404; use `epic-notes.sh` or manual GraphQL with `first: 100` + pagination
+14. **No `-R` for group-level API** — `-R` expects `OWNER/REPO`; group endpoints use `glab api "groups/..."` directly
+15. **Nested groups REST: `%2F`** — `groups/org%2Fsubgroup/epics`; unencoded slashes → 404
+16. **GraphQL iid is a String** — `workItem(iid: "16428")` not `workItem(iid: 16428)`
+17. **`groups/<id>/work_items` is 404** — use `groups/<id>/epics` (REST) or GraphQL
+18. **`project.workItems` not `project.workItem`** — singular doesn't exist; use `workItems(first: 1, iid: "IID")`; no `filter:` argument
+19. **Epic close/reopen via REST** — `state_event=close`/`reopen` on `PUT groups/<id>/epics/<iid>` works; no GraphQL needed
+20. **No `--body` flag** — glab uses `--description`, not `--body` (which is a `gh` flag); they are not interchangeable
 
 ## Contributing Improvements
 
