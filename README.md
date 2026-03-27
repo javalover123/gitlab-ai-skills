@@ -106,7 +106,7 @@ This repo ships as a [Claude Code plugin marketplace](https://code.claude.com/do
 | Plugin | Skills | Description | Version |
 | ------ | ------ | ----------- | ------- |
 | [`glab`](.claude-plugin/plugins/glab) | [`glab`](skills/glab/SKILL.md) | GitLab workflow automation using glab CLI | 1.2.3 |
-| [`run-in-tmux-pane`](.claude-plugin/plugins/run-in-tmux-pane) | [`run-in-tmux-pane`](skills/run-in-tmux-pane/SKILL.md) | Run commands in a temporary tmux pane with full interactive zsh environment (login shell, shims, PATH, aliases, TTY). | 1.0.1 |
+| [`run-in-tmux-pane`](.claude-plugin/plugins/run-in-tmux-pane) | [`run-in-tmux-pane`](skills/run-in-tmux-pane/SKILL.md) | Run commands in a temporary tmux pane with full interactive zsh environment (login shell, shims, PATH, aliases, TTY). | 1.1.0 |
 <!-- CLAUDECODE_PLUGINS_END -->
 
 ## Contributing
