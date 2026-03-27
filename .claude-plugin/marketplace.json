@@ -14,6 +14,10 @@
     {
       "name": "run-in-tmux-pane",
       "source": "./.claude-plugin/plugins/run-in-tmux-pane"
+    },
+    {
+      "name": "self-service-performance-testing",
+      "source": "./.claude-plugin/plugins/self-service-performance-testing"
     }
   ]
 }
