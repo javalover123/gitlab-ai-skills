@@ -34,7 +34,7 @@ TAIL_LINES=${TMUX_PANE_TAIL_LINES:-20}
 if [[ -n "${TMUX_PANE_TIMEOUT:-}" && ! "${TMUX_PANE_TIMEOUT}" =~ ^[1-9][0-9]*$ ]]; then
   unset TMUX_PANE_TIMEOUT
 fi
-_timeout=${TMUX_PANE_TIMEOUT:-120}
+_timeout_ms=${TMUX_PANE_TIMEOUT:-300000}
 
 tmpfile=$(mktemp)
 trap 'rm -f "$tmpfile" "${tmpfile}.out"' EXIT
@@ -52,12 +52,13 @@ escaped_cmd="${cmd//\'/\'\\\'\'}"
 pane_id=$(tmux split-window -v -l 30% -d -P -F '#{pane_id}' -t "${TMUX_PANE}" \
   "zsh -ilc '${escaped_cmd}; echo \"${_sentinel}:\$?\"' 2>&1 | tee '${tmpfile}'; sleep ${linger}")
 
-_deadline=$(( $(date +%s) + _timeout ))
+_timeout_s=$(( (_timeout_ms + 999) / 1000 ))
+_deadline=$(( $(date +%s) + _timeout_s ))
 while tmux list-panes -F '#{pane_id}' 2>/dev/null | grep -q "^${pane_id}$"; do
   sleep 0.5
   if [[ $(date +%s) -ge $_deadline ]]; then
     tmux kill-pane -t "$pane_id" 2>/dev/null || true
-    echo "Error: command timed out after ${_timeout}s" >&2
+    echo "Error: command timed out after ${_timeout_ms}ms" >&2
     exit 124
   fi
 done
