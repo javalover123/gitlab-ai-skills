@@ -14,6 +14,7 @@ metadata:
 # PostgreSQL Development Skill
 
 Use `gdk psql` to connect to local GDK PostgreSQL databases for schema inspection or queries.
+This skill assumes a GitLab GDK environment with local PostgreSQL access available.
 Prefer the **test** databases to avoid corrupting development data.
 
 ## Databases

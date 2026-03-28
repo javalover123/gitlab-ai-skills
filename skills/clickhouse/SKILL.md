@@ -15,6 +15,8 @@ metadata:
 
 Connect to the local development ClickHouse database to inspect schemas or run queries.
 
+This skill assumes a GitLab GDK environment with local ClickHouse access available.
+
 Use the bundled wrapper script so connection details stay centralized.
 
 ## Bundled script paths
@@ -27,7 +29,7 @@ Use the bundled wrapper script so connection details stay centralized.
 
 - Use `CLICKHOUSE_USER=default` for local read-only inspection in this GitLab development setup.
 - Use `CLICKHOUSE_USER=gitlab` when reproducing application-level access patterns or debugging credentials.
-- Pass the `gitlab` user password via `CLICKHOUSE_GDK_GITLAB_USER_PASSWORD`; the wrapper exports `CLICKHOUSE_PASSWORD` automatically when needed.
+- In this GitLab GDK workflow, the examples use `CLICKHOUSE_GDK_GITLAB_USER_PASSWORD`; adapt the env var name to your local setup if needed. The wrapper exports `CLICKHOUSE_PASSWORD` automatically when that variable is set.
 
 ## Decision Rule
 
