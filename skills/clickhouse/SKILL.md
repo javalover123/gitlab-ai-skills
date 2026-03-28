@@ -61,17 +61,19 @@ CLICKHOUSE_USER=gitlab skills/clickhouse/scripts/gdk-clickhouse
 # Run a single command
 skills/clickhouse/scripts/gdk-clickhouse --query "SHOW DATABASES FORMAT TSV"
 
-# List databases
-SHOW DATABASES;
-
 # List tables in the dev database
-SHOW TABLES;
-
-# Describe a table
-DESCRIBE TABLE <table_name>;
+skills/clickhouse/scripts/gdk-clickhouse --query "SHOW TABLES FORMAT TSV"
 
 # Describe a table with machine-friendly output
 skills/clickhouse/scripts/gdk-clickhouse --query "DESCRIBE TABLE <table_name> FORMAT TSV"
+```
+
+```sql
+SHOW DATABASES;
+
+SHOW TABLES;
+
+DESCRIBE TABLE <table_name>;
 ```
 
 ## Agent Guidelines

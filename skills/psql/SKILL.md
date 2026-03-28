@@ -68,19 +68,7 @@ gdk psql -X -d gitlabhq_test_ci -P pager=off -c "SELECT indexname, indexdef FROM
 gdk psql -X -d gitlabhq_test_ci -P pager=off -A -F $'\t' -t -c "SELECT id, status FROM p_ci_builds LIMIT 5;"
 
 # Check partitioned index attachments
-gdk psql -X -v ON_ERROR_STOP=1 -d gitlabhq_test_ci -P pager=off -c "
-SELECT
-  parent_idx.relname AS parent_index,
-  child_idx.relname AS attached_index,
-  child_tbl.relname AS partition_table
-FROM pg_inherits idx_inh
-JOIN pg_class parent_idx ON idx_inh.inhparent = parent_idx.oid
-JOIN pg_class child_idx ON idx_inh.inhrelid = child_idx.oid
-JOIN pg_index pi ON child_idx.oid = pi.indexrelid
-JOIN pg_class child_tbl ON pi.indrelid = child_tbl.oid
-WHERE parent_idx.relname = '<parent_index_name>'
-ORDER BY child_tbl.relname;
-"
+gdk psql -X -v ON_ERROR_STOP=1 -d gitlabhq_test_ci -P pager=off -c "SELECT parent_idx.relname AS parent_index, child_idx.relname AS attached_index, child_tbl.relname AS partition_table FROM pg_inherits idx_inh JOIN pg_class parent_idx ON idx_inh.inhparent = parent_idx.oid JOIN pg_class child_idx ON idx_inh.inhrelid = child_idx.oid JOIN pg_index pi ON child_idx.oid = pi.indexrelid JOIN pg_class child_tbl ON pi.indrelid = child_tbl.oid WHERE parent_idx.relname = '<parent_index_name>' ORDER BY child_tbl.relname;"
 ```
 
 ## Agent Guidelines
