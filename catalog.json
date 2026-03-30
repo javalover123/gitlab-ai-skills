@@ -1,6 +1,20 @@
 {
   "skills": [
     {
+      "name": "gitlab-clickhouse",
+      "description": "Inspect GitLab local ClickHouse tables, schemas, ingestion paths, and data patterns. Use for CH table questions, DESCRIBE TABLE, schema and source-of-truth checks under db/click_house, ingestion debugging, and investigating aggregates, distributions, outliers, or anomalous ClickHouse data in a GitLab GDK environment.",
+      "license": "MIT",
+      "compatibility": "opencode",
+      "path": "skills/gitlab-clickhouse/SKILL.md"
+    },
+    {
+      "name": "gitlab-psql",
+      "description": "Inspect GitLab GDK PostgreSQL test and development databases with gdk psql. Use for Postgres schema checks, table and index inspection, read-only SQL queries, migration verification, and investigating GitLab application data in local test or development databases.",
+      "license": "MIT",
+      "compatibility": "opencode",
+      "path": "skills/gitlab-psql/SKILL.md"
+    },
+    {
       "name": "glab",
       "description": "GitLab workflow automation using glab CLI",
       "license": "MIT",
