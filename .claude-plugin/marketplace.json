@@ -8,8 +8,16 @@
   },
   "plugins": [
     {
+      "name": "gitlab-clickhouse",
+      "source": "./.claude-plugin/plugins/gitlab-clickhouse"
+    },
+    {
       "name": "glab",
       "source": "./.claude-plugin/plugins/glab"
+    },
+    {
+      "name": "gitlab-psql",
+      "source": "./.claude-plugin/plugins/gitlab-psql"
     },
     {
       "name": "run-in-tmux-pane",

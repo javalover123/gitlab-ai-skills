@@ -33,6 +33,8 @@ Skills are loaded explicitly by the agent when relevant to a task (e.g. "load th
 <!-- SKILLS_START -->
 | Skill | Description |
 | ----- | ----------- |
+| [`gitlab-clickhouse`](skills/gitlab-clickhouse/SKILL.md) | Inspect GitLab local ClickHouse tables, schemas, ingestion paths, and data patterns. Use for CH table questions, DESCRIBE TABLE, schema and source-of-truth checks under db/click_house, ingestion debugging, and investigating aggregates, distributions, outliers, or anomalous ClickHouse data in a GitLab GDK environment. |
+| [`gitlab-psql`](skills/gitlab-psql/SKILL.md) | Inspect GitLab GDK PostgreSQL test and development databases with gdk psql. Use for Postgres schema checks, table and index inspection, read-only SQL queries, migration verification, and investigating GitLab application data in local test or development databases. |
 | [`glab`](skills/glab/SKILL.md) | GitLab workflow automation using glab CLI |
 | [`opencode-refine`](skills/opencode-refine/SKILL.md) | Iteratively test and refine prompts, skills, and agent configurations using opencode run |
 | [`playwright-cli`](skills/playwright-cli/SKILL.md) | Automates browser interactions for web testing, form filling, screenshots, and data extraction. Use when the user needs to navigate websites, interact with web pages, fill forms, take screenshots, test web applications, or extract information from web pages. |
@@ -106,7 +108,9 @@ This repo ships as a [Claude Code plugin marketplace](https://code.claude.com/do
 <!-- CLAUDECODE_PLUGINS_START -->
 | Plugin | Skills | Description | Version |
 | ------ | ------ | ----------- | ------- |
+| [`gitlab-clickhouse`](.claude-plugin/plugins/gitlab-clickhouse) | [`gitlab-clickhouse`](skills/gitlab-clickhouse/SKILL.md) | Inspect GitLab local ClickHouse tables, schemas, ingestion paths, and data patterns. Use for CH table questions, DESCRIBE TABLE, schema and source-of-truth checks under db/click_house, ingestion debugging, and investigating aggregates, distributions, outliers, or anomalous ClickHouse data in a GitLab GDK environment. | 1.0.0 |
 | [`glab`](.claude-plugin/plugins/glab) | [`glab`](skills/glab/SKILL.md) | GitLab workflow automation using glab CLI | 1.2.3 |
+| [`gitlab-psql`](.claude-plugin/plugins/gitlab-psql) | [`gitlab-psql`](skills/gitlab-psql/SKILL.md) | Inspect GitLab GDK PostgreSQL test and development databases with gdk psql. Use for Postgres schema checks, table and index inspection, read-only SQL queries, migration verification, and investigating GitLab application data in local test or development databases. | 1.0.0 |
 | [`run-in-tmux-pane`](.claude-plugin/plugins/run-in-tmux-pane) | [`run-in-tmux-pane`](skills/run-in-tmux-pane/SKILL.md) | Run commands in a temporary tmux pane with full interactive zsh environment (login shell, shims, PATH, aliases, TTY). | 1.1.0 |
 | [`self-service-performance-testing`](.claude-plugin/plugins/self-service-performance-testing) | [`self-service-performance-testing`](skills/self-service-performance-testing/SKILL.md) | Help engineers write performance tests that detect regressions, using k6 for load testing and sitespeed.io for frontend Core Web Vitals. Use when the user is adding or changing API endpoints, database queries, critical paths, or frontend pages and needs to decide whether to write a performance test, what kind, or how to integrate it into CI. Also activate when the user mentions load testing, stress testing, response times, benchmarking, performance budgets, or wants to run tests against staging - this skill enforces shared infrastructure safety rules. Does not cover profiling, APM, or debugging production incidents. | 0.1.0 |
 <!-- CLAUDECODE_PLUGINS_END -->
