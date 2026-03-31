@@ -1,0 +1,8 @@
+---
+instructions:
+  - name: No Trailing Newline Required
+    fileFilters:
+      - ".claude-plugin/plugins/*/skills/*"
+      - ".opencode/skills/*"
+    instructions: |
+      1. These files are symlinks - they do not require a newline at the end of the file - do not flag missing newlines
