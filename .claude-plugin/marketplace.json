@@ -24,6 +24,10 @@
       "source": "./.claude-plugin/plugins/glab"
     },
     {
+      "name": "mr-review",
+      "source": "./.claude-plugin/plugins/mr-review"
+    },
+    {
       "name": "run-in-tmux-pane",
       "source": "./.claude-plugin/plugins/run-in-tmux-pane"
     },
