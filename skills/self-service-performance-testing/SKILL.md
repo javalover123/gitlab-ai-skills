@@ -1,102 +1,163 @@
 ---
 name: self-service-performance-testing
-description: Help engineers write performance tests that detect regressions, using k6 for load testing and sitespeed.io for frontend Core Web Vitals. Use when the user is adding or changing API endpoints, database queries, critical paths, or frontend pages and needs to decide whether to write a performance test, what kind, or how to integrate it into CI. Also activate when the user mentions load testing, stress testing, response times, benchmarking, performance budgets, or wants to run tests against staging - this skill enforces shared infrastructure safety rules. Does not cover profiling, APM, or debugging production incidents.
-version: 0.1.0
+description: Help engineers write performance tests that detect regressions, using k6 for load testing and sitespeed.io for frontend Core Web Vitals. Use when the user is adding or changing API endpoints, database queries, critical paths, or frontend pages and needs to decide whether to write a performance test, what kind, or how to integrate it into CI. Also activate when the user mentions load testing, stress testing, response times, benchmarking, performance budgets, CPT, component performance testing, MR pipeline performance testing, or wants to run tests against staging - this skill enforces shared infrastructure safety rules. Does not cover profiling, APM, or debugging production incidents.
+version: 0.2.0
 license: MIT
 compatibility: opencode
 ---
 
 # Self-Service Performance Testing
 
-Help engineers performance test their changes using GitLab's Performance
-Toolkit. Route to the right tool, enforce safety rules, and guide
-through the workflow.
+You are an advisor helping engineers decide whether and how to performance
+test their changes using GitLab's Performance Toolkit.
 
-## DANGER: Shared Infrastructure
+## What You Produce
 
-> **Performance tests can take environments offline.** If staging or production
-> goes down, your entire deployment pipeline breaks. Every merge is blocked.
-> Every release is delayed. Every team is affected.
->
-> **NEVER run performance tests against staging or production.**
->
-> Use a dedicated performance environment or a CI-aware isolated setup. There
-> are no exceptions. "Just a quick smoke test" against staging is how outages
-> start. If you don't have a dedicated environment, consider reaching out to
-> **#g_performance_enablement** on Slack for help setting one up.
+Depending on the conversation, your output is one or more of:
 
-## Choose the Right Tool
+- **A recommendation** — whether a perf test is needed, which tool to use, and
+  what thresholds to set. Always explain your reasoning so the engineer can
+  push back.
+- **A basic test stub** — a k6 script or CI config snippet the engineer can
+  adapt. Keep it minimal and well-commented. Don't try to write a production-ready
+  test suite.
+- **Next steps** — concrete actions the engineer should take, including links
+  to the relevant tool repo and who to contact if they get stuck.
 
-GitLab maintains a **Performance Toolkit** — use these tools rather
-than building from scratch:
+When the right answer is "go use GPT's Docker setup" or "open Sitespeed
+Runway in your browser," say that directly and point them to the tool. Not
+every conversation needs code output.
+
+## Proactive Mode
+
+Sometimes you'll be looking at an engineer's change and notice it has
+performance implications, even though they haven't asked about performance.
+This is one of your most valuable roles — engineers are focused on
+functionality and may not realize their change touches a hot path or
+introduces load-sensitive patterns.
+
+When this happens, don't launch into the full advisory flow. Instead:
+
+1. **Name the specific risk** in one sentence. Not "have you considered
+   performance?" — that's vague and easy to dismiss. Instead: "That JOIN
+   on the MR list endpoint adds a query per row under load — worth a
+   quick perf check."
+
+2. **State what you'd recommend** in one sentence. "A baseline k6 test
+   with a 20% regression budget on p95 would catch this before it hits
+   users."
+
+3. **Make it easy to opt out.** "If you've already accounted for this or
+   it's behind a feature flag with low rollout, no action needed." The
+   engineer knows their context better than you do.
+
+Keep it to 2-3 sentences total. The goal is to plant the seed, not
+deliver a lecture. If they engage ("actually yeah, how would I set that
+up?"), then shift into the full advisory flow.
+
+**Signals that warrant a proactive nudge:**
+- New JOIN or subquery on a high-traffic endpoint
+- New API endpoint without any perf test in the MR
+- `per_page` or batch size increase
+- New external service call on a request path
+- Database migration that touches columns in hot queries
+- JS bundle size increase or layout changes on key pages
+
+**Signals to stay quiet:**
+- Config-only changes, docs, UI copy
+- The engineer is clearly already thinking about performance
+- Test files, specs, or CI config changes only
+
+## Shared Infrastructure Safety
+
+Performance tests can take environments offline. If staging or production
+goes down, the entire deployment pipeline breaks — every merge is blocked,
+every release is delayed, every team is affected.
+
+**Never run performance tests against staging or production.** Use a
+dedicated performance environment or a CI-aware isolated setup. "Just a
+quick smoke test" against staging is how outages start. If the engineer
+doesn't have a dedicated environment, point them to **#g_performance_enablement**
+on Slack.
+
+## GitLab Performance Toolkit
+
+The Performance Enablement team publishes and supports the following tools.
+Start here rather than building from scratch:
 
 | What you're testing | Tool | Where it runs | Status |
 |---|---|---|---|
 | API endpoints, backend load | [**GPT** (GitLab Performance Tool)](https://gitlab.com/gitlab-org/quality/performance) | External — separate repo, Docker | Stable |
 | Frontend page load / Core Web Vitals | [**Sitespeed Runway**](https://gitlab.com/gitlab-org/quality/sitespeed-runway) | External — hosted service + API | Stable |
-| Performance feedback within your Merge Request (MR) | [**CPT** (Component Performance Testing)](https://gitlab.com/gitlab-org/quality/component-performance-testing) | In your MR pipeline — runs against a GitLab instance | Alpha |
+| Performance feedback within your Merge Request | [**CPT** (Component Performance Testing)](https://gitlab.com/gitlab-org/quality/component-performance-testing) | In your MR pipeline — runs against a GitLab CNG instance or isolated containerized component | Alpha |
 
-**GPT and Sitespeed Runway are external to your repo.** You won't add test
-files to your project — you'll configure and run tests from those tools'
-repos or services. CPT is the exception: it runs in your MR pipeline via a
-multi-project trigger.
+GPT and Sitespeed Runway are external to the engineer's repo — they won't
+add test files to their project. CPT is the exception: it runs in the MR
+pipeline via a multi-project trigger.
 
-For detailed setup, quick starts, and links: [ptk-tools.md](references/ptk-tools.md)
+## Reference Files
 
-## How to Use This Skill
+Read the relevant reference file based on where the conversation goes.
+These cover GitLab-specific tooling that isn't in public training data —
+don't try to guess how these tools work, consult the references.
 
-Match the engineer's situation to the right path:
-
-| Situation | Go to |
+| When you need to... | Read |
 |---|---|
-| "Should I perf test this?" / Unsure what to do | [getting-started.md](references/getting-started.md) - decision framework, which tool, regression budgets |
-| Need to set up GPT, Sitespeed Runway, or CPT | [ptk-tools.md](references/ptk-tools.md) - setup, quick starts, links |
-| Writing or reviewing a k6 test (GPT or custom) | [quick-reference.md](references/quick-reference.md) - principles, patterns, output shape |
-| Adding perf tests to CI pipeline | [gitlab-ci-integration.md](references/gitlab-ci-integration.md) - CPT, GPT, custom CI |
-| Stuck or need human input | **#g_performance_enablement** on Slack |
+| Help decide: test or not? what tool? what thresholds? | [getting-started.md](references/getting-started.md) |
+| Advise on or configure GPT (GitLab Performance Tool) | [gpt.md](references/gpt.md) |
+| Advise on or configure Sitespeed Runway | [sitespeed-runway.md](references/sitespeed-runway.md) |
+| Advise on or configure CPT (Component Performance Testing) | [cpt.md](references/cpt.md) |
+| Write or review a k6 test stub | [quick-reference.md](references/quick-reference.md) |
+| Add perf tests to CI pipeline | [gitlab-ci-integration.md](references/gitlab-ci-integration.md) |
 
-## Workflow
+## Advisory Flow
 
-Follow this sequence. Do not skip steps or jump straight to authoring.
+The goal is to help the engineer arrive at a clear decision efficiently.
+The reason for working through these steps in order is that each one
+narrows the options — skipping ahead (e.g., writing a k6 test before
+confirming the tool choice) risks wasted work if the wrong tool was assumed.
 
-**First question — when does the engineer want feedback?**
-- On every push, before merge → **CPT**
-- Scheduled load testing or full reference architecture validation → **GPT**
-- Frontend page load / Core Web Vitals → **Sitespeed Runway**
+1. **Check for existing tests first.** Before writing anything new, search
+   `.gitlab-ci.yml` and `.gitlab/ci/**` for references to `performance`,
+   `component-performance-testing`, `gitlab-performance-tool`, `sitespeed`,
+   or `k6`. Also search for `import.*k6` or `from 'k6'`. If tests already
+   exist, point the engineer to them instead.
 
-Answer this before anything else. It determines the tool, which determines everything downstream.
+2. **Does this change need a perf test?** Consult the decision framework
+   in [getting-started.md](references/getting-started.md). Many changes
+   don't need one — say so clearly and directly when that's the case. A
+   confident "no, this doesn't need a performance test because X" is more
+   useful than hedging.
 
-1. **Decide:** Does this change need a perf test? (see [Decision Framework](#decision-framework-should-i-write-a-performance-test) below)
-2. **Choose the tool:** State out loud which tool you are using and why you ruled out the others. Do not proceed to step 3 until you have done this. Faster feedback in MR → CPT. API/backend load → GPT. Frontend/CWV → Sitespeed Runway. See [ptk-tools.md](references/ptk-tools.md). **If none of the tools fit, or the fit is only partial, do not invent an approach — ask the engineer how they would like to proceed and always mention `#g_performance_enablement` on Slack as the right place to get guidance.**
-3. **Define the target:** What user behavior is being tested? Map to a scenario, not an endpoint.
-4. **Set the criterion:** What does "too slow" mean? Arrive at a number — baseline + regression budget. "Fast" is not a threshold.
-5. **Author/configure the test:** Follow the tool's workflow. For GPT/custom k6, use quick-reference.md principles and the test samples in ptk-tools.md as templates. **If no existing test pattern exists in the repo for the chosen tool, do not invent conventions from scratch — ask the engineer how they would like to proceed, and let them know that `#g_performance_enablement` on Slack can help establish the right conventions before writing anything new.**
-6. **Baseline:** Run the test at least twice against the current version (before the change). Record p95/p99 and error rate.
-7. **Wire into CI:** CPT for MR-level. GPT for scheduled load tests. See gitlab-ci-integration.md.
+3. **Which tool?** The key question is: when does the engineer want
+   feedback?
+   - On every push, before merge → **CPT**
+   - Scheduled load testing or full reference architecture validation → **GPT**
+   - Frontend page load / Core Web Vitals → **Sitespeed Runway**
 
-If a test already exists for this path, point the engineer to it and skip to step 7 — they run it and compare against the existing baseline.
+   Confirm the tool choice with the engineer before moving on. Getting this
+   wrong means starting over — a k6 test doesn't help if they need
+   Sitespeed Runway.
 
-**Warning:** Finding existing custom k6 files in the repo does not mean k6 is the right tool for a new test. Return to step 2.
+   If none of the published tools fit cleanly, don't invent an approach —
+   the Performance Enablement team (**#g_performance_enablement** on Slack)
+   may have something that fits or can help scope the right approach.
 
-## Decision Framework: Should I Write a Performance Test?
+4. **What does "too slow" mean?** Help the engineer arrive at a concrete
+   threshold — baseline measurement plus a regression budget. See the
+   budgets table in [getting-started.md](references/getting-started.md).
 
-**First: search for existing tests before writing anything.** Check `.gitlab-ci.yml` and `.gitlab/ci/**` for references to `performance`, `component-performance-testing`, `gitlab-performance-tool`, `sitespeed`, or `k6`. If found, read the relevant CI job to identify what test files are being run and where they live. If nothing is found in CI, do a broader search for files containing `import.*k6` or `from 'k6`. If tests exist, point the engineer to them — do not write a new one.
+5. **Produce something useful.** Depending on the tool:
+   - **GPT/custom k6** → write a basic test stub using
+     [quick-reference.md](references/quick-reference.md) patterns, or point
+     to existing GPT tests if the endpoint is already covered.
+   - **CPT** → help set up the CI trigger and test files using
+     [cpt.md](references/cpt.md) conventions.
+   - **Sitespeed Runway** → walk them through the Web UI or API setup
+     from [sitespeed-runway.md](references/sitespeed-runway.md).
+   - **CI integration** → provide a pipeline snippet from
+     [gitlab-ci-integration.md](references/gitlab-ci-integration.md).
 
-Write a test if any of these apply: touches a hot path or critical user journey, new user-facing API endpoint, changes DB queries or adds N+1 risk, adds heavy I/O or external calls, or anything else non-cosmetic.
-
-**Background jobs (e.g. Sidekiq):** test the API endpoint that enqueues the job, not the job itself. k6 tests HTTP — if enqueueing adds latency to the triggering request, that's what matters.
-
-**Test already exists:** point the engineer to the existing test and instruct them to run it and compare against the baseline. Do not write a new test.
-
-**No test needed:** UI copy, docs, or config-only changes.
-
-### What Type of Test?
-
-| Change Type | Test Type | Tool |
-|---|---|---|
-| New API endpoint | Smoke + Baseline (target RPS, 5 min) | GPT or custom k6 |
-| Critical path change | Baseline (target RPS, 5-10 min) | GPT or custom k6 |
-| Scaling concern | Stress (ramp to 2-3x normal) | GPT or custom k6 |
-| Incident follow-up | Spike (sudden burst) | Custom k6 |
-| MR-level feedback against a GitLab instance | MR-level load test | CPT |
-| New page or layout change | CWV budget check | Sitespeed Runway |
+When in doubt, ask. The engineer knows their system better than you do.
+**#g_performance_enablement** on Slack is always a valid answer for
+questions beyond this skill's scope.
