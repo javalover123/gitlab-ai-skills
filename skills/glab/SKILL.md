@@ -1,7 +1,7 @@
 ---
 name: glab
 description: GitLab workflow automation using glab CLI
-version: 1.2.3
+version: 1.3.0
 license: MIT
 metadata:
   audience: developers
@@ -190,24 +190,24 @@ git checkout -b fix/description
 1. **`glab mr create` always needs `--push -H <owner/repo>`** — omitting either causes the MR to be created from the wrong remote or fail entirely
 2. **Always pass `--assignee <username>` on `glab mr create`** — MRs are unassigned by default; always assign to the author
 3. **Read context first** — `glab issue view` / `glab mr view` before implementing
-3. **Use project templates** — check `.gitlab/issue_templates/` and `.gitlab/merge_request_templates/`
-4. **Write descriptions to files** — use `$(cat /tmp/description.md)` not inline strings
-5. **Reference with full URLs** — `Closes https://gitlab.com/org/project/-/issues/123`
-6. **Descriptive commits** — focus on the "why"
-7. **Single quotes for special chars** — `git commit -m 'fix: from MR !123'`
-8. **Label syntax** — `--label` to add, `--unlabel` to remove; never `+label`/`-label`
-9. **Scoped labels** — `--label "status::doing"` auto-removes old `status::*`; no `--unlabel` needed
-10. **No `--jq` flag** — glab has no `--jq`; use `| jq '...'` pipe
-11. **No `--state`/`--status` on `mr list`** — use `--all`, `--merged`, `--closed`
-12. **Work items use the issues API** — `/work_items/<iid>` URLs → `projects/.../issues/<iid>`
-13. **Epic comments need GraphQL** — REST `/notes` → 404; use `epic-notes.sh` or manual GraphQL with `first: 100` + pagination
-14. **No `-R` for group-level API** — `-R` expects `OWNER/REPO`; group endpoints use `glab api "groups/..."` directly
-15. **Nested groups REST: `%2F`** — `groups/org%2Fsubgroup/epics`; unencoded slashes → 404
-16. **GraphQL iid is a String** — `workItem(iid: "16428")` not `workItem(iid: 16428)`
-17. **`groups/<id>/work_items` is 404** — use `groups/<id>/epics` (REST) or GraphQL
-18. **`project.workItems` not `project.workItem`** — singular doesn't exist; use `workItems(first: 1, iid: "IID")`; no `filter:` argument
-19. **Epic close/reopen via REST** — `state_event=close`/`reopen` on `PUT groups/<id>/epics/<iid>` works; no GraphQL needed
-20. **No `--body` flag** — glab uses `--description`, not `--body` (which is a `gh` flag); they are not interchangeable
+4. **Use project templates** — check `.gitlab/issue_templates/` and `.gitlab/merge_request_templates/`
+5. **Write descriptions to files** — use `$(cat /tmp/description.md)` not inline strings
+6. **Reference with full URLs** — `Closes https://gitlab.com/org/project/-/issues/123`
+7. **Descriptive commits** — focus on the "why"
+8. **Single quotes for special chars** — `git commit -m 'fix: from MR !123'`
+9. **Label syntax** — `--label` to add, `--unlabel` to remove; never `+label`/`-label`
+10. **Scoped labels** — `--label "status::doing"` auto-removes old `status::*`; no `--unlabel` needed
+11. **No `--jq` flag** — glab has no `--jq`; use `| jq '...'` pipe
+12. **No `--state`/`--status` on `mr list`** — use `--all`, `--merged`, `--closed`
+13. **Work items use the issues API** — `/work_items/<iid>` URLs → `projects/.../issues/<iid>`
+14. **Epic comments need GraphQL** — REST `/notes` → 404; use `epic-notes.sh` or manual GraphQL with `first: 100` + pagination
+15. **No `-R` for group-level API** — `-R` expects `OWNER/REPO`; group endpoints use `glab api "groups/..."` directly
+16. **Nested groups REST: `%2F`** — `groups/org%2Fsubgroup/epics`; unencoded slashes → 404
+17. **GraphQL iid is a String** — `workItem(iid: "16428")` not `workItem(iid: 16428)`
+18. **`groups/<id>/work_items` is 404** — use `groups/<id>/epics` (REST) or GraphQL
+19. **`project.workItems` not `project.workItem`** — singular doesn't exist; use `workItems(first: 1, iid: "IID")`; no `filter:` argument
+20. **Epic close/reopen via REST** — `state_event=close`/`reopen` on `PUT groups/<id>/epics/<iid>` works; no GraphQL needed
+21. **No `--body` flag** — glab uses `--description`, not `--body` (which is a `gh` flag); they are not interchangeable
 
 ## Contributing Improvements
 
