@@ -20,10 +20,10 @@ the source project, creating the MR from the wrong fork.
 
 ```bash
 # Simple MR
-glab mr create --push -H <owner/repo> --title "feat: add feature" --description "Brief description"
+glab mr create --push -H <owner/repo> --title "feat: add feature" --description "Brief description" --assignee <username>
 
 # Complex MR - write description to file first
-glab mr create --push -H <owner/repo> --title "feat: add feature" --description "$(cat /tmp/mr-description.md)"
+glab mr create --push -H <owner/repo> --title "feat: add feature" --description "$(cat /tmp/mr-description.md)" --assignee <username>
 ```
 
 **Templates:** Check `.gitlab/merge_request_templates/` for project-specific templates.
@@ -188,7 +188,8 @@ git checkout -b fix/description
 ## Agent Guidelines
 
 1. **`glab mr create` always needs `--push -H <owner/repo>`** — omitting either causes the MR to be created from the wrong remote or fail entirely
-2. **Read context first** — `glab issue view` / `glab mr view` before implementing
+2. **Always pass `--assignee <username>` on `glab mr create`** — MRs are unassigned by default; always assign to the author
+3. **Read context first** — `glab issue view` / `glab mr view` before implementing
 3. **Use project templates** — check `.gitlab/issue_templates/` and `.gitlab/merge_request_templates/`
 4. **Write descriptions to files** — use `$(cat /tmp/description.md)` not inline strings
 5. **Reference with full URLs** — `Closes https://gitlab.com/org/project/-/issues/123`
