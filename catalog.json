@@ -1,6 +1,13 @@
 {
   "skills": [
     {
+      "name": "commit-messages",
+      "description": "Use when creating git commits, writing commit messages, or when about to run git commit -- enforces structured commit message format with imperative mood, capitalized subjects, 72-char wrapping, and atomic commits",
+      "license": "MIT",
+      "compatibility": "opencode",
+      "path": "skills/commit-messages/SKILL.md"
+    },
+    {
       "name": "gitlab-clickhouse",
       "description": "Inspect GitLab local ClickHouse tables, schemas, ingestion paths, and data patterns. Use for CH table questions, DESCRIBE TABLE, schema and source-of-truth checks under db/click_house, ingestion debugging, and investigating aggregates, distributions, outliers, or anomalous ClickHouse data in a GitLab GDK environment.",
       "license": "MIT",
