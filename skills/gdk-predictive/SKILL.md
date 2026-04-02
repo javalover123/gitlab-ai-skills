@@ -1,6 +1,8 @@
 ---
 name: gdk-predictive
 description: Run GDK predictive checks (tests, linters, coverage) for local changes before pushing. Runs relevant RSpec, Jest, RuboCop, ESLint, HAML Lint, and Stylelint based on changed files. Use before pushing commits, or invoke with /gdk-predictive [flags].
+version: 1.0.0
+license: MIT
 argument-hint: "[--rspec|--jest|--rubocop|--eslint|--haml-lint|--stylelint|--simplecov|--yes|--skip-<tool>]"
 disable-model-invocation: false
 allowed-tools: Bash(gdk predictive:*), Bash(git diff:*), Bash(git status:*)

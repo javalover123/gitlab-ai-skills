@@ -34,6 +34,7 @@ Skills are loaded explicitly by the agent when relevant to a task (e.g. "load th
 | Skill | Description |
 | ----- | ----------- |
 | [`commit-messages`](skills/commit-messages/SKILL.md) | Use when creating git commits, writing commit messages, or when about to run git commit -- enforces structured commit message format with imperative mood, capitalized subjects, 72-char wrapping, and atomic commits |
+| [`gdk-predictive`](skills/gdk-predictive/SKILL.md) | Run GDK predictive checks (tests, linters, coverage) for local changes before pushing. Runs relevant RSpec, Jest, RuboCop, ESLint, HAML Lint, and Stylelint based on changed files. Use before pushing commits, or invoke with /gdk-predictive [flags]. |
 | [`gitlab-clickhouse`](skills/gitlab-clickhouse/SKILL.md) | Inspect GitLab local ClickHouse tables, schemas, ingestion paths, and data patterns. Use for CH table questions, DESCRIBE TABLE, schema and source-of-truth checks under db/click_house, ingestion debugging, and investigating aggregates, distributions, outliers, or anomalous ClickHouse data in a GitLab GDK environment. |
 | [`gitlab-psql`](skills/gitlab-psql/SKILL.md) | Inspect GitLab GDK PostgreSQL test and development databases with gdk psql. Use for Postgres schema checks, table and index inspection, read-only SQL queries, migration verification, and investigating GitLab application data in local test or development databases. |
 | [`glab`](skills/glab/SKILL.md) | GitLab workflow automation using glab CLI |
