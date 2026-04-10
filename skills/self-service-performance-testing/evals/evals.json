@@ -1,0 +1,84 @@
+{
+  "skill_name": "self-service-performance-testing",
+  "evals": [
+    {
+      "id": 0,
+      "prompt": "I just changed a SQL query in the merge requests API — added a join to pull in approval data. It's on the MR list endpoint which gets hit a lot. Do I need to write a performance test for this?",
+      "expected_output": "Clear yes recommendation with reasoning, tool suggestion (GPT or custom k6), and threshold guidance",
+      "files": [],
+      "assertions": [
+        {"name": "recommends-testing", "description": "Clearly recommends writing a performance test (answer is yes)"},
+        {"name": "identifies-hot-path", "description": "Mentions the MR list endpoint being high-traffic as a key reason"},
+        {"name": "suggests-tool", "description": "Recommends a specific tool: GPT or custom k6 (not CPT or Sitespeed)"},
+        {"name": "provides-threshold", "description": "Gives a concrete threshold number or regression budget percentage"},
+        {"name": "mentions-n1-risk", "description": "Identifies that a JOIN on a hot path can introduce N+1 or index issues under load"},
+        {"name": "no-staging-production", "description": "Does not suggest running tests against staging or production"}
+      ]
+    },
+    {
+      "id": 1,
+      "prompt": "I'm working on the container registry service and I want to add performance testing to my MR pipeline. The service is containerized and has HTTP APIs. I heard there's something called CPT that can do this? How do I set it up?",
+      "expected_output": "CPT recommendation with CI config snippet, k6 test stub following CPT conventions, and folder structure guidance",
+      "files": [],
+      "assertions": [
+        {"name": "confirms-cpt", "description": "Correctly identifies CPT as the right tool for MR-pipeline performance testing"},
+        {"name": "provides-ci-config", "description": "Includes a .gitlab-ci.yml snippet with the multi-project trigger to CPT"},
+        {"name": "provides-test-stub", "description": "Includes a k6 test file with CPT-required exported constants (TEST_NAME, TTFB_THRESHOLD, RPS_THRESHOLD)"},
+        {"name": "shows-folder-structure", "description": "Shows or describes the expected qa/performance_test/ folder layout"},
+        {"name": "mentions-alpha", "description": "Notes CPT is in alpha and/or suggests reaching out to #g_performance_enablement"},
+        {"name": "no-staging-production", "description": "Does not suggest running tests against staging or production"}
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "We just redesigned the project overview page — new layout, lazy-loaded components, changed the JS bundle. My manager wants me to check if performance got worse. What should I do?",
+      "expected_output": "Route to Sitespeed Runway, walk through Web UI steps, mention CWV targets (LCP < 2.5s, CLS < 0.1), suggest before/after comparison",
+      "files": [],
+      "assertions": [
+        {"name": "routes-to-sitespeed", "description": "Recommends Sitespeed Runway (not GPT or k6 as primary tool)"},
+        {"name": "provides-cwv-targets", "description": "Mentions specific CWV thresholds (LCP < 2.5s and/or CLS < 0.1)"},
+        {"name": "suggests-before-after", "description": "Recommends comparing performance before vs after the change"},
+        {"name": "mentions-web-ui-or-api", "description": "Points to the Sitespeed Runway Web UI or API as a concrete next step"},
+        {"name": "no-staging-production", "description": "Does not suggest running tests against staging or production"}
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "I just added a new endpoint to the merge requests controller that returns approval status. It joins the approvals table and the approval_rules table. Can you review this MR for me?",
+      "expected_output": "Brief proactive performance nudge (2-4 sentences) naming the specific JOIN risk, with an easy opt-out — not a full advisory flow",
+      "files": [],
+      "assertions": [
+        {"name": "raises-perf-concern", "description": "Proactively raises performance as a concern even though the engineer only asked for a code review"},
+        {"name": "names-specific-risk", "description": "Names a specific performance risk (e.g., JOIN on hot path, N+1, missing index) rather than generic 'consider performance'"},
+        {"name": "keeps-it-brief", "description": "The performance nudge is concise (2-4 sentences), not a full advisory wall of text"},
+        {"name": "easy-opt-out", "description": "Gives the engineer an easy way to dismiss the concern (e.g., 'if you've already accounted for this...')"},
+        {"name": "suggests-concrete-action", "description": "Suggests a specific next step (e.g., 'a baseline k6 test' or 'check GPT's test suite') not just 'think about performance'"},
+        {"name": "no-staging-production", "description": "Does not suggest running tests against staging or production"}
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "I want to add performance tests to the group merge requests API endpoint — GET /api/v4/groups/:id/merge_requests. I'm working in the gitlab-org/gitlab repo. Before writing anything, I searched the repo and found this in .gitlab-ci.yml:\n\n```yaml\ntests:performance:\n  stage: test\n  trigger:\n    project: gitlab-org/quality/component-performance-testing\n    strategy: depend\n  variables:\n    TEST_FILE_LOCATION: \"qa/performance_test/k6_test\"\n    COMPONENT_SERVICE_NAME: \"gitlab\"\n```\n\nAnd there's already a file at qa/performance_test/k6_test/group_merge_requests.js. Should I write a new test?",
+      "expected_output": "Points to the existing test, does not generate a new one, explains what the existing setup covers",
+      "files": [],
+      "assertions": [
+        {"name": "no-new-test-generated", "description": "Does not generate or offer to write a new k6 test file"},
+        {"name": "points-to-existing", "description": "Points the engineer to the existing file at qa/performance_test/k6_test/group_merge_requests.js"},
+        {"name": "explains-existing-coverage", "description": "Explains that the existing CPT setup already covers or likely covers this endpoint"},
+        {"name": "no-staging-production", "description": "Does not suggest running tests against staging or production"}
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "I just updated CHANGELOG.md and added some inline comments to config/database.yml to document our connection pool settings. Nothing in the actual application code changed. Do I need to run any performance tests before merging this?",
+      "expected_output": "Clear direct 'no' with a brief reason — no hedging, no suggesting tools just in case",
+      "files": [],
+      "assertions": [
+        {"name": "clear-no", "description": "Gives a clear direct 'no' — does not hedge with 'it depends' or 'you might want to consider'"},
+        {"name": "gives-reason", "description": "Briefly explains why no test is needed (docs and config comments only, no runtime impact)"},
+        {"name": "no-tool-suggestions", "description": "Does not recommend any performance testing tools or suggest running any tests"},
+        {"name": "concise", "description": "Response is brief — a short paragraph or less, not a full advisory flow"}
+      ]
+    }
+  ]
+}

@@ -1,52 +1,76 @@
 # Getting Started: Your First Performance Test
 
 Guide for engineers new to performance testing. If you're already comfortable
-with the tools, see the quick-reference via the main skill's routing table.
+with the tools, see quick-reference.md for k6 patterns or the individual
+tool references (gpt.md, sitespeed-runway.md, cpt.md).
 
-## Deciding What to Test
+## Before You Start: Check for Existing Tests
 
-You've looked at the decision framework in the main skill and decided "yes,
-write a test." Now: what *kind* of test, which tool, and what thresholds?
+Search before writing anything. Check `.gitlab-ci.yml` and `.gitlab/ci/**`
+for references to `performance`, `component-performance-testing`,
+`gitlab-performance-tool`, `sitespeed`, or `k6`. Also search for
+`import.*k6` or `from 'k6'`. If tests exist, point the engineer to them —
+don't write a new one.
 
-### Change type → tool and test type
+## Decision Framework: Should I Write a Performance Test?
 
-| Change Type | Perf Test? | Tool | Test Type | Why |
-|---|---|---|---|---|
-| New user-facing API endpoint | Yes | GPT or custom k6 | Smoke + Baseline | Establish baseline before it reaches users |
-| Changed SQL query on hot path | Yes | GPT or custom k6 | Baseline | N+1 or missing index shows up under load |
-| Added external service call | Yes | GPT or custom k6 | Baseline + Stress | External calls add latency and failure modes |
-| New background job (Sidekiq) | Yes | GPT or custom k6 | Smoke | Test the API that enqueues it, not the job itself |
-| New page or major layout change | Yes | Sitespeed Runway | CWV budget | LCP, CLS regression check |
-| Containerized component change | Yes | CPT | MR-level load | Faster feedback — catches regressions before merge |
-| Increased `per_page` default | Yes | GPT or custom k6 | Baseline | More data = more serialization, DB, memory |
-| Added authentication middleware | Yes | GPT or custom k6 | Baseline | Auth is on every request — small change, big impact |
-| Config change (ENV var only) | No | - | - | Unless it changes code paths under load |
-| Documentation / UI copy only | No | - | - | No runtime impact |
-| Dependency version bump | Maybe | GPT or custom k6 | Smoke | Only if the dep is on the hot path |
-| Database migration (add column) | Maybe | GPT or custom k6 | Baseline | If column is selected in hot queries |
-| Behind feature flag | Yes | GPT or custom k6 | Smoke + Baseline | Feature flags don't reduce the need for a perf baseline |
+### Does This Change Need a Perf Test?
 
-### Choosing the right tool
+| Change Type | Perf Test? | Why |
+|---|---|---|
+| New user-facing API endpoint | Yes | Establish baseline before it reaches users |
+| Changed SQL query on hot path | Yes | N+1 or missing index shows up under load |
+| Added external service call | Yes | External calls add latency and failure modes |
+| New background job (Sidekiq) | Yes | Test the API that enqueues it, not the job itself |
+| New page or major layout change | Yes | LCP, CLS regression check |
+| Containerized component change | Yes | Catches regressions before merge |
+| Increased `per_page` default | Yes | More data = more serialization, DB, memory |
+| Added authentication middleware | Yes | Auth is on every request — small change, big impact |
+| Behind feature flag | Yes | Feature flags don't reduce the need for a perf baseline |
+| Config change (ENV var only) | No | Unless it changes code paths under load |
+| Documentation / UI copy only | No | No runtime impact |
+| Dependency version bump | Maybe | Only if the dep is on the hot path |
+| Database migration (add column) | Maybe | If column is selected in hot queries |
 
-- **API/backend load testing** → **GPT** (GitLab Performance Tool). GPT has
-  pre-built tests for common GitLab endpoints and handles data generation,
-  execution, and reporting. Runs externally via Docker.
+### Which Tool and Test Type?
+
+| Change Type | Test Type | Tool |
+|---|---|---|
+| New API endpoint | Smoke + Baseline (target RPS, 5 min) | GPT or custom k6 |
+| Critical path change | Baseline (target RPS, 5-10 min) | GPT or custom k6 |
+| Scaling concern | Stress (ramp to 2-3x normal) | GPT or custom k6 |
+| Incident follow-up | Spike (sudden burst) | Custom k6 |
+| Containerized component change | MR-level load test | CPT |
+| MR-level feedback against a GitLab instance | MR-level load test | CPT |
+| New page or layout change | CWV budget check | Sitespeed Runway |
+
+**Choosing between the tools:**
+
+- **API/backend load testing** → **GPT**. Pre-built tests for common GitLab
+  endpoints, handles data generation, execution, and reporting. See gpt.md.
 - **Frontend page load / CWV** → **Sitespeed Runway**. Hosted service with
-  Web UI and API. No local setup required.
-- **Faster feedback in MR** → **CPT**. Runs in your MR pipeline.
-  Runs against a Docker Compose or CNG GitLab instance. Currently in alpha.
-- **Custom k6 test in your repo** → When GPT doesn't cover your endpoint or
-  you need a test embedded in your project. Write k6 tests following the
-  principles in quick-reference and the test samples in ptk-tools.md as templates.
-
-For setup details and quick starts: see ptk-tools.md via the main skill's
-routing table.
+  Web UI and API. No local setup required. See sitespeed-runway.md.
+- **Faster feedback in MR** → **CPT**. Runs in your MR pipeline against a
+  Docker Compose or CNG GitLab instance. Currently in alpha. See cpt.md.
+- **Custom k6 test in your repo** → When GPT doesn't cover the endpoint or
+  the engineer needs a test embedded in their project. See quick-reference.md.
 
 ## Defining "Too Slow"
 
+**CPT exception:** If the engineer is using CPT, skip this section. CPT test
+files include `TTFB_THRESHOLD` and `RPS_THRESHOLD` as reference values, but
+CPT runs with `--no-thresholds` and uses variance analysis rather than
+pass/fail gates — don't walk the engineer through the baseline + budget
+workflow below. See cpt.md for the constants and how CPT evaluates results.
+
+**Sitespeed Runway exception:** If the engineer is using Sitespeed Runway,
+the relevant metrics are Core Web Vitals (LCP, FCP, CLS). Skip Step 1 and
+go straight to Step 2 — use the CWV budget rows.
+See sitespeed-runway.md for how to configure and interpret results.
+
 "Fast" is not a threshold. You need a number.
 
-**Step 1:** Measure the current baseline (before your change):
+**Step 1:** Measure the current baseline (before the change):
 - p50, p95, p99 response times
 - Error rate
 - Requests per second achieved
@@ -70,70 +94,25 @@ thresholds: {
 }
 ```
 
-**Absolute thresholds** (e.g., `p(95)<500`): Use when you have a defined SLO. Don't drift with baseline changes — preferred for CI.
+**Absolute thresholds** (e.g., `p(95)<500`): Use when there's a defined SLO.
+Preferred for CI — they don't drift with baseline changes.
 
-**Relative thresholds** (e.g., "20% slower than last release"): Use when you don't have an SLO but want to detect regressions. Require comparing against stored baseline data — more complex to maintain.
+**Relative thresholds** (e.g., "20% slower than last release"): Use when
+there's no SLO but regression detection is needed. Require comparing against
+stored baseline data — more complex to maintain.
 
 For CI, absolute thresholds are simpler and more reliable. Store baseline
-numbers in your test's `options.thresholds` and update them when you
-intentionally accept a performance change. Document why in the commit message.
-
-## Writing a Custom k6 Test
-
-If GPT doesn't cover your endpoint, or you need a test embedded in your
-project, you'll write a custom k6 test.
-
-**Test data:** If your test writes data (comments, issues, etc.), use a
-dedicated test project in your perf environment. Never target real projects —
-test artifacts pollute real review threads and confuse other engineers.
-
-
-## Frontend Testing with Sitespeed Runway
-
-For pages and layout changes, use Sitespeed Runway to measure Core Web
-Vitals. The quickest path:
-
-1. Go to https://sitespeed.runway.gitlab.net/
-2. Enter your page URL
-3. Configure: Chrome, cable connectivity, 5 iterations
-4. Compare results before/after your change
-
-For automated testing via API or Docker, see ptk-tools.md via the main
-skill's routing table.
-
-## Adding to CI
-
-**CPT for MR-level testing. GPT for scheduled load tests.**
-
-- **CPT:** Add a multi-project pipeline trigger to your `.gitlab-ci.yml`.
-  See ptk-tools.md for the CI config.
-- **Custom k6 smoke test per MR:** Use the GitLab built-in template:
-
-```yaml
-include:
-  template: Verify/Load-Performance-Testing.gitlab-ci.yml
-
-load_performance:
-  variables:
-    K6_TEST_FILE: tests/performance/smoke.js
-  rules:
-    - if: $CI_MERGE_REQUEST_IID
-  tags:
-    - your-perf-runner-tag
-```
-
-For full pipeline examples including scheduled load tests, sitespeed.io jobs,
-and runner setup, see the CI integration guide via the main skill's routing
-table.
+numbers in the test's `options.thresholds` and update them when intentionally
+accepting a performance change. Document why in the commit message.
 
 ## Common Mistakes
 
 | Mistake | Why It Matters | Fix |
 |---|---|---|
 | Testing against staging/production | Can take environment offline, breaks deployment pipeline | Dedicated perf environment only |
-| Building from scratch instead of using GitLab Performance Toolkit | Duplicates existing tooling, no shared reporting | Use GPT, Sitespeed Runway, or CPT first |
-| No thresholds defined | Test always passes, catches nothing | Add p95/p99 + `http_req_failed` thresholds |
-| `check()` without threshold on checks | Checks don't affect k6 exit code | Add `'checks': ['rate>0.99']` |
+| Building from scratch instead of using the toolkit | Duplicates existing tooling, no shared reporting | Use GPT, Sitespeed Runway, or CPT first |
+| No thresholds defined (GPT/k6) | Test always passes, catches nothing | Add p95/p99 + `http_req_failed` thresholds |
+| `check()` without threshold on checks (GPT/k6) | Checks don't affect k6 exit code | Add `'checks': ['rate>0.99']` |
 | Duplicate threshold keys in `options` | JS silently drops duplicates | Use array: `['p(95)<500', 'p(99)<1000']` |
 | Hardcoded URLs in test body | Test only works in one environment | Use `__ENV.BASE_URL` |
 | `console.log` on every iteration | Serializes output, distorts timing | Log failures only |
@@ -173,5 +152,5 @@ problem.
 
 **Change:** Updated image manifest parsing in the container registry.
 **Decision:** Yes — registry is containerized and testable in isolation.
-**Tool:** CPT (if adopted) — runs in MR pipeline against isolated registry.
+**Tool:** CPT — runs in MR pipeline against isolated registry.
 **Test:** k6 load test against registry API endpoints via CPT.

@@ -1,36 +1,26 @@
 # GitLab CI Integration for Performance Tests
 
-Pipeline configuration for performance testing in GitLab CI.
-
-## Recommended: Use GitLab Performance Toolkit Tools First
-
-Before building custom CI jobs, check if GitLab's Performance Testing Kit
-covers your needs:
-
-- **CPT** — runs load tests in your MR pipeline via multi-project
-  trigger. The only GitLab Performance Toolkit tool that runs in your project's CI. See ptk-tools.md.
-- **GPT** — runs externally via Docker for full load testing. Typically on
-  scheduled pipelines, not per-MR.
-- **Sitespeed Runway** — hosted service for frontend CWV. Can be called from
-  CI via API but doesn't require CI integration.
+Pipeline configuration for performance testing in GitLab CI. Before building
+custom CI jobs, check if CPT covers the use case — it's the only toolkit tool
+that runs in your project's CI. See cpt.md.
 
 The custom CI configurations below are for teams that need tests embedded in
 their project's pipeline (e.g., custom k6 tests, sitespeed.io budget checks).
 
 ## Strategy: Smoke in CI, Load on Schedule
 
-This is k6's official recommendation for CI/CD integration:
+This strategy applies to GPT and custom k6 tests. For CPT pipeline setup,
+see cpt.md.
 
 | Test Type | When | Pipeline Behavior | Environment |
 |---|---|---|---|
 | **Smoke test** | Every MR | Fail pipeline on threshold breach | Perf env / ephemeral |
-| **Baseline load** | Scheduled (nightly/2x weekly) | Fail pipeline on threshold breach (with consistent runner) | Dedicated perf env |
-| **Stress test** | Pre-release (manual trigger) | `allow_failure: true` - intentionally pushes past limits | Dedicated perf env |
+| **Baseline load** | Scheduled (nightly/2x weekly) | Fail pipeline on threshold breach | Dedicated perf env |
+| **Stress test** | Pre-release (manual trigger) | `allow_failure: true` | Dedicated perf env |
 | **sitespeed.io budget** | MR (when frontend changes) | Fail pipeline on budget breach | Perf env |
 
-**Do not run large load tests in auto-deploy pipelines.** They take 5-15+
-minutes and can produce false positives. Use scheduled pipelines for load
-and stress tests.
+Don't run large load tests in auto-deploy pipelines — they take 5-15+
+minutes and can produce false positives.
 
 ## k6 with GitLab Built-in Template
 
@@ -48,26 +38,17 @@ load_performance:
   rules:
     - if: $CI_MERGE_REQUEST_IID
   tags:
-    - your-perf-runner-tag  # See "Runner Options" below
+    - your-perf-runner-tag
 ```
 
-### Template variables
-
-| Variable | Purpose |
-|---|---|
-| `K6_TEST_FILE` | Path to k6 test script |
-| `K6_OPTIONS` | Additional CLI flags |
-| `K6_DOCKER_OPTIONS` | Extra Docker flags (e.g., `--env-file`) |
-
-### MR widget
+**Template variables:** `K6_TEST_FILE` (path to test script), `K6_OPTIONS`
+(additional CLI flags), `K6_DOCKER_OPTIONS` (extra Docker flags).
 
 The template generates a Load Performance report artifact. GitLab shows
-comparison data in the MR widget (checks pass rate, TTFB p90/p95, RPS).
-Requires at least one prior run on the target branch for baseline data.
+comparison data in the MR widget. Requires at least one prior run on the
+target branch for baseline data.
 
-### Dynamic environments
-
-For review apps or ephemeral environments:
+### Dynamic environments (review apps)
 
 ```yaml
 include:
@@ -94,12 +75,10 @@ load_performance:
   rules:
     - if: $CI_MERGE_REQUEST_IID
   tags:
-    - your-perf-runner-tag  # See "Runner Options" below
+    - your-perf-runner-tag
 ```
 
-## k6 Custom Job Configuration
-
-When you need more control than the template provides:
+## k6 Custom Job Snippets
 
 ### Smoke test (per MR)
 
@@ -124,7 +103,7 @@ perf_smoke:
   rules:
     - if: $CI_MERGE_REQUEST_IID
   tags:
-    - your-perf-runner-tag  # See "Runner Options" below
+    - your-perf-runner-tag
 ```
 
 ### Baseline load test (scheduled)
@@ -136,7 +115,7 @@ perf_load:
     name: grafana/k6:1.6.0
     entrypoint: ['']
   script:
-    # Run twice consecutively for reliability (k6 recommendation)
+    # Run twice consecutively for reliability
     - k6 run
         --env BASE_URL=${PERF_ENV_URL}
         --env PRIVATE_TOKEN=${PERF_PRIVATE_TOKEN}
@@ -152,12 +131,10 @@ perf_load:
       - summary-run1.json
       - summary-run2.json
     when: always
-  # If running on shared runners (temporary), uncomment the next line:
-  # allow_failure: true  # TODO: Migrate to dedicated runner (contact #g_performance_enablement)
   rules:
     - if: $CI_PIPELINE_SOURCE == "schedule"
   tags:
-    - your-perf-runner-tag  # See "Runner Options" below
+    - your-perf-runner-tag
 ```
 
 ### Stress test (manual trigger)
@@ -178,17 +155,17 @@ perf_stress:
     paths:
       - stress-summary.json
     when: always
-  allow_failure: true   # Stress tests intentionally push past limits - failures are expected
+  allow_failure: true
   rules:
     - if: $CI_PIPELINE_SOURCE == "web"
       when: manual
   tags:
-    - your-perf-runner-tag  # See "Runner Options" below
+    - your-perf-runner-tag
 ```
 
 ## sitespeed.io in GitLab CI
 
-### Per-MR budget check (triggered by frontend changes)
+### Per-MR budget check
 
 ```yaml
 frontend_perf:
@@ -218,7 +195,7 @@ frontend_perf:
         - app/assets/**/*
         - app/javascript/**/*
   tags:
-    - your-perf-runner-tag  # See "Runner Options" below
+    - your-perf-runner-tag
   variables:
     DOCKER_HOST: ""
 ```
@@ -247,100 +224,36 @@ cwv_monitoring:
   rules:
     - if: $CI_PIPELINE_SOURCE == "schedule"
   tags:
-    - your-perf-runner-tag  # See "Runner Options" below
+    - your-perf-runner-tag
 ```
 
-## Runner Options
+## Runner Considerations
 
-Setting up a consistent runner takes 30 minutes. Running unreliable tests on
-shared infrastructure for months wastes everyone's time. Get proper
-infrastructure first.
+Performance tests need consistent infrastructure to produce comparable
+results. Use a dedicated runner with fixed CPU, memory, and network if
+possible. If using shared runners as a temporary fallback, add
+`allow_failure: true` and a `# TODO: Migrate to dedicated perf runner`
+comment.
 
-**Need help? Contact `#g_performance_enablement`** - they have dedicated
-performance infrastructure and can advise on provisioning for your team.
+For k6: ~1 GB RAM per 1000 VUs. For sitespeed.io: 2+ cores,
+`--cap-add=NET_ADMIN` for throttle, `--shm-size 2g` for Firefox.
 
-### Recommended: Dedicated or Consistent Runner
-
-Register a GitLab Runner on a machine or VM with fixed CPU, memory, and
-network. Tag it (`perf`, `performance`, `load-test` - your team's choice)
-and target it with `tags:` in your CI jobs.
-
-| Concern | Guidance |
-|---|---|
-| **Docker executor** | Required - k6 and sitespeed.io run via Docker images |
-| **k6 resources** | ~1 GB RAM per 1000 VUs, adequate CPU for target RPS |
-| **sitespeed.io resources** | 2+ cores (video recording), `--cap-add=NET_ADMIN` for throttle, `--shm-size 2g` for Firefox |
-| **Network** | Runner must reach the perf test environment |
-| **Consistency** | Same machine every run - comparable results over time |
-| **Isolation** | Don't co-locate with other heavy workloads during test runs |
-
-For large k6 tests: increase file descriptor limits, tune TCP settings
-(see k6 "Fine-tune OS" documentation).
-
-### Alternative: Ephemeral with Guaranteed Resources
-
-For teams using Kubernetes runners or ephemeral VMs, set guaranteed resource
-requests and limits (CPU, memory) on your pods. Results are reliable within
-a resource profile but may drift if limits change. Tag the runner or use a
-specific runner configuration.
-
-### Temporary Fallback: Shared Runner (Code Smell)
-
-If you truly cannot set up consistent infrastructure today, you can run on
-shared runners with `allow_failure: true` so results don't block the
-pipeline.
-
-**This is a code smell.** It means you're running tests whose results you
-can't trust. If you do this:
-
-- Add a comment: `# TODO: Migrate to dedicated perf runner (contact #g_performance_enablement)`
-- Review results manually - only compare within the same pipeline run, never
-  across runs
-- **Set a deadline to migrate to a dedicated or consistent runner.** This is
-  not a permanent state.
+Contact **#g_performance_enablement** for help provisioning dedicated
+performance infrastructure.
 
 ## Result Storage
 
-For GitLab CI, use `--summary-export=summary.json` with k6 and store as a
+Use `--summary-export=summary.json` with k6 and store as a
 `load_performance` artifact (enables the MR widget comparison). For
 sitespeed.io, use `--budget.output junit` and store as a `junit` artifact
-report. Both tools support external outputs (Grafana Cloud, InfluxDB,
-Prometheus, S3/GCS) - refer to their respective docs for configuration.
+report.
 
-## Dealing with Noise and Flakiness
+## Dealing with Noise
 
 Performance tests in CI are inherently noisier than in dedicated environments.
-
-### Strategies
-
-1. **Run each test at least twice consecutively.** Ignore runs where results
-   diverge significantly (k6 official recommendation).
-
-2. **Use generous thresholds for CI gates.** Set p90 or p95, not p99 or max.
-   Tail percentiles are sensitive to noise.
-
-3. **Alert on consecutive failures, not single failures.** For scheduled tests,
-   trigger alerts after 3+ consecutive threshold breaches.
-
-4. **Use consistent runners.** Shared GitLab runners have variable resources.
-   Set up a dedicated or resource-guaranteed runner - see "Runner Options"
-   above. Contact `#g_performance_enablement` for guidance.
-
-5. **Pin tool versions.** Pin k6 (`grafana/k6:1.6.0`) and sitespeed.io
-   (`sitespeedio/sitespeed.io:39.4.2`). Version drift introduces variance.
-
-6. **Separate infrastructure concerns from application concerns.** If a test
-   fails, check runner health before investigating application code.
-
-## Environment Rules
-
-> **NEVER run performance tests against staging or production.**
-> Performance tests generate significant load. Staging is shared infrastructure
-> that supports the deployment pipeline. If it goes down, every merge is blocked.
-
-| Environment | Allowed Tests | Notes |
-|---|---|---|
-| Dedicated perf env | All types (smoke, load, stress, spike, CWV) | Isolated, safe to push to limits |
-| Ephemeral review app | Smoke tests only | Limited resources, not for load |
-| Staging | **NEVER** | Shared infra, deployment pipeline dependency |
-| Production | **NEVER** | Real users, real money, real consequences |
+Key strategies: run each test at least twice consecutively, use p90/p95
+thresholds (not p99 or max), apply ramp-up and ramp-down periods to avoid
+cold-start and abrupt-stop outliers, alert on consecutive failures rather
+than single ones, pin tool versions (`grafana/k6:1.6.0`,
+`sitespeedio/sitespeed.io:39.4.2`), and use consistent runners. If a test fails, check runner health before
+investigating application code.
