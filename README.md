@@ -10,6 +10,11 @@ Reusable agent skills for GitLab projects. Skills are structured prompt files th
   - [Table of Contents](#table-of-contents)
   - [What is a Skill?](#what-is-a-skill)
   - [Skills](#skills)
+    - [Development Workflow](#development-workflow)
+    - [Database](#database)
+    - [Testing](#testing)
+    - [Shell & Environment](#shell-environment)
+    - [Agent Tooling](#agent-tooling)
   - [Installing Skills](#installing-skills)
     - [OpenCode (Native)](#opencode-native)
     - [Via `@dgruzd/skills` CLI](#via-dgruzdskills-cli)
@@ -31,19 +36,50 @@ Skills are loaded explicitly by the agent when relevant to a task (e.g. "load th
 ## Skills
 
 <!-- SKILLS_START -->
-| Skill | Description |
-| ----- | ----------- |
-| [`commit-messages`](skills/commit-messages/SKILL.md) | Use when creating git commits, writing commit messages, or when about to run git commit -- enforces structured commit message format with imperative mood, capitalized subjects, 72-char wrapping, and atomic commits |
-| [`gitlab-clickhouse`](skills/gitlab-clickhouse/SKILL.md) | Inspect GitLab local ClickHouse tables, schemas, ingestion paths, and data patterns. Use for CH table questions, DESCRIBE TABLE, schema and source-of-truth checks under db/click_house, ingestion debugging, and investigating aggregates, distributions, outliers, or anomalous ClickHouse data in a GitLab GDK environment. |
-| [`gitlab-psql`](skills/gitlab-psql/SKILL.md) | Inspect GitLab GDK PostgreSQL test and development databases with gdk psql. Use for Postgres schema checks, table and index inspection, read-only SQL queries, migration verification, and investigating GitLab application data in local test or development databases. |
-| [`glab`](skills/glab/SKILL.md) | GitLab workflow automation using glab CLI |
-| [`opencode-refine`](skills/opencode-refine/SKILL.md) | Iteratively test and refine prompts, skills, and agent configurations using opencode run |
-| [`playwright-cli`](skills/playwright-cli/SKILL.md) | Automates browser interactions for web testing, form filling, screenshots, and data extraction. Use when the user needs to navigate websites, interact with web pages, fill forms, take screenshots, test web applications, or extract information from web pages. |
-| [`run-in-tmux-pane`](skills/run-in-tmux-pane/SKILL.md) | Run commands in a temporary tmux pane with full interactive zsh environment (login shell, shims, PATH, aliases, TTY). |
-| [`self-service-performance-testing`](skills/self-service-performance-testing/SKILL.md) | Help engineers write performance tests that detect regressions, using k6 for load testing and sitespeed.io for frontend Core Web Vitals. Use when the user is adding or changing API endpoints, database queries, critical paths, or frontend pages and needs to decide whether to write a performance test, what kind, or how to integrate it into CI. Also activate when the user mentions load testing, stress testing, response times, benchmarking, performance budgets, CPT, component performance testing, MR pipeline performance testing, or wants to run tests against staging - this skill enforces shared infrastructure safety rules. Does not cover profiling, APM, or debugging production incidents. |
+### Development Workflow
+
+#### commit-messages
+
+Use when creating git commits, writing commit messages, or when about to run git commit -- enforces structured commit message format with imperative mood, capitalized subjects, 72-char wrapping, and atomic commits → [`SKILL.md`](skills/commit-messages/SKILL.md)
+
+#### glab
+
+GitLab workflow automation using glab CLI → [`SKILL.md`](skills/glab/SKILL.md)
+
+### Database
+
+#### gitlab-clickhouse
+
+Inspect GitLab local ClickHouse tables, schemas, ingestion paths, and data patterns. Use for CH table questions, DESCRIBE TABLE, schema and source-of-truth checks under db/click_house, ingestion debugging, and investigating aggregates, distributions, outliers, or anomalous ClickHouse data in a GitLab GDK environment. → [`SKILL.md`](skills/gitlab-clickhouse/SKILL.md)
+
+#### gitlab-psql
+
+Inspect GitLab GDK PostgreSQL test and development databases with gdk psql. Use for Postgres schema checks, table and index inspection, read-only SQL queries, migration verification, and investigating GitLab application data in local test or development databases. → [`SKILL.md`](skills/gitlab-psql/SKILL.md)
+
+### Testing
+
+#### playwright-cli
+
+Automates browser interactions for web testing, form filling, screenshots, and data extraction. Use when the user needs to navigate websites, interact with web pages, fill forms, take screenshots, test web applications, or extract information from web pages. → [`SKILL.md`](skills/playwright-cli/SKILL.md)
+
+#### self-service-performance-testing
+
+Help engineers write performance tests that detect regressions, using k6 for load testing and sitespeed.io for frontend Core Web Vitals. Use when the user is adding or changing API endpoints, database queries, critical paths, or frontend pages and needs to decide whether to write a performance test, what kind, or how to integrate it into CI. Also activate when the user mentions load testing, stress testing, response times, benchmarking, performance budgets, CPT, component performance testing, MR pipeline performance testing, or wants to run tests against staging - this skill enforces shared infrastructure safety rules. Does not cover profiling, APM, or debugging production incidents. → [`SKILL.md`](skills/self-service-performance-testing/SKILL.md)
+
+### Shell & Environment
+
+#### run-in-tmux-pane
+
+Run commands in a temporary tmux pane with full interactive zsh environment (login shell, shims, PATH, aliases, TTY). → [`SKILL.md`](skills/run-in-tmux-pane/SKILL.md)
+
+### Agent Tooling
+
+#### opencode-refine
+
+Iteratively test and refine prompts, skills, and agent configurations using opencode run → [`SKILL.md`](skills/opencode-refine/SKILL.md)
 <!-- SKILLS_END -->
 
-> The table above is auto-generated from skill frontmatter. Run `python3 scripts/update_skills_list.py` to regenerate after adding or modifying skills.
+> Skills are grouped by category and auto-generated from skill frontmatter. Run `python3 scripts/update_skills_list.py` to regenerate after adding or modifying skills.
 
 ## Installing Skills
 
@@ -114,7 +150,7 @@ This repo ships as a [Claude Code plugin marketplace](https://code.claude.com/do
 | [`gitlab-psql`](.claude-plugin/plugins/gitlab-psql) | [`gitlab-psql`](skills/gitlab-psql/SKILL.md) | Inspect GitLab GDK PostgreSQL test and development databases with gdk psql. Use for Postgres schema checks, table and index inspection, read-only SQL queries, migration verification, and investigating GitLab application data in local test or development databases. | 1.0.0 |
 | [`glab`](.claude-plugin/plugins/glab) | [`glab`](skills/glab/SKILL.md) | GitLab workflow automation using glab CLI | 1.4.0 |
 | [`run-in-tmux-pane`](.claude-plugin/plugins/run-in-tmux-pane) | [`run-in-tmux-pane`](skills/run-in-tmux-pane/SKILL.md) | Run commands in a temporary tmux pane with full interactive zsh environment (login shell, shims, PATH, aliases, TTY). | 1.1.0 |
-| [`self-service-performance-testing`](.claude-plugin/plugins/self-service-performance-testing) | [`self-service-performance-testing`](skills/self-service-performance-testing/SKILL.md) | Help engineers write performance tests that detect regressions, using k6 for load testing and sitespeed.io for frontend Core Web Vitals. Use when the user is adding or changing API endpoints, database queries, critical paths, or frontend pages and needs to decide whether to write a performance test, what kind, or how to integrate it into CI. Also activate when the user mentions load testing, stress testing, response times, benchmarking, performance budgets, CPT, component performance testing, MR pipeline performance testing, or wants to run tests against staging - this skill enforces shared infrastructure safety rules. Does not cover profiling, APM, or debugging production incidents. | 0.2.0 |
+| [`self-service-performance-testing`](.claude-plugin/plugins/self-service-performance-testing) | [`self-service-performance-testing`](skills/self-service-performance-testing/SKILL.md) | Help engineers write performance tests that detect regressions, using k6 for load testing and sitespeed.io for frontend Core Web Vitals. Use when the user is adding or adding API endpoints, database queries, critical paths, or frontend pages and needs to decide whether to write a performance test, what kind, or how to integrate it into CI. Also activate when the user mentions load testing, stress testing, response times, benchmarking, performance budgets, CPT, component performance testing, MR pipeline performance testing, or wants to run tests against staging - this skill enforces shared infrastructure safety rules. Does not cover profiling, APM, or debugging production incidents. | 0.2.0 |
 <!-- CLAUDECODE_PLUGINS_END -->
 
 ## Contributing
