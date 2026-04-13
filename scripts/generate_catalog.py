@@ -50,6 +50,7 @@ def generate_catalog():
         skill_entry = {
             "name": fields.get("name", skill_name),
             "description": fields.get("description", ""),
+            "category": fields.get("category", ""),
             "license": fields.get("license", ""),
             "compatibility": fields.get("compatibility", ""),
             "path": f"skills/{skill_name}/SKILL.md",

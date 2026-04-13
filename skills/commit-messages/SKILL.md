@@ -1,7 +1,8 @@
 ---
 name: commit-messages
 description: Use when creating git commits, writing commit messages, or when about to run git commit -- enforces structured commit message format with imperative mood, capitalized subjects, 72-char wrapping, and atomic commits
-version: 1.0.0
+version: 1.0.1
+category: Development Workflow
 license: MIT
 compatibility: opencode
 metadata:
