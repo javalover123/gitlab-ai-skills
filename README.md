@@ -13,7 +13,7 @@ Reusable agent skills for GitLab projects. Skills are structured prompt files th
     - [Development Workflow](#development-workflow)
     - [Database](#database)
     - [Testing](#testing)
-    - [Shell & Environment](#shell-environment)
+    - [Shell & Environment](#shell--environment)
     - [Agent Tooling](#agent-tooling)
   - [Installing Skills](#installing-skills)
     - [OpenCode (Native)](#opencode-native)
