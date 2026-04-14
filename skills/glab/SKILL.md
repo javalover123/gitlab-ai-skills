@@ -290,7 +290,7 @@ git checkout -b fix/description
 21. **No `--body` flag** — glab uses `--description`, not `--body` (which is a `gh` flag); they are not interchangeable
 22. **Search: URL-encode project paths** — use `%2F` for `/` in project paths: `projects/gitlab-org%2Fcli/search?...`
 23. **Search: no `--jq` flag** — pipe search results through `| jq '...'`; never use `--jq`
-24. **Search: tier restrictions** — `blobs`, `commits`, `wiki_blobs`, and `notes` scopes require Advanced Search or Exact Code Search; Free tier only supports `projects`, `issues`, `merge_requests`, `milestones`, `users`, `work_items`, and `snippet_titles`
+24. **Search: tier restrictions** — `blobs` requires Advanced Search or Exact Code Search; `commits`, `wiki_blobs`, and `notes` require Advanced Search; Free tier only supports `projects`, `issues`, `merge_requests`, `milestones`, `users`, `work_items`, and `snippet_titles`
 25. **Search: pagination** — add `per_page=<n>&page=<n>` query params to paginate; default page size is 20, max is 100
 26. **Search: nested groups need `%2F`** — `groups/gitlab-org%2Fsubgroup/search?...`; unencoded slashes → 404
 
