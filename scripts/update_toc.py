@@ -55,8 +55,8 @@ def header_to_anchor(header_text):
     text = text.lower()
     text = text.replace(" ", "-")
     text = re.sub(r"[^a-z0-9-]", "", text)
-    # Collapse consecutive hyphens (e.g. "Shell & Environment" -> "shell--environment" -> "shell-environment")
-    text = re.sub(r"-+", "-", text)
+    # NOTE: do NOT collapse consecutive hyphens — GitLab (and GitHub) preserve them.
+    # e.g. "Shell & Environment" -> "shell--environment" (the & is dropped, leaving two adjacent hyphens)
     return text
 
 
