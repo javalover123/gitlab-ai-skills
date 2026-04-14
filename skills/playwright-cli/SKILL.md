@@ -1,7 +1,7 @@
 ---
 name: playwright-cli
 description: Automates browser interactions for web testing, form filling, screenshots, and data extraction. Use when the user needs to navigate websites, interact with web pages, fill forms, take screenshots, test web applications, or extract information from web pages.
-version: 1.1.0
+version: 1.1.1
 category: Testing
 license: MIT
 compatibility: opencode
