@@ -1,7 +1,7 @@
 ---
 name: glab
 description: GitLab workflow automation using glab CLI
-version: 1.3.0
+version: 1.4.0
 license: MIT
 metadata:
   audience: developers
@@ -89,6 +89,18 @@ URL parsing: `https://gitlab.com/org/project/-/work_items/539076`
 → `glab api "projects/org%2Fproject/issues/539076"`
 
 Full details, GraphQL alternative, and group-level work items: **[references/work-items.md](references/work-items.md)**
+
+## MR Review
+
+For MR review operations (draft notes, code suggestions, inline comments, bulk publish):
+
+**[references/mr-review.md](references/mr-review.md)** — covers:
+- Fetching MR diffs and version SHAs
+- Draft notes (general and inline) with correct JSON piping
+- Position objects and line type rules (`+`/`-`/context)
+- Code suggestion syntax (`suggestion:-N+M`)
+- Bulk publishing all drafts as a single review
+- Fetching, replying to, and resolving discussions
 
 ## Issue Links and Epics
 
