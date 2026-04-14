@@ -1,7 +1,7 @@
 ---
 name: glab
 description: GitLab workflow automation using glab CLI
-version: 1.4.0
+version: 1.5.0
 license: MIT
 metadata:
   audience: developers
@@ -182,6 +182,74 @@ glab mr list -R <owner>/<repo> --author <user>
 
 **Note:** `glab mr list` has no `--state` or `--status` flag. Use `--all`, `--merged`, `--closed`.
 
+## Search via `glab api`
+
+Use `glab api` to call the GitLab Search REST API directly — no extra CLI flags needed.
+
+### Instance-level search
+
+```bash
+# Search issues across the entire instance
+glab api "search?scope=issues&search=login+bug" | jq '.[] | {iid, title, web_url}'
+
+# Search merge requests instance-wide
+glab api "search?scope=merge_requests&search=refactor" | jq '.[] | {iid, title, state}'
+
+# Paginate: 50 results per page, page 2
+glab api "search?scope=issues&search=bug&per_page=50&page=2" | jq '.[] | {iid, title}'
+
+# Filter by state
+glab api "search?scope=merge_requests&search=auth&state=merged" | jq '.[] | {iid, title}'
+```
+
+### Group-level search
+
+```bash
+# Search issues within a group
+glab api "groups/gitlab-org/search?scope=issues&search=performance" | jq '.[] | {iid, title, web_url}'
+
+# Search merge requests in a group
+glab api "groups/gitlab-org/search?scope=merge_requests&search=refactor" | jq '.[] | {iid, title, state}'
+
+# Nested group — encode the slash as %2F
+glab api "groups/gitlab-org%2Ffoundations/search?scope=issues&search=bug" | jq '.[] | {iid, title}'
+```
+
+### Project-level search
+
+```bash
+# Search issues in a project (URL-encode the project path: / → %2F)
+glab api "projects/gitlab-org%2Fcli/search?scope=issues&search=crash" | jq '.[] | {iid, title}'
+
+# Code search (blobs) — requires Advanced Search or Exact Code Search
+glab api "projects/gitlab-org%2Fcli/search?scope=blobs&search=handleAuth" | jq '.[] | {path, startline, data}'
+
+# Commits — requires Advanced Search
+glab api "projects/gitlab-org%2Fcli/search?scope=commits&search=fix+nil" | jq '.[] | {id, title, authored_date}'
+
+# Wiki pages — requires Advanced Search
+glab api "projects/gitlab-org%2Fcli/search?scope=wiki_blobs&search=setup" | jq '.[] | {path, data}'
+
+# Notes (comments) — requires Advanced Search
+glab api "projects/gitlab-org%2Fcli/search?scope=notes&search=LGTM" | jq '.[] | {id, body}'
+```
+
+### Scope availability
+
+| Scope | Instance | Group | Project | Requires |
+|-------|----------|-------|---------|----------|
+| `projects` | ✅ | ✅ | — | Free |
+| `issues` | ✅ | ✅ | ✅ | Free |
+| `merge_requests` | ✅ | ✅ | ✅ | Free |
+| `milestones` | ✅ | ✅ | ✅ | Free |
+| `users` | ✅ | ✅ | ✅ | Free |
+| `work_items` | ✅ | ✅ | ✅ | Free |
+| `snippet_titles` | ✅ | — | — | Free |
+| `blobs` (code) | — | — | ✅ | Advanced Search or Exact Code Search |
+| `commits` | — | — | ✅ | Advanced Search |
+| `wiki_blobs` | — | — | ✅ | Advanced Search |
+| `notes` | — | — | ✅ | Advanced Search |
+
 ## GLQL Queries
 
 To query issues, MRs, or epics across projects/groups, load the **`glab-glql`** skill.
@@ -220,6 +288,11 @@ git checkout -b fix/description
 19. **`project.workItems` not `project.workItem`** — singular doesn't exist; use `workItems(first: 1, iid: "IID")`; no `filter:` argument
 20. **Epic close/reopen via REST** — `state_event=close`/`reopen` on `PUT groups/<id>/epics/<iid>` works; no GraphQL needed
 21. **No `--body` flag** — glab uses `--description`, not `--body` (which is a `gh` flag); they are not interchangeable
+22. **Search: URL-encode project paths** — use `%2F` for `/` in project paths: `projects/gitlab-org%2Fcli/search?...`
+23. **Search: no `--jq` flag** — pipe search results through `| jq '...'`; never use `--jq`
+24. **Search: tier restrictions** — `blobs` requires Advanced Search or Exact Code Search; `commits`, `wiki_blobs`, and `notes` require Advanced Search; Free tier only supports `projects`, `issues`, `merge_requests`, `milestones`, `users`, `work_items`, and `snippet_titles`
+25. **Search: pagination** — add `per_page=<n>&page=<n>` query params to paginate; default page size is 20, max is 100
+26. **Search: nested groups need `%2F`** — `groups/gitlab-org%2Fsubgroup/search?...`; unencoded slashes → 404
 
 ## Contributing Improvements
 
