@@ -54,6 +54,18 @@ Optional fields: `compatibility` (agent framework, e.g. `opencode`), `metadata` 
 The `validate-frontmatter` CI job enforces these required fields. The `check-version-bump` job
 verifies that the `version` field is incremented whenever files under `skills/<name>/` change.
 
+## Updating an Existing Skill
+
+1. Edit files under `skills/<name>/` (e.g. `SKILL.md`, files in `references/`)
+2. Bump the `version` field in `SKILL.md` frontmatter — the `check-version-bump` CI job will fail if you forget
+3. Sync the version into the distribution manifests:
+
+   ```bash
+   bin/sync-skill <name>
+   ```
+
+4. Commit both the skill files and the updated manifests
+
 ## Distribution
 
 Skills are distributed to editor-specific directories using `bin/distribute-skill`:
