@@ -69,7 +69,7 @@ from context:
 | --- | --- |
 | Browser URL (`https://ops.gitlab.net/group/project/-/issues/1`) | Origin = scheme + host (`https://ops.gitlab.net`) |
 | SCP-style SSH remote (`git@ops.gitlab.net:group/project.git`) | SSH implies HTTPS; origin = `https://ops.gitlab.net` |
-| URL-style SSH remote (`ssh://git@gdk.test:2222/group/project.git`) | SSH port is not the API port; extract hostname only: `https://gdk.test` |
+| URL-style SSH remote (`ssh://git@gdk.test:2222/group/project.git`) | SSH port is not the API port; extract hostname only, then construct `GITLAB_HOST` with the correct scheme and API port |
 | HTTPS remote (`https://ops.gitlab.net/group/project.git`) | Origin = scheme + host (`https://ops.gitlab.net`) |
 | HTTP remote with port (`http://gdk.test:3000/group/project.git`) | Origin = `http://gdk.test:3000` |
 | Local path to a git repo | Run `git -C /path/to/repo remote get-url origin`, then parse |
@@ -88,7 +88,8 @@ git remote get-url origin | sed -E 's|(https?://[^/]*).*|\1|'
 git remote get-url origin | sed 's|git@\([^:]*\):.*|https://\1|'
 # git@ops.gitlab.net:org/project.git    →  https://ops.gitlab.net
 
-# URL-style SSH remote → HTTPS origin (SSH port ≠ API port; extract hostname only)
-git remote get-url origin | sed -E 's|ssh://git@([^:/]+)(:[0-9]+)?/.*|https://\1|'
-# ssh://git@gdk.test:2222/group/project.git  →  https://gdk.test
+# URL-style SSH remote → hostname only (SSH port ≠ API port; prepend correct scheme + API port manually)
+git remote get-url origin | sed -E 's|ssh://git@([^:/]+)(:[0-9]+)?/.*|\1|'
+# ssh://git@gdk.test:2222/group/project.git  →  gdk.test
+# Then construct GITLAB_HOST manually, e.g.: GITLAB_HOST=http://gdk.test:3000
 ```
