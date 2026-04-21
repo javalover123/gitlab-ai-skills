@@ -19,11 +19,14 @@ any remote yet. Without `-H`, glab may pick the wrong remote (e.g. a security mi
 the source project, creating the MR from the wrong fork.
 
 ```bash
+# Resolve your username first — never assume it matches your email or branch prefix
+GITLAB_USER=$(glab api "user" | jq -r '.username')
+
 # Simple MR
-glab mr create --push -H <owner/repo> --title "feat: add feature" --description "Brief description" --assignee <username>
+glab mr create --push -H <owner/repo> --title "feat: add feature" --description "Brief description" --assignee "$GITLAB_USER"
 
 # Complex MR - write description to file first
-glab mr create --push -H <owner/repo> --title "feat: add feature" --description "$(cat /tmp/mr-description.md)" --assignee <username>
+glab mr create --push -H <owner/repo> --title "feat: add feature" --description "$(cat /tmp/mr-description.md)" --assignee "$GITLAB_USER"
 ```
 
 **Templates:** Check `.gitlab/merge_request_templates/` for project-specific templates.
