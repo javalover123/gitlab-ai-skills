@@ -1,7 +1,7 @@
 ---
 name: glab
 description: GitLab workflow automation using glab CLI
-version: 1.5.0
+version: 1.6.0
 license: MIT
 metadata:
   audience: developers
@@ -11,6 +11,15 @@ metadata:
 # GitLab Workflow Skill
 
 GitLab workflow management using `glab` CLI for merge requests, issues, and Git best practices.
+
+## Multiple GitLab Instances
+
+glab auto-detects the GitLab host from your git remote. No `GITLAB_HOST` is needed when
+working inside a repository. For non-`origin` remotes (e.g. a local GDK instance added
+as a secondary remote), use `glab config set remote_alias <remote>`. Set `GITLAB_HOST`
+only when running outside a git repository or for a one-off command targeting a specific
+instance. See [references/multi-host.md](references/multi-host.md) for non-origin remote
+setup and hostname derivation from remote URLs.
 
 ## Creating Merge Requests
 
@@ -293,6 +302,8 @@ git checkout -b fix/description
 24. **Search: tier restrictions** — `blobs` requires Advanced Search or Exact Code Search; `commits`, `wiki_blobs`, and `notes` require Advanced Search; Free tier only supports `projects`, `issues`, `merge_requests`, `milestones`, `users`, `work_items`, and `snippet_titles`
 25. **Search: pagination** — add `per_page=<n>&page=<n>` query params to paginate; default page size is 20, max is 100
 26. **Search: nested groups need `%2F`** — `groups/gitlab-org%2Fsubgroup/search?...`; unencoded slashes → 404
+27. **`GITLAB_HOST` only when needed** — glab auto-detects the host from the git remote; set `GITLAB_HOST` only outside a git repo or for one-off cross-instance commands. For standard HTTPS hosts the scheme is optional (`GITLAB_HOST=ops.gitlab.net`); for HTTP or non-standard ports include both the scheme and the port (`GITLAB_HOST=http://gdk.test:3000`). See [references/multi-host.md](references/multi-host.md).
+28. **Non-origin remotes** — if `origin` points at one instance but you want glab to target another remote (e.g. `gdk`), run `glab config set remote_alias gdk` (per-repo) or `glab config set --global remote_alias gdk` (all repos) rather than setting `GITLAB_HOST` for every command.
 
 ## Contributing Improvements
 
