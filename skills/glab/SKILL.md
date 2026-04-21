@@ -1,7 +1,7 @@
 ---
 name: glab
 description: GitLab workflow automation using glab CLI
-version: 1.5.0
+version: 1.6.1
 license: MIT
 metadata:
   audience: developers
@@ -19,11 +19,14 @@ any remote yet. Without `-H`, glab may pick the wrong remote (e.g. a security mi
 the source project, creating the MR from the wrong fork.
 
 ```bash
+# Resolve your username first — never assume it matches your email or branch prefix
+GITLAB_USER=$(glab api "user" | jq -r '.username')
+
 # Simple MR
-glab mr create --push -H <owner/repo> --title "feat: add feature" --description "Brief description" --assignee <username>
+glab mr create --push -H <owner/repo> --title "feat: add feature" --description "Brief description" --assignee "$GITLAB_USER"
 
 # Complex MR - write description to file first
-glab mr create --push -H <owner/repo> --title "feat: add feature" --description "$(cat /tmp/mr-description.md)" --assignee <username>
+glab mr create --push -H <owner/repo> --title "feat: add feature" --description "$(cat /tmp/mr-description.md)" --assignee "$GITLAB_USER"
 ```
 
 **Templates:** Check `.gitlab/merge_request_templates/` for project-specific templates.
@@ -268,7 +271,7 @@ git checkout -b fix/description
 ## Agent Guidelines
 
 1. **`glab mr create` always needs `--push -H <owner/repo>`** — omitting either causes the MR to be created from the wrong remote or fail entirely
-2. **Always pass `--assignee <username>` on `glab mr create`** — MRs are unassigned by default; always assign to the author
+2. **Always pass `--assignee <username>` on `glab mr create`** — MRs are unassigned by default; always assign to the author. Resolve the username first: `glab api "user" | jq -r '.username'`
 3. **Read context first** — `glab issue view` / `glab mr view` before implementing
 4. **Use project templates** — check `.gitlab/issue_templates/` and `.gitlab/merge_request_templates/`
 5. **Write descriptions to files** — use `$(cat /tmp/description.md)` not inline strings

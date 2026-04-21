@@ -54,6 +54,22 @@ Optional fields: `compatibility` (agent framework, e.g. `opencode`), `metadata` 
 The `validate-frontmatter` CI job enforces these required fields. The `check-version-bump` job
 verifies that the `version` field is incremented whenever files under `skills/<name>/` change.
 
+## Updating an Existing Skill
+
+1. Edit files under `skills/<name>/` (e.g. `SKILL.md`, files in `references/`)
+2. Bump the `version` field in `SKILL.md` frontmatter — the `check-version-bump` CI job will fail if you forget
+3. Regenerate all derived files:
+
+   ```bash
+   bin/sync-skill <name>                        # sync version into plugin.json
+   python3 scripts/update_claudecode_readme.py  # update README plugins table
+   python3 scripts/generate_catalog.py          # update catalog.json
+   ```
+
+   Or run everything at once: `lefthook run auto-fix`
+
+4. Commit the skill files and all regenerated files together
+
 ## Distribution
 
 Skills are distributed to editor-specific directories using `bin/distribute-skill`:
