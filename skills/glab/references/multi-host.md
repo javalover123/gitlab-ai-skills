@@ -69,7 +69,7 @@ from context:
 | --- | --- |
 | Browser URL (`https://ops.gitlab.net/group/project/-/issues/1`) | Origin = scheme + host (`https://ops.gitlab.net`) |
 | SCP-style SSH remote (`git@ops.gitlab.net:group/project.git`) | SSH implies HTTPS; origin = `https://ops.gitlab.net` |
-| URL-style SSH remote (`ssh://git@gdk.test:2222/group/project.git`) | SSH port is not the API port; extract hostname only, then construct `GITLAB_HOST` with the correct scheme and API port |
+| URL-style SSH remote (`ssh://git@gdk.test:2222/group/project.git`) | SSH port ≠ API port; extract hostname only — scheme and API port must be known separately (e.g. `http://gdk.test:3000` for a local GDK instance) |
 | HTTPS remote (`https://ops.gitlab.net/group/project.git`) | Origin = scheme + host (`https://ops.gitlab.net`) |
 | HTTP remote with port (`http://gdk.test:3000/group/project.git`) | Origin = `http://gdk.test:3000` |
 | Local path to a git repo | Run `git -C /path/to/repo remote get-url origin`, then parse |
