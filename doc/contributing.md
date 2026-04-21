@@ -58,13 +58,17 @@ verifies that the `version` field is incremented whenever files under `skills/<n
 
 1. Edit files under `skills/<name>/` (e.g. `SKILL.md`, files in `references/`)
 2. Bump the `version` field in `SKILL.md` frontmatter — the `check-version-bump` CI job will fail if you forget
-3. Sync the version into the distribution manifests:
+3. Regenerate all derived files:
 
    ```bash
-   bin/sync-skill <name>
+   bin/sync-skill <name>                        # sync version into plugin.json
+   python3 scripts/update_claudecode_readme.py  # update README plugins table
+   python3 scripts/generate_catalog.py          # update catalog.json
    ```
 
-4. Commit both the skill files and the updated manifests
+   Or run everything at once: `lefthook run auto-fix`
+
+4. Commit the skill files and all regenerated files together
 
 ## Distribution
 
