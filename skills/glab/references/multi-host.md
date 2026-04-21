@@ -85,7 +85,7 @@ git remote get-url origin | sed -E 's|(https?://[^/]*).*|\1|'
 # http://gdk.test:3000/org/project.git  →  http://gdk.test:3000
 
 # SCP-style SSH remote → HTTPS origin
-git remote get-url origin | sed 's|git@\([^:]*\):.*|https://\1|'
+git remote get-url origin | sed -E 's|git@([^:]*):.*|https://\1|'
 # git@ops.gitlab.net:org/project.git    →  https://ops.gitlab.net
 
 # URL-style SSH remote → hostname only (SSH port ≠ API port; prepend correct scheme + API port manually)
