@@ -22,6 +22,13 @@
       "path": "skills/gitlab-psql/SKILL.md"
     },
     {
+      "name": "gitlab-todos",
+      "description": "Interactively triage GitLab to-do items using glab todo commands. Summarizes recent TODOs, identifies stale items on closed/merged MRs, prompts before marking items done, and prioritizes by milestone. Use when the user wants to review, triage, clean up, or prioritize their GitLab to-do list.",
+      "license": "MIT",
+      "compatibility": "opencode",
+      "path": "skills/gitlab-todos/SKILL.md"
+    },
+    {
       "name": "glab",
       "description": "GitLab workflow automation using glab CLI",
       "license": "MIT",
