@@ -1,7 +1,7 @@
 ---
 name: glab
 description: GitLab workflow automation using glab CLI
-version: 1.5.1
+version: 1.5.2
 category: Development Workflow
 license: MIT
 metadata:
@@ -13,6 +13,87 @@ metadata:
 
 GitLab workflow management using `glab` CLI for merge requests, issues, and Git best practices.
 
+## ⚠️ Message Escaping — Common Trap
+
+**If your message contains backticks (`` ` ``), `$`, or other shell special characters, NEVER inline them directly in `-m "..."`.** The shell interprets backticks as command substitution, silently mangling your message and producing errors like `/bin/bash: line 1: client_name: command not found`.
+
+This has caused real production failures: agents posting malformed comments to GitLab MRs/issues, followed by apologetic correction notes.
+
+### ❌ DON'T — inline backticks in double-quoted -m
+
+```bash
+# BROKEN: shell tries to execute `client_name` as a command
+glab mr note 100 -m "Use `client_name` and `wor/` here." -R org/repo
+# Error: /bin/bash: line 1: client_name: command not found
+# The comment is posted as: "Use  and  here." (identifiers silently stripped)
+
+# Also BROKEN: backslash-escaped backticks break in nested/scripted contexts
+glab mr note 100 -m "Use \`client_name\`" -R org/repo
+# Works in simple cases but fails when the command is double-quoted by a caller:
+# bash -c "glab mr note 100 -m \"Use \`client_name\`\""  → still executes client_name
+```
+
+### ✅ DO — write to a file first, then pass via $(cat ...)
+
+Pick a path appropriate for your environment (a `mktemp` result, a scoped workspace tmp file, whatever fits — the skill doesn't prescribe a specific path; agents choose one that's unique to their invocation to avoid clobbering parallel runs):
+
+```bash
+# MSG = path you choose (e.g. mktemp, ~/workspace/tmp/note-$$.md, etc.)
+MSG=<agent picks>
+
+cat > "$MSG" << 'EOF'
+Use `client_name` and `wor/` here. The `glab` tool handles this.
+EOF
+glab mr note 100 -m "$(cat "$MSG")" -R org/repo
+```
+
+The single-quoted `'EOF'` heredoc delimiter prevents ALL variable/backtick expansion when writing the file. The `$(cat "$MSG")` substitution is safe because the file content is already written literally.
+
+### ✅ Also safe — glab api with -f flag
+
+```bash
+glab api --method POST "projects/org%2Frepo/merge_requests/100/notes" \
+  -f "body=$(cat "$MSG")"
+```
+
+### ⚠️ Unquoted heredoc still interprets backticks
+
+```bash
+# BROKEN: unquoted EOF delimiter — backticks in body are still interpreted
+cat > "$MSG" << EOF
+Use `client_name` here.    # ← shell executes client_name when writing the file
+EOF
+```
+
+### ⚠️ Heredoc-inside-heredoc breaks shell parsing
+
+If your content itself contains a heredoc example, the inner `EOF` closes the outer heredoc early:
+
+```bash
+# BROKEN: the inner EOF closes the outer heredoc — shell reports unexpected EOF
+cat > "$OUTER" << 'EOF'
+Here is the safe pattern:
+  cat > "$MSG" << 'EOF'   ← this closes the OUTER heredoc prematurely!
+  ...
+  EOF
+EOF
+```
+
+**Fix — use a different delimiter for the outer heredoc:**
+
+```bash
+cat > "$OUTER" << 'OUTEREOF'
+Here is the safe pattern:
+  cat > "$MSG" << 'EOF'
+  Use `client_name` here.
+  EOF
+OUTEREOF
+```
+
+Or write the file in chunks — first chunk uses `>`, subsequent chunks use `>>`, each with its own delimiter.
+
+**Rule of thumb:** If the message contains `` ` ``, `$`, `!`, or `\` — write to a file with `<< 'EOF'` first, always. If the content itself contains heredoc syntax, use a unique outer delimiter (e.g. `OUTEREOF`, `MSGEOF`) that won't appear in the body.
+
 ## Creating Merge Requests
 
 Always pass `--push` and `-H <owner/repo>`. Without `--push`, the branch may not exist on
@@ -23,8 +104,8 @@ the source project, creating the MR from the wrong fork.
 # Simple MR
 glab mr create --push -H <owner/repo> --title "feat: add feature" --description "Brief description" --assignee <username>
 
-# Complex MR - write description to file first
-glab mr create --push -H <owner/repo> --title "feat: add feature" --description "$(cat /tmp/mr-description.md)" --assignee <username>
+# Complex MR - write description to file first (pick your own path)
+glab mr create --push -H <owner/repo> --title "feat: add feature" --description "$(cat "$DESC")" --assignee <username>
 ```
 
 **Templates:** Check `.gitlab/merge_request_templates/` for project-specific templates.
@@ -32,7 +113,7 @@ glab mr create --push -H <owner/repo> --title "feat: add feature" --description 
 ## Updating Merge Requests
 
 ```bash
-glab mr update <number> --description "$(cat /tmp/description.md)"
+glab mr update <number> --description "$(cat "$DESC")"
 glab mr view <number> -R <owner>/<repo>
 ```
 
@@ -43,7 +124,7 @@ glab mr view <number> -R <owner>/<repo>
 glab issue view <number>
 glab issue view <number> --comments -R <owner>/<repo>
 glab issue note <number> -m "comment" -R <owner>/<repo>
-glab issue note <number> -m "$(cat /tmp/comment.md)" -R <owner>/<repo>
+glab issue note <number> -m "$(cat "$MSG")" -R <owner>/<repo>
 
 # List (open by default — no --state flag)
 glab issue list --label "priority::P1,status::doing" -R <owner>/<repo>
@@ -51,7 +132,7 @@ glab issue list --closed -R <owner>/<repo>
 glab issue list --all   -R <owner>/<repo>
 
 # Create
-glab issue create --title "Bug: title" --description "$(cat /tmp/issue-description.md)"
+glab issue create --title "Bug: title" --description "$(cat "$DESC")"
 
 # Labels — use --label / --unlabel, NEVER +label or -label syntax
 glab issue update 123 --label "new-label"
@@ -70,7 +151,7 @@ glab api --method PUT "projects/<project_id>/issues/<iid>" -f state_event=reopen
 # Post a comment (note: the body field on PUT is silently ignored — always use POST)
 glab api --method POST "projects/<project_id>/issues/<iid>/notes" -f "body=Your comment"
 glab api --method POST "projects/<project_id>/issues/<iid>/notes" \
-  -f "body=$(cat /tmp/comment.md)"
+  -f "body=$(cat "$MSG")"
 ```
 
 ## Work Items
@@ -272,7 +353,7 @@ git checkout -b fix/description
 2. **Always pass `--assignee <username>` on `glab mr create`** — MRs are unassigned by default; always assign to the author
 3. **Read context first** — `glab issue view` / `glab mr view` before implementing
 4. **Use project templates** — check `.gitlab/issue_templates/` and `.gitlab/merge_request_templates/`
-5. **Write descriptions to files** — use `$(cat /tmp/description.md)` not inline strings
+5. **Write descriptions to files** — use `$(cat "$FILE")` not inline strings; you pick the path
 6. **Reference with full URLs** — `Closes https://gitlab.com/org/project/-/issues/123`
 7. **Descriptive commits** — focus on the "why"
 8. **Single quotes for special chars** — `git commit -m 'fix: from MR !123'`
@@ -294,6 +375,7 @@ git checkout -b fix/description
 24. **Search: tier restrictions** — `blobs` requires Advanced Search or Exact Code Search; `commits`, `wiki_blobs`, and `notes` require Advanced Search; Free tier only supports `projects`, `issues`, `merge_requests`, `milestones`, `users`, `work_items`, and `snippet_titles`
 25. **Search: pagination** — add `per_page=<n>&page=<n>` query params to paginate; default page size is 20, max is 100
 26. **Search: nested groups need `%2F`** — `groups/gitlab-org%2Fsubgroup/search?...`; unencoded slashes → 404
+27. **Backticks in messages → write to a file you name yourself** — never inline `` ` `` in `-m "..."` or `--description "..."`; write to a file you pick (e.g. `mktemp`, a workspace tmp path — unique per invocation to avoid clobbering parallel agents) using `<< 'EOF'` (single-quoted delimiter, critical), then pass via `$(cat "$FILE")`
 
 ## Contributing Improvements
 
