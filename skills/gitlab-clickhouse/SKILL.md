@@ -1,7 +1,8 @@
 ---
 name: gitlab-clickhouse
 description: Inspect GitLab local ClickHouse tables, schemas, ingestion paths, and data patterns. Use for CH table questions, DESCRIBE TABLE, schema and source-of-truth checks under db/click_house, ingestion debugging, and investigating aggregates, distributions, outliers, or anomalous ClickHouse data in a GitLab GDK environment.
-version: 1.0.0
+version: 1.0.1
+category: Database
 license: MIT
 compatibility: opencode
 metadata:
