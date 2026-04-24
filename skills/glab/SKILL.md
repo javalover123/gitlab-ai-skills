@@ -1,7 +1,7 @@
 ---
 name: glab
 description: GitLab workflow automation using glab CLI
-version: 1.6.0
+version: 1.6.1
 category: Development Workflow
 license: MIT
 metadata:
@@ -47,7 +47,7 @@ EOF
 glab mr note 100 -m "$(cat "$MSG")" -R org/repo
 ```
 
-The single-quoted `'EOF'` heredoc delimiter prevents ALL variable/backtick expansion when writing the file. The `$(cat "$MSG")` substitution is safe because the file content is already written literally.
+The single-quoted `'EOF'` heredoc delimiter prevents ALL variable/backtick expansion when writing the file. The `$(cat "$MSG")` substitution is safe because the file content is already written literally. **Triple-backtick code blocks (` ``` `) are also safe inside `<<'EOF'` heredocs** — no escaping needed; only single-backticks and `$` trigger command substitution.
 
 ### ✅ Also safe — glab api with -f flag
 
@@ -67,16 +67,19 @@ EOF
 
 ### ⚠️ Heredoc-inside-heredoc breaks shell parsing
 
-If your content itself contains a heredoc example, the inner `EOF` closes the outer heredoc early:
+If your content itself contains a heredoc example **with an unindented `EOF` terminator**, the inner `EOF` at column 0 closes the outer heredoc early:
 
 ```bash
-# BROKEN: the inner EOF closes the outer heredoc — shell reports unexpected EOF
+# BROKEN: the inner EOF is at column 0 — it closes the OUTER heredoc early
 cat > "$OUTER" << 'EOF'
 Here is the safe pattern:
-  cat > "$MSG" << 'EOF'   ← this closes the OUTER heredoc prematurely!
-  ...
-  EOF
+cat > "$MSG" << 'EOF'
+Use `client_name` here.
 EOF
+# ↑ This EOF terminates the OUTER heredoc — the lines below run as shell commands!
+echo "more content..."
+EOF
+# ↑ This stray EOF becomes a command: "EOF: command not found"
 ```
 
 **Fix — use a different delimiter for the outer heredoc:**
