@@ -2,6 +2,7 @@
 name: mr-review
 description: Review GitLab merge requests using conventional comments format
 version: 1.0.0
+category: Development Workflow
 license: MIT
 compatibility: opencode
 metadata:
