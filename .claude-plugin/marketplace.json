@@ -12,6 +12,10 @@
       "source": "./.claude-plugin/plugins/commit-messages"
     },
     {
+      "name": "gitlab-babysit-mr",
+      "source": "./.claude-plugin/plugins/gitlab-babysit-mr"
+    },
+    {
       "name": "gitlab-clickhouse",
       "source": "./.claude-plugin/plugins/gitlab-clickhouse"
     },
