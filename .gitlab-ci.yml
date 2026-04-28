@@ -42,6 +42,12 @@ validate-distribution-opencode:
   script:
     - python3 scripts/validate-opencode-distribution.py --ci --debug
 
+validate-distribution-pi:
+  stage: verify
+  extends: .verify-rules
+  script:
+    - python3 scripts/validate-pi-distribution.py --ci --debug
+
 verify-catalog:
   stage: verify
   extends: .verify-rules
