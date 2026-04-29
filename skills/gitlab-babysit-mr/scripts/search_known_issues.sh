@@ -4,7 +4,13 @@
 # Repo defaults to gitlab-org/gitlab
 # Output: JSON arrays of matching issues and MRs
 
-set -euo pipefail
+set -Eeuo pipefail
+
+error_handler() {
+  echo "Error: Command failed at line $1 with exit code $2" >&2
+}
+
+trap 'error_handler $LINENO $?' ERR
 
 SEARCH_TERM="${1:-}"
 REPO="${2:-gitlab-org/gitlab}"
