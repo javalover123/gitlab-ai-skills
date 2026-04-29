@@ -3,7 +3,13 @@
 # Usage: ./pipeline_status.sh <mr-url>
 # Output: JSON with pipeline status, failed jobs, and counts
 
-set -euo pipefail
+set -Eeuo pipefail
+
+error_handler() {
+  echo "Error: Command failed at line $1 with exit code $2" >&2
+}
+
+trap 'error_handler $LINENO $?' ERR
 
 MR_URL="${1:-}"
 if [[ -z "$MR_URL" ]]; then
@@ -18,6 +24,7 @@ MR_IID="${MR_URL##*/}"
 PROJECT_ENCODED="${PROJECT_PATH//\//%2F}"
 
 # Get latest pipeline for this MR
+echo "Fetching pipeline for MR ${MR_IID}..." >&2
 PIPELINES_JSON=$(glab api "projects/${PROJECT_ENCODED}/merge_requests/${MR_IID}/pipelines?per_page=1" 2>/dev/null)
 
 PIPELINE_ID=$(echo "$PIPELINES_JSON" | jq -r '.[0].id // empty')
@@ -34,7 +41,8 @@ PIPELINE_URL=$(echo "$PIPELINES_JSON" | jq -r '.[0].web_url')
 PIPELINE_SHA=$(echo "$PIPELINES_JSON" | jq -r '.[0].sha[0:8]')
 
 # Get all jobs for this pipeline (handles pagination)
-ALL_JOBS=$(glab api --paginate "projects/${PROJECT_ENCODED}/pipelines/${PIPELINE_ID}/jobs?per_page=100" 2>/dev/null)
+echo "Fetching jobs for pipeline ${PIPELINE_ID}..." >&2
+ALL_JOBS=$(glab api --paginate "projects/${PROJECT_ENCODED}/pipelines/${PIPELINE_ID}/jobs?per_page=100" 2>/dev/null | jq -s 'add // []')
 
 # Extract current failed jobs (exclude jobs that were retried, i.e. superseded)
 FAILED_JOBS=$(echo "$ALL_JOBS" | jq '[

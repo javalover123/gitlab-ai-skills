@@ -5,7 +5,7 @@ version: 0.9.0
 category: Development Workflow
 license: MIT
 compatibility: opencode
-argument-hint: <mr-url>
+argument-hint: <URL of the MR to babysit>
 metadata:
   audience: developers
   workflow: gitlab
