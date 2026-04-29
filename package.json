@@ -1,0 +1,10 @@
+{
+  "name": "gitlab-skills",
+  "version": "1.0.0",
+  "description": "Reusable AI agent skills for GitLab workflows",
+  "keywords": ["pi-package"],
+  "license": "MIT",
+  "pi": {
+    "skills": ["./skills"]
+  }
+}
