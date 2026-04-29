@@ -1,7 +1,8 @@
 ---
 name: glab
 description: GitLab workflow automation using glab CLI
-version: 1.6.0
+version: 1.7.0
+category: Development Workflow
 license: MIT
 metadata:
   audience: developers
@@ -21,6 +22,90 @@ only when running outside a git repository or for a one-off command targeting a 
 instance. See [references/multi-host.md](references/multi-host.md) for non-origin remote
 setup and hostname derivation from remote URLs.
 
+## ⚠️ Message Escaping — Common Trap
+
+**If your message contains backticks (`` ` ``), `$`, or other shell special characters, NEVER inline them directly in `-m "..."`.** The shell interprets backticks as command substitution, silently mangling your message and producing errors like `/bin/bash: line 1: client_name: command not found`.
+
+This has caused real production failures: agents posting malformed comments to GitLab MRs/issues, followed by apologetic correction notes.
+
+### ❌ DON'T — inline backticks in double-quoted -m
+
+```bash
+# BROKEN: shell tries to execute `client_name` as a command
+glab mr note 100 -m "Use `client_name` and `wor/` here." -R org/repo
+# Error: /bin/bash: line 1: client_name: command not found
+# The comment is posted as: "Use  and  here." (identifiers silently stripped)
+
+# Also BROKEN: backslash-escaped backticks break in nested/scripted contexts
+glab mr note 100 -m "Use \`client_name\`" -R org/repo
+# Works in simple cases but fails when the command is double-quoted by a caller:
+# bash -c "glab mr note 100 -m \"Use \`client_name\`\""  → still executes client_name
+```
+
+### ✅ DO — write to a file first, then pass via $(cat ...)
+
+Pick a path appropriate for your environment (a `mktemp` result, a scoped workspace tmp file, whatever fits — the skill doesn't prescribe a specific path; agents choose one that's unique to their invocation to avoid clobbering parallel runs):
+
+```bash
+# MSG = path you choose (e.g. mktemp, ~/workspace/tmp/note-$$.md, etc.)
+MSG=<agent picks>
+
+cat > "$MSG" << 'EOF'
+Use `client_name` and `wor/` here. The `glab` tool handles this.
+EOF
+glab mr note 100 -m "$(cat "$MSG")" -R org/repo
+```
+
+The single-quoted `'EOF'` heredoc delimiter prevents ALL variable/backtick expansion when writing the file. The `$(cat "$MSG")` substitution is safe because the file content is already written literally. **Triple-backtick code blocks (` ``` `) are also safe inside `<<'EOF'` heredocs** — no escaping needed; only single-backticks and `$` trigger command substitution.
+
+### ✅ Also safe — glab api with -f flag
+
+```bash
+glab api --method POST "projects/org%2Frepo/merge_requests/100/notes" \
+  -f "body=$(cat "$MSG")"
+```
+
+### ⚠️ Unquoted heredoc still interprets backticks
+
+```bash
+# BROKEN: unquoted EOF delimiter — backticks in body are still interpreted
+cat > "$MSG" << EOF
+Use `client_name` here.    # ← shell executes client_name when writing the file
+EOF
+```
+
+### ⚠️ Heredoc-inside-heredoc breaks shell parsing
+
+If your content itself contains a heredoc example **with an unindented `EOF` terminator**, the inner `EOF` at column 0 closes the outer heredoc early:
+
+```bash
+# BROKEN: the inner EOF is at column 0 — it closes the OUTER heredoc early
+cat > "$OUTER" << 'EOF'
+Here is the safe pattern:
+cat > "$MSG" << 'EOF'
+Use `client_name` here.
+EOF
+# ↑ This EOF terminates the OUTER heredoc — the lines below run as shell commands!
+echo "more content..."
+EOF
+# ↑ This stray EOF becomes a command: "EOF: command not found"
+```
+
+**Fix — use a different delimiter for the outer heredoc:**
+
+```bash
+cat > "$OUTER" << 'OUTEREOF'
+Here is the safe pattern:
+  cat > "$MSG" << 'EOF'
+  Use `client_name` here.
+  EOF
+OUTEREOF
+```
+
+Or write the file in chunks — first chunk uses `>`, subsequent chunks use `>>`, each with its own delimiter.
+
+**Rule of thumb:** If the message contains `` ` ``, `$`, `!`, or `\` — write to a file with `<< 'EOF'` first, always. If the content itself contains heredoc syntax, use a unique outer delimiter (e.g. `OUTEREOF`, `MSGEOF`) that won't appear in the body.
+
 ## Creating Merge Requests
 
 Always pass `--push` and `-H <owner/repo>`. Without `--push`, the branch may not exist on
@@ -31,8 +116,8 @@ the source project, creating the MR from the wrong fork.
 # Simple MR
 glab mr create --push -H <owner/repo> --title "feat: add feature" --description "Brief description" --assignee <username>
 
-# Complex MR - write description to file first
-glab mr create --push -H <owner/repo> --title "feat: add feature" --description "$(cat /tmp/mr-description.md)" --assignee <username>
+# Complex MR - write description to file first (pick your own path)
+glab mr create --push -H <owner/repo> --title "feat: add feature" --description "$(cat "$DESC")" --assignee <username>
 ```
 
 **Templates:** Check `.gitlab/merge_request_templates/` for project-specific templates.
@@ -40,7 +125,7 @@ glab mr create --push -H <owner/repo> --title "feat: add feature" --description 
 ## Updating Merge Requests
 
 ```bash
-glab mr update <number> --description "$(cat /tmp/description.md)"
+glab mr update <number> --description "$(cat "$DESC")"
 glab mr view <number> -R <owner>/<repo>
 ```
 
@@ -51,7 +136,7 @@ glab mr view <number> -R <owner>/<repo>
 glab issue view <number>
 glab issue view <number> --comments -R <owner>/<repo>
 glab issue note <number> -m "comment" -R <owner>/<repo>
-glab issue note <number> -m "$(cat /tmp/comment.md)" -R <owner>/<repo>
+glab issue note <number> -m "$(cat "$MSG")" -R <owner>/<repo>
 
 # List (open by default — no --state flag)
 glab issue list --label "priority::P1,status::doing" -R <owner>/<repo>
@@ -59,7 +144,7 @@ glab issue list --closed -R <owner>/<repo>
 glab issue list --all   -R <owner>/<repo>
 
 # Create
-glab issue create --title "Bug: title" --description "$(cat /tmp/issue-description.md)"
+glab issue create --title "Bug: title" --description "$(cat "$DESC")"
 
 # Labels — use --label / --unlabel, NEVER +label or -label syntax
 glab issue update 123 --label "new-label"
@@ -68,18 +153,7 @@ glab issue update 123 --unlabel "old-label"
 glab issue update 123 --label "status::doing"   # removes any existing status:: label
 ```
 
-### Issue State Transitions and Notes
-
-```bash
-# Close / reopen
-glab api --method PUT "projects/<project_id>/issues/<iid>" -f state_event=close
-glab api --method PUT "projects/<project_id>/issues/<iid>" -f state_event=reopen
-
-# Post a comment (note: the body field on PUT is silently ignored — always use POST)
-glab api --method POST "projects/<project_id>/issues/<iid>/notes" -f "body=Your comment"
-glab api --method POST "projects/<project_id>/issues/<iid>/notes" \
-  -f "body=$(cat /tmp/comment.md)"
-```
+For issue state transitions (close/reopen via API) and posting notes via `glab api`: **[references/issue-api.md](references/issue-api.md)**
 
 ## Work Items
 
@@ -88,7 +162,6 @@ GitLab is migrating issues to work items. The URL shows `/work_items/<iid>` but 
 ```bash
 # ✅ Use the issues API — same IID, same endpoints
 glab api "projects/org%2Fproject/issues/<iid>"
-glab api "projects/<project_id>/issues/<iid>/notes"
 
 # ❌ /work_items/ REST endpoint does not exist
 glab api "projects/org%2Fproject/work_items/<iid>"   # → 404
@@ -111,72 +184,12 @@ For MR review operations (draft notes, code suggestions, inline comments, bulk p
 - Bulk publishing all drafts as a single review
 - Fetching, replying to, and resolving discussions
 
-## Issue Links and Epics
+## Issue Links, Epics, and Nested Groups
 
 - **Issue links** (`blocked_by`, `relates_to`): [references/issue-links.md](references/issue-links.md)
 - **Epics CRUD** (create, list, update, close): [references/epics.md](references/epics.md)
-- **Epic comments** (GraphQL read/write, pagination): [references/epic-comments.md](references/epic-comments.md)
+- **Epic comments** (GraphQL read/write, pagination — REST returns 404): [references/epic-comments.md](references/epic-comments.md)
 - **Nested groups** (`%2F` encoding): [references/nested-groups.md](references/nested-groups.md)
-
-## Epics — Critical Notes
-
-**⚠️ Epic comments require GraphQL** — the REST `/notes` endpoint returns 404.
-
-**Quickest path — use the wrapper scripts:**
-
-```bash
-# Read all comments (handles pagination)
-epic-notes.sh <group-path> <epic-iid>
-epic-notes.sh gitlab-org 16428
-
-# Post a comment
-create-epic-note.sh <group-id> <epic-iid> "body"
-create-epic-note.sh 9970 16428 "My comment"
-```
-
-Scripts are in `scripts/`; GraphQL templates in `assets/graphql/`.
-
-**Manual GraphQL (when you need more control):**
-
-```bash
-# iid must be a quoted string: "16428" not 16428 (integer → type error)
-glab api graphql -f query='
-{
-  group(fullPath: "gitlab-org") {
-    workItem(iid: "16428") {
-      widgets {
-        type
-        ... on WorkItemWidgetNotes {
-          discussions(first: 100) {
-            pageInfo { hasNextPage endCursor }
-            nodes {
-              notes {
-                nodes { id body author { username } createdAt }
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-}'
-# If hasNextPage: true → re-run with discussions(first: 100, after: "<endCursor>")
-```
-
-**Epic close/reopen** — REST works fine, no GraphQL needed:
-
-```bash
-glab api --method PUT "groups/<group_id>/epics/<iid>" -f state_event=close
-glab api --method PUT "groups/<group_id>/epics/<iid>" -f state_event=reopen
-```
-
-**Nested groups** — REST requires `%2F`; GraphQL uses plain `/`:
-
-```bash
-glab api "groups/gitlab-org%2Ffoundations/epics"                    # ✅ REST
-glab api "groups/gitlab-org/foundations/epics"                      # ❌ 404
-glab api graphql -f query='{ group(fullPath: "gitlab-org/foundations") { ... } }'  # ✅
-```
 
 ## MR Listing and Filtering
 
@@ -191,73 +204,17 @@ glab mr list -R <owner>/<repo> --author <user>
 
 **Note:** `glab mr list` has no `--state` or `--status` flag. Use `--all`, `--merged`, `--closed`.
 
-## Search via `glab api`
+## Search
 
-Use `glab api` to call the GitLab Search REST API directly — no extra CLI flags needed.
+For full search examples (instance / group / project, scope table, pagination): **[references/search.md](references/search.md)**
 
-### Instance-level search
-
-```bash
-# Search issues across the entire instance
-glab api "search?scope=issues&search=login+bug" | jq '.[] | {iid, title, web_url}'
-
-# Search merge requests instance-wide
-glab api "search?scope=merge_requests&search=refactor" | jq '.[] | {iid, title, state}'
-
-# Paginate: 50 results per page, page 2
-glab api "search?scope=issues&search=bug&per_page=50&page=2" | jq '.[] | {iid, title}'
-
-# Filter by state
-glab api "search?scope=merge_requests&search=auth&state=merged" | jq '.[] | {iid, title}'
-```
-
-### Group-level search
+Quick reference:
 
 ```bash
-# Search issues within a group
-glab api "groups/gitlab-org/search?scope=issues&search=performance" | jq '.[] | {iid, title, web_url}'
-
-# Search merge requests in a group
-glab api "groups/gitlab-org/search?scope=merge_requests&search=refactor" | jq '.[] | {iid, title, state}'
-
-# Nested group — encode the slash as %2F
-glab api "groups/gitlab-org%2Ffoundations/search?scope=issues&search=bug" | jq '.[] | {iid, title}'
+glab api "search?scope=issues&search=<query>" | jq '.[] | {iid, title}'
+glab api "groups/<group>/search?scope=merge_requests&search=<query>" | jq '.[]'
+glab api "projects/<org>%2F<repo>/search?scope=issues&search=<query>" | jq '.[]'
 ```
-
-### Project-level search
-
-```bash
-# Search issues in a project (URL-encode the project path: / → %2F)
-glab api "projects/gitlab-org%2Fcli/search?scope=issues&search=crash" | jq '.[] | {iid, title}'
-
-# Code search (blobs) — requires Advanced Search or Exact Code Search
-glab api "projects/gitlab-org%2Fcli/search?scope=blobs&search=handleAuth" | jq '.[] | {path, startline, data}'
-
-# Commits — requires Advanced Search
-glab api "projects/gitlab-org%2Fcli/search?scope=commits&search=fix+nil" | jq '.[] | {id, title, authored_date}'
-
-# Wiki pages — requires Advanced Search
-glab api "projects/gitlab-org%2Fcli/search?scope=wiki_blobs&search=setup" | jq '.[] | {path, data}'
-
-# Notes (comments) — requires Advanced Search
-glab api "projects/gitlab-org%2Fcli/search?scope=notes&search=LGTM" | jq '.[] | {id, body}'
-```
-
-### Scope availability
-
-| Scope | Instance | Group | Project | Requires |
-|-------|----------|-------|---------|----------|
-| `projects` | ✅ | ✅ | — | Free |
-| `issues` | ✅ | ✅ | ✅ | Free |
-| `merge_requests` | ✅ | ✅ | ✅ | Free |
-| `milestones` | ✅ | ✅ | ✅ | Free |
-| `users` | ✅ | ✅ | ✅ | Free |
-| `work_items` | ✅ | ✅ | ✅ | Free |
-| `snippet_titles` | ✅ | — | — | Free |
-| `blobs` (code) | — | — | ✅ | Advanced Search or Exact Code Search |
-| `commits` | — | — | ✅ | Advanced Search |
-| `wiki_blobs` | — | — | ✅ | Advanced Search |
-| `notes` | — | — | ✅ | Advanced Search |
 
 ## GLQL Queries
 
@@ -280,7 +237,7 @@ git checkout -b fix/description
 2. **Always pass `--assignee <username>` on `glab mr create`** — MRs are unassigned by default; always assign to the author
 3. **Read context first** — `glab issue view` / `glab mr view` before implementing
 4. **Use project templates** — check `.gitlab/issue_templates/` and `.gitlab/merge_request_templates/`
-5. **Write descriptions to files** — use `$(cat /tmp/description.md)` not inline strings
+5. **Write descriptions to files** — use `$(cat "$FILE")` not inline strings; you pick the path
 6. **Reference with full URLs** — `Closes https://gitlab.com/org/project/-/issues/123`
 7. **Descriptive commits** — focus on the "why"
 8. **Single quotes for special chars** — `git commit -m 'fix: from MR !123'`
@@ -289,7 +246,7 @@ git checkout -b fix/description
 11. **No `--jq` flag** — glab has no `--jq`; use `| jq '...'` pipe
 12. **No `--state`/`--status` on `mr list`** — use `--all`, `--merged`, `--closed`
 13. **Work items use the issues API** — `/work_items/<iid>` URLs → `projects/.../issues/<iid>`
-14. **Epic comments need GraphQL** — REST `/notes` → 404; use `epic-notes.sh` or manual GraphQL with `first: 100` + pagination
+14. **Epic comments need GraphQL** — REST `/notes` → 404; see [references/epic-comments.md](references/epic-comments.md)
 15. **No `-R` for group-level API** — `-R` expects `OWNER/REPO`; group endpoints use `glab api "groups/..."` directly
 16. **Nested groups REST: `%2F`** — `groups/org%2Fsubgroup/epics`; unencoded slashes → 404
 17. **GraphQL iid is a String** — `workItem(iid: "16428")` not `workItem(iid: 16428)`
@@ -297,13 +254,10 @@ git checkout -b fix/description
 19. **`project.workItems` not `project.workItem`** — singular doesn't exist; use `workItems(first: 1, iid: "IID")`; no `filter:` argument
 20. **Epic close/reopen via REST** — `state_event=close`/`reopen` on `PUT groups/<id>/epics/<iid>` works; no GraphQL needed
 21. **No `--body` flag** — glab uses `--description`, not `--body` (which is a `gh` flag); they are not interchangeable
-22. **Search: URL-encode project paths** — use `%2F` for `/` in project paths: `projects/gitlab-org%2Fcli/search?...`
-23. **Search: no `--jq` flag** — pipe search results through `| jq '...'`; never use `--jq`
-24. **Search: tier restrictions** — `blobs` requires Advanced Search or Exact Code Search; `commits`, `wiki_blobs`, and `notes` require Advanced Search; Free tier only supports `projects`, `issues`, `merge_requests`, `milestones`, `users`, `work_items`, and `snippet_titles`
-25. **Search: pagination** — add `per_page=<n>&page=<n>` query params to paginate; default page size is 20, max is 100
-26. **Search: nested groups need `%2F`** — `groups/gitlab-org%2Fsubgroup/search?...`; unencoded slashes → 404
-27. **`GITLAB_HOST` only when needed** — glab auto-detects the host from the git remote; set `GITLAB_HOST` only outside a git repo or for one-off cross-instance commands. For standard HTTPS hosts the scheme is optional (`GITLAB_HOST=ops.gitlab.net`); for HTTP or non-standard ports include both the scheme and the port (`GITLAB_HOST=http://gdk.test:3000`). See [references/multi-host.md](references/multi-host.md).
-28. **Non-origin remotes** — if `origin` points at one instance but you want glab to target another remote (e.g. `gdk`), run `glab config set remote_alias gdk` (per-repo) or `glab config set --global remote_alias gdk` (all repos) rather than setting `GITLAB_HOST` for every command.
+22. **Search: URL-encode project paths** — use `%2F` for `/`; see [references/search.md](references/search.md) for full examples
+23. **Backticks in messages → write to a file you name yourself** — never inline `` ` `` in `-m "..."` or `--description "..."`; write to a file you pick (e.g. `mktemp`, a workspace tmp path — unique per invocation to avoid clobbering parallel agents) using `<< 'EOF'` (single-quoted delimiter, critical), then pass via `$(cat "$FILE")`
+24. **`GITLAB_HOST` only when needed** — glab auto-detects the host from the git remote; set `GITLAB_HOST` only outside a git repo or for one-off cross-instance commands. For standard HTTPS hosts the scheme is optional (`GITLAB_HOST=ops.gitlab.net`); for HTTP or non-standard ports include both the scheme and the port (`GITLAB_HOST=http://gdk.test:3000`). See [references/multi-host.md](references/multi-host.md).
+25. **Non-origin remotes** — if `origin` points at one instance but you want glab to target another remote (e.g. `gdk`), run `glab config set remote_alias gdk` (per-repo) or `glab config set --global remote_alias gdk` (all repos) rather than setting `GITLAB_HOST` for every command.
 
 ## Contributing Improvements
 

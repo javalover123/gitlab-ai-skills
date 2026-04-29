@@ -1,7 +1,8 @@
 ---
 name: gitlab-psql
 description: Inspect GitLab GDK PostgreSQL test and development databases with gdk psql. Use for Postgres schema checks, table and index inspection, read-only SQL queries, migration verification, and investigating GitLab application data in local test or development databases.
-version: 1.0.0
+version: 1.0.1
+category: Database
 license: MIT
 compatibility: opencode
 metadata:
