@@ -22,6 +22,7 @@ run python3 scripts/update_claudecode_readme.py --ci
 run python3 scripts/validate_frontmatter.py --ci
 run python3 scripts/validate-opencode-distribution.py --ci
 run python3 scripts/validate-claudecode-distribution.py --ci
+run python3 scripts/validate-pi-distribution.py --ci
 run python3 scripts/check_version_bump.py --ci
 run bin/sync-skill --ci
 run python3 scripts/generate_catalog.py --ci

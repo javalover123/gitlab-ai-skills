@@ -2,7 +2,7 @@
 
 ![Pipeline Status](https://gitlab.com/gitlab-org/ai/skills/badges/main/pipeline.svg)
 
-Reusable agent skills for GitLab projects. Skills are structured prompt files that AI coding assistants (like [OpenCode](https://opencode.ai) and [Claude Code](https://code.claude.com)) can load on demand to gain domain-specific knowledge and workflows.
+Reusable agent skills for GitLab projects. Skills are structured prompt files that AI coding assistants (like [pi](https://github.com/badlogic/pi-mono), [OpenCode](https://opencode.ai) and [Claude Code](https://code.claude.com)) can load on demand to gain domain-specific knowledge and workflows.
 
 ## Table of Contents
 
@@ -16,6 +16,7 @@ Reusable agent skills for GitLab projects. Skills are structured prompt files th
     - [Shell & Environment](#shell--environment)
     - [Agent Tooling](#agent-tooling)
   - [Installing Skills](#installing-skills)
+    - [Pi (Package)](#pi-package)
     - [OpenCode (Native)](#opencode-native)
     - [Via `@dgruzd/skills` CLI](#via-dgruzdskills-cli)
     - [Claude Code Plugin Marketplace](#claude-code-plugin-marketplace)
@@ -91,6 +92,23 @@ Iteratively test and refine prompts, skills, and agent configurations using open
 > ```
 >
 > You may also need to enable [Developer Mode](https://learn.microsoft.com/en-us/windows/apps/get-started/enable-your-device-for-development) or run Git as Administrator for symlink creation to work.
+
+### Pi (Package)
+
+This repo ships as a [pi package](https://github.com/badlogic/pi-mono). Install globally or per-project:
+
+```bash
+# From git (global)
+pi install git:gitlab.com/gitlab-org/ai/skills
+
+# From local clone
+pi install /path/to/skills
+
+# Per-project (writes to .pi/settings.json)
+pi install -l git:gitlab.com/gitlab-org/ai/skills
+```
+
+Pi auto-discovers all skills under `skills/` via the `package.json` manifest. To filter which skills load, use package filtering in `.pi/settings.json`.
 
 ### OpenCode (Native)
 
