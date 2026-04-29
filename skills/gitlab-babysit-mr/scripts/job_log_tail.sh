@@ -3,7 +3,13 @@
 # Usage: ./job_log_tail.sh <project-encoded> <job-id> [lines]
 # Output: Job metadata as JSON, then plain text log tail
 
-set -euo pipefail
+set -Eeuo pipefail
+
+error_handler() {
+  echo "Error: Command failed at line $1 with exit code $2" >&2
+}
+
+trap 'error_handler $LINENO $?' ERR
 
 PROJECT_ENCODED="${1:-}"
 JOB_ID="${2:-}"
