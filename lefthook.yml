@@ -11,6 +11,8 @@ pre-push:
       run: python3 scripts/validate-claudecode-distribution.py --ci
     validate-opencode-distribution:
       run: python3 scripts/validate-opencode-distribution.py --ci
+    validate-pi-distribution:
+      run: python3 scripts/validate-pi-distribution.py --ci
     verify-catalog:
       run: python3 scripts/generate_catalog.py --ci
     verify-toc:

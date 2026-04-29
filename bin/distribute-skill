@@ -188,17 +188,44 @@ def undistribute_claudecode(skill_name):
 
 
 # ---------------------------------------------------------------------------
+# Pi
+# ---------------------------------------------------------------------------
+
+
+def distribute_pi(skill_name, **_kwargs):
+    if not os.path.isfile(os.path.join(REPO_ROOT, "package.json")):
+        print("WARNING: No root package.json found. Run task 1 first.", file=sys.stderr)
+        return
+    with open(os.path.join(REPO_ROOT, "package.json")) as f:
+        data = json.load(f)
+    pi_skills = data.get("pi", {}).get("skills", [])
+    if "./skills" not in pi_skills:
+        print("WARNING: package.json 'pi.skills' does not include './skills'", file=sys.stderr)
+        return
+    print(f"Skill '{skill_name}' is discoverable via pi package manifest (no symlinks needed)")
+
+
+def undistribute_pi(skill_name):
+    print(
+        f"Pi discovers all skills via package.json manifest. "
+        f"Use pi's package filtering in settings.json to exclude '{skill_name}'."
+    )
+
+
+# ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
 
 HANDLERS = {
     "opencode": distribute_opencode,
     "claudecode": distribute_claudecode,
+    "pi": distribute_pi,
 }
 
 UNDISTRIBUTE_HANDLERS = {
     "opencode": undistribute_opencode,
     "claudecode": undistribute_claudecode,
+    "pi": undistribute_pi,
 }
 
 
