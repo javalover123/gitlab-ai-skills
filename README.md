@@ -2,7 +2,7 @@
 
 ![Pipeline Status](https://gitlab.com/gitlab-org/ai/skills/badges/main/pipeline.svg)
 
-Reusable agent skills for GitLab projects. Skills are structured prompt files that AI coding assistants (like [pi](https://github.com/anthropics/pi), [OpenCode](https://opencode.ai) and [Claude Code](https://code.claude.com)) can load on demand to gain domain-specific knowledge and workflows.
+Reusable agent skills for GitLab projects. Skills are structured prompt files that AI coding assistants (like [pi](https://github.com/badlogic/pi-mono), [OpenCode](https://opencode.ai) and [Claude Code](https://code.claude.com)) can load on demand to gain domain-specific knowledge and workflows.
 
 ## Table of Contents
 
