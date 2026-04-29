@@ -95,7 +95,7 @@ Iteratively test and refine prompts, skills, and agent configurations using open
 
 ### Pi (Package)
 
-This repo ships as a [pi package](https://github.com/anthropics/pi). Install globally or per-project:
+This repo ships as a [pi package](https://github.com/badlogic/pi-mono). Install globally or per-project:
 
 ```bash
 # From git (global)
