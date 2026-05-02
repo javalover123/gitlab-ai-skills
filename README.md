@@ -43,6 +43,10 @@ Skills are loaded explicitly by the agent when relevant to a task (e.g. "load th
 
 Use when creating git commits, writing commit messages, or when about to run git commit -- enforces structured commit message format with imperative mood, capitalized subjects, 72-char wrapping, and atomic commits → [`SKILL.md`](skills/commit-messages/SKILL.md)
 
+#### gitlab-pipeline-watch
+
+Watch GitLab MR pipelines and react to state changes → [`SKILL.md`](skills/gitlab-pipeline-watch/SKILL.md)
+
 #### glab
 
 GitLab workflow automation using glab CLI → [`SKILL.md`](skills/glab/SKILL.md)

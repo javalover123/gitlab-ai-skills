@@ -17,6 +17,14 @@
       "path": "skills/gitlab-clickhouse/SKILL.md"
     },
     {
+      "name": "gitlab-pipeline-watch",
+      "description": "Watch GitLab MR pipelines and react to state changes",
+      "category": "Development Workflow",
+      "license": "MIT",
+      "compatibility": "",
+      "path": "skills/gitlab-pipeline-watch/SKILL.md"
+    },
+    {
       "name": "gitlab-psql",
       "description": "Inspect GitLab GDK PostgreSQL test and development databases with gdk psql. Use for Postgres schema checks, table and index inspection, read-only SQL queries, migration verification, and investigating GitLab application data in local test or development databases.",
       "category": "Database",
