@@ -1,7 +1,7 @@
 ---
 name: glab
 description: GitLab workflow automation using glab CLI
-version: 1.6.0
+version: 1.7.0
 category: Development Workflow
 license: MIT
 metadata:
@@ -12,6 +12,15 @@ metadata:
 # GitLab Workflow Skill
 
 GitLab workflow management using `glab` CLI for merge requests, issues, and Git best practices.
+
+## Multiple GitLab Instances
+
+glab auto-detects the GitLab host from your git remote. No `GITLAB_HOST` is needed when
+working inside a repository. For non-`origin` remotes (e.g. a local GDK instance added
+as a secondary remote), use `glab config set remote_alias <remote>`. Set `GITLAB_HOST`
+only when running outside a git repository or for a one-off command targeting a specific
+instance. See [references/multi-host.md](references/multi-host.md) for non-origin remote
+setup and hostname derivation from remote URLs.
 
 ## ⚠️ Message Escaping — Common Trap
 
@@ -247,6 +256,8 @@ git checkout -b fix/description
 21. **No `--body` flag** — glab uses `--description`, not `--body` (which is a `gh` flag); they are not interchangeable
 22. **Search: URL-encode project paths** — use `%2F` for `/`; see [references/search.md](references/search.md) for full examples
 23. **Backticks in messages → write to a file you name yourself** — never inline `` ` `` in `-m "..."` or `--description "..."`; write to a file you pick (e.g. `mktemp`, a workspace tmp path — unique per invocation to avoid clobbering parallel agents) using `<< 'EOF'` (single-quoted delimiter, critical), then pass via `$(cat "$FILE")`
+24. **`GITLAB_HOST` only when needed** — glab auto-detects the host from the git remote; set `GITLAB_HOST` only outside a git repo or for one-off cross-instance commands. For standard HTTPS hosts the scheme is optional (`GITLAB_HOST=ops.gitlab.net`); for HTTP or non-standard ports include both the scheme and the port (`GITLAB_HOST=http://gdk.test:3000`). See [references/multi-host.md](references/multi-host.md).
+25. **Non-origin remotes** — if `origin` points at one instance but you want glab to target another remote (e.g. `gdk`), run `glab config set remote_alias gdk` (per-repo) or `glab config set --global remote_alias gdk` (all repos) rather than setting `GITLAB_HOST` for every command.
 
 ## Contributing Improvements
 
