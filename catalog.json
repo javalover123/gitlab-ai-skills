@@ -49,6 +49,14 @@
       "path": "skills/glab/SKILL.md"
     },
     {
+      "name": "mr-review",
+      "description": "Review GitLab merge requests using conventional comments format",
+      "category": "Development Workflow",
+      "license": "MIT",
+      "compatibility": "opencode",
+      "path": "skills/mr-review/SKILL.md"
+    },
+    {
       "name": "opencode-refine",
       "description": "Iteratively test and refine prompts, skills, and agent configurations using opencode run",
       "category": "Agent Tooling",
