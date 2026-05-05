@@ -9,6 +9,14 @@
       "path": "skills/commit-messages/SKILL.md"
     },
     {
+      "name": "gitlab-babysit-mr",
+      "description": "Monitor a GitLab MR's pipeline until green. Classifies failures (flaky, master-broken, lint, coverage, real), retries jobs where appropriate, makes light-touch auto-fixes, and posts findings as an MR comment.",
+      "category": "Development Workflow",
+      "license": "MIT",
+      "compatibility": "opencode",
+      "path": "skills/gitlab-babysit-mr/SKILL.md"
+    },
+    {
       "name": "gitlab-clickhouse",
       "description": "Inspect GitLab local ClickHouse tables, schemas, ingestion paths, and data patterns. Use for CH table questions, DESCRIBE TABLE, schema and source-of-truth checks under db/click_house, ingestion debugging, and investigating aggregates, distributions, outliers, or anomalous ClickHouse data in a GitLab GDK environment.",
       "category": "Database",
