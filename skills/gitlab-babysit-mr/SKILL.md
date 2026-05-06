@@ -287,7 +287,7 @@ for each LINT job:
         note: "Duo Developer fix incomplete — requires manual attention"
 ```
 
-If Duo Developer does not push a commit within 10 minutes (detected when pipeline-watch times out with no new pipeline), classify as REQUIRES_MANUAL_FIX.
+If Duo Developer does not push a commit within 15 minutes (detected when pipeline-watch times out with no new pipeline), classify as REQUIRES_MANUAL_FIX.
 
 ### COVERAGE → Search for known coverage issues first
 ```bash
