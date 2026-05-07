@@ -243,9 +243,19 @@ DUO_INSTRUCTION="Fix the following lint violations in this MR:\n\n"
 # - ESLint no-unused-vars in app/assets/javascripts/bar.js:10
 # Keep it specific: file paths, line numbers, rule names, and what to change.
 
+# Write the comment body to a temp file to avoid shell quoting issues
+# (lint output routinely contains backticks, quotes, and other metacharacters)
+DUO_MSG=$(mktemp)
+cat > "$DUO_MSG" << 'EOF'
+@duo-developer-gitlab-org
+EOF
+# Append the instruction (already shell-safe in a variable)
+printf '%s' "$DUO_INSTRUCTION" >> "$DUO_MSG"
+
 glab api "projects/${PROJECT_ENCODED}/merge_requests/${MR_IID}/notes" \
   --method POST \
-  --raw-field "body=@duo-developer-gitlab-org ${DUO_INSTRUCTION}"
+  --raw-field "body=$(cat "$DUO_MSG")"
+rm -f "$DUO_MSG"
 ```
 
 **Guidelines for the instruction:**
@@ -283,11 +293,53 @@ for each LINT job:
         note: "Requested Duo Developer fix for lint violations"
     else:
         # Already requested once — Duo's fix didn't fully resolve it
-        classify as REQUIRES_MANUAL_FIX
-        note: "Duo Developer fix incomplete — requires manual attention"
+        # Fall back to local auto-fix before giving up
+        LOCAL_FIX_ATTEMPTED = try_local_autofix(job)
+        if LOCAL_FIX_ATTEMPTED:
+            note: "Duo Developer fix incomplete — attempting local auto-fix"
+        else:
+            classify as REQUIRES_MANUAL_FIX
+            note: "Duo Developer fix incomplete, local auto-fix unavailable — requires manual attention"
 ```
 
-If Duo Developer does not push a commit within 15 minutes (detected when pipeline-watch times out with no new pipeline), classify as REQUIRES_MANUAL_FIX.
+**Step 5 (fallback): Local auto-fix when Duo Developer's fix is incomplete or unavailable.**
+
+If Duo Developer doesn't push within the timeout, or its fix doesn't resolve all violations, attempt local auto-fix as a last resort before classifying as `REQUIRES_MANUAL_FIX`. This requires the project's toolchain to be available locally.
+
+```bash
+# Detect which linters are available and run auto-fix on MR-changed files only
+CHANGED_FILES=$(git diff origin/main --name-only)
+
+# RuboCop (Ruby)
+if command -v bundle &>/dev/null && bundle exec rubocop --version &>/dev/null; then
+  echo "$CHANGED_FILES" | grep '\.rb$' | xargs -r bundle exec rubocop --autocorrect --force-exclusion
+fi
+
+# ESLint (JavaScript/TypeScript)
+if command -v yarn &>/dev/null && [ -f .eslintrc* ] || [ -f eslint.config* ]; then
+  echo "$CHANGED_FILES" | grep -E '\.(js|ts|vue)$' | xargs -r yarn run eslint --fix
+fi
+
+# Prettier (formatting)
+if command -v yarn &>/dev/null && [ -f .prettierrc* ] || [ -f prettier.config* ]; then
+  echo "$CHANGED_FILES" | grep -E '\.(js|ts|vue|css|scss)$' | xargs -r yarn run prettier --write
+fi
+
+# HAML-lint
+if command -v bundle &>/dev/null && bundle exec haml-lint --version &>/dev/null; then
+  echo "$CHANGED_FILES" | grep '\.haml$' | xargs -r bundle exec haml-lint --auto-correct
+fi
+
+# If any files were modified, commit and push
+if ! git diff --quiet; then
+  git add -u
+  git commit -m "fix: auto-correct lint violations"
+  git push
+  WAIT_FOR_PUSH=false  # we pushed directly, no need to wait
+fi
+```
+
+If Duo Developer does not push a commit within 15 minutes (detected when pipeline-watch times out with no new pipeline), attempt the local auto-fix fallback above. If that also fails or is unavailable, classify as REQUIRES_MANUAL_FIX.
 
 ### COVERAGE → Search for known coverage issues first
 ```bash
