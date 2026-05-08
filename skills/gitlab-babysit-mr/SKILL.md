@@ -127,45 +127,9 @@ If the log tail is insufficient to classify, gather more context:
 
 ## Failure Classification Guide
 
-Read the last 150 lines of the log and classify into one of:
+**Classify** each failure using the detailed guide: **[references/failure-classification.md](references/failure-classification.md)**
 
-### FLAKY
-Random or infrastructure-related failures unrelated to the MR code:
-- Connection timeouts, DNS failures, port conflicts (`Errno::EADDRINUSE`, `Net::ReadTimeout`, `SocketError`)
-- "Could not connect", "connection refused", "connection reset"
-- Test passes in other shards/jobs of the same type
-- Intermittent Docker/runner issues
-- `random seed` combined with failures that seem random
-- "flaky" mentioned in the output
-
-### MASTER_BROKEN
-Shared code or infrastructure is broken for everyone, not specific to this MR:
-- Error in code the MR did not touch (check `git diff origin/main --name-only`)
-- Same root error in multiple unrelated jobs
-- Database migration errors, gem version conflicts
-- CI infrastructure errors (runner out of disk, registry unavailable)
-- Missing fixtures or seed data that existed before
-
-### LINT
-Style/formatting violation:
-- Job name contains: `rubocop`, `eslint`, `haml-lint`, `stylelint`, `prettier`
-- RuboCop cop names: `Style/`, `Layout/`, `Metrics/`, `Lint/`
-- ESLint format: `error  <rule>  <file>:<line>`
-- "offenses detected", "x problems (y errors, z warnings)"
-
-### COVERAGE
-Code coverage below threshold:
-- Job name contains: `coverage`, `code_coverage`
-- Output: "Coverage (%) must be at least X%", `C0 coverage`
-
-### REAL_FAILURE
-Actual bug in MR code:
-- Test failure in code the MR modified (correlate with `git diff origin/main --name-only`)
-- Logic error, missing method, wrong behavior
-- Expected/actual diff matches the MR's changes
-
-### UNKNOWN
-Cannot determine cause from log tail alone.
+Categories: FLAKY, MASTER_BROKEN, LINT, COVERAGE, REAL_FAILURE, UNKNOWN.
 
 ---
 
@@ -222,124 +186,9 @@ glab api --method POST "projects/<project_encoded>/pipelines/<pipeline_id>/retry
 
 ### LINT → Delegate fix to Duo Developer via MR comment
 
-Instead of running lint fixes locally, delegate to Duo Developer by posting an MR comment. This triggers a remote AI workflow that pushes a fix commit.
+Follow the full lint fix delegation workflow: **[references/lint-fix-delegation.md](references/lint-fix-delegation.md)**
 
-**Step 1: Analyze the lint errors to build a clear instruction.**
-
-From the job log tail, extract:
-- Which files have violations (correlate with `git diff origin/main --name-only`)
-- Which linter reported them (RuboCop cop names, ESLint rules, etc.)
-- The specific violations (e.g. "Style/StringLiterals in app/models/foo.rb:42")
-
-**Step 2: Post an MR comment mentioning Duo Developer.**
-
-Compose a targeted instruction and post it as a **new top-level MR note** (not inside the babysitter discussion thread):
-
-```bash
-# Build the instruction from the lint errors found in Phase 2
-DUO_INSTRUCTION="Fix the following lint violations in this MR:\n\n"
-# Append each violation, e.g.:
-# - RuboCop Style/StringLiterals in app/models/foo.rb:42 — use double quotes
-# - ESLint no-unused-vars in app/assets/javascripts/bar.js:10
-# Keep it specific: file paths, line numbers, rule names, and what to change.
-
-# Write the comment body to a temp file to avoid shell quoting issues
-# (lint output routinely contains backticks, quotes, and other metacharacters)
-DUO_MSG=$(mktemp)
-cat > "$DUO_MSG" << 'EOF'
-@duo-developer-gitlab-org
-EOF
-# Append the instruction (already shell-safe in a variable)
-printf '%s' "$DUO_INSTRUCTION" >> "$DUO_MSG"
-
-glab api "projects/${PROJECT_ENCODED}/merge_requests/${MR_IID}/notes" \
-  --method POST \
-  --raw-field "body=$(cat "$DUO_MSG")"
-rm -f "$DUO_MSG"
-```
-
-**Guidelines for the instruction:**
-- Be specific: include file paths, line numbers, and rule names
-- Group by linter (RuboCop, ESLint, HAML-lint, Prettier, Stylelint)
-- For RuboCop: include the cop name (e.g. `Style/StringLiterals`)
-- For ESLint/Prettier: include the rule name and whether `--fix` can resolve it
-- Limit to violations in files the MR actually changed (from `git diff origin/main --name-only`)
-- If there are too many violations (>20), focus on the blocking ones and ask Duo to run the auto-formatter
-
-Example instruction:
-```
-Fix these RuboCop offenses in this MR:
-- Style/StringLiterals in app/models/user.rb:42,58 — use double quotes
-- Layout/TrailingWhitespace in app/controllers/foo_controller.rb:15,23
-
-Run `bundle exec rubocop --autocorrect` on the affected files.
-```
-
-**Step 3: Wait for Duo Developer to push a fix commit.**
-
-After posting the comment, set `WAIT_FOR_PUSH=true` and loop back to Phase 1. The pipeline watcher will use `--wait-for-push` to detect Duo Developer's new commit and the resulting pipeline.
-
-**Step 4: If Duo Developer's fix doesn't resolve all lint issues** (detected in a subsequent action round), classify remaining violations as REQUIRES_MANUAL_FIX. Do NOT post a second Duo Developer request for the same lint job — avoid a retry loop.
-
-Track Duo Developer requests using a `DUO_LINT_REQUESTED` set (keyed by job name). Only request once per job:
-
-```pseudocode
-DUO_LINT_REQUESTED = {}   # persisted across action rounds, keyed by job name
-
-for each LINT job:
-    if job_name not in DUO_LINT_REQUESTED:
-        # Post @duo-developer-gitlab-org comment with fix instructions
-        DUO_LINT_REQUESTED[job_name] = true
-        note: "Requested Duo Developer fix for lint violations"
-    else:
-        # Already requested once — Duo's fix didn't fully resolve it
-        # Fall back to local auto-fix before giving up
-        LOCAL_FIX_ATTEMPTED = try_local_autofix(job)
-        if LOCAL_FIX_ATTEMPTED:
-            note: "Duo Developer fix incomplete — attempting local auto-fix"
-        else:
-            classify as REQUIRES_MANUAL_FIX
-            note: "Duo Developer fix incomplete, local auto-fix unavailable — requires manual attention"
-```
-
-**Step 5 (fallback): Local auto-fix when Duo Developer's fix is incomplete or unavailable.**
-
-If Duo Developer doesn't push within the timeout, or its fix doesn't resolve all violations, attempt local auto-fix as a last resort before classifying as `REQUIRES_MANUAL_FIX`. This requires the project's toolchain to be available locally.
-
-```bash
-# Detect which linters are available and run auto-fix on MR-changed files only
-CHANGED_FILES=$(git diff origin/main --name-only)
-
-# RuboCop (Ruby)
-if command -v bundle &>/dev/null && bundle exec rubocop --version &>/dev/null; then
-  echo "$CHANGED_FILES" | grep '\.rb$' | xargs -r bundle exec rubocop --autocorrect --force-exclusion
-fi
-
-# ESLint (JavaScript/TypeScript)
-if command -v yarn &>/dev/null && [ -f .eslintrc* ] || [ -f eslint.config* ]; then
-  echo "$CHANGED_FILES" | grep -E '\.(js|ts|vue)$' | xargs -r yarn run eslint --fix
-fi
-
-# Prettier (formatting)
-if command -v yarn &>/dev/null && [ -f .prettierrc* ] || [ -f prettier.config* ]; then
-  echo "$CHANGED_FILES" | grep -E '\.(js|ts|vue|css|scss)$' | xargs -r yarn run prettier --write
-fi
-
-# HAML-lint
-if command -v bundle &>/dev/null && bundle exec haml-lint --version &>/dev/null; then
-  echo "$CHANGED_FILES" | grep '\.haml$' | xargs -r bundle exec haml-lint --auto-correct
-fi
-
-# If any files were modified, commit and push
-if ! git diff --quiet; then
-  git add -u
-  git commit -m "fix: auto-correct lint violations"
-  git push
-  WAIT_FOR_PUSH=false  # we pushed directly, no need to wait
-fi
-```
-
-If Duo Developer does not push a commit within 15 minutes (detected when pipeline-watch times out with no new pipeline), attempt the local auto-fix fallback above. If that also fails or is unavailable, classify as REQUIRES_MANUAL_FIX.
+Summary: Post a `@duo-developer-gitlab-org` MR comment with specific violations, wait for Duo to push a fix, fall back to local auto-fix if incomplete. Track requests in `DUO_LINT_REQUESTED` to avoid retry loops.
 
 ### COVERAGE → Search for known coverage issues first
 ```bash
@@ -355,84 +204,7 @@ If found, retry. Otherwise classify as REQUIRES_MANUAL_FIX.
 
 ## Phase 5: Post MR Comment (resolved discussion thread)
 
-Post all reports inside a **single resolved discussion** so they stay collapsed and out of the way.
-
-### First report: Create resolved discussion, then reply with report
-
-**Step 1**: Create a small discussion and immediately resolve it.
-
-```bash
-# Create the discussion with a short placeholder body
-DISCUSSION_RESPONSE=$(glab api "projects/${PROJECT_ENCODED}/merge_requests/${MR_IID}/discussions" \
-  --method POST \
-  --raw-field "body=Thread generated by \`/gitlab-babysit-mr\`")
-
-DISCUSSION_ID=$(echo "$DISCUSSION_RESPONSE" | jq -r '.id')
-FIRST_NOTE_ID=$(echo "$DISCUSSION_RESPONSE" | jq -r '.notes[0].id')
-
-# Immediately resolve the discussion so it's collapsed
-glab api "projects/${PROJECT_ENCODED}/merge_requests/${MR_IID}/discussions/${DISCUSSION_ID}" \
-  --method PUT \
-  --raw-field "resolved=true"
-```
-
-**Step 2**: Post the actual report as a reply, then re-resolve the discussion (GitLab unresolves a discussion when a new reply is added).
-
-```bash
-glab api "projects/${PROJECT_ENCODED}/merge_requests/${MR_IID}/discussions/${DISCUSSION_ID}/notes" \
-  --method POST \
-  --raw-field "body=$(cat <<'COMMENT'
-## Pipeline Babysitter Report
-
-**Pipeline**: <pipeline_url> | **Status**: <pipeline_status> | **Commit**: `<pipeline_sha>`
-**Action round**: 1 of 5
-
-### Failed Jobs
-
-**`<job_name>`** · stage: `<stage>`
-- **Failure summary**: <1-2 line description from log>
-- **Classification**: FLAKY | MASTER_BROKEN | LINT | COVERAGE | REAL_FAILURE | UNKNOWN
-- **Known issue**: <URL or "none found">
-- **Action taken**: <description or "none — requires manual fix">
-
-_(repeat for each failed job)_
-
-### Summary
-
-| Classification | Jobs | Action |
-|----------------|------|--------|
-| Flaky | N | Retried (attempt M of 2) / pipeline retried |
-| Master broken | N | Pipeline retried / linked issue |
-| Lint | N | Auto-fixed and pushed |
-| Coverage | N | Retried / requires manual fix |
-| Real failure | N | **Requires manual fix** |
-| Unknown | N | Retried once |
-
-_Waiting for pipeline to finish before next check._
-
----
-*Generated by `/babysit-mr`*
-COMMENT
-)"
-
-# Re-resolve the discussion (replying unresolves it)
-glab api "projects/${PROJECT_ENCODED}/merge_requests/${MR_IID}/discussions/${DISCUSSION_ID}" \
-  --method PUT \
-  --raw-field "resolved=true"
-```
-
-### Subsequent reports: Reply to existing discussion
-
-```bash
-glab api "projects/${PROJECT_ENCODED}/merge_requests/${MR_IID}/discussions/${DISCUSSION_ID}/notes" \
-  --method POST \
-  --raw-field "body=<report body>"
-
-# Re-resolve the discussion (replying unresolves it)
-glab api "projects/${PROJECT_ENCODED}/merge_requests/${MR_IID}/discussions/${DISCUSSION_ID}" \
-  --method PUT \
-  --raw-field "resolved=true"
-```
+Post all reports inside a **single resolved discussion** so they stay collapsed and out of the way. See **[references/mr-reporting.md](references/mr-reporting.md)** for the full API workflow, report template, and re-resolve pattern.
 
 Store `DISCUSSION_ID` across action rounds so all updates form a single thread.
 
@@ -440,30 +212,7 @@ Store `DISCUSSION_ID` across action rounds so all updates form a single thread.
 
 ## Phase 6: Diagnose Blocking Failures
 
-**Before posting the final blocked report**, attempt root-cause diagnosis for any failure classified as **REAL_FAILURE**, **MASTER_BROKEN**, **UNKNOWN**, or **REQUIRES_MANUAL_FIX**. This gives the MR author actionable information instead of just "requires manual fix".
-
-For each blocking failure:
-
-### REAL_FAILURE diagnosis
-1. Correlate the failing test file with MR changes: `git diff origin/main --name-only`
-2. Read the failing test to understand what it asserts
-3. Read the relevant source code that the MR changed
-4. Summarize: which MR change likely caused which assertion to fail, and suggest a fix direction
-
-### MASTER_BROKEN diagnosis
-1. Check if the same job/test fails on the `main` branch pipeline (use `glab api "projects/${PROJECT_ENCODED}/pipelines?ref=main&status=failed&per_page=3"`)
-2. Search for related open issues: `bash scripts/search_known_issues.sh "<error>" "<project>"`
-3. If confirmed broken on main: note the issue URL and whether a fix MR exists
-4. Summarize: what's broken, who owns it (if identifiable from issue), and whether a workaround exists
-
-### UNKNOWN diagnosis
-1. Fetch more log context (increase to 300 lines): `bash scripts/job_log_tail.sh "<project_encoded>" "<job_id>" 300`
-2. Re-attempt classification with the additional context
-3. If still unclassifiable: note the job URL and the most distinctive error line for manual inspection
-
-### REQUIRES_MANUAL_FIX diagnosis
-1. If this was a lint auto-fix that failed: note what went wrong and which files need manual attention
-2. If this was a coverage drop: identify which files lost coverage by reading the coverage report section of the log
+**Before posting the final blocked report**, attempt root-cause diagnosis for any blocking failure. See **[references/failure-diagnosis.md](references/failure-diagnosis.md)** for per-classification diagnosis steps.
 
 Include the diagnosis in the final report under each job's entry as a **Root cause** field.
 
