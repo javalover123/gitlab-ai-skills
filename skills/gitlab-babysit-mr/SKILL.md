@@ -17,229 +17,53 @@ Nurse a GitLab MR's pipeline to green by classifying failures, retrying flaky/br
 
 ## Dependencies
 
-- **Bundled scripts** — `scripts/` directory next to this file (pipeline_status.sh, job_log_tail.sh, search_known_issues.sh)
+- **Bundled scripts** — `scripts/` directory (pipeline_status.sh, job_log_tail.sh, search_known_issues.sh)
 - **gitlab-pipeline-watch skill** — provides `pipeline-watch.py` for blocking pipeline polling
 
-## Phase 0: Resolve the MR
-
-Use the argument if provided. Otherwise detect from the current branch:
-
-```bash
-MR_URL="${ARGUMENT:-}"
-if [[ -z "$MR_URL" ]]; then
-  MR_URL=$(glab mr view --output json 2>/dev/null | jq -r '.web_url // empty')
-fi
-
-if [[ -z "$MR_URL" ]]; then
-  echo "Error: no MR URL provided and none detected for current branch." >&2
-  exit 1
-fi
-```
-
-Parse the URL to extract project and MR IID:
-
-```bash
-# https://gitlab.com/group/[subgroup/]project/-/merge_requests/123
-path="${MR_URL#https://gitlab.com/}"
-PROJECT_PATH="${path%%/-/*}"
-MR_IID="${MR_URL##*/}"
-PROJECT_ENCODED="${PROJECT_PATH//\//%2F}"
-```
-
----
-
-## Main Loop (max 5 ACTION rounds)
+## Main Loop (max 5 action rounds)
 
 The loop caps **action rounds** (classify + retry/fix), NOT status checks. The babysitter waits as long as the pipeline needs — it only counts a round when it takes action on failures.
 
 ```pseudocode
-ACTION_ROUND=0
-MAX_ROUNDS=5
-JOB_RETRY_COUNT={}        # keyed by job name, persisted across rounds
-DUO_LINT_REQUESTED={}     # keyed by job name, tracks Duo Developer lint fix requests
-DISCUSSION_ID=null        # set after first discussion creation, used for thread replies
+ACTION_ROUND = 0, MAX_ROUNDS = 5
+JOB_RETRY_COUNT = {}      # keyed by job name, persisted across rounds
+DUO_LINT_REQUESTED = {}   # keyed by job name, tracks Duo Developer requests
+DISCUSSION_ID = null      # set after first report, reused for thread replies
 
 while ACTION_ROUND < MAX_ROUNDS:
-    1. Wait for pipeline to reach terminal state (Phase 1)
-    2. If success → post report (as reply in discussion thread), exit
-    3. If failed → analyze, classify, act, report (Phases 2-5)
-    4. If action taken → ACTION_ROUND++, go to 1
-    5. If no action possible → diagnose blocking failures (Phase 6), post final report (Phase 5), exit
+    Phase 0: Resolve MR URL → PROJECT_PATH, MR_IID, PROJECT_ENCODED
+    Phase 1: Wait for pipeline terminal state (SUCCESS/FAILED/CANCELED)
+    Phase 2: Analyze each failed job (fetch log tail, classify)
+    Phase 3: Search for known issues (FLAKY and MASTER_BROKEN only)
+    Phase 4: Take action per classification
+    Phase 5: Post report in resolved discussion thread
+    Phase 6: Diagnose blocking failures before final report
+    Phase 7: Loop back if action taken, else post final report and exit
 ```
 
----
+## Phases — Reference Files
 
-## Phase 1: Wait for Pipeline to Finish
+Each phase has detailed instructions in a reference file. Load on demand.
 
-Use `pipeline-watch.py` (from the `gitlab-pipeline-watch` skill) in a polling loop. Each invocation blocks for up to 15 minutes (staying within tool-call timeout limits), then re-invoke if the pipeline is still running. **Never give up on a running pipeline.**
+| Phase | Summary | Reference |
+|-------|---------|-----------|
+| **0** | Resolve MR from argument or current branch | [references/mr-resolution.md](references/mr-resolution.md) |
+| **1** | Poll with pipeline-watch.py in 15-min windows; never give up on running pipelines | [references/pipeline-watching.md](references/pipeline-watching.md) |
+| **2–3** | Fetch job logs, classify failures, search known issues | [references/job-analysis.md](references/job-analysis.md) |
+| **4** | Retry flaky jobs, retry pipelines, delegate lint to Duo Developer | [references/failure-actions.md](references/failure-actions.md) |
+| **5** | Post report in a resolved discussion thread (collapsed by default) | [references/mr-reporting.md](references/mr-reporting.md) |
+| **6** | Root-cause diagnosis for blocking failures | [references/failure-diagnosis.md](references/failure-diagnosis.md) |
+| **7** | Set `WAIT_FOR_PUSH=true` and loop, or exit if no actions possible | — |
 
-Locate pipeline-watch.py from the installed `gitlab-pipeline-watch` skill's `scripts/` directory.
+**Classification guide:** [references/failure-classification.md](references/failure-classification.md) — FLAKY, MASTER_BROKEN, LINT, COVERAGE, REAL_FAILURE, UNKNOWN.
 
-```pseudocode
-WAIT_FOR_PUSH=false   # set to true after pushing a fix or retrying
+**Lint fix delegation:** [references/lint-fix-delegation.md](references/lint-fix-delegation.md) — Duo Developer comment → wait → local fallback.
 
-loop:
-    if WAIT_FOR_PUSH:
-        output=$(python3 pipeline-watch.py "$PROJECT_PATH" \
-          --no-all --no-watch-new "$MR_IID" \
-          --wait-for-push --timeout 900)
-    else:
-        output=$(python3 pipeline-watch.py "$PROJECT_PATH" \
-          --no-all --no-watch-new "$MR_IID" \
-          --timeout 900)
+## Safety Rules
 
-    if output contains "SUCCESS" → pipeline green, proceed to report
-    if output contains "FAILED"  → proceed to Phase 2
-    if output contains "CANCELED" → post comment, exit
-    if timeout (no event)        → loop again
-```
-
-**CRITICAL**: Use `timeout=960000` (16 min) on the Bash tool call so it outlasts the 900s script timeout. The script exits cleanly on timeout — it's not an error, just means the pipeline is still running.
-
-After the watcher reports a terminal state, get the structured JSON:
-
-```bash
-bash scripts/pipeline_status.sh "$MR_URL"
-```
-
-Check `blocking_failure_count`: if 0 but status is `failed`, all failures are `allow_failure: true` (non-blocking). Treat as green.
-
----
-
-## Phase 2: Analyze Each Failed Job
-
-For each entry in `failed_jobs` where `allow_failure != true`:
-
-```bash
-bash scripts/job_log_tail.sh "<project_encoded>" "<job_id>" 150
-```
-
-If the log tail is insufficient to classify, gather more context:
-- Run `git diff origin/main --name-only` to see which files the MR changed — compare against files mentioned in the error
-- Check if the same job name failed in other recent pipelines (indicates FLAKY or MASTER_BROKEN, not REAL_FAILURE)
-- Read the job's `failure_reason` field from the pipeline_status output (e.g. `script_failure` vs `stuck_or_timeout_failure`)
-
-**Classify** the failure using the guide below. Record the classification for each job.
-
-**Skip** jobs where `allow_failure: true` — they do not block the pipeline.
-
----
-
-## Failure Classification Guide
-
-**Classify** each failure using the detailed guide: **[references/failure-classification.md](references/failure-classification.md)**
-
-Categories: FLAKY, MASTER_BROKEN, LINT, COVERAGE, REAL_FAILURE, UNKNOWN.
-
----
-
-## Phase 3: Search for Known Issues
-
-For **FLAKY** and **MASTER_BROKEN** failures, search for known issues:
-
-```bash
-# Use the most distinctive part of the error — test name, class name, or error message
-bash scripts/search_known_issues.sh "<failure-keyword>" "<project>"
-```
-
-Good search terms (in order of specificity):
-1. Exact test name: `FooSpec#bar_method`
-2. Error class + method: `NoMethodError undefined method foo`
-3. Job name if it's a known flaky job: `rspec-ee-unit`
-
----
-
-## Phase 4: Take Action
-
-### FLAKY → Retry job (up to 2 retries per job; on 3rd failure, retry pipeline)
-
-Track retry counts per job across action rounds using a `JOB_RETRY_COUNT` map (keyed by job name, since job IDs change on retry).
-
-```pseudocode
-JOB_RETRY_COUNT = {}   # persisted across action rounds, keyed by job name
-
-for each FLAKY job:
-    count = JOB_RETRY_COUNT.get(job_name, 0)
-    if count < 2:
-        # Retry the individual job
-        glab api --method POST "projects/<project_encoded>/jobs/<job_id>/retry"
-        JOB_RETRY_COUNT[job_name] = count + 1
-        note: "Retried job (attempt #{count + 1} of 2)" + (known_issue_url or "no known issue found")
-    else:
-        # 3rd failure — escalate to full pipeline retry
-        glab api --method POST "projects/<project_encoded>/pipelines/<pipeline_id>/retry"
-        note: "Job failed 3 times — retried entire pipeline"
-        break   # pipeline retry supersedes remaining individual retries
-```
-
-Search for known issues regardless of retry count (for reporting):
-```bash
-bash scripts/search_known_issues.sh "<failure-keyword>" "<project>"
-```
-
-### MASTER_BROKEN + known issue found → Retry pipeline (not just the job)
-```bash
-glab api --method POST "projects/<project_encoded>/pipelines/<pipeline_id>/retry"
-```
-
-### MASTER_BROKEN + no known issue → Check if the error is really master broken by inspecting code history. If confirmed, retry pipeline.
-
-### LINT → Delegate fix to Duo Developer via MR comment
-
-Follow the full lint fix delegation workflow: **[references/lint-fix-delegation.md](references/lint-fix-delegation.md)**
-
-Summary: Post a `@duo-developer-gitlab-org` MR comment with specific violations, wait for Duo to push a fix, fall back to local auto-fix if incomplete. Track requests in `DUO_LINT_REQUESTED` to avoid retry loops.
-
-### COVERAGE → Search for known coverage issues first
-```bash
-bash scripts/search_known_issues.sh "coverage" "<project>"
-```
-If found, retry. Otherwise classify as REQUIRES_MANUAL_FIX.
-
-### REAL_FAILURE → No action. Document clearly in the report.
-
-### UNKNOWN → Retry up to 2 times (same as FLAKY). If it fails a 3rd time, escalate to REQUIRES_MANUAL_FIX and diagnose in Phase 6.
-
----
-
-## Phase 5: Post MR Comment (resolved discussion thread)
-
-Post all reports inside a **single resolved discussion** so they stay collapsed and out of the way. See **[references/mr-reporting.md](references/mr-reporting.md)** for the full API workflow, report template, and re-resolve pattern.
-
-Store `DISCUSSION_ID` across action rounds so all updates form a single thread.
-
----
-
-## Phase 6: Diagnose Blocking Failures
-
-**Before posting the final blocked report**, attempt root-cause diagnosis for any blocking failure. See **[references/failure-diagnosis.md](references/failure-diagnosis.md)** for per-classification diagnosis steps.
-
-Include the diagnosis in the final report under each job's entry as a **Root cause** field.
-
----
-
-## Phase 7: Wait and Loop
-
-If any jobs were retried or a fix was pushed:
-```bash
-WAIT_FOR_PUSH=true   # so Phase 1 uses --wait-for-push to ignore stale pipeline
-# → Loop back to Phase 1
-```
-
-If no actions could be taken (all failures are REAL_FAILURE or REQUIRES_MANUAL_FIX):
-```bash
-# Post final blocked report (as reply in discussion thread) with diagnosis and exit
-```
-
----
-
-## Retry Safety Rules
-
-- **Max 2 retries per job** — track by job name across rounds; on 3rd failure, escalate to pipeline retry
-- **Never retry REAL_FAILURE jobs** — they need code fixes, not retries
+- **Max 2 retries per job** — track by name; 3rd failure → pipeline retry
+- **Never retry REAL_FAILURE** — needs code fixes, not retries
 - **Max 5 action rounds** — caps retries/fixes, NOT waiting time
-- **Never give up on a running pipeline** — keep re-invoking pipeline-watch.py in 15-min windows until terminal
-- **Do not retry `allow_failure: true` jobs** — they are non-blocking by design
-- **Do not force-push or amend commits** — always new commits for lint fixes
-
-
+- **Never give up on a running pipeline** — re-invoke pipeline-watch.py in 15-min windows
+- **Skip `allow_failure: true` jobs** — non-blocking by design
+- **No force-push or amend** — always new commits for fixes
