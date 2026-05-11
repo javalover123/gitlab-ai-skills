@@ -25,13 +25,14 @@ Nurse a GitLab MR's pipeline to green by classifying failures, retrying flaky/br
 The loop caps **action rounds** (classify + retry/fix), NOT status checks. The babysitter waits as long as the pipeline needs — it only counts a round when it takes action on failures.
 
 ```pseudocode
+Phase 0: Resolve MR URL → PROJECT_PATH, MR_IID, PROJECT_ENCODED
+
 ACTION_ROUND = 0, MAX_ROUNDS = 5
 JOB_RETRY_COUNT = {}      # keyed by job name, persisted across rounds
 DUO_LINT_REQUESTED = {}   # keyed by job name, tracks Duo Developer requests
 DISCUSSION_ID = null      # set after first report, reused for thread replies
 
 while ACTION_ROUND < MAX_ROUNDS:
-    Phase 0: Resolve MR URL → PROJECT_PATH, MR_IID, PROJECT_ENCODED
     Phase 1: Wait for pipeline terminal state (SUCCESS/FAILED/CANCELED)
     Phase 2: Analyze each failed job (fetch log tail, classify)
     Phase 3: Search for known issues (FLAKY and MASTER_BROKEN only)
