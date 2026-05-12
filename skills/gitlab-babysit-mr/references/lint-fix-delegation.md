@@ -96,12 +96,12 @@ if command -v bundle &>/dev/null && bundle exec rubocop --version &>/dev/null; t
 fi
 
 # ESLint (JavaScript/TypeScript)
-if command -v yarn &>/dev/null && [ -f .eslintrc* ] || [ -f eslint.config* ]; then
+if command -v yarn &>/dev/null && { compgen -G ".eslintrc*" || compgen -G "eslint.config*"; } &>/dev/null; then
   echo "$CHANGED_FILES" | grep -E '\.(js|ts|vue)$' | xargs -r yarn run eslint --fix
 fi
 
 # Prettier (formatting)
-if command -v yarn &>/dev/null && [ -f .prettierrc* ] || [ -f prettier.config* ]; then
+if command -v yarn &>/dev/null && { compgen -G ".prettierrc*" || compgen -G "prettier.config*"; } &>/dev/null; then
   echo "$CHANGED_FILES" | grep -E '\.(js|ts|vue|css|scss)$' | xargs -r yarn run prettier --write
 fi
 
