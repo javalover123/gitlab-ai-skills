@@ -85,7 +85,7 @@
       "description": "Write large files reliably using chunked bash append (>> heredoc)",
       "category": "Shell & Environment",
       "license": "MIT",
-      "compatibility": "opencode",
+      "compatibility": "",
       "path": "skills/write-large-file/SKILL.md"
     }
   ]
