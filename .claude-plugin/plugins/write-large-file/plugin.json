@@ -1,0 +1,10 @@
+{
+  "name": "write-large-file",
+  "description": "Write large files reliably using chunked bash append (>> heredoc)",
+  "version": "1.0.0",
+  "author": {
+    "name": "GitLab"
+  },
+  "license": "MIT",
+  "skills": "./"
+}
