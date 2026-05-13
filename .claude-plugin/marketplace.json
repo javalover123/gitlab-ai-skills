@@ -28,6 +28,10 @@
       "source": "./.claude-plugin/plugins/glab"
     },
     {
+      "name": "pushify",
+      "source": "./.claude-plugin/plugins/pushify"
+    },
+    {
       "name": "run-in-tmux-pane",
       "source": "./.claude-plugin/plugins/run-in-tmux-pane"
     },
