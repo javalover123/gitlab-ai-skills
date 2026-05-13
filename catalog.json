@@ -79,6 +79,14 @@
       "license": "MIT",
       "compatibility": "opencode",
       "path": "skills/self-service-performance-testing/SKILL.md"
+    },
+    {
+      "name": "write-large-file",
+      "description": "Write large files reliably using chunked bash append (>> heredoc)",
+      "category": "Shell & Environment",
+      "license": "MIT",
+      "compatibility": "",
+      "path": "skills/write-large-file/SKILL.md"
     }
   ]
 }
