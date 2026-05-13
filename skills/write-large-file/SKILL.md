@@ -4,7 +4,6 @@ description: Write large files reliably using chunked bash append (>> heredoc)
 version: 1.0.0
 category: Shell & Environment
 license: MIT
-compatibility: opencode
 metadata:
   audience: general
   workflow: local
