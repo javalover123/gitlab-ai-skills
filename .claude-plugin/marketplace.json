@@ -34,6 +34,10 @@
     {
       "name": "self-service-performance-testing",
       "source": "./.claude-plugin/plugins/self-service-performance-testing"
+    },
+    {
+      "name": "write-large-file",
+      "source": "./.claude-plugin/plugins/write-large-file"
     }
   ]
 }

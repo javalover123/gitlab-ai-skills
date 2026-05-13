@@ -81,6 +81,10 @@ Help engineers write performance tests that detect regressions, using k6 for loa
 
 Run commands in a temporary tmux pane with full interactive zsh environment (login shell, shims, PATH, aliases, TTY). → [`SKILL.md`](skills/run-in-tmux-pane/SKILL.md)
 
+#### write-large-file
+
+Write large files reliably using chunked bash append (>> heredoc) → [`SKILL.md`](skills/write-large-file/SKILL.md)
+
 ### Agent Tooling
 
 #### opencode-refine
@@ -178,6 +182,7 @@ This repo ships as a [Claude Code plugin marketplace](https://code.claude.com/do
 | [`glab`](.claude-plugin/plugins/glab) | [`glab`](skills/glab/SKILL.md) | GitLab workflow automation using glab CLI | 1.7.0 |
 | [`run-in-tmux-pane`](.claude-plugin/plugins/run-in-tmux-pane) | [`run-in-tmux-pane`](skills/run-in-tmux-pane/SKILL.md) | Run commands in a temporary tmux pane with full interactive zsh environment (login shell, shims, PATH, aliases, TTY). | 1.1.1 |
 | [`self-service-performance-testing`](.claude-plugin/plugins/self-service-performance-testing) | [`self-service-performance-testing`](skills/self-service-performance-testing/SKILL.md) | Help engineers write performance tests that detect regressions, using k6 for load testing and sitespeed.io for frontend Core Web Vitals. Use when the user is adding or changing API endpoints, database queries, critical paths, or frontend pages and needs to decide whether to write a performance test, what kind, or how to integrate it into CI. Also activate when the user mentions load testing, stress testing, response times, benchmarking, performance budgets, CPT, component performance testing, MR pipeline performance testing, or wants to run tests against staging - this skill enforces shared infrastructure safety rules. Does not cover profiling, APM, or debugging production incidents. | 0.2.1 |
+| [`write-large-file`](.claude-plugin/plugins/write-large-file) | [`write-large-file`](skills/write-large-file/SKILL.md) | Write large files reliably using chunked bash append (>> heredoc) | 1.0.0 |
 <!-- CLAUDECODE_PLUGINS_END -->
 
 ## Contributing
