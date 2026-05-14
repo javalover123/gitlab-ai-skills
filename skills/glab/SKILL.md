@@ -1,7 +1,7 @@
 ---
 name: glab
 description: GitLab workflow automation using glab CLI
-version: 1.7.0
+version: 1.8.0
 category: Development Workflow
 license: MIT
 metadata:
@@ -174,15 +174,24 @@ Full details, GraphQL alternative, and group-level work items: **[references/wor
 
 ## MR Review
 
-For MR review operations (draft notes, code suggestions, inline comments, bulk publish):
+Since `glab` v1.94.0, `glab mr note` handles every common MR-comment shape (list, general, diff-line, reply, resolve/reopen) without raw `glab api` calls or hand-built `position` objects. Prefer it for any single-comment workflow. The MR IID is a **positional** argument (not `--mr`); omit it to auto-detect from the current branch.
 
-**[references/mr-review.md](references/mr-review.md)** — covers:
-- Fetching MR diffs and version SHAs
-- Draft notes (general and inline) with correct JSON piping
-- Position objects and line type rules (`+`/`-`/context)
-- Code suggestion syntax (`suggestion:-N+M`)
-- Bulk publishing all drafts as a single review
-- Fetching, replying to, and resolving discussions
+```bash
+# ✅ Use glab mr note for read/write/reply/resolve — single command per operation
+glab mr note list 123 -F json                                       # read discussions
+glab mr note create 123 -m "comment"                                # general
+glab mr note create 123 --file main.go --line 42 -m "..."           # diff comment
+glab mr note create 123 --reply abc12345 -m "..."                   # reply
+glab mr note resolve 123 abc12345                                   # resolve thread
+
+# ❌ Do NOT use glab api .../discussions for these operations
+glab api "projects/<id>/merge_requests/123/discussions"             # use mr note list
+glab api --method PUT ".../discussions/<id>" -f resolved=true       # use mr note resolve
+```
+
+Fall back to raw `glab api .../draft_notes` only for **batched draft reviews** (multiple inline comments published together via `bulk_publish`) — `glab mr note` has no draft mode.
+
+Full reference (all flags, code suggestions, drafts/batch fallback, position objects): **[references/mr-review.md](references/mr-review.md)**
 
 ## Issue Links, Epics, and Nested Groups
 
@@ -258,6 +267,8 @@ git checkout -b fix/description
 23. **Backticks in messages → write to a file you name yourself** — never inline `` ` `` in `-m "..."` or `--description "..."`; write to a file you pick (e.g. `mktemp`, a workspace tmp path — unique per invocation to avoid clobbering parallel agents) using `<< 'EOF'` (single-quoted delimiter, critical), then pass via `$(cat "$FILE")`
 24. **`GITLAB_HOST` only when needed** — glab auto-detects the host from the git remote; set `GITLAB_HOST` only outside a git repo or for one-off cross-instance commands. For standard HTTPS hosts the scheme is optional (`GITLAB_HOST=ops.gitlab.net`); for HTTP or non-standard ports include both the scheme and the port (`GITLAB_HOST=http://gdk.test:3000`). See [references/multi-host.md](references/multi-host.md).
 25. **Non-origin remotes** — if `origin` points at one instance but you want glab to target another remote (e.g. `gdk`), run `glab config set remote_alias gdk` (per-repo) or `glab config set --global remote_alias gdk` (all repos) rather than setting `GITLAB_HOST` for every command.
+26. **Prefer `glab mr note` for MR comments (v1.94.0+)** — `glab mr note create --file --line` / `--reply` / `--unique` and `glab mr note resolve|reopen` replace the entire raw `glab api .../draft_notes` + position-object workflow for single comments. Fall back to `glab api .../draft_notes` only when you need batched drafts published together via `bulk_publish`.
+27. **Idempotent comments → `--unique`** — `glab mr note create -m "..." --unique` reads all MR notes first and skips if the same body already exists. Use it on rerun-safe paths (status comments, recurring summaries). `--unique` matches on body only; identical bodies on different diff lines still post (line is part of the position, not the body).
 
 ## Contributing Improvements
 
