@@ -1,4 +1,4 @@
-#!/opt/homebrew/bin/bats
+#!/usr/bin/env bats
 
 setup() {
   SCRIPT_DIR="$(cd "$(dirname "$BATS_TEST_FILENAME")/.." && pwd)"
