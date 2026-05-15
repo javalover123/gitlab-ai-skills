@@ -25,6 +25,14 @@
       "path": "skills/gitlab-clickhouse/SKILL.md"
     },
     {
+      "name": "gitlab-mr-comments",
+      "description": "Use when creating, reading, replying to, or resolving comments on a GitLab merge request \u2014 diff-line notes, thread replies, general notes, and discussion resolution via glab mr note. Also covers batched draft reviews via the optional note CLI. Keywords - GitLab, merge request, MR, comments, notes, code review, diff, resolve, feedback, discussion.",
+      "category": "Development Workflow",
+      "license": "MIT",
+      "compatibility": "opencode",
+      "path": "skills/gitlab-mr-comments/SKILL.md"
+    },
+    {
       "name": "gitlab-pipeline-watch",
       "description": "Watch GitLab MR pipelines and react to state changes",
       "category": "Development Workflow",

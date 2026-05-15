@@ -20,6 +20,10 @@
       "source": "./.claude-plugin/plugins/gitlab-clickhouse"
     },
     {
+      "name": "gitlab-mr-comments",
+      "source": "./.claude-plugin/plugins/gitlab-mr-comments"
+    },
+    {
       "name": "gitlab-psql",
       "source": "./.claude-plugin/plugins/gitlab-psql"
     },
