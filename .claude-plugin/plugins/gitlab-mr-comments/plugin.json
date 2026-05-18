@@ -1,0 +1,10 @@
+{
+  "name": "gitlab-mr-comments",
+  "description": "Use when creating, reading, replying to, or resolving comments on a GitLab merge request \u2014 diff-line notes, thread replies, general notes, and discussion resolution via glab mr note. Also covers batched draft reviews via the optional note CLI. Keywords - GitLab, merge request, MR, comments, notes, code review, diff, resolve, feedback, discussion.",
+  "version": "1.0.0",
+  "author": {
+    "name": "GitLab"
+  },
+  "license": "MIT",
+  "skills": "./"
+}
