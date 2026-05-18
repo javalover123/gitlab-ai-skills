@@ -1,98 +1,82 @@
-# Draft Reviews (using `note` CLI)
+# Draft Reviews (batched via `glab api`)
 
-The [`note`](https://gitlab.com/viktomas/note) CLI supports draft reviews — comments that stay invisible until explicitly published. Use drafts when you want to batch multiple comments before making them visible.
+`glab mr note create` publishes comments **immediately** — there is no draft mode in `glab mr note`. When you need to batch multiple inline comments and publish them together as a single review event (one notification, all comments grouped), use the `glab api .../draft_notes` path described in the `glab` skill's `mr-review.md`.
 
-Install:
+> **Note:** This is the one workflow where the raw API is still required. For any single comment — reply, diff note, or general — prefer `glab mr note create`.
 
-```bash
-# See https://gitlab.com/viktomas/note for installation
-go install gitlab.com/viktomas/note@latest
-```
+## Creating Draft Notes
 
-## Creating Drafts
-
-### Draft replies to existing discussions
+### General draft note (not inline)
 
 ```bash
-# Reply to a discussion as draft
-note draft create --reply d1a2b3c4 -m ":robot: AI-generated
+glab api --method POST \
+  "projects/<project_id>/merge_requests/<mr_iid>/draft_notes" \
+  -f note=":robot: AI-generated
 
-Good point, will fix."
-
-# Reply and auto-resolve on publish
-note draft create --reply d1a2b3c4 --resolve -m ":robot: AI-generated
-
-Fixed in latest push."
+Your summary comment here"
 ```
 
-### Draft comments on diff lines
+### Inline draft note (attached to a diff line)
+
+**Do NOT use `-f` flags for inline draft notes** — the nested `position` object will not serialize correctly and the comment will silently appear as a general (non-inline) note. Use JSON piped with `Content-Type: application/json`:
 
 ```bash
-# Draft diff comment on a specific line (new side)
-note draft create --file main.go --line 42 -m ":robot: AI-generated
-
-Nit: rename this"
-
-# Multiline diff comment (lines 10 through 15)
-note draft create --file main.go --line 10:15 -m ":robot: AI-generated
-
-Refactor this block"
-
-# Comment on a removed line (old side)
-note draft create --file main.go --old-line 10 -m ":robot: AI-generated
-
-Why was this removed?"
+echo '{"note":":robot: AI-generated\n\nNit: rename this","position":{"position_type":"text","base_sha":"BASE_SHA","head_sha":"HEAD_SHA","start_sha":"START_SHA","old_path":"path/to/file.rb","new_path":"path/to/file.rb","new_line":42}}' \
+  | glab api --method POST \
+    "projects/<project_id>/merge_requests/<mr_iid>/draft_notes" \
+    -H "Content-Type: application/json" --input -
 ```
 
-### Draft general comments
+For multi-line note bodies, write the JSON to a file first:
 
 ```bash
-note draft create -m ":robot: AI-generated
-
-Needs work"
+cat > /tmp/draft.json << 'DRAFT'
+{
+  "note": ":robot: AI-generated\n\nNit: rename this",
+  "position": {
+    "position_type": "text",
+    "base_sha": "BASE_SHA",
+    "head_sha": "HEAD_SHA",
+    "start_sha": "START_SHA",
+    "old_path": "path/to/file.rb",
+    "new_path": "path/to/file.rb",
+    "new_line": 42
+  }
+}
+DRAFT
+glab api --method POST \
+  "projects/<project_id>/merge_requests/<mr_iid>/draft_notes" \
+  -H "Content-Type: application/json" --input /tmp/draft.json
 ```
 
-### Multiline body via stdin
+### Fetching MR version SHAs
 
-````bash
-note draft create --file main.go --line 42 <<'EOF'
-:robot: AI-generated
+Inline draft notes require three SHAs from the latest MR version. Always fetch fresh — cached SHAs may be rejected.
 
-**Title of the finding**
-
-Explanation of the problem.
-
-```go
-// suggested fix
+```bash
+# ⚠️ API returns base_commit_sha / head_commit_sha / start_commit_sha
+# but the position object expects base_sha / head_sha / start_sha — jq renames here
+glab api "projects/<project_id>/merge_requests/<mr_iid>/versions" \
+  | jq '.[0] | {base_sha: .base_commit_sha, head_sha: .head_commit_sha, start_sha: .start_commit_sha}'
 ```
-EOF
-````
 
 ## Managing Drafts
 
 ```bash
-# List pending drafts
-note draft list
+# List pending draft notes
+glab api "projects/<project_id>/merge_requests/<mr_iid>/draft_notes"
 
 # Publish all drafts (ONLY when user explicitly asks)
-note draft publish
-```
-
-## Batch Review from JSON
-
-Creates multiple draft comments at once:
-
-```bash
-# Creates drafts (don't add --publish without user approval)
-echo '[{"file":"main.go","line":42,"body":":robot: AI-generated\n\nNit: rename this"}]' | note review
+glab api --method POST \
+  "projects/<project_id>/merge_requests/<mr_iid>/draft_notes/bulk_publish"
 ```
 
 ## Publishing Rules for Drafts
 
-1. **Never run `note draft publish` without the user explicitly requesting it.**
+1. **Never run `bulk_publish` without the user explicitly requesting it.**
 2. After creating drafts, report what's pending and let the user decide when to publish.
-3. Use drafts as the default when `note` CLI is available and the user wants to review comments before they go live.
+3. Use drafts as the default when the user wants to review comments before they go live.
 
 ## Auto-detection
 
-Like `glab`, the `note` CLI auto-detects the project and MR from the current branch. Pass `--mr <iid>` only if auto-detection fails.
+The `glab api` path requires explicit `<project_id>` and `<mr_iid>`. Fetch them from `glab mr view --output json | jq '{iid, project_id}'` if needed.

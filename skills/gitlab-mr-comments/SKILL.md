@@ -26,7 +26,7 @@ This skill is a focused MR-comments workflow adapted from [`viktomas/gitlab-mr-c
    glab auth login
    ```
 
-2. **[`note`](https://gitlab.com/viktomas/note)** *(optional)* — only required for batched draft reviews. See [references/DRAFTS.md](references/DRAFTS.md).
+2. **[`jq`](https://jqlang.github.io/jq/)** *(optional)* — only required for batched draft reviews via `glab api`. See [references/DRAFTS.md](references/DRAFTS.md).
 
 ## Publishing Rules
 
@@ -39,7 +39,7 @@ This skill is a focused MR-comments workflow adapted from [`viktomas/gitlab-mr-c
 
 **Confirm before every write. Everything is published immediately.**
 
-For draft reviews (batch comments that stay invisible until published), see [references/DRAFTS.md](references/DRAFTS.md) — requires the `note` CLI.
+For draft reviews (batch comments that stay invisible until published), see [references/DRAFTS.md](references/DRAFTS.md) — uses `glab api` directly.
 
 ## Auto-detection
 
@@ -220,10 +220,9 @@ Uses `glab` CLI for GitLab authentication:
 4. **Prefer `--reply` over a new note** when continuing an existing thread; otherwise the conversation fragments.
 5. **Use `--unique` on rerun-safe paths** — status comments, recurring summaries — to prevent duplicates.
 6. **Heredoc-quote bodies with backticks** — `<< 'EOF'` (single-quoted) for any body containing `` ` ``, `$`, or `!`.
-7. **For batched reviews, use the `note` CLI** — see [references/DRAFTS.md](references/DRAFTS.md). Never run `note draft publish` without the user's explicit request.
+7. **For batched reviews, use `glab api .../draft_notes`** — see [references/DRAFTS.md](references/DRAFTS.md). Never run `bulk_publish` without the user's explicit request.
 
 ## References
 
 - `glab mr note --help`, `glab mr note create --help`, `glab mr note list --help` for full CLI usage
-- [references/REFERENCE.md](references/REFERENCE.md) — GitLab API details, position object structure, line indexing
-- [references/DRAFTS.md](references/DRAFTS.md) — Draft review workflow using the `note` CLI (batch comments, publish control)
+- [references/DRAFTS.md](references/DRAFTS.md) — Draft review workflow using `glab api` (batch comments, publish control)
