@@ -1,11 +1,12 @@
 ---
 name: glab
 description: GitLab workflow automation using glab CLI
-version: 1.8.0
+version: 1.8.1
 category: Development Workflow
 license: MIT
 metadata:
   audience: developers
+  author: dgruzd
   workflow: gitlab
 ---
 
