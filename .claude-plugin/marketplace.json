@@ -20,6 +20,10 @@
       "source": "./.claude-plugin/plugins/gitlab-clickhouse"
     },
     {
+      "name": "gitlab-pipeline-watch",
+      "source": "./.claude-plugin/plugins/gitlab-pipeline-watch"
+    },
+    {
       "name": "gitlab-psql",
       "source": "./.claude-plugin/plugins/gitlab-psql"
     },
