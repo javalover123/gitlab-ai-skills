@@ -2,5 +2,9 @@
   "name": "gitlab-pipeline-watch",
   "description": "Watch GitLab MR pipelines and react to state changes",
   "version": "1.0.0",
-  "license": "MIT"
+  "author": {
+    "name": "GitLab"
+  },
+  "license": "MIT",
+  "skills": "./"
 }
