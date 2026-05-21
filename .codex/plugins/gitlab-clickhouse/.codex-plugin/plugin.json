@@ -9,7 +9,7 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "GitLab ClickHouse",
-    "shortDescription": "Inspect GitLab local ClickHouse tables, schemas, ingestion paths, and data patterns. Use for CH table questions, DESCRIBE TABLE, schema and source-of-truth checks under db/click_house, ingestion debugging, and investigating aggregates, distributions, outliers, or anomalous ClickHouse data in a GitLab GDK environment.",
+    "shortDescription": "Inspect GitLab local ClickHouse tables, schemas, ingestion paths, and data patterns.",
     "longDescription": "Connects to the local ClickHouse database in a GitLab GDK environment to inspect schemas, run DESCRIBE TABLE queries, trace ingestion paths under db/click_house, and investigate aggregates, distributions, outliers, or anomalous data patterns. Use this skill when you need to answer questions about ClickHouse table structure, verify source-of-truth definitions, debug ingestion pipelines, or explore analytics data without leaving your development environment.",
     "developerName": "GitLab",
     "category": "Developer Tools",

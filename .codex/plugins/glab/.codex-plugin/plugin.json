@@ -8,8 +8,8 @@
   "license": "MIT",
   "skills": "./skills/",
   "interface": {
-    "displayName": "Glab",
-    "shortDescription": "GitLab workflow automation using glab CLI",
+    "displayName": "GitLab CLI",
+    "shortDescription": "GitLab workflow automation using glab CLI.",
     "longDescription": "Automates GitLab workflows using the glab CLI. Covers creating and managing merge requests and issues, reviewing diffs, checking pipeline status, and following GitLab git best practices. The skill auto-detects the GitLab host from the git remote, so no extra configuration is needed when working inside a repository. Use this skill for any task that involves interacting with GitLab resources from the command line.",
     "developerName": "GitLab",
     "category": "Developer Tools",

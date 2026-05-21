@@ -9,7 +9,7 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "GitLab Pipeline Watch",
-    "shortDescription": "Watch GitLab MR pipelines and react to state changes",
+    "shortDescription": "Watch GitLab MR pipelines and react to state changes.",
     "longDescription": "Blocks until a GitLab MR pipeline reaches an actionable state — success, failure, merge, or a new MR being created — then reacts accordingly. Designed for event-loop workflows where the agent needs to wait for CI results before taking the next step. Requires the glab CLI and Python 3.7+. Use this skill when you want the agent to pause and respond automatically to pipeline state changes rather than polling manually.",
     "developerName": "GitLab",
     "category": "Developer Tools",
