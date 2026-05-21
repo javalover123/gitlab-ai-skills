@@ -1,7 +1,7 @@
 ---
 name: gitlab-mr-comments
 description: Use when creating, reading, replying to, or resolving comments on a GitLab merge request — diff-line notes, thread replies, general notes, and discussion resolution via glab mr note. Also covers batched draft reviews via the optional note CLI. Keywords - GitLab, merge request, MR, comments, notes, code review, diff, resolve, feedback, discussion.
-version: 1.0.0
+version: 1.1.0
 category: Development Workflow
 license: MIT
 compatibility: opencode
@@ -17,6 +17,8 @@ metadata:
 Read, create, and manage comments on GitLab merge requests using `glab mr note` subcommands.
 
 This skill is a focused MR-comments workflow adapted from [`viktomas/gitlab-mr-comments`](https://gitlab.com/viktomas/gitlab-mr-comments). For broader GitLab automation (MR/issue CRUD, pipelines, work items, search), load the `glab` skill instead.
+
+> **Full command reference:** All `glab mr note` commands, flags, code suggestions, draft reviews, and gotchas are documented in the `glab` skill's [`references/mr-review.md`](../glab/references/mr-review.md). This skill adds the MR-comments-specific publishing rules and AI prefix convention on top of that reference.
 
 ## Prerequisites
 
@@ -40,55 +42,6 @@ This skill is a focused MR-comments workflow adapted from [`viktomas/gitlab-mr-c
 **Confirm before every write. Everything is published immediately.**
 
 For draft reviews (batch comments that stay invisible until published), see [references/DRAFTS.md](references/DRAFTS.md) — uses `glab api` directly.
-
-## Auto-detection
-
-When run inside a git worktree whose branch has an open MR, `glab` auto-detects the project and MR — no ID needed. Pass the MR IID as a positional argument only if auto-detection fails or you want to target a different MR.
-
-## Reading Notes
-
-```bash
-# List all discussions on the current branch's MR
-glab mr note list
-
-# List unresolved discussions
-glab mr note list --state unresolved
-
-# List only diff notes
-glab mr note list --type diff
-
-# List only diff notes on a specific file
-glab mr note list --file src/main.ts
-
-# JSON output — returns discussion objects with nested `notes[]`
-glab mr note list -F json
-
-# List discussions on a specific MR
-glab mr note list 123
-```
-
-### List Options
-
-| Flag | Default | Description |
-|------|---------|-------------|
-| `--type <type>` | `all` | `all`, `general`, `diff`, or `system` |
-| `--state <state>` | `all` | `all`, `resolved`, or `unresolved` |
-| `--file <path>` | (none) | Show only diff notes on this file |
-| `-F <format>` | `text` | `text` or `json` |
-| `-R <repo>` | auto-detect | `OWNER/REPO` or `GROUP/NAMESPACE/REPO` |
-
-### Output Format
-
-```
-#d1a2b3c4 [UNRESOLVED] src/example.ts:42 (diff)
-  @alice (2024-01-15 10:30): This variable is unused.
-  @bob   (2024-01-15 11:00): Fixed, thanks.
-
-#e5f6a7b8 (general)
-  @carol (2024-01-15 09:00): Can we add tests for the edge case?
-```
-
-Each discussion shows: discussion ID prefix (8 chars), resolution status (if resolvable), file:line (if diff), type, then indented notes with author and timestamp.
 
 ## Comment Formatting Convention
 
@@ -120,97 +73,33 @@ Looks good!"
 
 > **Heredoc safety:** If your comment body contains backticks, `$`, or `!`, always write to a file with `<< 'EOF'` (single-quoted delimiter) first, then pass via `$(cat "$FILE")` or pipe via stdin. See the `glab` skill's "Message Escaping" section for the full trap list.
 
-## Creating Notes
-
-### Reply to existing discussions
+## Quick Reference
 
 ```bash
-# Reply to a discussion by ID prefix (8+ chars)
-glab mr note create --reply d1a2b3c4 -m ":robot: AI-generated
+# List discussions
+glab mr note list --state unresolved
 
-Good point, will fix."
-```
+# General comment (confirm with user first)
+glab mr note create -m ":robot: AI-generated
 
-### Comments on diff lines
+<body>"
 
-```bash
-# Diff comment on a specific line (new side)
+# Reply to a thread (confirm with user first)
+glab mr note create --reply <discussion-id> -m ":robot: AI-generated
+
+<body>"
+
+# Diff comment (confirm with user first)
 glab mr note create --file main.go --line 42 -m ":robot: AI-generated
 
-Nit: rename this"
+<body>"
 
-# Multiline diff comment (lines 10 through 15)
-glab mr note create --file main.go --line 10:15 -m ":robot: AI-generated
-
-Refactor this block"
-
-# Comment on a removed line (old side)
-glab mr note create --file main.go --old-line 10 -m ":robot: AI-generated
-
-Why was this removed?"
-
-# File-level diff comment (no line specified)
-glab mr note create --file main.go -m ":robot: AI-generated
-
-General comment on this file"
+# Resolve / reopen a thread
+glab mr note resolve <discussion-id>
+glab mr note reopen  <discussion-id>
 ```
 
-### General comments
-
-```bash
-glab mr note create -m ":robot: AI-generated
-
-Needs work"
-
-# Body from stdin
-echo ":robot: AI-generated
-
-LGTM" | glab mr note create
-```
-
-### Idempotent comments
-
-```bash
-# Skip if a comment with the same body already exists
-glab mr note create -m ":robot: AI-generated
-
-LGTM" --unique
-```
-
-`--unique` matches on body only — identical bodies on different diff lines still post (line is part of the position, not the body).
-
-### Targeting a specific MR
-
-```bash
-# All create commands accept MR IID as positional argument
-glab mr note create 123 -m ":robot: AI-generated
-
-Comment on MR 123"
-```
-
-## Managing Discussions
-
-```bash
-# Resolve a discussion (by discussion ID prefix or note ID)
-glab mr note resolve d1a2b3c4
-
-# Reopen a resolved discussion
-glab mr note reopen d1a2b3c4
-
-# On a specific MR
-glab mr note resolve 123 d1a2b3c4
-```
-
-## Flag Rules
-
-- `--line` and `--old-line` require `--file`, and cannot be used together
-- `--file`, `--reply`, and `--unique` are mutually exclusive
-
-## Authentication
-
-Uses `glab` CLI for GitLab authentication:
-1. Install `glab` and run `glab auth login`
-2. The `GITLAB_TOKEN` environment variable is also respected
+For the full reference — all flags, code suggestions, batched draft reviews, position objects, and gotchas — see the `glab` skill's [`references/mr-review.md`](../glab/references/mr-review.md).
 
 ## Agent Guidelines
 
@@ -225,4 +114,5 @@ Uses `glab` CLI for GitLab authentication:
 ## References
 
 - `glab mr note --help`, `glab mr note create --help`, `glab mr note list --help` for full CLI usage
+- [`glab` skill — `references/mr-review.md`](../glab/references/mr-review.md) — Full MR comment reference (all flags, code suggestions, drafts/batch fallback, position objects, gotchas)
 - [references/DRAFTS.md](references/DRAFTS.md) — Draft review workflow using `glab api` (batch comments, publish control)

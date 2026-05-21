@@ -193,6 +193,8 @@ Fall back to raw `glab api .../draft_notes` only for **batched draft reviews** (
 
 Full reference (all flags, code suggestions, drafts/batch fallback, position objects): **[references/mr-review.md](references/mr-review.md)**
 
+> **Focused code-review skill:** If your task is specifically "review this MR" (read comments, post findings, resolve threads), load the **`gitlab-mr-comments`** skill instead. It layers AI-specific publishing rules (confirm-before-post, `:robot: AI-generated` prefix) on top of this reference without pulling in the broader `glab` surface.
+
 ## Issue Links, Epics, and Nested Groups
 
 - **Issue links** (`blocked_by`, `relates_to`): [references/issue-links.md](references/issue-links.md)
