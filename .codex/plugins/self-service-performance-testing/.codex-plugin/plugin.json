@@ -10,7 +10,7 @@
   "interface": {
     "displayName": "Self Service Performance Testing",
     "shortDescription": "Help engineers write performance tests that detect regressions, using k6 for load testing and sitespeed.io for frontend Core Web Vitals. Use when the user is adding or changing API endpoints, database queries, critical paths, or frontend pages and needs to decide whether to write a performance test, what kind, or how to integrate it into CI. Also activate when the user mentions load testing, stress testing, response times, benchmarking, performance budgets, CPT, component performance testing, MR pipeline performance testing, or wants to run tests against staging - this skill enforces shared infrastructure safety rules. Does not cover profiling, APM, or debugging production incidents.",
-    "longDescription": "Self Service Performance Testing provides GitLab AI skill workflows for Codex.",
+    "longDescription": "Advises engineers on whether and how to write performance tests for their changes, then helps them implement those tests using GitLab's Performance Toolkit. Uses k6 for API and backend load testing and sitespeed.io for frontend Core Web Vitals. Covers test authoring, threshold selection, and CI integration. Enforces shared infrastructure safety rules when running tests against staging. Use this skill when adding or changing API endpoints, database queries, critical paths, or frontend pages, or when you need guidance on load testing, stress testing, benchmarking, or performance budgets. Does not cover profiling, APM, or debugging production incidents.",
     "developerName": "GitLab",
     "category": "Developer Tools",
     "capabilities": [],

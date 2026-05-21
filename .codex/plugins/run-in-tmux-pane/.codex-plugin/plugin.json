@@ -10,7 +10,7 @@
   "interface": {
     "displayName": "Run In Tmux Pane",
     "shortDescription": "Run commands in a temporary tmux pane with full interactive zsh environment (login shell, shims, PATH, aliases, TTY).",
-    "longDescription": "Run In Tmux Pane provides GitLab AI skill workflows for Codex.",
+    "longDescription": "Runs a command in a temporary tmux pane that has the user's full interactive zsh environment, including login shell, mise/asdf shims, custom PATH entries, aliases, and a real TTY. The pane opens, executes the command, captures the output, and closes automatically. Use this skill when a command requires the interactive shell environment that agent tools cannot provide — for example, commands that rely on autoloaded zsh functions, version manager shims, or tools that detect whether they are running in a TTY.",
     "developerName": "GitLab",
     "category": "Developer Tools",
     "capabilities": [],

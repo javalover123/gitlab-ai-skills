@@ -10,7 +10,7 @@
   "interface": {
     "displayName": "Write Large File",
     "shortDescription": "Write large files reliably using chunked bash append (>> heredoc)",
-    "longDescription": "Write Large File provides GitLab AI skill workflows for Codex.",
+    "longDescription": "Writes files longer than approximately 150 lines reliably by splitting the content into chunks and appending each chunk using bash heredocs (>>). This avoids the timeouts and context-window issues that can occur when a single Write tool call tries to create a very large file. Use this skill when generating reports, review documents, analysis summaries, generated code, or any structured document with multiple sections that would exceed the safe single-write limit.",
     "developerName": "GitLab",
     "category": "Developer Tools",
     "capabilities": [],

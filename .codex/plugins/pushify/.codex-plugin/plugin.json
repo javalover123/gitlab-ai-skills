@@ -10,7 +10,7 @@
   "interface": {
     "displayName": "Pushify",
     "shortDescription": "Run pre-push lefthook checks and fix any failures before pushing. Use this skill whenever the user asks to run pre-push checks, prepare for push, or wants to ensure code passes all pre-push hooks. Trigger proactively when the user asks if code is ready to push or wants to clean up before a git push.",
-    "longDescription": "Pushify provides GitLab AI skill workflows for Codex.",
+    "longDescription": "Runs all pre-push lefthook hooks and iteratively fixes any failures until every check passes, then pushes the branch. The skill handles lint errors, formatting issues, and other hook failures automatically, retrying after each fix. Use this skill whenever you want to ensure your code passes all pre-push checks before it reaches the remote, or when you ask whether the code is ready to push.",
     "developerName": "GitLab",
     "category": "Developer Tools",
     "capabilities": [],
