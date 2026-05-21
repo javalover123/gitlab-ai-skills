@@ -1,0 +1,19 @@
+{
+  "name": "write-large-file",
+  "version": "1.0.0",
+  "description": "Write large files reliably using chunked bash append (>> heredoc)",
+  "author": {
+    "name": "GitLab"
+  },
+  "license": "MIT",
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Write Large File",
+    "shortDescription": "Write large files reliably using chunked bash append (>> heredoc)",
+    "longDescription": "Write Large File provides GitLab AI skill workflows for Codex.",
+    "developerName": "GitLab",
+    "category": "Developer Tools",
+    "capabilities": [],
+    "defaultPrompt": "Use the write-large-file skill for this task."
+  }
+}

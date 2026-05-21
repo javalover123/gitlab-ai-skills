@@ -1,0 +1,19 @@
+{
+  "name": "glab",
+  "version": "1.8.1",
+  "description": "GitLab workflow automation using glab CLI",
+  "author": {
+    "name": "GitLab"
+  },
+  "license": "MIT",
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Glab",
+    "shortDescription": "GitLab workflow automation using glab CLI",
+    "longDescription": "Glab provides GitLab AI skill workflows for Codex.",
+    "developerName": "GitLab",
+    "category": "Developer Tools",
+    "capabilities": [],
+    "defaultPrompt": "Use the glab skill for this task."
+  }
+}

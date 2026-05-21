@@ -5,7 +5,7 @@ Compares the current branch against the base branch (origin/main or
 CI_MERGE_REQUEST_DIFF_BASE_SHA) and fails if any skill has file changes
 without a corresponding version bump in SKILL.md frontmatter.
 
-Generated files (.claude-plugin/) are excluded from the diff check since
+Generated files (.claude-plugin/, .codex-plugin/) are excluded from the diff check since
 they are derived from SKILL.md.
 
 Usage:
@@ -24,7 +24,7 @@ SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 REPO_ROOT = os.path.join(SCRIPT_DIR, "..")
 
 # Patterns to exclude from "changed files" — these are generated/derived
-EXCLUDED_PATTERNS = [".claude-plugin/"]
+EXCLUDED_PATTERNS = [".claude-plugin/", ".codex-plugin/"]
 
 # Debug flag
 DEBUG = "--debug" in sys.argv
