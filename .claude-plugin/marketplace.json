@@ -32,6 +32,10 @@
       "source": "./.claude-plugin/plugins/glab"
     },
     {
+      "name": "mr-review",
+      "source": "./.claude-plugin/plugins/mr-review"
+    },
+    {
       "name": "pushify",
       "source": "./.claude-plugin/plugins/pushify"
     },
