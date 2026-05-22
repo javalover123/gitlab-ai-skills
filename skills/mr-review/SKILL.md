@@ -6,7 +6,7 @@ category: Development Workflow
 license: MIT
 metadata:
   audience: developers
-  author: viktomas
+  author: gitlab
   workflow: gitlab
   slash-command: enabled
 ---

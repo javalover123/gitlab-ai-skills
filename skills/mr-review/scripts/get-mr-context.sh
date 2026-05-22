@@ -56,6 +56,12 @@ else
   # We need the source branch name to compare. If we have glab + MR IID, get it.
   # Otherwise assume current branch is the source branch.
   SOURCE_BRANCH="$CURRENT_BRANCH"
+  if [ "$HAS_GLAB" = true ] && [ -n "$MR_IID" ]; then
+    MR_SOURCE=$(glab mr view "$MR_IID" -F json 2>/dev/null | grep -o '"source_branch":"[^"]*"' | head -1 | cut -d'"' -f4)
+    if [ -n "$MR_SOURCE" ]; then
+      SOURCE_BRANCH="$MR_SOURCE"
+    fi
+  fi
 
   if [ "$CURRENT_BRANCH" != "$SOURCE_BRANCH" ]; then
     BRANCH_STATUS="NOT_CHECKED_OUT"
