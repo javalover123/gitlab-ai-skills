@@ -50,7 +50,7 @@
     },
     {
       "name": "mr-adversarial-review",
-      "description": "Use when an author wants a critical, skeptical review of their own merge request before bringing in a human reviewer \u2014 produces a severity-bucketed findings report (High / Medium / Low / Done well) and posts it as a single comment on the MR.",
+      "description": "Use when running a critical, skeptical pass over a GitLab MR \u2014 either as the author before requesting human review, or as a reviewer wanting a structured first cut \u2014 produces a severity-bucketed findings report (High / Medium / Low / Done well) and posts it as a single comment on the MR.",
       "category": "Development Workflow",
       "license": "MIT",
       "compatibility": "opencode",
