@@ -16,6 +16,7 @@ Reusable agent skills for GitLab projects. Skills are structured prompt files th
     - [Shell & Environment](#shell--environment)
     - [Agent Tooling](#agent-tooling)
   - [Installing Skills](#installing-skills)
+    - [GitLab Duo CLI](#gitlab-duo-cli)
     - [Pi (Package)](#pi-package)
     - [OpenCode (Native)](#opencode-native)
     - [Via `@dgruzd/skills` CLI](#via-dgruzdskills-cli)
@@ -112,6 +113,20 @@ Iteratively test and refine prompts, skills, and agent configurations using open
 > ```
 >
 > You may also need to enable [Developer Mode](https://learn.microsoft.com/en-us/windows/apps/get-started/enable-your-device-for-development) or run Git as Administrator for symlink creation to work.
+
+### GitLab Duo CLI
+
+Duo CLI discovers global skills from `~/.agents/skills/` (or `~/.gitlab/duo/skills/`). Copy individual skills into that directory:
+
+```bash
+# Single skill
+cp -r skills/mr-review ~/.agents/skills/mr-review
+
+# All skills
+cp -r skills/* ~/.agents/skills/
+```
+
+Global skills require the `--global-skills` flag (experimental) when launching Duo CLI.
 
 ### Pi (Package)
 
