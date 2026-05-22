@@ -57,7 +57,7 @@ GitLab workflow automation using glab CLI → [`SKILL.md`](skills/glab/SKILL.md)
 
 #### mr-review
 
-Review a GitLab merge request — read diffs, analyze changes, present findings, and optionally post comments on the MR → [`SKILL.md`](skills/mr-review/SKILL.md)
+Review a GitLab merge request - read diffs, analyze changes, present findings, and optionally post comments on the MR → [`SKILL.md`](skills/mr-review/SKILL.md)
 
 #### pushify
 

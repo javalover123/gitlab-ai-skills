@@ -50,7 +50,7 @@
     },
     {
       "name": "mr-review",
-      "description": "Review a GitLab merge request \u2014 read diffs, analyze changes, present findings, and optionally post comments on the MR",
+      "description": "Review a GitLab merge request - read diffs, analyze changes, present findings, and optionally post comments on the MR",
       "category": "Development Workflow",
       "license": "MIT",
       "compatibility": "",

@@ -1,6 +1,6 @@
 ---
 name: mr-review
-description: Review a GitLab merge request — read diffs, analyze changes, present findings, and optionally post comments on the MR
+description: Review a GitLab merge request - read diffs, analyze changes, present findings, and optionally post comments on the MR
 version: 0.1.0
 category: Development Workflow
 license: MIT
