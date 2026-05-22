@@ -49,6 +49,14 @@
       "path": "skills/glab/SKILL.md"
     },
     {
+      "name": "mr-review",
+      "description": "Review a GitLab merge request - read diffs, analyze changes, present findings, and optionally post comments on the MR",
+      "category": "Development Workflow",
+      "license": "MIT",
+      "compatibility": "",
+      "path": "skills/mr-review/SKILL.md"
+    },
+    {
       "name": "opencode-refine",
       "description": "Iteratively test and refine prompts, skills, and agent configurations using opencode run",
       "category": "Agent Tooling",
