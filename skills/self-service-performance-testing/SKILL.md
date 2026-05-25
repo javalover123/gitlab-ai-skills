@@ -1,7 +1,7 @@
 ---
 name: self-service-performance-testing
-description: Help engineers write performance tests that detect regressions, using k6 for load testing and sitespeed.io for frontend Core Web Vitals. Use when the user is adding or changing API endpoints, database queries, critical paths, or frontend pages and needs to decide whether to write a performance test, what kind, or how to integrate it into CI. Also activate when the user mentions load testing, stress testing, response times, benchmarking, performance budgets, CPT, component performance testing, MR pipeline performance testing, or wants to run tests against staging - this skill enforces shared infrastructure safety rules. Does not cover profiling, APM, or debugging production incidents.
-version: 0.2.1
+description: Help engineers write performance tests that detect regressions, using k6 for load testing and sitespeed.io for frontend Core Web Vitals. Use when the user is adding or changing API endpoints, database queries, critical paths, or frontend pages and needs to decide whether to write a performance test, what kind, or how to integrate it into CI. Also activate when the user mentions load testing, stress testing, response times, benchmarking, performance budgets, CPT, component performance testing, MR pipeline performance testing, instance verification after deployment or upgrade, or wants to run tests against staging - this skill enforces shared infrastructure safety rules. Does not cover profiling, APM, or debugging production incidents.
+version: 0.3.0
 category: Testing
 license: MIT
 compatibility: opencode
@@ -91,10 +91,12 @@ Start here rather than building from scratch:
 | API endpoints, backend load | [**GPT** (GitLab Performance Tool)](https://gitlab.com/gitlab-org/quality/performance) | External — separate repo, Docker | Stable |
 | Frontend page load / Core Web Vitals | [**Sitespeed Runway**](https://gitlab.com/gitlab-org/quality/sitespeed-runway) | External — hosted service + API | Stable |
 | Performance feedback within your Merge Request | [**CPT** (Component Performance Testing)](https://gitlab.com/gitlab-org/quality/component-performance-testing) | In your MR pipeline — runs against a GitLab CNG instance or isolated containerized component | Alpha |
+| Instance health verification after deployment or upgrade | [**GitLab Verify Playbook**](https://gitlab.com/gitlab-org/quality/quality-engineering/gitlab-verify-playbook) | External — Ansible playbook run against target instance | Experimental |
 
 GPT and Sitespeed Runway are external to the engineer's repo — they won't
 add test files to their project. CPT is the exception: it runs in the MR
-pipeline via a multi-project trigger.
+pipeline via a multi-project trigger. The Verify Playbook is also external
+and is used for post-deployment health checks, not load testing.
 
 ## Reference Files
 
@@ -110,6 +112,7 @@ don't try to guess how these tools work, consult the references.
 | Advise on or configure CPT (Component Performance Testing) | [cpt.md](references/cpt.md) |
 | Write or review a k6 test stub | [quick-reference.md](references/quick-reference.md) |
 | Add perf tests to CI pipeline | [gitlab-ci-integration.md](references/gitlab-ci-integration.md) |
+| Verify a GitLab instance is healthy after deployment or upgrade | [verify-playbook.md](references/verify-playbook.md) |
 
 ## Advisory Flow
 
@@ -135,6 +138,7 @@ confirming the tool choice) risks wasted work if the wrong tool was assumed.
    - On every push, before merge → **CPT**
    - Scheduled load testing or full reference architecture validation → **GPT**
    - Frontend page load / Core Web Vitals → **Sitespeed Runway**
+   - Verifying instance health after a deployment or upgrade → **GitLab Verify Playbook**
 
    Confirm the tool choice with the engineer before moving on. Getting this
    wrong means starting over — a k6 test doesn't help if they need
@@ -148,6 +152,10 @@ confirming the tool choice) risks wasted work if the wrong tool was assumed.
    threshold — baseline measurement plus a regression budget. See the
    budgets table in [getting-started.md](references/getting-started.md).
 
+   Note: The Verify Playbook does not use thresholds — it checks pass/fail
+   health of instance components. Skip this step if the engineer is using
+   the Verify Playbook.
+
 5. **Produce something useful.** Depending on the tool:
    - **GPT/custom k6** → write a basic test stub using
      [quick-reference.md](references/quick-reference.md) patterns, or point
@@ -158,6 +166,9 @@ confirming the tool choice) risks wasted work if the wrong tool was assumed.
      from [sitespeed-runway.md](references/sitespeed-runway.md).
    - **CI integration** → provide a pipeline snippet from
      [gitlab-ci-integration.md](references/gitlab-ci-integration.md).
+   - **GitLab Verify Playbook** → walk them through the setup from
+     [verify-playbook.md](references/verify-playbook.md) and remind them
+     it's experimental — suggest reaching out to **#g_performance_enablement**.
 
 When in doubt, ask. The engineer knows their system better than you do.
 **#g_performance_enablement** on Slack is always a valid answer for
