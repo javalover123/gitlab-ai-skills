@@ -1,7 +1,7 @@
 ---
 name: self-service-performance-testing
 description: Help engineers write performance tests that detect regressions, using k6 for load testing, sitespeed.io for frontend Core Web Vitals, rspec-benchmark for unit-level perf assertions, and Ruby profilers (Stackprof, memory_profiler, derailed_benchmarks, etc.) for investigating slow code paths. Use when the user is adding or changing API endpoints, database queries, critical paths, or frontend pages and needs to decide whether to write a performance test, what kind, or how to integrate it into CI. Also activate when the user mentions load testing, stress testing, response times, benchmarking, performance budgets, CPT, component performance testing, MR pipeline performance testing, profiling slow Ruby code, memory bloat, or wants to run tests against staging - this skill enforces shared infrastructure safety rules. Does not cover APM or debugging production incidents.
-version: 0.3.0
+version: 0.3.1
 category: Testing
 license: MIT
 compatibility: opencode
@@ -92,7 +92,7 @@ Start here rather than building from scratch:
 | Frontend page load / Core Web Vitals | [**Sitespeed Runway**](https://gitlab.com/gitlab-org/quality/sitespeed-runway) | External — hosted service + API | Stable |
 | Performance feedback within your Merge Request | [**CPT** (Component Performance Testing)](https://gitlab.com/gitlab-org/quality/component-performance-testing) | In your MR pipeline — runs against a GitLab CNG instance or isolated containerized component | Alpha |
 | Unit-level perf assertions (execution time, allocations, scaling) | [**rspec-benchmark**](https://github.com/piotrmurach/rspec-benchmark) (in the `gitlab-org/gitlab` Gemfile) | In the engineer's RSpec suite | Stable |
-| Investigating slow Ruby code / memory bloat | **Ruby profilers**: Stackprof, memory_profiler, ruby-prof, rbspy, derailed_benchmarks, benchmark-ips, rspec_profiling | Locally on the engineer's machine or in test/dev | Stable |
+| Investigating slow Ruby code / memory bloat | **Ruby profilers**: Stackprof, memory_profiler, derailed_benchmarks, benchmark-ips, rspec_profiling (all in the `gitlab-org/gitlab` Gemfile); rbspy (standalone Rust binary) and ruby-prof (added manually) for cases the in-Gemfile tools don't cover | Locally on the engineer's machine or in test/dev | Stable |
 
 GPT and Sitespeed Runway are external to the engineer's repo — they won't
 add test files to their project. CPT is the exception: it runs in the MR

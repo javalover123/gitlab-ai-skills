@@ -34,6 +34,14 @@ Do **not** use when:
 
 ## The Four Matcher Families
 
+*The handbook page demonstrates three matchers in its example
+(`perform_under`, `perform_allocation`, `perform_linear`). The fourth
+(`perform_at_least`) and the additional scaling matchers
+(`perform_constant`, `perform_logarithmic`, `perform_power`,
+`perform_exponential`) come from the rspec-benchmark gem README
+([github.com/piotrmurach/rspec-benchmark](https://github.com/piotrmurach/rspec-benchmark)).*
+
+
 ### 1. `perform_under(time).ms` — execution time bound
 
 ```ruby
@@ -116,6 +124,12 @@ end
 Source: [GitLab Performance Testing Tool Selection Guide](https://handbook.gitlab.com/handbook/engineering/testing/performance-tools/#using-rspec-benchmark)
 
 ## Caveats and Pitfalls
+
+*The handbook page covers the matchers and the example above. The
+following caveats are not from the handbook — they are practical
+guidance compiled from general RSpec / CI experience and from the
+rspec-benchmark gem README ([github.com/piotrmurach/rspec-benchmark](https://github.com/piotrmurach/rspec-benchmark)).
+Treat them as advice, not policy.*
 
 - **Time-based matchers are inherently noisy on CI runners.** Use them
   sparingly and set generous thresholds (50ms, not 5ms). Repeated flakes

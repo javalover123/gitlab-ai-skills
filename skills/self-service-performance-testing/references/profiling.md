@@ -5,13 +5,17 @@ time is going, you need a profiler — not a load test. This reference covers
 the profilers shipped in the `gitlab-org/gitlab` Gemfile, when to reach for
 each, and how to invoke them.
 
-**Canonical sources** (all rules and snippets below are taken from these):
+**Canonical sources** (rules and snippets below are taken from these):
 
-- [GitLab Performance Testing Tool Selection Guide — Profiling Tools](https://handbook.gitlab.com/handbook/engineering/testing/performance-tools/) (handbook list)
-- [GitLab Performance Guidelines — Profiling with Stackprof](https://docs.gitlab.com/development/performance/#profiling-with-stackprof)
-- [GitLab Performance Guidelines — Memory optimization](https://docs.gitlab.com/development/performance/#memory-optimization)
-- [GitLab Performance Guidelines — Benchmarks](https://docs.gitlab.com/development/performance/#benchmarks)
-- [GitLab Profiling docs](https://docs.gitlab.com/development/profiling/)
+- [GitLab Performance Testing Tool Selection Guide — Profiling Tools](https://handbook.gitlab.com/handbook/engineering/testing/performance-tools/#profiling-tools) — the handbook's inventory of the 7 profilers GitLab uses
+- [GitLab Performance Guidelines](https://docs.gitlab.com/development/performance/) — the docs page that contains the verbatim quotes, env var defaults, the memory budget, the rbtrace and benchmark-ips guidance, and the "Importance of Changes" section
+- [GitLab Profiling docs](https://docs.gitlab.com/development/profiling/) — the Speedscope flamegraph workflow
+
+The handbook lists the 7 profilers; the operational detail (quotes, env
+vars, code samples) lives in the `development/performance/` docs page.
+`rbtrace` below is not in the handbook list but is documented in the
+performance docs as `#rbtrace`; it's included here because it's the
+go-to tool for live heap inspection.
 
 ## Decision Table: Which Profiler For Which Symptom?
 
@@ -181,7 +185,9 @@ Use **allocated** to find code that's just making the GC work hard.
 
 You can measure these counters in your own code with
 `Gitlab::Memory::Instrumentation.with_memory_allocations { ... }`, which
-returns `{ mem_objects:, mem_bytes:, mem_mallocs: }`.
+returns `{ mem_objects:, mem_mallocs:, mem_bytes:, mem_total_bytes: }`.
+See [`lib/gitlab/memory/instrumentation.rb`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/memory/instrumentation.rb)
+for the implementation.
 
 ---
 
