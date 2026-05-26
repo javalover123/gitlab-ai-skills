@@ -7,11 +7,11 @@ each, and how to invoke them.
 
 **Canonical sources** (rules and snippets below are taken from these):
 
-- [GitLab Performance Testing Tool Selection Guide — Profiling Tools](https://handbook.gitlab.com/handbook/engineering/testing/performance-tools/#profiling-tools) — the handbook's inventory of the 7 profilers GitLab uses
+- [GitLab Performance Testing Tool Selection Guide — Profiling Tools](https://handbook.gitlab.com/handbook/engineering/testing/performance-tools/#profiling-tools) — the handbook's inventory of the profilers GitLab uses
 - [GitLab Performance Guidelines](https://docs.gitlab.com/development/performance/) — the docs page that contains the verbatim quotes, env var defaults, the memory budget, the rbtrace and benchmark-ips guidance, and the "Importance of Changes" section
 - [GitLab Profiling docs](https://docs.gitlab.com/development/profiling/) — the Speedscope flamegraph workflow
 
-The handbook lists the 7 profilers; the operational detail (quotes, env
+The handbook lists the profilers; the operational detail (quotes, env
 vars, code samples) lives in the `development/performance/` docs page.
 `rbtrace` below is not in the handbook list but is documented in the
 performance docs as `#rbtrace`; it's included here because it's the
@@ -214,7 +214,6 @@ Other modes (each boots the app in `production` env and benchmarks under
 Rack) are documented in the [gem README](https://github.com/zombocom/derailed_benchmarks#running-derailed-exec).
 In GDK, follow the gem's "Running in production locally" instructions and
 GDK has `production` sections configured out of the box.
-sections configured out of the box.
 
 ---
 
