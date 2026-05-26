@@ -213,7 +213,7 @@ bundle exec derailed exec perf:mem
 Other modes (each boots the app in `production` env and benchmarks under
 Rack) are documented in the [gem README](https://github.com/zombocom/derailed_benchmarks#running-derailed-exec).
 In GDK, follow the gem's "Running in production locally" instructions and
-do the equivalent for Redis configs to avoid errors. GCK has `production`
+GDK has `production` sections configured out of the box.
 sections configured out of the box.
 
 ---

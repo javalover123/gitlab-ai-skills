@@ -153,7 +153,7 @@ Treat them as advice, not policy.*
   QueryRecorder for query-count regressions, or k6 / CPT for end-to-end
   latency. See [getting-started.md](getting-started.md).
 - Need to compare *before and after* a code change with statistical
-  confidence → use [benchmark-ips](profiling.md#benchmark-ips) directly in
+  confidence → use [benchmark-ips](profiling.md#4-benchmark-ips-block-iterationssec-benchmark) directly in
   a script, or `derailed_benchmarks` for full-app boot/memory comparison.
 - Symptom is intermittent / load-dependent → unit specs won't reproduce it.
   Use GPT or CPT.
