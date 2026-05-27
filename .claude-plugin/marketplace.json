@@ -36,6 +36,10 @@
       "source": "./.claude-plugin/plugins/mr-adversarial-review"
     },
     {
+      "name": "mr-review",
+      "source": "./.claude-plugin/plugins/mr-review"
+    },
+    {
       "name": "pushify",
       "source": "./.claude-plugin/plugins/pushify"
     },
