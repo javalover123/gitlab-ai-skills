@@ -1,0 +1,10 @@
+{
+  "name": "source-code-file-templates",
+  "description": "Group file templates and custom project templates - Premium+ EE features for standardized templates",
+  "version": "1.0.0",
+  "author": {
+    "name": "GitLab"
+  },
+  "license": "MIT",
+  "skills": "./"
+}

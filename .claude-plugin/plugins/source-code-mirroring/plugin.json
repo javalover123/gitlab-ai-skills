@@ -1,0 +1,10 @@
+{
+  "name": "source-code-mirroring",
+  "description": "Repository mirroring - push, pull, and bidirectional sync between GitLab and external repositories",
+  "version": "1.0.0",
+  "author": {
+    "name": "GitLab"
+  },
+  "license": "MIT",
+  "skills": "./"
+}

@@ -15,6 +15,7 @@ Reusable agent skills for GitLab projects. Skills are structured prompt files th
     - [Testing](#testing)
     - [Shell & Environment](#shell--environment)
     - [Agent Tooling](#agent-tooling)
+    - [Other](#other)
   - [Installing Skills](#installing-skills)
     - [GitLab Duo CLI](#gitlab-duo-cli)
     - [Pi (Package)](#pi-package)
@@ -103,6 +104,48 @@ Write large files reliably using chunked bash append (>> heredoc) → [`SKILL.md
 #### opencode-refine
 
 Iteratively test and refine prompts, skills, and agent configurations using opencode run → [`SKILL.md`](skills/opencode-refine/SKILL.md)
+
+### Other
+
+#### source-code-branch-protection
+
+Guide for working with branch protection, protected tags, branch rules, and access level restrictions in GitLab → [`SKILL.md`](skills/source-code-branch-protection/SKILL.md)
+
+#### source-code-code-owners
+
+CODEOWNERS file parsing, validation, and MR approval integration (Premium+) → [`SKILL.md`](skills/source-code-code-owners/SKILL.md)
+
+#### source-code-commit-signing
+
+Guide for working with commit signing features (GPG, SSH, X.509, S/MIME) in GitLab → [`SKILL.md`](skills/source-code-commit-signing/SKILL.md)
+
+#### source-code-developer-tools-index
+
+Lightweight index of miscellaneous Source Code developer tools and features → [`SKILL.md`](skills/source-code-developer-tools-index/SKILL.md)
+
+#### source-code-file-templates
+
+Group file templates and custom project templates - Premium+ EE features for standardized templates → [`SKILL.md`](skills/source-code-file-templates/SKILL.md)
+
+#### source-code-git-lfs
+
+Git Large File Storage (LFS) - managing large binary files outside Git repositories → [`SKILL.md`](skills/source-code-git-lfs/SKILL.md)
+
+#### source-code-merge-controls
+
+Guide for working with merge request approvals, merge methods, and squash settings in GitLab → [`SKILL.md`](skills/source-code-merge-controls/SKILL.md)
+
+#### source-code-mirroring
+
+Repository mirroring - push, pull, and bidirectional sync between GitLab and external repositories → [`SKILL.md`](skills/source-code-mirroring/SKILL.md)
+
+#### source-code-push-rules
+
+Push rules - pre-receive hooks for commit validation, secret blocking, and signature requirements (Premium+) → [`SKILL.md`](skills/source-code-push-rules/SKILL.md)
+
+#### source-code-snippets
+
+Snippets - versioned code/text sharing with Git repositories → [`SKILL.md`](skills/source-code-snippets/SKILL.md)
 <!-- SKILLS_END -->
 
 > Skills are grouped by category and auto-generated from skill frontmatter. Run `python3 scripts/update_skills_list.py` to regenerate after adding or modifying skills.
@@ -212,6 +255,16 @@ This repo ships as a [Claude Code plugin marketplace](https://code.claude.com/do
 | [`pushify`](.claude-plugin/plugins/pushify) | [`pushify`](skills/pushify/SKILL.md) | Run pre-push lefthook checks and iteratively fix failures (up to 3 iterations, then escalate). Invoke when: (a) about to push and wanting hooks to pass cleanly, (b) `git push` has just failed on a pre-push hook and the failure needs to be driven to resolution, or (c) preparing a clean working tree without pushing — e.g. before opening a Draft MR for early review. | 1.1.0 |
 | [`run-in-tmux-pane`](.claude-plugin/plugins/run-in-tmux-pane) | [`run-in-tmux-pane`](skills/run-in-tmux-pane/SKILL.md) | Run commands in a temporary tmux pane with full interactive zsh environment (login shell, shims, PATH, aliases, TTY). | 1.1.1 |
 | [`self-service-performance-testing`](.claude-plugin/plugins/self-service-performance-testing) | [`self-service-performance-testing`](skills/self-service-performance-testing/SKILL.md) | Help engineers write performance tests that detect regressions, using k6 for load testing and sitespeed.io for frontend Core Web Vitals. Use when the user is adding or changing API endpoints, database queries, critical paths, or frontend pages and needs to decide whether to write a performance test, what kind, or how to integrate it into CI. Also activate when the user mentions load testing, stress testing, response times, benchmarking, performance budgets, CPT, component performance testing, MR pipeline performance testing, or wants to run tests against staging - this skill enforces shared infrastructure safety rules. Does not cover profiling, APM, or debugging production incidents. | 0.2.1 |
+| [`source-code-branch-protection`](.claude-plugin/plugins/source-code-branch-protection) | [`source-code-branch-protection`](skills/source-code-branch-protection/SKILL.md) | Guide for working with branch protection, protected tags, branch rules, and access level restrictions in GitLab | 1.0.0 |
+| [`source-code-code-owners`](.claude-plugin/plugins/source-code-code-owners) | [`source-code-code-owners`](skills/source-code-code-owners/SKILL.md) | CODEOWNERS file parsing, validation, and MR approval integration (Premium+) | 1.0.0 |
+| [`source-code-commit-signing`](.claude-plugin/plugins/source-code-commit-signing) | [`source-code-commit-signing`](skills/source-code-commit-signing/SKILL.md) | Guide for working with commit signing features (GPG, SSH, X.509, S/MIME) in GitLab | 1.0.0 |
+| [`source-code-developer-tools-index`](.claude-plugin/plugins/source-code-developer-tools-index) | [`source-code-developer-tools-index`](skills/source-code-developer-tools-index/SKILL.md) | Lightweight index of miscellaneous Source Code developer tools and features | 1.0.0 |
+| [`source-code-file-templates`](.claude-plugin/plugins/source-code-file-templates) | [`source-code-file-templates`](skills/source-code-file-templates/SKILL.md) | Group file templates and custom project templates - Premium+ EE features for standardized templates | 1.0.0 |
+| [`source-code-git-lfs`](.claude-plugin/plugins/source-code-git-lfs) | [`source-code-git-lfs`](skills/source-code-git-lfs/SKILL.md) | Git Large File Storage (LFS) - managing large binary files outside Git repositories | 1.0.0 |
+| [`source-code-merge-controls`](.claude-plugin/plugins/source-code-merge-controls) | [`source-code-merge-controls`](skills/source-code-merge-controls/SKILL.md) | Guide for working with merge request approvals, merge methods, and squash settings in GitLab | 1.0.0 |
+| [`source-code-mirroring`](.claude-plugin/plugins/source-code-mirroring) | [`source-code-mirroring`](skills/source-code-mirroring/SKILL.md) | Repository mirroring - push, pull, and bidirectional sync between GitLab and external repositories | 1.0.0 |
+| [`source-code-push-rules`](.claude-plugin/plugins/source-code-push-rules) | [`source-code-push-rules`](skills/source-code-push-rules/SKILL.md) | Push rules - pre-receive hooks for commit validation, secret blocking, and signature requirements (Premium+) | 1.0.0 |
+| [`source-code-snippets`](.claude-plugin/plugins/source-code-snippets) | [`source-code-snippets`](skills/source-code-snippets/SKILL.md) | Snippets - versioned code/text sharing with Git repositories | 1.0.0 |
 | [`stack-changes`](.claude-plugin/plugins/stack-changes) | [`stack-changes`](skills/stack-changes/SKILL.md) | Splits a large local change (uncommitted or committed) into a stacked-MR chain. Use when the user asks to split an MR they find too big to review, wants stacked diffs, has sprawling AI-mode work to publish, or types /stack-changes. | 0.1.0 |
 | [`write-large-file`](.claude-plugin/plugins/write-large-file) | [`write-large-file`](skills/write-large-file/SKILL.md) | Write large files reliably using chunked bash append (>> heredoc) | 1.0.0 |
 <!-- CLAUDECODE_PLUGINS_END -->

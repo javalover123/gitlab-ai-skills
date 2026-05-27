@@ -1,0 +1,10 @@
+{
+  "name": "source-code-code-owners",
+  "description": "CODEOWNERS file parsing, validation, and MR approval integration (Premium+)",
+  "version": "1.0.0",
+  "author": {
+    "name": "GitLab"
+  },
+  "license": "MIT",
+  "skills": "./"
+}
