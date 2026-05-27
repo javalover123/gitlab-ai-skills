@@ -49,6 +49,22 @@
       "path": "skills/glab/SKILL.md"
     },
     {
+      "name": "mr-adversarial-review",
+      "description": "Use when running a critical, skeptical pass over a GitLab MR \u2014 either as the author before requesting human review, or as a reviewer wanting a structured first cut \u2014 produces a severity-bucketed findings report (High / Medium / Low / Done well) and posts it as a single comment on the MR.",
+      "category": "Development Workflow",
+      "license": "MIT",
+      "compatibility": "opencode",
+      "path": "skills/mr-adversarial-review/SKILL.md"
+    },
+    {
+      "name": "mr-review",
+      "description": "Review a GitLab merge request - read diffs, analyze changes, present findings, and optionally post comments on the MR",
+      "category": "Development Workflow",
+      "license": "MIT",
+      "compatibility": "",
+      "path": "skills/mr-review/SKILL.md"
+    },
+    {
       "name": "opencode-refine",
       "description": "Iteratively test and refine prompts, skills, and agent configurations using opencode run",
       "category": "Agent Tooling",
@@ -66,7 +82,7 @@
     },
     {
       "name": "pushify",
-      "description": "Run pre-push lefthook checks and fix any failures before pushing. Use this skill whenever the user asks to run pre-push checks, prepare for push, or wants to ensure code passes all pre-push hooks. Trigger proactively when the user asks if code is ready to push or wants to clean up before a git push.",
+      "description": "Run pre-push lefthook checks and iteratively fix failures (up to 3 iterations, then escalate). Invoke when: (a) about to push and wanting hooks to pass cleanly, (b) `git push` has just failed on a pre-push hook and the failure needs to be driven to resolution, or (c) preparing a clean working tree without pushing \u2014 e.g. before opening a Draft MR for early review.",
       "category": "Development Workflow",
       "license": "MIT",
       "compatibility": "",
@@ -87,6 +103,14 @@
       "license": "MIT",
       "compatibility": "opencode",
       "path": "skills/self-service-performance-testing/SKILL.md"
+    },
+    {
+      "name": "stack-changes",
+      "description": "Splits a large local change (uncommitted or committed) into a stacked-MR chain. Use when the user asks to split an MR they find too big to review, wants stacked diffs, has sprawling AI-mode work to publish, or types /stack-changes.",
+      "category": "Development Workflow",
+      "license": "MIT",
+      "compatibility": "",
+      "path": "skills/stack-changes/SKILL.md"
     },
     {
       "name": "write-large-file",

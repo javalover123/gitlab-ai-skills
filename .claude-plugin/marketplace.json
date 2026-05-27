@@ -32,6 +32,14 @@
       "source": "./.claude-plugin/plugins/glab"
     },
     {
+      "name": "mr-adversarial-review",
+      "source": "./.claude-plugin/plugins/mr-adversarial-review"
+    },
+    {
+      "name": "mr-review",
+      "source": "./.claude-plugin/plugins/mr-review"
+    },
+    {
       "name": "pushify",
       "source": "./.claude-plugin/plugins/pushify"
     },
@@ -42,6 +50,10 @@
     {
       "name": "self-service-performance-testing",
       "source": "./.claude-plugin/plugins/self-service-performance-testing"
+    },
+    {
+      "name": "stack-changes",
+      "source": "./.claude-plugin/plugins/stack-changes"
     },
     {
       "name": "write-large-file",
