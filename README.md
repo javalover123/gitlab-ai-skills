@@ -62,7 +62,7 @@ Review a GitLab merge request - read diffs, analyze changes, present findings, a
 
 #### pushify
 
-Run pre-push lefthook checks and fix any failures before pushing. Use this skill whenever the user asks to run pre-push checks, prepare for push, or wants to ensure code passes all pre-push hooks. Trigger proactively when the user asks if code is ready to push or wants to clean up before a git push. → [`SKILL.md`](skills/pushify/SKILL.md)
+Run pre-push lefthook checks and iteratively fix failures. Primary trigger: invoke after `git push` fails on the lefthook pre-push hook, to drive the fix loop until checks pass. Secondary trigger: pre-validate without pushing — e.g., before opening a Draft MR for early review, or when explicitly preparing a clean working tree. If lefthook is installed as a git hook (`lefthook install`), `git push` already runs the same checks; the unique value of this skill is the structured fix-and-retry loop, not the hook execution itself. → [`SKILL.md`](skills/pushify/SKILL.md)
 
 ### Database
 

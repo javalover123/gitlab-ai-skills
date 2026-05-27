@@ -1,9 +1,9 @@
 ---
 name: pushify
-version: 1.0.0
+version: 1.1.0
 category: Development Workflow
 license: MIT
-description: Run pre-push lefthook checks and fix any failures before pushing. Use this skill whenever the user asks to run pre-push checks, prepare for push, or wants to ensure code passes all pre-push hooks. Trigger proactively when the user asks if code is ready to push or wants to clean up before a git push.
+description: "Run pre-push lefthook checks and iteratively fix failures. Primary trigger: invoke after `git push` fails on the lefthook pre-push hook, to drive the fix loop until checks pass. Secondary trigger: pre-validate without pushing — e.g., before opening a Draft MR for early review, or when explicitly preparing a clean working tree. If lefthook is installed as a git hook (`lefthook install`), `git push` already runs the same checks; the unique value of this skill is the structured fix-and-retry loop, not the hook execution itself."
 metadata:
   author: pshutsin
   audience: developers
@@ -11,7 +11,9 @@ metadata:
 
 # Pushify
 
-Run all pre-push lefthook hooks and fix failures iteratively until everything passes. All prepush hooks must pass.
+Run all pre-push lefthook hooks and fix failures iteratively until everything passes. All pre-push hooks must pass.
+
+When lefthook is installed as a git hook (`lefthook install` — see [`doc/contributing.md`](../../doc/contributing.md)), `git push` already triggers the same hook set. The unique value of this skill is the **structured fix-and-retry loop** below, not running the hooks. Prefer letting `git push` enforce the checks; invoke this skill when push fails (to drive recovery) or when you explicitly want to pre-validate without pushing (e.g. before opening a Draft MR for early review).
 
 ## Workflow
 
