@@ -1,7 +1,7 @@
 {
   "name": "pushify",
-  "description": "Run pre-push lefthook checks and fix any failures before pushing. Use this skill whenever the user asks to run pre-push checks, prepare for push, or wants to ensure code passes all pre-push hooks. Trigger proactively when the user asks if code is ready to push or wants to clean up before a git push.",
-  "version": "1.0.0",
+  "description": "Run pre-push lefthook checks and iteratively fix failures (up to 3 iterations, then escalate). Invoke when: (a) about to push and wanting hooks to pass cleanly, (b) `git push` has just failed on a pre-push hook and the failure needs to be driven to resolution, or (c) preparing a clean working tree without pushing \u2014 e.g. before opening a Draft MR for early review.",
+  "version": "1.1.0",
   "author": {
     "name": "GitLab"
   },

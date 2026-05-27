@@ -1,9 +1,9 @@
 ---
 name: pushify
-version: 1.0.0
+version: 1.1.0
 category: Development Workflow
 license: MIT
-description: Run pre-push lefthook checks and fix any failures before pushing. Use this skill whenever the user asks to run pre-push checks, prepare for push, or wants to ensure code passes all pre-push hooks. Trigger proactively when the user asks if code is ready to push or wants to clean up before a git push.
+description: "Run pre-push lefthook checks and iteratively fix failures (up to 3 iterations, then escalate). Invoke when: (a) about to push and wanting hooks to pass cleanly, (b) `git push` has just failed on a pre-push hook and the failure needs to be driven to resolution, or (c) preparing a clean working tree without pushing — e.g. before opening a Draft MR for early review."
 metadata:
   author: pshutsin
   audience: developers
@@ -11,7 +11,7 @@ metadata:
 
 # Pushify
 
-Run all pre-push lefthook hooks and fix failures iteratively until everything passes. All prepush hooks must pass.
+Run all pre-push lefthook hooks and fix failures iteratively until everything passes. All pre-push hooks must pass.
 
 ## Workflow
 
