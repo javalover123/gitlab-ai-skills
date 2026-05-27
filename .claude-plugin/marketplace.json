@@ -48,6 +48,10 @@
       "source": "./.claude-plugin/plugins/self-service-performance-testing"
     },
     {
+      "name": "stack-changes",
+      "source": "./.claude-plugin/plugins/stack-changes"
+    },
+    {
       "name": "write-large-file",
       "source": "./.claude-plugin/plugins/write-large-file"
     }
