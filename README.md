@@ -56,6 +56,10 @@ Watch GitLab MR pipelines and react to state changes → [`SKILL.md`](skills/git
 
 GitLab workflow automation using glab CLI → [`SKILL.md`](skills/glab/SKILL.md)
 
+#### mr-adversarial-review
+
+Use when running a critical, skeptical pass over a GitLab MR — either as the author before requesting human review, or as a reviewer wanting a structured first cut — produces a severity-bucketed findings report (High / Medium / Low / Done well) and posts it as a single comment on the MR. → [`SKILL.md`](skills/mr-adversarial-review/SKILL.md)
+
 #### mr-review
 
 Review a GitLab merge request - read diffs, analyze changes, present findings, and optionally post comments on the MR → [`SKILL.md`](skills/mr-review/SKILL.md)
@@ -208,6 +212,7 @@ This repo ships as a [Claude Code plugin marketplace](https://code.claude.com/do
 | [`gitlab-pipeline-watch`](.claude-plugin/plugins/gitlab-pipeline-watch) | [`gitlab-pipeline-watch`](skills/gitlab-pipeline-watch/SKILL.md) | Watch GitLab MR pipelines and react to state changes | 1.0.0 |
 | [`gitlab-psql`](.claude-plugin/plugins/gitlab-psql) | [`gitlab-psql`](skills/gitlab-psql/SKILL.md) | Inspect GitLab GDK PostgreSQL test and development databases with gdk psql. Use for Postgres schema checks, table and index inspection, read-only SQL queries, migration verification, and investigating GitLab application data in local test or development databases. | 1.0.1 |
 | [`glab`](.claude-plugin/plugins/glab) | [`glab`](skills/glab/SKILL.md) | GitLab workflow automation using glab CLI | 1.8.1 |
+| [`mr-adversarial-review`](.claude-plugin/plugins/mr-adversarial-review) | [`mr-adversarial-review`](skills/mr-adversarial-review/SKILL.md) | Use when running a critical, skeptical pass over a GitLab MR — either as the author before requesting human review, or as a reviewer wanting a structured first cut — produces a severity-bucketed findings report (High / Medium / Low / Done well) and posts it as a single comment on the MR. | 0.1.0 |
 | [`mr-review`](.claude-plugin/plugins/mr-review) | [`mr-review`](skills/mr-review/SKILL.md) | Review a GitLab merge request — read diffs, analyze changes, present findings, and optionally post comments on the MR | 0.1.0 |
 | [`pushify`](.claude-plugin/plugins/pushify) | [`pushify`](skills/pushify/SKILL.md) | Run pre-push lefthook checks and iteratively fix failures (up to 3 iterations, then escalate). Invoke when: (a) about to push and wanting hooks to pass cleanly, (b) `git push` has just failed on a pre-push hook and the failure needs to be driven to resolution, or (c) preparing a clean working tree without pushing — e.g. before opening a Draft MR for early review. | 1.1.0 |
 | [`run-in-tmux-pane`](.claude-plugin/plugins/run-in-tmux-pane) | [`run-in-tmux-pane`](skills/run-in-tmux-pane/SKILL.md) | Run commands in a temporary tmux pane with full interactive zsh environment (login shell, shims, PATH, aliases, TTY). | 1.1.1 |
