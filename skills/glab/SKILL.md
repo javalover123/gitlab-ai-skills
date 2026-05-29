@@ -77,8 +77,8 @@ the binary from the [releases page](https://gitlab.com/gitlab-org/cli/-/releases
 another method from the [installation options](https://gitlab.com/gitlab-org/cli/-/blob/main/docs/installation_options.md).
 
 After a successful install, run `glab --version` to confirm, then **note that `glab`
-likely needs auth** before most commands work: `glab auth login` (interactive — suggest
-the user run it via `! glab auth login` in the prompt), or set a `GITLAB_TOKEN` env var.
+likely needs auth** before most commands work: `glab auth login` (interactive — the user
+must run this in a terminal themselves, not via the agent), or set a `GITLAB_TOKEN` env var.
 Then continue with the original request.
 
 ## Multiple GitLab Instances
