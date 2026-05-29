@@ -1,7 +1,7 @@
 ---
 name: glab
 description: GitLab workflow automation using glab CLI
-version: 1.8.1
+version: 1.9.0
 category: Development Workflow
 license: MIT
 metadata:
@@ -13,6 +13,73 @@ metadata:
 # GitLab Workflow Skill
 
 GitLab workflow management using `glab` CLI for merge requests, issues, and Git best practices.
+
+## Preflight — Verify `glab` Is Installed
+
+**Before running any `glab` command, confirm the binary exists.** Run this single check —
+nothing else:
+
+```bash
+command -v glab >/dev/null 2>&1 && glab --version
+```
+
+- **If it prints a version** → proceed normally.
+- **If it prints nothing (exit non-zero)** → `glab` is not installed. **Stop immediately
+  and offer to install it (next section). This is the only acceptable next action.**
+
+When `glab` is missing, do **not**:
+
+- hunt for the binary in `bin/`, `/opt/homebrew/`, or other paths — the `command -v` check
+  above is definitive; if it failed, the binary is not on `PATH`, full stop;
+- treat installation as conditional ("I'll offer to install *only if* I can't fetch it
+  another way"). The install offer is **unconditional and immediate**;
+- fall back to WebFetch, the raw GitLab web UI, unauthenticated REST/GraphQL, `curl`, or any
+  other workaround to satisfy the request without `glab`. The whole point of this skill is
+  the authenticated `glab` workflow — substituting a different mechanism defeats it and
+  silently changes the user's request.
+
+The correct behavior is: detect missing → tell the user `glab` isn't installed → propose the
+install command → on approval, install → verify → then resume the original request with `glab`.
+
+### Offer to install
+
+Installing software changes the user's machine, so **always confirm before running the
+install command** — state the exact command and ask the user to approve. Homebrew is the
+officially supported package manager (macOS, Linux, and Windows via WSL); the rest are
+community-maintained native packages. Pick by detecting an available package manager:
+
+```bash
+# Homebrew — officially supported, preferred when available (macOS or Linux)
+brew install glab
+
+# Arch Linux
+sudo pacman -S glab
+
+# Fedora / RHEL
+sudo dnf install glab
+
+# Alpine Linux
+sudo apk add --no-cache glab
+```
+
+Detection helper — prints the right command for the current host:
+
+```bash
+if   command -v brew   >/dev/null 2>&1; then echo "brew install glab"
+elif command -v pacman >/dev/null 2>&1; then echo "sudo pacman -S glab"
+elif command -v dnf    >/dev/null 2>&1; then echo "sudo dnf install glab"
+elif command -v apk    >/dev/null 2>&1; then echo "sudo apk add --no-cache glab"
+else echo "No supported package manager found — download a binary from https://gitlab.com/gitlab-org/cli/-/releases (see https://gitlab.com/gitlab-org/cli/-/blob/main/docs/installation_options.md for more options)"; fi
+```
+
+For Debian/Ubuntu (no native apt package) or any host without a package manager, download
+the binary from the [releases page](https://gitlab.com/gitlab-org/cli/-/releases) or pick
+another method from the [installation options](https://gitlab.com/gitlab-org/cli/-/blob/main/docs/installation_options.md).
+
+After a successful install, run `glab --version` to confirm, then **note that `glab`
+likely needs auth** before most commands work: `glab auth login` (interactive — suggest
+the user run it via `! glab auth login` in the prompt), or set a `GITLAB_TOKEN` env var.
+Then continue with the original request.
 
 ## Multiple GitLab Instances
 
@@ -243,6 +310,7 @@ git checkout -b fix/description
 
 ## Agent Guidelines
 
+0. **Verify `glab` is installed first** — run `command -v glab` before any workflow. If missing, **stop immediately and offer to install it** (confirm the command first). The offer is unconditional — do not search for the binary, do not fall back to WebFetch/web UI/raw API/`curl`, and do not make the offer conditional on whether some workaround exists. See the Preflight section above.
 1. **`glab mr create` always needs `--push -H <owner/repo>`** — omitting either causes the MR to be created from the wrong remote or fail entirely
 2. **Always pass `--assignee <username>` on `glab mr create`** — MRs are unassigned by default; always assign to the author
 3. **Read context first** — `glab issue view` / `glab mr view` before implementing
