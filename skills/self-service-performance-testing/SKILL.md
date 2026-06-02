@@ -1,7 +1,7 @@
 ---
 name: self-service-performance-testing
-description: Help engineers write performance tests that detect regressions, using k6 for load testing and sitespeed.io for frontend Core Web Vitals. Use when the user is adding or changing API endpoints, database queries, critical paths, or frontend pages and needs to decide whether to write a performance test, what kind, or how to integrate it into CI. Also activate when the user mentions load testing, stress testing, response times, benchmarking, performance budgets, CPT, component performance testing, MR pipeline performance testing, or wants to run tests against staging - this skill enforces shared infrastructure safety rules. Does not cover profiling, APM, or debugging production incidents.
-version: 0.2.1
+description: Help engineers write performance tests that detect regressions, using k6 for load testing, sitespeed.io for frontend Core Web Vitals, rspec-benchmark for unit-level perf assertions, and Ruby profilers (Stackprof, memory_profiler, derailed_benchmarks, etc.) for investigating slow code paths. Use when the user is adding or changing API endpoints, database queries, critical paths, or frontend pages and needs to decide whether to write a performance test, what kind, or how to integrate it into CI. Also activate when the user mentions load testing, stress testing, response times, benchmarking, performance budgets, CPT, component performance testing, MR pipeline performance testing, profiling slow Ruby code, memory bloat, or wants to run tests against staging - this skill enforces shared infrastructure safety rules. Does not cover APM or debugging production incidents.
+version: 0.3.1
 category: Testing
 license: MIT
 compatibility: opencode
@@ -91,10 +91,17 @@ Start here rather than building from scratch:
 | API endpoints, backend load | [**GPT** (GitLab Performance Tool)](https://gitlab.com/gitlab-org/quality/performance) | External — separate repo, Docker | Stable |
 | Frontend page load / Core Web Vitals | [**Sitespeed Runway**](https://gitlab.com/gitlab-org/quality/sitespeed-runway) | External — hosted service + API | Stable |
 | Performance feedback within your Merge Request | [**CPT** (Component Performance Testing)](https://gitlab.com/gitlab-org/quality/component-performance-testing) | In your MR pipeline — runs against a GitLab CNG instance or isolated containerized component | Alpha |
+| Unit-level perf assertions (execution time, allocations, scaling) | [**rspec-benchmark**](https://github.com/piotrmurach/rspec-benchmark) (in the `gitlab-org/gitlab` Gemfile) | In the engineer's RSpec suite | Stable |
+| Investigating slow Ruby code / memory bloat | **Ruby profilers**: Stackprof, memory_profiler, derailed_benchmarks, benchmark-ips, rspec_profiling (all in the `gitlab-org/gitlab` Gemfile); rbspy (standalone Rust binary) and ruby-prof (added manually) for cases the in-Gemfile tools don't cover | Locally on the engineer's machine or in test/dev | Stable |
 
 GPT and Sitespeed Runway are external to the engineer's repo — they won't
 add test files to their project. CPT is the exception: it runs in the MR
-pipeline via a multi-project trigger.
+pipeline via a multi-project trigger. rspec-benchmark lives in the spec
+suite alongside functional tests. Profilers are typically run ad-hoc when
+investigating a regression or hot path.
+
+The handbook's [Performance Testing Tool Selection Guide](https://handbook.gitlab.com/handbook/engineering/testing/performance-tools/)
+is the canonical decision tree for which tool to use.
 
 ## Reference Files
 
@@ -110,6 +117,8 @@ don't try to guess how these tools work, consult the references.
 | Advise on or configure CPT (Component Performance Testing) | [cpt.md](references/cpt.md) |
 | Write or review a k6 test stub | [quick-reference.md](references/quick-reference.md) |
 | Add perf tests to CI pipeline | [gitlab-ci-integration.md](references/gitlab-ci-integration.md) |
+| Write unit-level perf assertions with rspec-benchmark | [unit-performance-testing.md](references/unit-performance-testing.md) |
+| Profile slow Ruby code, memory bloat, allocations | [profiling.md](references/profiling.md) |
 
 ## Advisory Flow
 
@@ -130,15 +139,18 @@ confirming the tool choice) risks wasted work if the wrong tool was assumed.
    confident "no, this doesn't need a performance test because X" is more
    useful than hedging.
 
-3. **Which tool?** The key question is: when does the engineer want
-   feedback?
-   - On every push, before merge → **CPT**
+3. **Which tool?** The key question is: at what level does the engineer
+   want feedback?
+   - Single method / class, want assertion in the spec suite → **rspec-benchmark**
+   - Investigating *why* something is slow (CPU, memory, allocations) → **a profiler** (see [profiling.md](references/profiling.md))
+   - On every push, before merge, component-level load → **CPT**
    - Scheduled load testing or full reference architecture validation → **GPT**
    - Frontend page load / Core Web Vitals → **Sitespeed Runway**
 
    Confirm the tool choice with the engineer before moving on. Getting this
    wrong means starting over — a k6 test doesn't help if they need
-   Sitespeed Runway.
+   Sitespeed Runway, and a load test won't tell them which line of Ruby
+   is allocating 100k objects (a profiler will).
 
    If none of the published tools fit cleanly, don't invent an approach —
    the Performance Enablement team (**#g_performance_enablement** on Slack)
@@ -156,6 +168,11 @@ confirming the tool choice) risks wasted work if the wrong tool was assumed.
      [cpt.md](references/cpt.md) conventions.
    - **Sitespeed Runway** → walk them through the Web UI or API setup
      from [sitespeed-runway.md](references/sitespeed-runway.md).
+   - **rspec-benchmark** → write the matcher-based spec using patterns
+     from [unit-performance-testing.md](references/unit-performance-testing.md).
+   - **Profiling** → point them to the right profiler for their symptom
+     (CPU vs memory vs allocations vs whole-app boot) using
+     [profiling.md](references/profiling.md).
    - **CI integration** → provide a pipeline snippet from
      [gitlab-ci-integration.md](references/gitlab-ci-integration.md).
 
