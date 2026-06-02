@@ -3,6 +3,7 @@
 This repo hosts reusable agent **skills** — each is a `skills/<name>/SKILL.md`
 with YAML frontmatter plus Markdown content, distributed to OpenCode, Claude
 Code, and pi. Most contributions add or edit a skill. Read this before writing.
+See [`CONTEXT.md`](CONTEXT.md) for the canonical glossary of domain terms.
 
 > `CLAUDE.md` is a copy of this file. Keep the two **byte-identical** — edit
 > `AGENTS.md` and copy it over (`cp AGENTS.md CLAUDE.md`).
