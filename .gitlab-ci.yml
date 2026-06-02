@@ -30,6 +30,26 @@ validate-frontmatter:
   script:
     - python3 scripts/validate_frontmatter.py --ci --debug
 
+validate-skill-length:
+  stage: verify
+  extends: .verify-rules
+  script:
+    - python3 scripts/validate_skill_length.py --ci --debug
+
+lint-shell:
+  stage: lint
+  extends: .verify-rules
+  before_script:
+    - apk add --no-cache shellcheck bash
+  script:
+    - scripts/lint_shell.sh
+
+agent-file-sync:
+  stage: lint
+  extends: .verify-rules
+  script:
+    - diff AGENTS.md CLAUDE.md || (echo "AGENTS.md and CLAUDE.md are out of sync. Run 'cp AGENTS.md CLAUDE.md'." && exit 1)
+
 validate-distribution-claudecode:
   stage: verify
   extends: .verify-rules
