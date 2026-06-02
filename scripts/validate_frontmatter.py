@@ -24,6 +24,9 @@ REQUIRED_FIELDS = ["name", "description", "version", "license"]
 # Semver pattern (major.minor.patch, no pre-release/build metadata for simplicity)
 SEMVER_RE = re.compile(r"^\d+\.\d+\.\d+$")
 
+# Skill names are kebab-case: lowercase alphanumerics joined by single hyphens.
+KEBAB_RE = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*$")
+
 # Debug flag
 DEBUG = "--debug" in sys.argv
 
@@ -64,6 +67,21 @@ def validate_skills():
             if not SEMVER_RE.match(fields["version"]):
                 format_errors.append(
                     f"version '{fields['version']}' is not valid semver (expected X.Y.Z)"
+                )
+
+        # Validate name: kebab-case and matching the directory name.
+        # Rationale: reviewers repeatedly asked for this convention (see
+        # !9 commit-messages, !23 gitlab-clickhouse/gitlab-psql). Encoding it
+        # as a check stops it recurring. All 15 existing skills already pass.
+        name = fields.get("name", "")
+        if name:
+            if not KEBAB_RE.match(name):
+                format_errors.append(
+                    f"name '{name}' is not kebab-case (lowercase, hyphen-separated)"
+                )
+            if name != skill_name:
+                format_errors.append(
+                    f"name '{name}' does not match directory name '{skill_name}'"
                 )
 
         if missing or format_errors:
