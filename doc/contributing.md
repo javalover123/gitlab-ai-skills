@@ -51,8 +51,12 @@ The CI pipeline will fail if any generated files are out of sync with the skill 
 
 Optional fields: `compatibility` (agent framework, e.g. `opencode`), `metadata` (with nested `audience`, `workflow`, etc.)
 
-The `validate-frontmatter` CI job enforces these required fields. The `check-version-bump` job
-verifies that the `version` field is incremented whenever files under `skills/<name>/` change.
+The `validate-frontmatter` CI job enforces these required fields, that `name` is
+kebab-case, and that it matches the directory name. The `check-version-bump` job
+verifies that the `version` field is incremented whenever files under
+`skills/<name>/` change. See [`AGENTS.md`](../AGENTS.md) for the full list of
+conventions and their enforcing checks (skill length, shell-script linting,
+`AGENTS.md`/`CLAUDE.md` sync).
 
 ## Distribution
 

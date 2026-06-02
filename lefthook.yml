@@ -7,6 +7,12 @@ pre-push:
       run: python3 scripts/update_skills_list.py --ci
     validate-frontmatter:
       run: python3 scripts/validate_frontmatter.py --ci
+    validate-skill-length:
+      run: python3 scripts/validate_skill_length.py --ci
+    lint-shell:
+      run: scripts/lint_shell.sh
+    agent-file-sync:
+      run: diff AGENTS.md CLAUDE.md || (echo "AGENTS.md and CLAUDE.md are out of sync. Run 'cp AGENTS.md CLAUDE.md'." && exit 1)
     validate-claudecode-distribution:
       run: python3 scripts/validate-claudecode-distribution.py --ci
     validate-opencode-distribution:
