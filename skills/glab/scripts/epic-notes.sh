@@ -19,7 +19,7 @@
 #
 # Requires: glab (authenticated), jq
 
-set -euo pipefail
+set -Eeuo pipefail
 
 GROUP_PATH="${1:?Usage: epic-notes.sh <group-path> <epic-iid> [page-size]}"
 EPIC_IID="${2:?Usage: epic-notes.sh <group-path> <epic-iid> [page-size]}"
@@ -35,32 +35,24 @@ if [[ ! -f "$TEMPLATE" ]]; then
   exit 1
 fi
 
+QUERY="$(cat "$TEMPLATE")"
+
 cursor=""
-page=0
 all_notes='[]'
 _err=$(mktemp)
 trap 'rm -f "$_err"' EXIT
 
 while true; do
-  page=$((page + 1))
-
-  # Build the discussions argument: add after: cursor on pages > 1
-  # JSON-encode the cursor via jq to safely embed it in the GraphQL string
-  if [[ -z "$cursor" ]]; then
-    discussions_arg="discussions(first: ${PAGE_SIZE})"
-  else
-    escaped_cursor=$(jq -rn --arg c "$cursor" '$c | @json')
-    discussions_arg="discussions(first: ${PAGE_SIZE}, after: ${escaped_cursor})"
+  # Pass values as GraphQL variables: no string interpolation, no escaping traps.
+  # Use -f for String-typed variables (glab -F coerces numeric-looking values to
+  # Int, which fails String! validation) and -F for the Int pageSize. cursor is
+  # omitted on the first page (defaults to null in the query).
+  args=(-f "groupPath=${GROUP_PATH}" -f "epicIid=${EPIC_IID}" -F "pageSize=${PAGE_SIZE}")
+  if [[ -n "$cursor" ]]; then
+    args+=(-f "cursor=${cursor}")
   fi
 
-  # Substitute placeholders in the template
-  query=$(sed \
-    -e "s|\\\$GROUP_PATH|${GROUP_PATH}|g" \
-    -e "s|\\\$EPIC_IID|${EPIC_IID}|g" \
-    -e "s|discussions(first: \\\$PAGE_SIZE)|${discussions_arg}|g" \
-    "$TEMPLATE")
-
-  if ! response=$(glab api graphql -f "query=${query}" 2>"$_err"); then
+  if ! response=$(glab api graphql "${args[@]}" -f "query=${QUERY}" 2>"$_err"); then
     echo "ERROR from glab: $(cat "$_err")" >&2
     exit 1
   fi

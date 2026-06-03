@@ -7,7 +7,8 @@
 # Arguments:
 #   group-id    Numeric group ID (get with: glab api "groups/my-group%2Fpath" | jq '.id')
 #   epic-iid    Epic display number (iid), e.g. 16428
-#   body        Comment text (quoted)
+#   body        Comment text (quoted). Any content is safe — newlines, backticks,
+#               $, and em dashes are passed as a GraphQL variable, not interpolated.
 #
 # Examples:
 #   create-epic-note.sh 9970 16428 "This needs more context before we proceed."
@@ -17,7 +18,7 @@
 #
 # Requires: glab (authenticated), jq
 
-set -euo pipefail
+set -Eeuo pipefail
 
 GROUP_ID="${1:?Usage: create-epic-note.sh <group-id> <epic-iid> \"body\"}"
 EPIC_IID="${2:?Usage: create-epic-note.sh <group-id> <epic-iid> \"body\"}"
@@ -45,19 +46,15 @@ fi
 EPIC_INTERNAL_ID=$(echo "$EPIC_DATA" | jq -r '.id')
 NOTEABLE_ID="gid://gitlab/Epic/${EPIC_INTERNAL_ID}"
 
-# Escape the body for safe embedding in a GraphQL string.
-# jq -Rs produces a fully JSON-encoded string (handles \, ", \n, \t, control chars, etc.)
-# Strip the surrounding quotes since they're already in the template.
-ESCAPED_BODY=$(jq -Rs . <<<"$BODY")
-ESCAPED_BODY=${ESCAPED_BODY:1:${#ESCAPED_BODY}-2}
-
-# Substitute placeholders in the template
-query=$(sed \
-  -e "s|\\\$NOTEABLE_ID|${NOTEABLE_ID}|g" \
-  -e "s|\\\$BODY|${ESCAPED_BODY}|g" \
-  "$TEMPLATE")
-
-if ! response=$(glab api graphql -f "query=${query}" 2>"$_err"); then
+# Pass noteableId and body as GraphQL variables. Use -f (raw string) rather than
+# -F: glab's -F coerces numeric-looking values to Int, which fails String!/
+# NoteableID! validation for a body like "42". This avoids every escaping trap
+# that string interpolation hits: newlines, backticks, $, and non-ASCII
+# characters (e.g. em dashes) are sent verbatim.
+if ! response=$(glab api graphql \
+  -f noteableId="$NOTEABLE_ID" \
+  -f body="$BODY" \
+  -f query="$(cat "$TEMPLATE")" 2>"$_err"); then
   echo "ERROR from glab: $(cat "$_err")" >&2
   exit 1
 fi
