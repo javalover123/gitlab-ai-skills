@@ -1,22 +1,29 @@
 # Fetch a project-level work item with its notes.
 #
-# Variables (substitute before use):
-#   $PROJECT_PATH — project fullPath, e.g. "gitlab-org/gitlab"
-#   $WORK_ITEM_IID — work item IID as a quoted string, e.g. "539076"
-#   $PAGE_SIZE    — discussions per page, default 50
+# Pass values as GraphQL variables (glab api graphql -F ...), NOT by string
+# substitution. Variables avoid escaping traps and work on every GitLab version.
 #
-# Note: project.workItem (singular) does NOT exist.
-#       Use workItems(first: 1, iid: "...") (plural).
-#       Do NOT use a filter: {} argument — pass iid directly.
-#       WorkItem has no 'type' field — use workItemType { name }.
+# Variables:
+#   projectPath   project fullPath, e.g. "gitlab-org/gitlab"
+#   workItemIid   work item IID as a string, e.g. "539076"
+#   pageSize      discussions per page (default 50 if omitted by the caller)
+#
+# Notes:
+#   project.workItem (singular) does NOT exist. Use workItems(first: 1, iid: ...) (plural).
+#   Do NOT use a filter argument; pass iid directly.
+#   WorkItem has no 'type' field; use workItemType { name }.
 #
 # For most use cases the REST issues API is simpler:
 #   glab api "projects/org%2Fproject/issues/<iid>"
 #   glab api "projects/org%2Fproject/issues/<iid>/notes"
+#
+# Usage (-f for String vars, -F for the Int pageSize):
+#   glab api graphql -f projectPath=gitlab-org/gitlab -f workItemIid="539076" \
+#     -F pageSize=50 -f query="$(cat project-work-item.graphql)"
 
-{
-  project(fullPath: "$PROJECT_PATH") {
-    workItems(first: 1, iid: "$WORK_ITEM_IID") {
+query($projectPath: ID!, $workItemIid: String!, $pageSize: Int = 50) {
+  project(fullPath: $projectPath) {
+    workItems(first: 1, iid: $workItemIid) {
       nodes {
         id
         iid
@@ -27,7 +34,7 @@
         widgets {
           type
           ... on WorkItemWidgetNotes {
-            discussions(first: $PAGE_SIZE) {
+            discussions(first: $pageSize) {
               pageInfo {
                 hasNextPage
                 endCursor
