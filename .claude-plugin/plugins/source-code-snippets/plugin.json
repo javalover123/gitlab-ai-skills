@@ -1,0 +1,10 @@
+{
+  "name": "source-code-snippets",
+  "description": "Snippets - versioned code/text sharing with Git repositories",
+  "version": "1.0.0",
+  "author": {
+    "name": "GitLab"
+  },
+  "license": "MIT",
+  "skills": "./"
+}

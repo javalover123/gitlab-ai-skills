@@ -1,0 +1,10 @@
+{
+  "name": "source-code-push-rules",
+  "description": "Push rules - pre-receive hooks for commit validation, secret blocking, and signature requirements (Premium+)",
+  "version": "1.0.0",
+  "author": {
+    "name": "GitLab"
+  },
+  "license": "MIT",
+  "skills": "./"
+}

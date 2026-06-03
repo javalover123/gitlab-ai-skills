@@ -1,0 +1,10 @@
+{
+  "name": "source-code-developer-tools-index",
+  "description": "Lightweight index of miscellaneous Source Code developer tools and features",
+  "version": "1.0.0",
+  "author": {
+    "name": "GitLab"
+  },
+  "license": "MIT",
+  "skills": "./"
+}

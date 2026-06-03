@@ -1,0 +1,10 @@
+{
+  "name": "source-code-branch-protection",
+  "description": "Guide for working with branch protection, protected tags, branch rules, and access level restrictions in GitLab",
+  "version": "1.0.0",
+  "author": {
+    "name": "GitLab"
+  },
+  "license": "MIT",
+  "skills": "./"
+}

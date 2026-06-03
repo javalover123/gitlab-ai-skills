@@ -1,0 +1,10 @@
+{
+  "name": "source-code-git-lfs",
+  "description": "Git Large File Storage (LFS) - managing large binary files outside Git repositories",
+  "version": "1.0.0",
+  "author": {
+    "name": "GitLab"
+  },
+  "license": "MIT",
+  "skills": "./"
+}

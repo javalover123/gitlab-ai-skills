@@ -52,6 +52,46 @@
       "source": "./.claude-plugin/plugins/self-service-performance-testing"
     },
     {
+      "name": "source-code-branch-protection",
+      "source": "./.claude-plugin/plugins/source-code-branch-protection"
+    },
+    {
+      "name": "source-code-code-owners",
+      "source": "./.claude-plugin/plugins/source-code-code-owners"
+    },
+    {
+      "name": "source-code-commit-signing",
+      "source": "./.claude-plugin/plugins/source-code-commit-signing"
+    },
+    {
+      "name": "source-code-developer-tools-index",
+      "source": "./.claude-plugin/plugins/source-code-developer-tools-index"
+    },
+    {
+      "name": "source-code-file-templates",
+      "source": "./.claude-plugin/plugins/source-code-file-templates"
+    },
+    {
+      "name": "source-code-git-lfs",
+      "source": "./.claude-plugin/plugins/source-code-git-lfs"
+    },
+    {
+      "name": "source-code-merge-controls",
+      "source": "./.claude-plugin/plugins/source-code-merge-controls"
+    },
+    {
+      "name": "source-code-mirroring",
+      "source": "./.claude-plugin/plugins/source-code-mirroring"
+    },
+    {
+      "name": "source-code-push-rules",
+      "source": "./.claude-plugin/plugins/source-code-push-rules"
+    },
+    {
+      "name": "source-code-snippets",
+      "source": "./.claude-plugin/plugins/source-code-snippets"
+    },
+    {
       "name": "stack-changes",
       "source": "./.claude-plugin/plugins/stack-changes"
     },

@@ -105,6 +105,86 @@
       "path": "skills/self-service-performance-testing/SKILL.md"
     },
     {
+      "name": "source-code-branch-protection",
+      "description": "Guide for working with branch protection, protected tags, branch rules, and access level restrictions in GitLab",
+      "category": "",
+      "license": "MIT",
+      "compatibility": "",
+      "path": "skills/source-code-branch-protection/SKILL.md"
+    },
+    {
+      "name": "source-code-code-owners",
+      "description": "CODEOWNERS file parsing, validation, and MR approval integration (Premium+)",
+      "category": "",
+      "license": "MIT",
+      "compatibility": "",
+      "path": "skills/source-code-code-owners/SKILL.md"
+    },
+    {
+      "name": "source-code-commit-signing",
+      "description": "Guide for working with commit signing features (GPG, SSH, X.509, S/MIME) in GitLab",
+      "category": "",
+      "license": "MIT",
+      "compatibility": "",
+      "path": "skills/source-code-commit-signing/SKILL.md"
+    },
+    {
+      "name": "source-code-developer-tools-index",
+      "description": "Lightweight index of miscellaneous Source Code developer tools and features",
+      "category": "",
+      "license": "MIT",
+      "compatibility": "",
+      "path": "skills/source-code-developer-tools-index/SKILL.md"
+    },
+    {
+      "name": "source-code-file-templates",
+      "description": "Group file templates and custom project templates - Premium+ EE features for standardized templates",
+      "category": "",
+      "license": "MIT",
+      "compatibility": "",
+      "path": "skills/source-code-file-templates/SKILL.md"
+    },
+    {
+      "name": "source-code-git-lfs",
+      "description": "Git Large File Storage (LFS) - managing large binary files outside Git repositories",
+      "category": "",
+      "license": "MIT",
+      "compatibility": "",
+      "path": "skills/source-code-git-lfs/SKILL.md"
+    },
+    {
+      "name": "source-code-merge-controls",
+      "description": "Guide for working with merge request approvals, merge methods, and squash settings in GitLab",
+      "category": "",
+      "license": "MIT",
+      "compatibility": "",
+      "path": "skills/source-code-merge-controls/SKILL.md"
+    },
+    {
+      "name": "source-code-mirroring",
+      "description": "Repository mirroring - push, pull, and bidirectional sync between GitLab and external repositories",
+      "category": "",
+      "license": "MIT",
+      "compatibility": "",
+      "path": "skills/source-code-mirroring/SKILL.md"
+    },
+    {
+      "name": "source-code-push-rules",
+      "description": "Push rules - pre-receive hooks for commit validation, secret blocking, and signature requirements (Premium+)",
+      "category": "",
+      "license": "MIT",
+      "compatibility": "",
+      "path": "skills/source-code-push-rules/SKILL.md"
+    },
+    {
+      "name": "source-code-snippets",
+      "description": "Snippets - versioned code/text sharing with Git repositories",
+      "category": "",
+      "license": "MIT",
+      "compatibility": "",
+      "path": "skills/source-code-snippets/SKILL.md"
+    },
+    {
       "name": "stack-changes",
       "description": "Splits a large local change (uncommitted or committed) into a stacked-MR chain. Use when the user asks to split an MR they find too big to review, wants stacked diffs, has sprawling AI-mode work to publish, or types /stack-changes.",
       "category": "Development Workflow",
