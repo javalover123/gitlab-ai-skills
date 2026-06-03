@@ -1,7 +1,7 @@
 ---
 name: glab
 description: GitLab workflow automation using glab CLI
-version: 1.8.1
+version: 1.8.2
 category: Development Workflow
 license: MIT
 metadata:
@@ -256,7 +256,7 @@ git checkout -b fix/description
 11. **No `--jq` flag** — glab has no `--jq`; use `| jq '...'` pipe
 12. **No `--state`/`--status` on `mr list`** — use `--all`, `--merged`, `--closed`
 13. **Work items use the issues API** — `/work_items/<iid>` URLs → `projects/.../issues/<iid>`
-14. **Epic comments need GraphQL** — REST `/notes` → 404; see [references/epic-comments.md](references/epic-comments.md)
+14. **Epic comments need GraphQL** — REST `/notes` GET+POST both → 404 (still true on GitLab 19.1); pass `body`/`noteableId` as GraphQL variables, never string-interpolate. See [references/epic-comments.md](references/epic-comments.md)
 15. **No `-R` for group-level API** — `-R` expects `OWNER/REPO`; group endpoints use `glab api "groups/..."` directly
 16. **Nested groups REST: `%2F`** — `groups/org%2Fsubgroup/epics`; unencoded slashes → 404
 17. **GraphQL iid is a String** — `workItem(iid: "16428")` not `workItem(iid: 16428)`

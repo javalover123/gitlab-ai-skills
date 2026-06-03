@@ -1,30 +1,29 @@
 # Fetch all notes (comments) on a group-level epic.
 #
-# Variables (substitute before use):
-#   $GROUP_PATH  — group fullPath, plain slashes, e.g. "gitlab-org" or "gitlab-org/foundations"
-#   $EPIC_IID    — epic IID as a quoted string, e.g. "16428"
-#   $PAGE_SIZE   — discussions per page, default 100
-#   $CURSOR      — omit for first page; set to pageInfo.endCursor for subsequent pages
+# Pass values as GraphQL variables (glab api graphql -F ...), NOT by string
+# substitution. Variables avoid escaping traps and work on every GitLab version.
 #
-# Usage (first page):
-#   glab api graphql -f query="$(
-#     sed -e 's/$GROUP_PATH/gitlab-org/' \
-#         -e 's/$EPIC_IID/16428/' \
-#         -e 's/$PAGE_SIZE/100/' \
-#         -e '/\$CURSOR/d' \
-#         epic-notes.graphql)"
+# Variables:
+#   groupPath  group fullPath, plain slashes, e.g. "gitlab-org" or "gitlab-org/foundations"
+#   epicIid    epic IID as a string, e.g. "16428"
+#   pageSize   discussions per page (default 100 if omitted by the caller)
+#   cursor     null for the first page; pageInfo.endCursor for subsequent pages
 #
-# See scripts/epic-notes.sh for a ready-to-run wrapper.
+# Usage (first page; -f for String vars, -F for the Int pageSize):
+#   glab api graphql -f groupPath=gitlab-org -f epicIid="16428" \
+#     -F pageSize=100 -f query="$(cat epic-notes.graphql)"
+#
+# See scripts/epic-notes.sh for a ready-to-run wrapper that handles pagination.
 
-{
-  group(fullPath: "$GROUP_PATH") {
-    workItem(iid: "$EPIC_IID") {
+query($groupPath: ID!, $epicIid: String!, $pageSize: Int = 100, $cursor: String) {
+  group(fullPath: $groupPath) {
+    workItem(iid: $epicIid) {
       id
       title
       widgets {
         type
         ... on WorkItemWidgetNotes {
-          discussions(first: $PAGE_SIZE) {
+          discussions(first: $pageSize, after: $cursor) {
             pageInfo {
               hasNextPage
               endCursor
