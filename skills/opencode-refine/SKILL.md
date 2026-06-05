@@ -1,7 +1,7 @@
 ---
 name: opencode-refine
 description: Iteratively test and refine prompts, skills, and agent configurations using opencode run
-version: 1.0.3
+version: 1.0.2
 category: Agent Tooling
 license: MIT
 metadata:
@@ -252,7 +252,3 @@ opencode checks multiple config files (first match wins for each setting):
 4. `<workdir>/opencode.json`
 
 Use `--print-logs` and grep for `service=config` to see which files are loaded.
-
-## References
-
-- Dynamic context injection guidance: references/dynamic-context-injection.md
