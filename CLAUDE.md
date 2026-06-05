@@ -76,6 +76,20 @@ the [Claude Code docs](https://code.claude.com/docs/en/skills#inject-dynamic-con
 `skills/` in CI (catches the glob-test footgun as `SC2144`, unquoted
 expansions, and more).
 
+### Synced skills (source of truth elsewhere)
+
+Some skills are **synced in** from another repository — their source of truth
+(SSoT) lives upstream and this repo is only the destination. They're listed in
+[`synced-skills.yml`](synced-skills.yml).
+
+- **Don't edit them here.** The `guard-synced-skills` MR-pipeline job fails any
+  MR that touches a synced skill's directory. Fix the skill at its source
+  (`source_project` / `source_path` in the manifest) instead.
+- A scheduled pipeline (`SCHEDULE_TYPE=sync_skills`) runs
+  `scripts/sync_external_skills.py`, mirrors the upstream copy (including
+  deletions), runs `lefthook run auto-fix`, and opens an MR as the sync bot.
+- The version comes from upstream — no manual bump for synced skills.
+
 ## Workflow
 
 1. Create `skills/<name>/SKILL.md` with frontmatter (`name`, `description`,
@@ -97,6 +111,7 @@ expansions, and more).
 | `update_skills_list.py` / `update_toc.py` / `generate_catalog.py` / `update_claudecode_readme.py` | Generated README/catalog/manifests are in sync |
 | `validate-{opencode,claudecode,pi}-distribution.py` | Per-channel distribution format |
 | `sync_skill.py` / `bin/sync-skill` | SKILL.md versions synced into plugin manifests |
+| `check_synced_skills_untouched.sh` | MR doesn't edit a synced skill (SSoT elsewhere) |
 
 If a generated file is out of sync, run `lefthook run auto-fix` and commit the
 result — don't hand-edit generated files.

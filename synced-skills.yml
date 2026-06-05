@@ -1,0 +1,20 @@
+# Skills whose source of truth (SSoT) lives in another repository.
+#
+# This repo is the DESTINATION for these skills. Do NOT edit them here — fix
+# them at the source and let the scheduled sync pipeline pull the change in.
+# An MR-pipeline guard (scripts/check_synced_skills_untouched.sh) blocks
+# contributor edits to these skill directories; the scheduled sync job
+# (.gitlab-ci.yml: sync-skills) opens an MR with upstream changes.
+#
+# Fields per skill:
+#   source_project  GitLab project path of the SSoT repo
+#   source_path     Path to the skill directory within the SSoT repo
+#   source_ref      Branch/tag/ref to track
+#   mode            How the sync job applies changes: "mr" (open an MR) or
+#                   "direct" (commit straight to the default branch)
+skills:
+  glab:
+    source_project: gitlab-org/gitlab
+    source_path: .claude/skills/glab
+    source_ref: master
+    mode: mr

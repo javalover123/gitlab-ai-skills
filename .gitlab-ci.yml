@@ -1,12 +1,16 @@
 stages:
   - lint
   - verify
+  - sync
 
 include:
   - component: ${CI_SERVER_FQDN}/gitlab-org/components/danger-review/danger-review@2.1.0
     inputs:
       job_stage: lint
   - component: ${CI_SERVER_FQDN}/gitlab-org/orbit/components/lgtm-agent/lgtm-agent@main
+
+variables:
+  GLAB_VERSION: "1.101.0"
 
 default:
   image: python:3.12-alpine3.20
@@ -89,3 +93,39 @@ sync-distribution-versions:
   extends: .verify-rules
   script:
     - python3 scripts/sync_skill.py --ci --debug
+
+# Block contributor edits to externally-synced skills (see synced-skills.yml).
+# Those skills have their source of truth in another repo; edits here would be
+# overwritten by the next scheduled sync. The sync bot's own MR is exempt.
+guard-synced-skills:
+  stage: verify
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+  before_script:
+    - apk add --no-cache git bash
+  script:
+    - bash scripts/check_synced_skills_untouched.sh
+
+# Scheduled inbound sync: pull externally-synced skills from their source of
+# truth and open an MR with any changes. Configure a pipeline schedule with
+# CI variable SCHEDULE_TYPE=sync_skills.
+sync-skills:
+  stage: sync
+  image: registry.gitlab.com/gitlab-org/cli:v${GLAB_VERSION}
+  resource_group: sync-skills
+  retry: 0
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "schedule" && $SCHEDULE_TYPE == "sync_skills"
+      when: always
+    - when: never
+  variables:
+    REPO_URL: "https://oauth2:${SYNC_BOT_TOKEN}@${CI_SERVER_HOST}/${CI_PROJECT_PATH}.git"
+  before_script:
+    - apk add --no-cache git python3 bash jq
+    - glab auth login --hostname "$CI_SERVER_HOST" --token "$SYNC_BOT_TOKEN"
+    - git config --global user.email "${SYNC_BOT_EMAIL:-skills-sync-bot@no-reply.gitlab.com}"
+    - git config --global user.name "${SYNC_BOT_NAME:-GitLab Skills Sync Bot}"
+    - git remote set-url origin "$REPO_URL"
+    - git fetch origin "$CI_DEFAULT_BRANCH"
+  script:
+    - bash scripts/open_sync_mr.sh
