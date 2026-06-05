@@ -10,7 +10,10 @@
 # Required environment (set by the CI job):
 #   CI_DEFAULT_BRANCH, CI_COMMIT_SHORT_SHA  - GitLab CI predefined vars
 # Optional:
-#   SYNC_MR_LABELS  - comma-separated labels to apply to the MR
+#   SYNC_MR_LABELS     - comma-separated labels to apply to the MR
+#   SYNC_MR_REVIEWERS  - comma-separated reviewer usernames; defaults to the
+#                        pipeline trigger user (GITLAB_USER_LOGIN) unless that
+#                        is the sync bot
 set -Eeuo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -68,6 +71,26 @@ if [ -n "${SYNC_MR_LABELS:-}" ]; then
   done
 fi
 
+# Assign reviewers so the sync MR lands in someone's review queue instead of
+# going unnoticed. SYNC_MR_REVIEWERS (comma-separated usernames) takes
+# precedence; otherwise default to whoever triggered the pipeline
+# (GITLAB_USER_LOGIN) — e.g. the person who clicked the play button, or the
+# schedule owner. Skip the fallback when the trigger is the sync bot itself,
+# since a bot reviewing its own MR adds no value.
+reviewers="${SYNC_MR_REVIEWERS:-}"
+if [ -z "$reviewers" ] && [ -n "${GITLAB_USER_LOGIN:-}" ] &&
+   ! [[ "$GITLAB_USER_LOGIN" =~ ^project_[0-9]+_bot(_[0-9a-f]+|[0-9]*)$ ]]; then
+  reviewers="$GITLAB_USER_LOGIN"
+fi
+
+reviewer_args=()
+if [ -n "$reviewers" ]; then
+  IFS=',' read -ra _reviewers <<< "$reviewers"
+  for r in "${_reviewers[@]}"; do
+    reviewer_args+=(--reviewer "$r")
+  done
+fi
+
 description="Automated sync of skills whose source of truth lives in another repository (see \`synced-skills.yml\`).
 
 Review the diff to confirm it matches the upstream change, then merge."
@@ -79,4 +102,5 @@ glab mr create \
   --remove-source-branch \
   --yes \
   "${label_args[@]}" \
+  "${reviewer_args[@]}" \
   --description "$description"
