@@ -32,6 +32,10 @@
       "source": "./.claude-plugin/plugins/glab"
     },
     {
+      "name": "glab-glql",
+      "source": "./.claude-plugin/plugins/glab-glql"
+    },
+    {
       "name": "mr-adversarial-review",
       "source": "./.claude-plugin/plugins/mr-adversarial-review"
     },
