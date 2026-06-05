@@ -96,10 +96,16 @@ which is correct — the bot opens an MR, it never pushes to `main`.
 | `SYNC_BOT_TOKEN` | yes | no | the project access token value |
 | `SYNC_BOT_EMAIL` | no | no | git author email for the sync commit |
 | `SYNC_BOT_NAME` | no | no | git author name for the sync commit |
+| `SYNC_MR_LABELS` | no | no | optional comma-separated labels for the sync MR |
+| `SYNC_MR_REVIEWERS` | no | no | optional comma-separated reviewer usernames |
 
 `SYNC_BOT_TOKEN` is **unprotected** on purpose: the sync job runs on `sync/*`
 branches, which are not protected, so a protected variable would not be exposed
 to it.
+
+If `SYNC_MR_REVIEWERS` is unset, the sync MR is assigned to whoever triggered
+the pipeline (`GITLAB_USER_LOGIN`) — e.g. the person who clicked the play
+button, or the schedule owner — unless that is the bot itself.
 
 ### Creating or rotating the token
 
