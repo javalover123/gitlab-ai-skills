@@ -3,9 +3,9 @@
 **⚠️ The REST `/groups/<id>/epics/<iid>/notes` endpoint returns 404 — it does not exist.**
 
 Both **GET and POST** on this endpoint 404. Verified on gitlab.com and on a GitLab
-19.1 instance (GDK) — the GraphQL path below is still the only way to read or write
-epic comments, and there is no native `glab epic` subcommand. Epics are internally
-implemented as work items; use GraphQL or the wrapper scripts.
+19.1 instance (GDK) — GraphQL is still the only way to read or write epic comments,
+and there is no native `glab epic` subcommand. Epics are internally implemented as
+work items; use the wrapper scripts below (or the GraphQL templates they consume).
 
 ## Quick start — use the scripts
 
@@ -21,90 +21,42 @@ create-epic-note.sh <group-id> <epic-iid> "comment body"
 create-epic-note.sh 9970 16428 "This is my comment"
 ```
 
-Scripts live in `scripts/` alongside the skill. See the script source for the full GraphQL used.
+The scripts live in `scripts/` alongside the skill and consume the GraphQL documents
+in `assets/graphql/` (the single source for the query and mutation — see [Template
+files](#template-files)). Use the scripts; the notes below explain *why* they are
+shaped the way they are, so you can read or extend them.
 
-## Reading comments — GraphQL
+## Why the scripts use these shapes
 
-Pass the group path and iid as **GraphQL variables** (`-f`, raw string — `-F`
-coerces a numeric-looking iid to Int, failing `String!`). `first: 100` fetches all
-discussions for most epics in one shot.
+**Reading** (`epic-notes.sh` → `assets/graphql/epic-notes.graphql`):
+- Pass the group path and iid as GraphQL **variables** (`-f`, raw string — `-F`
+  coerces a numeric-looking iid to `Int`, failing `String!`).
+- `widgets[].type == "NOTES"` holds the `discussions`; each `discussion` is a thread
+  and `notes.nodes` are its replies.
+- Pagination is driven by `pageInfo.hasNextPage` + `pageInfo.endCursor`; the script
+  re-runs with `cursor` set to the previous `endCursor`. `pageSize: 100` covers most
+  epics in one request; only very high-traffic epics need multiple pages.
 
-```bash
-glab api graphql -f groupPath=gitlab-org -f epicIid="16428" -F pageSize=100 \
-  -f query='
-query($groupPath: ID!, $epicIid: String!, $pageSize: Int = 100, $cursor: String) {
-  group(fullPath: $groupPath) {
-    workItem(iid: $epicIid) {
-      widgets {
-        type
-        ... on WorkItemWidgetNotes {
-          discussions(first: $pageSize, after: $cursor) {
-            pageInfo { hasNextPage endCursor }
-            nodes {
-              notes {
-                nodes { id body author { username } createdAt }
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-}'
-```
-
-Response structure:
-- `widgets[].type == "NOTES"` → contains `discussions`
-- Each `discussion` is a thread; `notes.nodes` is the list of replies in that thread
-- `pageInfo.hasNextPage` + `pageInfo.endCursor` drive pagination
-
-## Pagination
-
-If `pageInfo.hasNextPage` is `true`, re-run the same query with the `cursor`
-variable set to the previous page's `endCursor`:
-
-```bash
-glab api graphql -f groupPath=<group-path> -f epicIid="<epic_iid>" \
-  -F pageSize=100 -f cursor="<endCursor value>" -f query='...'   # same query as above
-```
-
-In practice: most epics fit in `pageSize: 100`. Only very high-traffic epics need multiple pages.
-
-## Posting a comment — GraphQL mutation
-
-The REST notes endpoint (POST) also returns 404. Use the `createNote` GraphQL
-mutation, passing `noteableId` and `body` as **variables** (`-f`). Do **not**
-string-interpolate the body into the query: bodies with newlines, backticks, `$`,
-or non-ASCII characters (e.g. an em dash) break the query — and on GitLab 19.1+ a
-stray non-ASCII byte outside a `#` comment raises `UNKNOWN_CHAR`. Variables sidestep
-all of it.
-
-```bash
-# Step 1: get the epic's internal id (not iid)
-EPIC_ID=$(glab api "groups/<group_id>/epics/<epic_iid>" | jq '.id')
-
-# Step 2: post the note (body passed as a variable, no escaping needed)
-glab api graphql \
-  -f noteableId="gid://gitlab/Epic/${EPIC_ID}" \
-  -f body="Your comment here" \
-  -f query='
-mutation($noteableId: NoteableID!, $body: String!) {
-  createNote(input: { noteableId: $noteableId, body: $body }) {
-    note { id body }
-    errors
-  }
-}'
-```
-
-The `noteableId` format is always `gid://gitlab/Epic/<internal_id>` — using the internal `id`, not the `iid`.
+**Posting** (`create-epic-note.sh` → `assets/graphql/create-note.graphql`):
+- The REST notes endpoint (POST) also 404s, so the script uses the `createNote`
+  mutation. It first resolves the epic's internal `id` (not `iid`) and builds
+  `noteableId` as `gid://gitlab/Epic/<internal_id>`.
+- `noteableId` and `body` are passed as **variables** (`-f`), never string-interpolated:
+  bodies with newlines, backticks, `$`, or non-ASCII characters (e.g. an em dash)
+  break an interpolated query — and on GitLab 19.1+ a stray non-ASCII byte outside a
+  `#` comment raises `UNKNOWN_CHAR`. Variables sidestep all of it.
 
 ## Template files
 
-The `.graphql` files in `assets/graphql/` are parameterised with GraphQL
-**variables** (passed via `glab api graphql -f`/`-F`, no string substitution):
+The `.graphql` files in `assets/graphql/` are the source of truth for the queries
+above, parameterised with GraphQL **variables** (passed via `glab api graphql -f`/`-F`,
+no string substitution):
 
 - `assets/graphql/epic-notes.graphql` — read query (`groupPath`, `epicIid`, `pageSize`, `cursor`)
 - `assets/graphql/create-note.graphql` — `createNote` mutation (`noteableId`, `body`)
+
+To run a query ad hoc without the scripts, pass the matching template as
+`-f query="$(cat assets/graphql/epic-notes.graphql)"` along with its variables.
 
 ## Why REST doesn't work
 

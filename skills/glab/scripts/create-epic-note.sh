@@ -44,6 +44,10 @@ if ! EPIC_DATA=$(glab api "groups/${GROUP_ID}/epics/${EPIC_IID}" 2>"$_err"); the
 fi
 
 EPIC_INTERNAL_ID=$(echo "$EPIC_DATA" | jq -r '.id')
+if [[ "$EPIC_INTERNAL_ID" == "null" || -z "$EPIC_INTERNAL_ID" ]]; then
+  echo "ERROR: could not extract epic internal id from API response" >&2
+  exit 1
+fi
 NOTEABLE_ID="gid://gitlab/Epic/${EPIC_INTERNAL_ID}"
 
 # Pass noteableId and body as GraphQL variables. Use -f (raw string) rather than
