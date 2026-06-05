@@ -6,7 +6,7 @@ Common fields to include in `fields:`:
 
 | Field | Notes |
 |-------|-------|
-| `id` | Issue/MR IID |
+| `id` | Global ID (GID), e.g. `gid://gitlab/Issue/123` |
 | `title` | Title |
 | `state` | `OPEN`, `CLOSED`, or `MERGED` in response |
 | `author` | Nested: `.author.username` |
@@ -54,7 +54,7 @@ you specify in `fields:` -- you don't need to request them explicitly.
 | jq '"Total: \(.data.count), hasNextPage: \(.data.pageInfo.hasNextPage)"'
 
 # Full table with count header
-| jq -r '"Total: \(.data.count)\n" + (.data.nodes[] | "  \(.reference)\t\(.state)\t\(.title)")'
+| jq -r '"Total: \(.data.count)", (.data.nodes[] | "  \(.reference)\t\(.state)\t\(.title)")'
 ```
 
 ## Pagination
