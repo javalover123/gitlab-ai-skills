@@ -11,7 +11,7 @@ metadata:
 
 # OpenCode Refine
 
-Use `opencode run` as a fast feedback loop to test and refine prompts, system instructions, skills, and agent behavior â without starting interactive sessions.
+Use `opencode run` as a fast feedback loop to test and refine prompts, system instructions, skills, and agent behavior — without starting interactive sessions.
 
 ## When to Use
 
@@ -38,7 +38,7 @@ Runs a single non-interactive agent session. The agent executes, prints its resp
 |------|---------|
 | `-m <model>` | Override model (e.g. `-m gitlab/duo-chat-haiku-4-5` for fast/cheap iterations) |
 | `--print-logs` | Show debug logs on stderr (permission checks, plugin hooks, config resolution) |
-| `-f <file> --` | Attach a file as context â **requires `--` separator before the prompt** |
+| `-f <file> --` | Attach a file as context — **requires `--` separator before the prompt** |
 | `--format json` | Machine-readable event stream for scripting |
 | `--dir <path>` | Run the session in a specific directory (inherits that directory's config) |
 | `--continue` | Continue the last session (multi-turn refinement) |
@@ -52,14 +52,14 @@ Runs a single non-interactive agent session. The agent executes, prints its resp
 The prompt should be specific enough to trigger the exact behavior you want to verify. Think of it as a test case.
 
 ```bash
-# Bad: too vague â may cause the agent to ask clarifying questions (which hangs)
+# Bad: too vague — may cause the agent to ask clarifying questions (which hangs)
 opencode run 'do something with files'
 
 # Good: exercises the specific behavior, self-contained
 opencode run 'run ls -al and tell me what you see'
 ```
 
-### 2. Run, observe, adjust â tight loop
+### 2. Run, observe, adjust — tight loop
 
 ```bash
 # Edit the config/skill/prompt
@@ -110,10 +110,10 @@ opencode run 'I need help with a task'
 After editing permission rules in `opencode.json`:
 
 ```bash
-# If bash is set to "ask" â will be auto-rejected in non-interactive mode
+# If bash is set to "ask" — will be auto-rejected in non-interactive mode
 opencode run 'run git status'
 
-# If bash is set to "allow" â will execute
+# If bash is set to "allow" — will execute
 opencode run 'run date'
 ```
 
@@ -125,7 +125,8 @@ opencode run 'run date'
 
 ```bash
 # Extract just the text response
-opencode run --format json 'what is 2+2?' | \n  python3 -c '
+opencode run --format json 'what is 2+2?' | \
+  python3 -c '
 import sys, json
 for line in sys.stdin:
     ev = json.loads(line.strip())
@@ -134,7 +135,8 @@ for line in sys.stdin:
 '
 
 # Get token usage from a run
-opencode run --format json 'run date' | \n  python3 -c '
+opencode run --format json 'run date' | \
+  python3 -c '
 import sys, json
 for line in sys.stdin:
     ev = json.loads(line.strip())
@@ -143,7 +145,8 @@ for line in sys.stdin:
 '
 
 # Capture session ID for continuation (first event with sessionID)
-SESSION_ID=$(opencode run --format json 'set up scenario X' | \n  python3 -c '
+SESSION_ID=$(opencode run --format json 'set up scenario X' | \
+  python3 -c '
 import sys, json
 for line in sys.stdin:
     ev = json.loads(line.strip())
@@ -192,7 +195,7 @@ opencode run 'use opencode run to test if date works: opencode run "run date and
 - Both sessions use the same `opencode.json`
 - Inner session output appears in the outer session's bash tool block
 
-**Gotcha:** If the inner prompt triggers the `question` tool, the inner session will hang â and the outer session's bash tool will block waiting for it. Keep inner prompts self-contained.
+**Gotcha:** If the inner prompt triggers the `question` tool, the inner session will hang — and the outer session's bash tool will block waiting for it. Keep inner prompts self-contained.
 
 ## Example: Attaching Files
 
@@ -208,11 +211,11 @@ Without the `--`, the CLI parser treats the prompt as a second file path and err
 
 ## Tips
 
-- **Keep prompts self-contained**: Avoid vague prompts that might cause the agent to ask clarifying questions â that will hang the process (see Known Limitations).
+- **Keep prompts self-contained**: Avoid vague prompts that might cause the agent to ask clarifying questions — that will hang the process (see Known Limitations).
 - **Config changes are instant**: No restart needed. Each `opencode run` invocation reads fresh config.
 - **Cheap models for iteration**: Use `-m gitlab/duo-chat-haiku-4-5` when testing infrastructure (permissions, plugins). Switch to your primary model for testing prompt/tone quality.
 - **Stderr for logs, stdout for output**: `--print-logs` writes to stderr, so you can `2>debug.log` and still see the agent's response on stdout.
-- **Stdin piping**: `echo "prompt" | opencode run` works â useful for multi-line prompts or scripted input.
+- **Stdin piping**: `echo "prompt" | opencode run` works — useful for multi-line prompts or scripted input.
 
 ## Known Limitations
 
@@ -226,10 +229,10 @@ The `question` tool is technically `deny`-listed in non-interactive mode, but du
 
 ```bash
 # Linux/GNU:
-timeout 30 opencode run 'your prompt' || echo "Timed out â agent may have tried to ask a question"
+timeout 30 opencode run 'your prompt' || echo "Timed out — agent may have tried to ask a question"
 
 # macOS (requires coreutils: brew install coreutils):
-gtimeout 30 opencode run 'your prompt' || echo "Timed out â agent may have tried to ask a question"
+gtimeout 30 opencode run 'your prompt' || echo "Timed out — agent may have tried to ask a question"
 ```
 
 ### Permissions depend on your opencode.json
@@ -243,7 +246,7 @@ cat ~/.config/opencode/opencode.json | python3 -m json.tool
 ### Config file locations
 
 opencode checks multiple config files (first match wins for each setting):
-1. `~/.config/opencode/opencode.json` â primary location
+1. `~/.config/opencode/opencode.json` — primary location
 2. `~/.config/opencode/opencode.jsonc`
 3. `~/.opencode/opencode.json`
 4. `<workdir>/opencode.json`
