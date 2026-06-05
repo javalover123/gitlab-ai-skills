@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Run shellcheck over the Bash helper scripts shipped inside skills/.
+# Run shellcheck over the Bash helper scripts shipped inside skills/ and the
+# repo's own scripts/ helpers.
 #
 # Rationale: reviewers repeatedly caught Bash footguns in skill helper scripts
 # (!37, !39) — e.g. `[ -f .eslintrc* ]` which silently never matches (SC2144),
@@ -20,15 +21,16 @@ if ! command -v shellcheck >/dev/null 2>&1; then
   exit 1
 fi
 
-# Collect Bash scripts under skills/. Null-delimited to handle any path, and
-# read into an array portably (works on bash 3.2 / macOS and bash 5 / alpine).
+# Collect Bash scripts under skills/ and scripts/. Null-delimited to handle any
+# path, and read into an array portably (works on bash 3.2 / macOS and
+# bash 5 / alpine).
 scripts=()
 while IFS= read -r -d '' f; do
   scripts+=("$f")
-done < <(find skills -name '*.sh' -type f -print0)
+done < <(find skills scripts -name '*.sh' -type f -print0)
 
 if [ ${#scripts[@]} -eq 0 ]; then
-  echo "No shell scripts under skills/ to check."
+  echo "No shell scripts to check."
   exit 0
 fi
 
