@@ -30,12 +30,19 @@ if git diff --quiet && git diff --cached --quiet; then
   exit 0
 fi
 
-# 2. Regenerate distribution artifacts. Non-fatal if lefthook is unavailable in
-#    the image — the raw sync is still worth an MR.
+# 2. Regenerate distribution artifacts (README, ToC, catalog, plugin version
+#    manifests). Prefer lefthook's auto-fix when available; otherwise run the
+#    same steps directly so the job works in images without lefthook (e.g. the
+#    glab CLI image). Keep this list in sync with lefthook.yml's auto-fix hook.
 if command -v lefthook >/dev/null 2>&1; then
   lefthook run auto-fix
 else
-  echo "WARN: lefthook not found; committing raw sync without regeneration." >&2
+  echo "lefthook not found; running auto-fix steps directly." >&2
+  python3 scripts/update_skills_list.py
+  python3 scripts/update_toc.py
+  python3 scripts/generate_catalog.py
+  python3 scripts/update_claudecode_readme.py
+  bin/sync-skill
 fi
 
 # 3. Commit on a fresh branch.
@@ -43,7 +50,7 @@ git checkout -b "$BRANCH"
 git add -A
 git commit \
   -m "$TITLE" \
-  -m "Automated by the sync-skills scheduled pipeline. [skip ci]"
+  -m "Automated by the sync-skills scheduled pipeline."
 git push -u origin "$BRANCH"
 
 # 4. Open the MR. Skip if one already exists for this branch.
