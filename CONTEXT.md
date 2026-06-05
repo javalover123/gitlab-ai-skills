@@ -49,3 +49,10 @@ _Avoid_: doc, appendix, attachment.
 An executable script under a Skill directory (`skills/**/*.sh`) that the Skill's
 workflow invokes. Subject to `shellcheck` in CI.
 _Avoid_: util, tool, command.
+
+**Synced Skill**:
+A Skill whose source of truth (SSoT) lives in another repository, listed in
+`synced-skills.yml`. This repo is the destination: a scheduled pipeline pulls
+the canonical copy in and opens an MR, while an MR-pipeline guard blocks direct
+edits here. Distinct from a locally-authored Skill, which is edited in place.
+_Avoid_: mirror, import, vendored skill.
