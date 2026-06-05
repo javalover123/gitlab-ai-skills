@@ -107,9 +107,9 @@ guard-synced-skills:
     - bash scripts/check_synced_skills_untouched.sh
 
 # Inbound sync: pull externally-synced skills from their source of truth and
-# open an MR with any changes. Runs either from a pipeline schedule with CI
-# variable SCHEDULE_TYPE=sync_skills, or from a manual "Run pipeline" on the
-# default branch with variable RUN_SYNC=true.
+# open an MR with any changes. Runs automatically from a pipeline schedule with
+# CI variable SCHEDULE_TYPE=sync_skills, or on demand via the manual play button
+# (â–¶) on default-branch pipelines.
 sync-skills:
   stage: sync
   image: registry.gitlab.com/gitlab-org/cli:v${GLAB_VERSION}
@@ -118,8 +118,9 @@ sync-skills:
   rules:
     - if: $CI_PIPELINE_SOURCE == "schedule" && $SCHEDULE_TYPE == "sync_skills"
       when: always
-    - if: $CI_PIPELINE_SOURCE == "web" && $RUN_SYNC == "true"
-      when: always
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      when: manual
+      allow_failure: true
     - when: never
   variables:
     REPO_URL: "https://oauth2:${SYNC_BOT_TOKEN}@${CI_SERVER_HOST}/${CI_PROJECT_PATH}.git"

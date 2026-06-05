@@ -58,8 +58,8 @@ branch with CI variable `SCHEDULE_TYPE=sync_skills`. The `sync-skills` job only
 runs when `$CI_PIPELINE_SOURCE == "schedule"` and that variable is set, so the
 schedule can coexist with any other scheduled pipelines.
 
-To trigger a sync on demand, run a manual pipeline (Build → Pipelines → Run
-pipeline) on the default branch with variable `RUN_SYNC=true`.
+To trigger a sync on demand, open the latest default-branch pipeline and click
+the manual play button (▶) on the `sync-skills` job.
 
 ## The edit guard
 
