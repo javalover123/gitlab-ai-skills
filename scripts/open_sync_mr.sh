@@ -10,7 +10,10 @@
 # Required environment (set by the CI job):
 #   CI_DEFAULT_BRANCH, CI_COMMIT_SHORT_SHA  - GitLab CI predefined vars
 # Optional:
-#   SYNC_MR_LABELS  - comma-separated labels to apply to the MR
+#   SYNC_MR_LABELS     - comma-separated labels to apply to the MR
+#   SYNC_MR_REVIEWERS  - comma-separated reviewer usernames; defaults to the
+#                        pipeline trigger user (GITLAB_USER_LOGIN) unless that
+#                        is the sync bot
 set -Eeuo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -30,12 +33,19 @@ if git diff --quiet && git diff --cached --quiet; then
   exit 0
 fi
 
-# 2. Regenerate distribution artifacts. Non-fatal if lefthook is unavailable in
-#    the image — the raw sync is still worth an MR.
+# 2. Regenerate distribution artifacts (README, ToC, catalog, plugin version
+#    manifests). Prefer lefthook's auto-fix when available; otherwise run the
+#    same steps directly so the job works in images without lefthook (e.g. the
+#    glab CLI image). Keep this list in sync with lefthook.yml's auto-fix hook.
 if command -v lefthook >/dev/null 2>&1; then
   lefthook run auto-fix
 else
-  echo "WARN: lefthook not found; committing raw sync without regeneration." >&2
+  echo "lefthook not found; running auto-fix steps directly." >&2
+  python3 scripts/update_skills_list.py
+  python3 scripts/update_toc.py
+  python3 scripts/generate_catalog.py
+  python3 scripts/update_claudecode_readme.py
+  bin/sync-skill
 fi
 
 # 3. Commit on a fresh branch.
@@ -43,7 +53,7 @@ git checkout -b "$BRANCH"
 git add -A
 git commit \
   -m "$TITLE" \
-  -m "Automated by the sync-skills scheduled pipeline. [skip ci]"
+  -m "Automated by the sync-skills scheduled pipeline."
 git push -u origin "$BRANCH"
 
 # 4. Open the MR. Skip if one already exists for this branch.
@@ -61,6 +71,26 @@ if [ -n "${SYNC_MR_LABELS:-}" ]; then
   done
 fi
 
+# Assign reviewers so the sync MR lands in someone's review queue instead of
+# going unnoticed. SYNC_MR_REVIEWERS (comma-separated usernames) takes
+# precedence; otherwise default to whoever triggered the pipeline
+# (GITLAB_USER_LOGIN) — e.g. the person who clicked the play button, or the
+# schedule owner. Skip the fallback when the trigger is the sync bot itself,
+# since a bot reviewing its own MR adds no value.
+reviewers="${SYNC_MR_REVIEWERS:-}"
+if [ -z "$reviewers" ] && [ -n "${GITLAB_USER_LOGIN:-}" ] &&
+   ! [[ "$GITLAB_USER_LOGIN" =~ ^project_[0-9]+_bot(_[0-9a-f]+|[0-9]*)$ ]]; then
+  reviewers="$GITLAB_USER_LOGIN"
+fi
+
+reviewer_args=()
+if [ -n "$reviewers" ]; then
+  IFS=',' read -ra _reviewers <<< "$reviewers"
+  for r in "${_reviewers[@]}"; do
+    reviewer_args+=(--reviewer "$r")
+  done
+fi
+
 description="Automated sync of skills whose source of truth lives in another repository (see \`synced-skills.yml\`).
 
 Review the diff to confirm it matches the upstream change, then merge."
@@ -72,4 +102,5 @@ glab mr create \
   --remove-source-branch \
   --yes \
   "${label_args[@]}" \
+  "${reviewer_args[@]}" \
   --description "$description"
