@@ -14,8 +14,8 @@
 #   epic-notes.sh gitlab-org/foundations 15
 #   epic-notes.sh gitlab-org 16428 20   # force pagination for testing
 #
-# Output: JSON array of all notes, one line per note:
-#   {"id":"gid://...","body":"...","author":{"username":"..."},"createdAt":"..."}
+# Output: a JSON array of all notes, e.g.
+#   [{"id":"gid://...","body":"...","author":{"username":"..."},"createdAt":"..."}]
 #
 # Requires: glab (authenticated), jq
 
@@ -82,4 +82,4 @@ while true; do
   fi
 done
 
-echo "$all_notes" | jq '.[]'
+echo "$all_notes" | jq '.'

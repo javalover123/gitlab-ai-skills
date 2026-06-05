@@ -1,6 +1,6 @@
 # Post a comment on any noteable GitLab resource (epic, issue, MR, etc.).
 #
-# Pass values as GraphQL variables (glab api graphql -F ...), NOT by string
+# Pass values as GraphQL variables (glab api graphql -f ...), NOT by string
 # substitution. Variables avoid all escaping traps (newlines, backticks, $, em
 # dashes) and are accepted by every GitLab GraphQL version.
 #
@@ -17,6 +17,13 @@
 #     -f query="$(cat create-note.graphql)"
 #
 # See scripts/create-epic-note.sh for a ready-to-run wrapper.
+#
+# Source of truth: this is a hand-maintained mirror. The canonical schema lives in
+# doc/api/graphql/reference (and the frontend mutation
+# app/assets/javascripts/work_items/graphql/notes/create_work_item_note.mutation.graphql),
+# but that is an Apollo build-loader document that `glab api graphql` cannot execute,
+# so this self-contained copy is maintained by hand. No CI hook validates it against
+# the schema — verify against the reference if a field stops resolving.
 
 mutation($noteableId: NoteableID!, $body: String!) {
   createNote(input: { noteableId: $noteableId, body: $body }) {

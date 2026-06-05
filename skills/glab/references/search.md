@@ -68,7 +68,7 @@ glab api "projects/gitlab-org%2Fcli/search?scope=notes&search=LGTM" | jq '.[] | 
 
 ## Common gotchas
 
-- **No `--jq` flag** — pipe results through `| jq '...'`; `glab` has no `--jq`
+- **`glab api` has no `--jq`** — pipe its output through `| jq '...'` (the search endpoints are all `glab api`). The global `--jq` flag added to `glab issue list`/`glab mr list`/`glab ci list` does not apply to `glab api`.
 - **URL-encode project paths** — use `%2F` for `/`: `projects/gitlab-org%2Fcli/search?...`
 - **Nested groups need `%2F`** — `groups/gitlab-org%2Fsubgroup/search?...`; unencoded slashes → 404
 - **Pagination** — add `per_page=<n>&page=<n>`; default page size is 20, max is 100

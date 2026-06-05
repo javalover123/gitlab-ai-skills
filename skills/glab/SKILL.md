@@ -1,7 +1,7 @@
 ---
 name: glab
 description: GitLab workflow automation using glab CLI
-version: 1.8.2
+version: 1.10.0
 category: Development Workflow
 license: MIT
 metadata:
@@ -115,13 +115,17 @@ the source project, creating the MR from the wrong fork.
 
 ```bash
 # Simple MR
-glab mr create --push -H <owner/repo> --title "feat: add feature" --description "Brief description" --assignee <username>
+glab mr create --push -H <owner/repo> --title "Add feature" --description "Brief description" --assignee <username>
 
 # Complex MR - write description to file first (pick your own path)
-glab mr create --push -H <owner/repo> --title "feat: add feature" --description "$(cat "$DESC")" --assignee <username>
+glab mr create --push -H <owner/repo> --title "Add feature" --description "$(cat "$DESC")" --assignee <username>
 ```
 
 **Templates:** Check `.gitlab/merge_request_templates/` for project-specific templates.
+
+Full flag list (Claude Code injects this automatically; other agents should run it):
+
+!`glab mr create --help`
 
 ## Updating Merge Requests
 
@@ -132,26 +136,27 @@ glab mr view <number> -R <owner>/<repo>
 
 ## Issue Management
 
+The full, always-current flag list (Claude Code injects this automatically; other agents
+should run it):
+
+!`glab issue --help`
+
+`view`, `note`, `list`, `create`, `update` work as you'd expect. The non-obvious traps that
+`--help` won't warn you about:
+
 ```bash
-# View / comment
-glab issue view <number>
-glab issue view <number> --comments -R <owner>/<repo>
-glab issue note <number> -m "comment" -R <owner>/<repo>
-glab issue note <number> -m "$(cat "$MSG")" -R <owner>/<repo>
-
-# List (open by default — no --state flag)
-glab issue list --label "priority::P1,status::doing" -R <owner>/<repo>
+# List is open by default and has NO --state flag — use --closed / --all instead
 glab issue list --closed -R <owner>/<repo>
-glab issue list --all   -R <owner>/<repo>
-
-# Create
-glab issue create --title "Bug: title" --description "$(cat "$DESC")"
+glab issue list --all    -R <owner>/<repo>
 
 # Labels — use --label / --unlabel, NEVER +label or -label syntax
 glab issue update 123 --label "new-label"
 glab issue update 123 --unlabel "old-label"
 # Scoped labels auto-replace within their scope — no --unlabel needed:
 glab issue update 123 --label "status::doing"   # removes any existing status:: label
+
+# Messages with backticks/$ — write to a file first (see Message Escaping above)
+glab issue note <number> -m "$(cat "$MSG")" -R <owner>/<repo>
 ```
 
 For issue state transitions (close/reopen via API) and posting notes via `glab api`: **[references/issue-api.md](references/issue-api.md)**
@@ -190,6 +195,11 @@ glab api "projects/<id>/merge_requests/123/discussions"             # use mr not
 glab api --method PUT ".../discussions/<id>" -f resolved=true       # use mr note resolve
 ```
 
+Full flag list for the subcommands above (Claude Code injects this automatically; other
+agents should run it):
+
+!`glab mr note --help`
+
 Fall back to raw `glab api .../draft_notes` only for **batched draft reviews** (multiple inline comments published together via `bulk_publish`) — `glab mr note` has no draft mode.
 
 Full reference (all flags, code suggestions, drafts/batch fallback, position objects): **[references/mr-review.md](references/mr-review.md)**
@@ -203,16 +213,12 @@ Full reference (all flags, code suggestions, drafts/batch fallback, position obj
 
 ## MR Listing and Filtering
 
-```bash
-glab mr list -R <owner>/<repo>                   # open (default)
-glab mr list -R <owner>/<repo> --assignee <user>
-glab mr list -R <owner>/<repo> --all             # all states
-glab mr list -R <owner>/<repo> --merged
-glab mr list -R <owner>/<repo> --closed
-glab mr list -R <owner>/<repo> --author <user>
-```
+Full flag list (Claude Code injects this automatically; other agents should run it):
 
-**Note:** `glab mr list` has no `--state` or `--status` flag. Use `--all`, `--merged`, `--closed`.
+!`glab mr list --help`
+
+**Note:** `glab mr list` lists open MRs by default and has no `--state` or `--status` flag —
+use `--all`, `--merged`, or `--closed` to change the state filter.
 
 ## Search
 
@@ -226,51 +232,50 @@ glab api "groups/<group>/search?scope=merge_requests&search=<query>" | jq '.[]'
 glab api "projects/<org>%2F<repo>/search?scope=issues&search=<query>" | jq '.[]'
 ```
 
-## GLQL Queries
+## Git and Commit Conventions
 
-To query issues, MRs, or epics across projects/groups, load the **`glab-glql`** skill.
-
-## Git Best Practices
+Follow the repo's own git conventions when present (a project may document them and
+enforce them with a commit linter). GitLab defaults:
 
 ```bash
-git checkout -b feat/description    # branch naming
-git checkout -b fix/description
-
-# Commit format: type: description (conventional commits)
-# Reference issues with full URLs: Closes https://gitlab.com/org/project/-/issues/123
-# Use single quotes for special characters: git commit -m 'fix: from MR !123'
+git checkout -b feature/description   # feature branches
+git checkout -b fix/description       # bug fixes
 ```
+
+- Capitalized, imperative commit subjects ("Add feature", not "Added feature" or
+  "feat: add feature"); GitLab does not use conventional-commit subjects.
+- Reference issues/MRs with full URLs: `Closes https://gitlab.com/org/project/-/issues/123`.
+- Single-quote commit messages containing special characters:
+  `git commit -m 'Add note from https://gitlab.com/org/project/-/merge_requests/123'`.
 
 ## Agent Guidelines
 
-1. **`glab mr create` always needs `--push -H <owner/repo>`** — omitting either causes the MR to be created from the wrong remote or fail entirely
-2. **Always pass `--assignee <username>` on `glab mr create`** — MRs are unassigned by default; always assign to the author
-3. **Read context first** — `glab issue view` / `glab mr view` before implementing
-4. **Use project templates** — check `.gitlab/issue_templates/` and `.gitlab/merge_request_templates/`
-5. **Write descriptions to files** — use `$(cat "$FILE")` not inline strings; you pick the path
-6. **Reference with full URLs** — `Closes https://gitlab.com/org/project/-/issues/123`
-7. **Descriptive commits** — focus on the "why"
-8. **Single quotes for special chars** — `git commit -m 'fix: from MR !123'`
-9. **Label syntax** — `--label` to add, `--unlabel` to remove; never `+label`/`-label`
-10. **Scoped labels** — `--label "status::doing"` auto-removes old `status::*`; no `--unlabel` needed
-11. **No `--jq` flag** — glab has no `--jq`; use `| jq '...'` pipe
-12. **No `--state`/`--status` on `mr list`** — use `--all`, `--merged`, `--closed`
-13. **Work items use the issues API** — `/work_items/<iid>` URLs → `projects/.../issues/<iid>`
-14. **Epic comments need GraphQL** — REST `/notes` GET+POST both → 404 (still true on GitLab 19.1); pass `body`/`noteableId` as GraphQL variables, never string-interpolate. See [references/epic-comments.md](references/epic-comments.md)
-15. **No `-R` for group-level API** — `-R` expects `OWNER/REPO`; group endpoints use `glab api "groups/..."` directly
-16. **Nested groups REST: `%2F`** — `groups/org%2Fsubgroup/epics`; unencoded slashes → 404
-17. **GraphQL iid is a String** — `workItem(iid: "16428")` not `workItem(iid: 16428)`
-18. **`groups/<id>/work_items` is 404** — use `groups/<id>/epics` (REST) or GraphQL
-19. **`project.workItems` not `project.workItem`** — singular doesn't exist; use `workItems(first: 1, iid: "IID")`; no `filter:` argument
-20. **Epic close/reopen via REST** — `state_event=close`/`reopen` on `PUT groups/<id>/epics/<iid>` works; no GraphQL needed
-21. **No `--body` flag** — glab uses `--description`, not `--body` (which is a `gh` flag); they are not interchangeable
-22. **Search: URL-encode project paths** — use `%2F` for `/`; see [references/search.md](references/search.md) for full examples
-23. **Backticks in messages → write to a file you name yourself** — never inline `` ` `` in `-m "..."` or `--description "..."`; write to a file you pick (e.g. `mktemp`, a workspace tmp path — unique per invocation to avoid clobbering parallel agents) using `<< 'EOF'` (single-quoted delimiter, critical), then pass via `$(cat "$FILE")`
-24. **`GITLAB_HOST` only when needed** — glab auto-detects the host from the git remote; set `GITLAB_HOST` only outside a git repo or for one-off cross-instance commands. For standard HTTPS hosts the scheme is optional (`GITLAB_HOST=ops.gitlab.net`); for HTTP or non-standard ports include both the scheme and the port (`GITLAB_HOST=http://gdk.test:3000`). See [references/multi-host.md](references/multi-host.md).
-25. **Non-origin remotes** — if `origin` points at one instance but you want glab to target another remote (e.g. `gdk`), run `glab config set remote_alias gdk` (per-repo) or `glab config set --global remote_alias gdk` (all repos) rather than setting `GITLAB_HOST` for every command.
-26. **Prefer `glab mr note` for MR comments (v1.94.0+)** — `glab mr note create --file --line` / `--reply` / `--unique` and `glab mr note resolve|reopen` replace the entire raw `glab api .../draft_notes` + position-object workflow for single comments. Fall back to `glab api .../draft_notes` only when you need batched drafts published together via `bulk_publish`.
-27. **Idempotent comments → `--unique`** — `glab mr note create -m "..." --unique` reads all MR notes first and skips if the same body already exists. Use it on rerun-safe paths (status comments, recurring summaries). `--unique` matches on body only; identical bodies on different diff lines still post (line is part of the position, not the body).
+The sections above cover the common workflows. These are the non-obvious traps and
+API quirks that are easy to get wrong and not discoverable from `glab <cmd> --help`:
+
+1. **Read context first** — `glab issue view` / `glab mr view` before implementing; check `.gitlab/issue_templates/` and `.gitlab/merge_request_templates/` for templates
+2. **`--jq` works on subcommands, not on `glab api`** — `glab issue list`/`glab mr list`/`glab ci list` accept a global `--jq` flag (filters JSON output); `glab api` does **not** — pipe its output through `| jq '...'` instead
+3. **No `--body` flag** — glab uses `--description`, not `--body` (which is a `gh` flag); they are not interchangeable
+4. **Work items use the issues API** — `/work_items/<iid>` URLs → `projects/.../issues/<iid>`; the `/work_items/` REST endpoint is a 404
+5. **Epic comments need GraphQL** — REST `/notes` GET+POST both → 404 (still true on GitLab 19.1); pass `body`/`noteableId` as GraphQL variables, never string-interpolate. See [references/epic-comments.md](references/epic-comments.md)
+6. **No `-R` for group-level API** — `-R` expects `OWNER/REPO`; group endpoints use `glab api "groups/..."` directly
+7. **Nested groups REST: `%2F`** — `groups/org%2Fsubgroup/epics`; unencoded slashes → 404
+8. **GraphQL iid is a String** — `workItem(iid: "16428")` not `workItem(iid: 16428)`
+9. **`groups/<id>/work_items` is 404** — use `groups/<id>/epics` (REST) or GraphQL
+10. **`project` exposes `workItems` (plural), not `workItem`** — under `project` use `workItems(first: 1, iid: "IID")` with no `filter:` argument; the singular `workItem(iid:)` field exists only under `group`/`namespace`
+11. **Epic close/reopen via REST** — `state_event=close`/`reopen` on `PUT groups/<id>/epics/<iid>` works; no GraphQL needed
+12. **Scoped labels auto-replace** — `--label "status::doing"` removes any existing `status::*` label; no `--unlabel` needed (this is a platform fact, true via the API generally, not just glab)
+13. **Idempotent comments → `--unique`** — `glab mr note create -m "..." --unique` skips posting if an identical body already exists; matches on body only, so identical bodies on different diff lines still post
+14. **Non-origin remotes → `remote_alias`** — if `origin` points at one instance but you want glab to target another remote (e.g. a local GDK added as `gdk`), run `glab config set remote_alias gdk` rather than setting `GITLAB_HOST` per command. See [references/multi-host.md](references/multi-host.md)
+15. **Backticks in messages → write to a file first** — never inline `` ` ``/`$` in `-m "..."` or `--description "..."`; write to a file you name (unique per invocation) using `<< 'EOF'` (single-quoted delimiter, critical), then pass via `$(cat "$FILE")`. See the Message Escaping section above.
 
 ## Contributing Improvements
 
-If you discover that any guidance in this skill is **inaccurate or outdated** (e.g., a command that no longer works, a wrong flag, an incorrect API behavior), confirm with the user and open an MR to `gitlab-org/ai/skills` with the fix. Keep changes focused — one fix per MR.
+This skill is maintained in the GitLab monolith
+([`gitlab-org/gitlab`](https://gitlab.com/gitlab-org/gitlab), under
+`.claude/skills/glab/`) and synced out to
+[`gitlab-org/ai/skills`](https://gitlab.com/gitlab-org/ai/skills) — the monolith copy
+is the source of truth. If you discover that any guidance here is **inaccurate or
+outdated** (e.g. a command that no longer works, a wrong flag, an incorrect API
+behavior), confirm with the user and open an MR against the monolith with the fix.
+Keep changes focused — one fix per MR.
