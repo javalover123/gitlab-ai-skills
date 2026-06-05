@@ -36,16 +36,24 @@ fi
 # 2. Regenerate distribution artifacts (README, ToC, catalog, plugin version
 #    manifests). Prefer lefthook's auto-fix when available; otherwise run the
 #    same steps directly so the job works in images without lefthook (e.g. the
-#    glab CLI image). Keep this list in sync with lefthook.yml's auto-fix hook.
+#    glab CLI image).
+#
+#    Order matters here, unlike in lefthook's hook: bin/sync-skill propagates
+#    each SKILL.md version into its plugin.json, and update_claudecode_readme.py
+#    reads the version *from* plugin.json. So sync-skill must run BEFORE the
+#    README regen, otherwise the README table keeps the stale version.
 if command -v lefthook >/dev/null 2>&1; then
   lefthook run auto-fix
+  # lefthook lists claudecode-readme before sync-distribution-versions, so a
+  # single pass leaves the README one version behind. Refresh it after.
+  python3 scripts/update_claudecode_readme.py
 else
   echo "lefthook not found; running auto-fix steps directly." >&2
+  bin/sync-skill
   python3 scripts/update_skills_list.py
   python3 scripts/update_toc.py
   python3 scripts/generate_catalog.py
   python3 scripts/update_claudecode_readme.py
-  bin/sync-skill
 fi
 
 # 3. Commit on a fresh branch.
