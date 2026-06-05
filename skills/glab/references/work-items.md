@@ -89,8 +89,6 @@ glab api graphql -f query='
 }'
 ```
 
-See `assets/graphql/project-work-item.graphql` for a reusable template.
-
 ## Gotchas
 
 - **`/work_items/` in URLs is cosmetic** — the REST API uses `/issues/<iid>` with the same number
