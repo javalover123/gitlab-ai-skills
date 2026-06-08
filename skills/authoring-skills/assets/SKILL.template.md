@@ -81,7 +81,7 @@ metadata:                            # optional; add what aids discovery
 -->
 
 <!-- ---------- ARCHETYPE C: DEEP REFERENCE + GUARDRAILS ----------
-     For a tool/API with many footguns, budgets, caveats. Example: orbit.
+     For a tool/API with many footguns, budgets, caveats. Example: glab.
 
 ## Discovery / Usage
 

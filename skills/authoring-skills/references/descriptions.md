@@ -22,12 +22,12 @@ Pack in the literal verbs, nouns, and phrases a user would actually type.
 List the kinds of request it covers — breadth here is deliberate so many
 phrasings match.
 
-- **`orbit`** lists answerable question shapes rather than describing the DSL:
-  > "Use for code-structure questions (who calls this function, where is this
-  > symbol defined), cross-project dependency and blast-radius analysis,
-  > merge-request and contributor queries…"
-  A user who types "who calls `foo`?" matches even though they never said
-  "knowledge graph".
+- **`playwright-cli`** lists the tasks it covers rather than how it works:
+  > "Use when the user needs to navigate websites, interact with web pages, fill
+  > forms, take screenshots, test web applications, or extract information from
+  > web pages."
+  A user who types "fill out this form on example.com" matches even though they
+  never said "browser automation".
 
 ### 3. State the boundary when a sibling could also match
 If two skills could plausibly fire on the same prompt, add a "use when… / do
@@ -82,16 +82,15 @@ The explicit allow-list + "Do not use for…" clause stops the false positives.
 ### Example C — mechanics → situations (breadth fix)
 
 ❌ **Before (mechanics):**
-> `description: Runs graph queries against ClickHouse via a CLI.`
+> `description: Drives a headless browser via a CLI wrapper.`
 
-A user asking "what's the blast radius if I change this function?" won't match
-"runs graph queries against ClickHouse."
+A user asking "fill out this signup form and screenshot the result" won't match
+"drives a headless browser via a CLI wrapper."
 
-✅ **After (situation enumeration, modelled on the real `orbit`):**
-> `description: …Use for code-structure questions (who calls this function,
-> where is this symbol defined), cross-project dependency and blast-radius
-> analysis, merge-request and contributor queries, and any question answerable
-> by traversing GitLab's unified entity graph.`
+✅ **After (situation enumeration, modelled on the real `playwright-cli`):**
+> `description: …Use when the user needs to navigate websites, interact with web
+> pages, fill forms, take screenshots, test web applications, or extract
+> information from web pages.`
 
 ## The litmus / trigger test (do this before shipping)
 

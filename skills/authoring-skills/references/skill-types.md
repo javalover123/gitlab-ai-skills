@@ -6,37 +6,39 @@ into one; the ones that try to do too much straddle several and confuse the
 agent.* Use this list to (a) sanity-check that your idea is one job, and (b)
 spot gaps in the skill library.
 
-Where possible the examples name real, well-written skills (rather than the
-post's hypotheticals) so you can find them in your skills directories, open
-them, and copy the shape.
+Where possible, each category points at a real skill **in this repository** (in
+backticks, e.g. `glab`) so you can open it and copy the shape. Names from
+Anthropic's post that don't exist here are clearly labelled "Post example" — treat
+those as illustrations, not files to open.
 
 ## The nine categories
 
 ### 1. Library & API reference
 Explains how to correctly use a library, CLI, or SDK — often a folder of
 reference snippets plus a list of gotchas.
-- Representative examples: **`glab`** (every common `glab` sub-command + the backtick-
-  escaping footgun), **`orbit`** (the Knowledge-Graph query DSL + recipes).
+- In this repo: **`glab`** (every common `glab` sub-command + the backtick-
+  escaping footgun), **`glab-glql`** (the GLQL query language + examples).
 
 ### 2. Product verification
 Describes how to test/verify that code works, usually paired with a browser,
 tmux, or other external driver. *Anthropic: verification skills had the most
 measurable impact on output quality — worth an engineer-week to make excellent.*
-- Representative examples: **`playwright-cli`**, **`agent-browser`** (drive a headless
-  browser, assert state), **`run-in-tmux-pane`** (interactive CLI/TTY testing).
+- In this repo: **`playwright-cli`** (drive a headless browser, assert state),
+  **`run-in-tmux-pane`** (interactive CLI/TTY testing).
 
 ### 3. Data fetching & analysis
 Connects to data/monitoring stacks: credentials, dashboard IDs, canonical table
 maps, common query workflows.
-- Representative examples: **`orbit`** also serves this role (fetch MR/contributor/
-  blast-radius data from the graph). Post examples: `funnel-query`, `grafana`.
+- In this repo: **`gitlab-clickhouse`** and **`gitlab-psql`** (connect to the
+  data stores, canonical schemas, query patterns). Post examples: `funnel-query`,
+  `grafana`.
 
 ### 4. Business process & team automation
 Collapses a repetitive workflow into one command; simple instructions but may
 depend on other skills/MCPs. Logging past runs helps consistency.
-- Representative examples: a task/issue-tracker automation skill (e.g. create a
-  ticket → enforce schema → notify reviewer), an inbox-triage skill, a standup
-  generator. Post examples: `standup-post`, `weekly-recap`.
+- Shape: a task/issue-tracker automation skill (e.g. create a ticket → enforce
+  schema → notify reviewer), an inbox-triage skill, a standup generator. Post
+  examples: `standup-post`, `weekly-recap`.
 
 ### 5. Code scaffolding & templates
 Generates framework boilerplate where natural-language requirements can't be
@@ -46,13 +48,15 @@ captured purely in code.
 ### 6. Code quality & review
 Enforces org code quality / reviews code; may use deterministic scripts and run
 from hooks or CI.
-- Representative examples: **`opencode-refine`** (iteratively test/refine prompts & skill
-  configs). Post examples: `adversarial-review`, `code-style`.
+- In this repo: **`mr-review`** and **`mr-adversarial-review`** (review a diff
+  against a rubric; spawn a fresh-eyes critique). Post examples:
+  `adversarial-review`, `code-style`.
 
 ### 7. CI/CD & deployment
 Fetches, pushes, and deploys code; may reference data-fetching skills.
-- Representative examples: **`gitlab-babysit-mr`** (monitor pipeline → retry flaky →
-  light fixes → report), **`gitlab-pipeline-watch`**, **`gitlab-backport`**.
+- In this repo: **`gitlab-babysit-mr`** (monitor pipeline → retry flaky → light
+  fixes → report), **`gitlab-pipeline-watch`**, **`pushify`** (drive pre-push
+  hooks to green).
 
 ### 8. Runbooks
 Take a symptom (alert, error signature, Slack thread), walk a multi-tool

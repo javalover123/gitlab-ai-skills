@@ -1,10 +1,11 @@
 # Frontmatter field reference
 
-Every `SKILL.md` opens with a YAML frontmatter block delimited by `---`. Only
-two fields are required; the rest are conventional metadata commonly seen across
-well-written skills. The two required fields are what Anthropic's post calls out
-as load-bearing — `name` identifies the skill and `description` is the discovery
-trigger.
+Every `SKILL.md` opens with a YAML frontmatter block delimited by `---`. This
+repo's `validate_frontmatter.py` requires **four** fields — `name`,
+`description`, `version`, `license` — and CI fails without them. The rest are
+conventional metadata. Of the four, `name` and `description` are the ones
+Anthropic's post calls out as load-bearing for discovery: `name` identifies the
+skill, `description` is the trigger the model scans.
 
 ```yaml
 ---
@@ -39,38 +40,39 @@ allowed-tools: Bash(my-tool:*)
   trigger*, not a summary.
 - **Convention:** third-person present; lead with trigger verbs/phrases;
   enumerate situations; add a boundary clause if a sibling skill could also
-  match. Length varies from one line (`gitlab-backport`,
-  `write-large-file`) to a packed multi-sentence trigger surface
-  (`agent-browser`, `playwright-cli`, `orbit`) — longer is fine when the skill
-  legitimately covers many phrasings.
+  match. Length varies from one line (`write-large-file`, `commit-messages`)
+  to a packed multi-sentence trigger surface (`playwright-cli`, `pushify`,
+  `stack-changes`) — longer is fine when the skill legitimately covers many
+  phrasings.
 - See **`references/descriptions.md`** for patterns, worked before/after
   examples, and the litmus test.
 
+### `version` (required)
+- **What:** semver string (`X.Y.Z`) for the skill.
+- **Convention:** start a new skill at `0.1.0` or `1.0.0`; **bump it on every
+  change** to any file under the skill directory — `check_version_bump.py` gates
+  this against `main` and CI fails otherwise.
+
+### `license` (required)
+- **What:** SPDX license identifier. **Common:** uniformly `MIT` across this
+  repo's skills.
+
 ## Optional fields (conventional)
-
-### `version`
-- **What:** semver string for the skill.
-- **Observed:** `0.1.0` … `1.8.2`. Present on most skills; absent on a few
-  (`jina-reader`, `agent-browser`). Bump it when you change behaviour. Optional
-  but recommended.
-
-### `license`
-- **What:** license identifier. **Common:** uniformly `MIT` across the example
-  skills. Optional; include for shareable skills.
 
 ### `compatibility`
 - **What:** the agent runtime the skill targets. **Observed:** `opencode` on
-  skills that set it (`glab`, `orbit`, `playwright-cli`, `jina-reader`,
-  `gitlab-babysit-mr`, …). Some skills omit it. Use `opencode` here.
+  skills that set it (`glab`, `playwright-cli`, `gitlab-babysit-mr`, …). Some
+  skills omit it. Use `opencode` here.
 
 ### `category`
 - **What:** free-text bucket for human browsing (not the 9-type taxonomy in
   `references/skill-types.md`, though they overlap).
-- **Observed values:** `Development Workflow` (`gitlab-pipeline-watch`,
-  `glab`), `Testing` (`playwright-cli`), `Agent Tooling` (`opencode-refine`),
-  `Shell & Environment` (`run-in-tmux-pane`), `Meta / Authoring`
-  (this meta-skill). Title Case. Optional and not standardised — pick the
-  clearest label or reuse an existing one.
+- **Observed values in this repo:** `Development Workflow` (`glab`,
+  `gitlab-pipeline-watch`, …), `Testing` (`playwright-cli`), `Database`
+  (`gitlab-psql`, `gitlab-clickhouse`), `Agent Tooling` (`opencode-refine`),
+  `Shell & Environment` (`run-in-tmux-pane`). Title Case. Not standardised —
+  reuse an existing label, or add a new one when none fits (this skill uses
+  `Meta / Authoring`).
 
 ### `argument-hint`
 - **What:** a hint shown for skills invoked with an argument.
@@ -78,11 +80,10 @@ allowed-tools: Bash(my-tool:*)
   babysit>`. Add it only when the skill expects a specific positional input.
 
 ### `allowed-tools`
-- **What:** restricts which tools the skill may call (a permission scope).
-- **Observed:** `agent-browser` uses
-  `allowed-tools: Bash(agent-browser:*), Bash(npx agent-browser:*)`. Use only
-  when you want to constrain the skill to specific commands; most skills omit
-  it and inherit the agent's tool access.
+- **What:** restricts which tools the skill may call (a permission scope), e.g.
+  `allowed-tools: Bash(my-tool:*), Bash(npx my-tool:*)`. Use only when you want
+  to constrain the skill to specific commands; the skills in this repo omit it
+  and inherit the agent's tool access.
 
 ### `metadata.*` (nested map)
 A free-form block of tags; useful for organisation and search. Observed keys:
@@ -90,9 +91,9 @@ A free-form block of tags; useful for organisation and search. Observed keys:
 | Key | What | Observed values |
 |---|---|---|
 | `audience` | who the skill is for | `developers`, `general`, `skill-authors` |
-| `keywords` | extra search/discovery terms (comma-separated) | e.g. `orbit, knowledge-graph, gkg, query` |
-| `workflow` | domain tag | `gitlab`, `gitlab-ci`, `gitlab-release`, `web-scraping`, `local`, `ai`, `browser-automation` |
-| `author` | who wrote it | e.g. `dgruzd`, `pedropombeiro` |
+| `keywords` | extra search/discovery terms (comma-separated) | e.g. `migration, schema, rollback` |
+| `workflow` | domain tag | `gitlab`, `gitlab-ci`, `database`, `git`, `local`, `browser-automation` |
+| `author` | who wrote it | e.g. `dgruzd`, `gitlab`, `pedropombeiro` |
 
 All `metadata` keys are optional and non-standardised — add what aids discovery,
 omit the rest.

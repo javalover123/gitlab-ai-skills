@@ -1,12 +1,13 @@
 ---
 name: authoring-skills
 description: Author a new agent skill or improve an existing one - write the SKILL.md frontmatter and description, structure the body, and fix skills that under- or over-trigger. Use when asked to create/write a skill, make a SKILL.md, improve/refactor a skill, or fix a skill's description.
-version: 0.1.0
+version: 0.2.0
 license: MIT
+category: Meta / Authoring
 compatibility: opencode
 metadata:
   audience: skill-authors
-  workflow: ai
+  workflow: local
 ---
 
 # Authoring Skills
