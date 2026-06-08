@@ -8,6 +8,10 @@
   },
   "plugins": [
     {
+      "name": "authoring-skills",
+      "source": "./.claude-plugin/plugins/authoring-skills"
+    },
+    {
       "name": "commit-messages",
       "source": "./.claude-plugin/plugins/commit-messages"
     },

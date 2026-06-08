@@ -1,6 +1,14 @@
 {
   "skills": [
     {
+      "name": "authoring-skills",
+      "description": "Author a new agent skill or improve an existing one - write the SKILL.md frontmatter and description, structure the body, and fix skills that under- or over-trigger. Use when asked to create/write a skill, make a SKILL.md, improve/refactor a skill, or fix a skill's description.",
+      "category": "",
+      "license": "MIT",
+      "compatibility": "opencode",
+      "path": "skills/authoring-skills/SKILL.md"
+    },
+    {
       "name": "commit-messages",
       "description": "Use when creating git commits, writing commit messages, or when about to run git commit -- enforces structured commit message format with imperative mood, capitalized subjects, 72-char wrapping, and atomic commits",
       "category": "Development Workflow",

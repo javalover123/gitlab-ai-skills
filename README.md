@@ -111,6 +111,10 @@ Iteratively test and refine prompts, skills, and agent configurations using open
 
 ### Other
 
+#### authoring-skills
+
+Author a new agent skill or improve an existing one - write the SKILL.md frontmatter and description, structure the body, and fix skills that under- or over-trigger. Use when asked to create/write a skill, make a SKILL.md, improve/refactor a skill, or fix a skill's description. → [`SKILL.md`](skills/authoring-skills/SKILL.md)
+
 #### glab-glql
 
 Execute GLQL queries against GitLab projects and groups using glab CLI → [`SKILL.md`](skills/glab-glql/SKILL.md)
@@ -213,6 +217,7 @@ This repo ships as a [Claude Code plugin marketplace](https://code.claude.com/do
 <!-- CLAUDECODE_PLUGINS_START -->
 | Plugin | Skills | Description | Version |
 | ------ | ------ | ----------- | ------- |
+| [`authoring-skills`](.claude-plugin/plugins/authoring-skills) | [`authoring-skills`](skills/authoring-skills/SKILL.md) | Author a new agent skill or improve an existing one - write the SKILL.md frontmatter and description, structure the body, and fix skills that under- or over-trigger. Use when asked to create/write a skill, make a SKILL.md, improve/refactor a skill, or fix a skill's description. | 0.1.0 |
 | [`commit-messages`](.claude-plugin/plugins/commit-messages) | [`commit-messages`](skills/commit-messages/SKILL.md) | Use when creating git commits, writing commit messages, or when about to run git commit -- enforces structured commit message format with imperative mood, capitalized subjects, 72-char wrapping, and atomic commits | 1.0.1 |
 | [`gitlab-babysit-mr`](.claude-plugin/plugins/gitlab-babysit-mr) | [`gitlab-babysit-mr`](skills/gitlab-babysit-mr/SKILL.md) | Monitor a GitLab MR's pipeline until green. Classifies failures (flaky, master-broken, lint, coverage, real), retries jobs where appropriate, makes light-touch auto-fixes, and posts findings as an MR comment. | 0.10.0 |
 | [`gitlab-clickhouse`](.claude-plugin/plugins/gitlab-clickhouse) | [`gitlab-clickhouse`](skills/gitlab-clickhouse/SKILL.md) | Inspect GitLab local ClickHouse tables, schemas, ingestion paths, and data patterns. Use for CH table questions, DESCRIBE TABLE, schema and source-of-truth checks under db/click_house, ingestion debugging, and investigating aggregates, distributions, outliers, or anomalous ClickHouse data in a GitLab GDK environment. | 1.0.1 |
