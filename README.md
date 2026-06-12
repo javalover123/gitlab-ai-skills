@@ -62,6 +62,10 @@ Watch GitLab MR pipelines and react to state changes → [`SKILL.md`](skills/git
 
 GitLab workflow automation using glab CLI → [`SKILL.md`](skills/glab/SKILL.md)
 
+#### local-duo-review
+
+Run a GitLab Duo Code Review locally — detect a project's custom review instructions in `.gitlab/duo/mr-review-instructions.yaml`, match changed files against each instruction group's glob filters, and review the local diff against only those user-defined rules, emulating Duo before you push or open an MR. Use when asked to apply custom/duo review instructions, check changes against `.gitlab/duo` rules, or preview a Duo review locally. Do not use for a general MR review (use `mr-review`) or a skeptical critique (use `mr-adversarial-review`). → [`SKILL.md`](skills/local-duo-review/SKILL.md)
+
 #### mr-adversarial-review
 
 Use when running a critical, skeptical pass over a GitLab MR — either as the author before requesting human review, or as a reviewer wanting a structured first cut — produces a severity-bucketed findings report (High / Medium / Low / Done well) and posts it as a single comment on the MR. → [`SKILL.md`](skills/mr-adversarial-review/SKILL.md)
@@ -233,6 +237,7 @@ This repo ships as a [Claude Code plugin marketplace](https://code.claude.com/do
 | [`gitlab-psql`](.claude-plugin/plugins/gitlab-psql) | [`gitlab-psql`](skills/gitlab-psql/SKILL.md) | Inspect GitLab GDK PostgreSQL test and development databases with gdk psql. Use for Postgres schema checks, table and index inspection, read-only SQL queries, migration verification, and investigating GitLab application data in local test or development databases. | 1.0.1 |
 | [`glab`](.claude-plugin/plugins/glab) | [`glab`](skills/glab/SKILL.md) | GitLab workflow automation using glab CLI | 1.10.0 |
 | [`glab-glql`](.claude-plugin/plugins/glab-glql) | [`glab-glql`](skills/glab-glql/SKILL.md) | Execute GLQL queries against GitLab projects and groups using glab CLI | 1.0.0 |
+| [`local-duo-review`](.claude-plugin/plugins/local-duo-review) | [`local-duo-review`](skills/local-duo-review/SKILL.md) | Run a GitLab Duo Code Review locally — detect a project's custom review instructions in `.gitlab/duo/mr-review-instructions.yaml`, match changed files against each instruction group's glob filters, and review the local diff against only those user-defined rules, emulating Duo before you push or open an MR. Use when asked to apply custom/duo review instructions, check changes against `.gitlab/duo` rules, or preview a Duo review locally. Do not use for a general MR review (use `mr-review`) or a skeptical critique (use `mr-adversarial-review`). | 0.1.0 |
 | [`mr-adversarial-review`](.claude-plugin/plugins/mr-adversarial-review) | [`mr-adversarial-review`](skills/mr-adversarial-review/SKILL.md) | Use when running a critical, skeptical pass over a GitLab MR — either as the author before requesting human review, or as a reviewer wanting a structured first cut — produces a severity-bucketed findings report (High / Medium / Low / Done well) and posts it as a single comment on the MR. | 0.1.0 |
 | [`mr-review`](.claude-plugin/plugins/mr-review) | [`mr-review`](skills/mr-review/SKILL.md) | Review a GitLab merge request — read diffs, analyze changes, present findings, and optionally post comments on the MR | 0.1.0 |
 | [`pushify`](.claude-plugin/plugins/pushify) | [`pushify`](skills/pushify/SKILL.md) | Run pre-push lefthook checks and iteratively fix failures (up to 3 iterations, then escalate). Invoke when: (a) about to push and wanting hooks to pass cleanly, (b) `git push` has just failed on a pre-push hook and the failure needs to be driven to resolution, or (c) preparing a clean working tree without pushing — e.g. before opening a Draft MR for early review. | 1.1.0 |
