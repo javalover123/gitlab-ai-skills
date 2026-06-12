@@ -50,6 +50,10 @@ Use when creating git commits, writing commit messages, or when about to run git
 
 Monitor a GitLab MR's pipeline until green. Classifies failures (flaky, master-broken, lint, coverage, real), retries jobs where appropriate, makes light-touch auto-fixes, and posts findings as an MR comment. → [`SKILL.md`](skills/gitlab-babysit-mr/SKILL.md)
 
+#### gitlab-mr-description
+
+Write or update a GitLab MR description. Reads the branch diff, drafts structured markdown using GitLab's standard sections, and applies conventions for feature flags, database queries, and local testing matrices. Use when opening a new MR or refreshing an existing description. → [`SKILL.md`](skills/gitlab-mr-description/SKILL.md)
+
 #### gitlab-pipeline-watch
 
 Watch GitLab MR pipelines and react to state changes → [`SKILL.md`](skills/gitlab-pipeline-watch/SKILL.md)
@@ -117,10 +121,6 @@ Iteratively test and refine prompts, skills, and agent configurations using open
 Author a new agent skill or improve an existing one - write the SKILL.md frontmatter and description, structure the body, and fix skills that under- or over-trigger. Use when asked to create/write a skill, make a SKILL.md, improve/refactor a skill, or fix a skill's description. → [`SKILL.md`](skills/authoring-skills/SKILL.md)
 
 ### Other
-
-#### gitlab-mr-description
-
-Write or update a GitLab MR description. Reads the branch diff, drafts structured markdown using GitLab's standard sections, and applies conventions for feature flags, database queries, and local testing matrices. Use when opening a new MR or refreshing an existing description. → [`SKILL.md`](skills/gitlab-mr-description/SKILL.md)
 
 #### glab-glql
 
