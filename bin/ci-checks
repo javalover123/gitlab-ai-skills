@@ -21,6 +21,7 @@ run python3 scripts/update_toc.py --ci
 run python3 scripts/update_claudecode_readme.py --ci
 run python3 scripts/validate_frontmatter.py --ci
 run python3 scripts/validate_skill_length.py --ci
+run python3 scripts/run_skill_tests.py --ci
 run scripts/lint_shell.sh
 run diff AGENTS.md CLAUDE.md
 run python3 scripts/validate-opencode-distribution.py --ci
