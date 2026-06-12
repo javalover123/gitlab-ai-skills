@@ -27,8 +27,8 @@
    bin/distribute-skill my-workflow
    ```
 
-   This creates the necessary symlinks and manifests in `.opencode/` and `.claude-plugin/`, and verifies pi package discovery.
-   To target a specific environment only: `--env=opencode`, `--env=claudecode`, or `--env=pi`. See more in `bin/distribute-skill` manual.
+   This creates the necessary symlinks and manifests in `.opencode/`, `.agents/`, and `.claude-plugin/`, and verifies pi package discovery.
+   To target a specific environment only: `--env=opencode`, `--env=agents`, `--env=claudecode`, or `--env=pi`. See more in `bin/distribute-skill` manual.
 
 4. Regenerate all derived files:
 
@@ -65,6 +65,7 @@ Skills are distributed to editor-specific directories using `bin/distribute-skil
 ```bash
 bin/distribute-skill SKILLNAME                          # all environments
 bin/distribute-skill SKILLNAME --env=opencode           # opencode only
+bin/distribute-skill SKILLNAME --env=agents             # .agents/skills/ only
 bin/distribute-skill SKILLNAME --env=claudecode         # ClaudeCode only
 bin/distribute-skill SKILLNAME --env=pi                 # pi only
 bin/distribute-skill SKILLNAME --env=claudecode --plugin=PLUGINNAME  # custom plugin name
@@ -73,6 +74,8 @@ bin/distribute-skill SKILLNAME --env=opencode --overwrite  # remove from all oth
 
 **opencode** (`.opencode/skills/`): creates a symlink to `skills/<name>/`.
 
+**agents** (`.agents/skills/`): creates a symlink to `skills/<name>/`. This is the cross-tool discovery location defined by the [Agent Skills spec](https://agentskills.io); see the README for the tools that consume it.
+
 **ClaudeCode** (`.claude-plugin/plugins/<name>/`): writes a `plugin.json` manifest, creates a symlink under `skills/`, and registers the plugin in `marketplace.json`.
 
 **pi** (root `package.json`): no per-skill symlinks needed. Pi discovers all skills under `skills/` via the `pi.skills` manifest in `package.json`. The distribute command verifies the manifest is correctly configured.
@@ -80,6 +83,7 @@ bin/distribute-skill SKILLNAME --env=opencode --overwrite  # remove from all oth
 CI jobs verify the distributed skills are format-compatible:
 
 - `validate-opencode-distribution` — checks `.opencode/skills/*/SKILL.md` for required opencode fields
+- `validate-agents-distribution` — checks `.agents/skills/*/SKILL.md` against the Agent Skills spec
 - `validate-claudecode-distribution` — checks `.claude-plugin/**/skills/*/SKILL.md` for required ClaudeCode fields
 - `validate-distribution-pi` — checks `package.json` manifest and all `skills/*/SKILL.md` against pi's Agent Skills spec
 

@@ -1,8 +1,9 @@
 # Agent guidance for gitlab-org/ai/skills
 
 This repo hosts reusable agent **skills** — each is a `skills/<name>/SKILL.md`
-with YAML frontmatter plus Markdown content, distributed to OpenCode, Claude
-Code, and pi. Most contributions add or edit a skill. Read this before writing.
+with YAML frontmatter plus Markdown content, distributed to OpenCode, the
+`.agents/skills/` convention, Claude Code, and pi. Most contributions add or
+edit a skill. Read this before writing.
 See [`CONTEXT.md`](CONTEXT.md) for the canonical glossary of domain terms.
 
 > `CLAUDE.md` is a copy of this file. Keep the two **byte-identical** — edit
@@ -94,7 +95,8 @@ Some skills are **synced in** from another repository — their source of truth
 
 1. Create `skills/<name>/SKILL.md` with frontmatter (`name`, `description`,
    `version`, `license`); keep it lean (see above).
-2. `bin/distribute-skill <name>` — register for OpenCode / Claude Code / pi.
+2. `bin/distribute-skill <name>` — register for OpenCode / `.agents/skills/` /
+   Claude Code / pi.
 3. `lefthook run auto-fix` — regenerate README table, ToC, catalog, manifests.
 4. **Bump the `version`** field whenever any file under `skills/<name>/` changes
    (`check_version_bump.py` gates this against `main`).

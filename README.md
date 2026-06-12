@@ -18,7 +18,7 @@ Reusable agent skills for GitLab projects. Skills are structured prompt files th
     - [Meta / Authoring](#meta--authoring)
     - [Other](#other)
   - [Installing Skills](#installing-skills)
-    - [GitLab Duo CLI](#gitlab-duo-cli)
+    - [`.agents/skills/` (Zed, GitLab Duo CLI)](#agentsskills-zed-gitlab-duo-cli)
     - [Pi (Package)](#pi-package)
     - [OpenCode (Native)](#opencode-native)
     - [Via `@dgruzd/skills` CLI](#via-dgruzdskills-cli)
@@ -136,19 +136,22 @@ Execute GLQL queries against GitLab projects and groups using glab CLI → [`SKI
 >
 > You may also need to enable [Developer Mode](https://learn.microsoft.com/en-us/windows/apps/get-started/enable-your-device-for-development) or run Git as Administrator for symlink creation to work.
 
-### GitLab Duo CLI
+### `.agents/skills/` (Zed, GitLab Duo CLI)
 
-Duo CLI discovers global skills from `~/.agents/skills/` (or `~/.gitlab/duo/skills/`). Copy individual skills into that directory:
+This repo ships `.agents/skills/` with a symlink for each skill. That is the cross-tool discovery location defined by the [Agent Skills spec](https://agentskills.io), so multiple tools can read it:
+
+- **Zed** loads skills from a project-local `<worktree>/.agents/skills/` (in a trusted worktree) as well as the global `~/.agents/skills/`. Cloning this repo is enough for project-local discovery, no extra step needed. See the [Zed skills docs](https://zed.dev/docs/ai/skills).
+- **GitLab Duo CLI** discovers global skills from `~/.agents/skills/` (or `~/.gitlab/duo/skills/`), behind the experimental `--global-skills` flag.
+
+For global discovery, symlink the shipped skills into `~/.agents/skills/`:
 
 ```bash
-# Single skill
-cp -r skills/mr-review ~/.agents/skills/mr-review
+git clone https://gitlab.com/gitlab-org/ai/skills.git ~/gitlab-skills
 
-# All skills
-cp -r skills/* ~/.agents/skills/
+for skill in ~/gitlab-skills/.agents/skills/*/; do
+  ln -s "$skill" ~/.agents/skills/
+done
 ```
-
-Global skills require the `--global-skills` flag (experimental) when launching Duo CLI.
 
 ### Pi (Package)
 
