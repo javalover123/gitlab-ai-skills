@@ -33,6 +33,14 @@
       "path": "skills/gitlab-clickhouse/SKILL.md"
     },
     {
+      "name": "gitlab-mr-description",
+      "description": "Write or update a GitLab MR description. Reads the branch diff, drafts structured markdown using GitLab's standard sections, and applies conventions for feature flags, database queries, and local testing matrices. Use when opening a new MR or refreshing an existing description.",
+      "category": "",
+      "license": "MIT",
+      "compatibility": "",
+      "path": "skills/gitlab-mr-description/SKILL.md"
+    },
+    {
       "name": "gitlab-pipeline-watch",
       "description": "Watch GitLab MR pipelines and react to state changes",
       "category": "Development Workflow",

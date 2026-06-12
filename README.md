@@ -118,6 +118,10 @@ Author a new agent skill or improve an existing one - write the SKILL.md frontma
 
 ### Other
 
+#### gitlab-mr-description
+
+Write or update a GitLab MR description. Reads the branch diff, drafts structured markdown using GitLab's standard sections, and applies conventions for feature flags, database queries, and local testing matrices. Use when opening a new MR or refreshing an existing description. → [`SKILL.md`](skills/gitlab-mr-description/SKILL.md)
+
 #### glab-glql
 
 Execute GLQL queries against GitLab projects and groups using glab CLI → [`SKILL.md`](skills/glab-glql/SKILL.md)
