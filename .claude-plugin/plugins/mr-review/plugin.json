@@ -1,7 +1,7 @@
 {
   "name": "mr-review",
   "description": "Review a GitLab merge request \u2014 read diffs, analyze changes, present findings, and optionally post comments on the MR",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "author": {
     "name": "GitLab"
   },

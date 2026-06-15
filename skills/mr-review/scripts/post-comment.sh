@@ -10,7 +10,7 @@
 #   post-comment.sh [--mr <IID>] --file <path> --old-line <N> --message <text>
 #   post-comment.sh [--mr <IID>] --reply <discussion-id> --message <text>
 #
-# The :robot: AI-generated prefix is prepended automatically.
+# A "> :robot: posted by agent" footer is appended automatically.
 set -euo pipefail
 
 MR_IID=""
@@ -37,10 +37,10 @@ if [ -z "$MESSAGE" ]; then
   exit 1
 fi
 
-# Prepend the AI-generated prefix
-FULL_MESSAGE=":robot: AI-generated
+# Append the agent attribution footer
+FULL_MESSAGE="$MESSAGE
 
-$MESSAGE"
+> :robot: posted by agent"
 
 # ── Validate flag combinations ────────────────────────────────────────
 if [ -n "$LINE" ] && [ -n "$OLD_LINE" ]; then
