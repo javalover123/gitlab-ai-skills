@@ -1,7 +1,7 @@
 ---
 name: mr-review
 description: Review a GitLab merge request - read diffs, analyze changes, present findings, and optionally post comments on the MR
-version: 0.1.0
+version: 0.2.0
 category: Development Workflow
 license: MIT
 metadata:
@@ -85,12 +85,21 @@ Do **not** flag:
 - **Maintainability** — unclear naming, excessive complexity, missing error handling, untested code paths.
 - **Performance** — N+1 queries, unnecessary allocations, missing indexes, unbounded loops.
 
-#### Priority levels
+#### Comment labels
 
-- **[P0]** Critical — bug or security issue that must be fixed before merge.
-- **[P1]** Important — likely problem, should fix before merge.
-- **[P2]** Suggestion — improvement worth considering.
-- **[P3]** Nit — minor style or naming preference.
+Prefix every finding with a [conventional comment](https://conventionalcomments.org/) label in bold, optionally decorated: `**<label> (<decoration>):** <finding>`.
+
+Labels:
+- **issue** — a problem to address (correctness, security, performance, maintainability).
+- **suggestion** — a concrete improvement; propose the change, don't just gesture at it.
+- **nitpick** — minor preference (naming, style); always non-blocking.
+- **question** — you need clarification before you can judge the code.
+- **praise** — something done notably well; use sparingly and genuinely.
+
+Decorations (optional) signal whether the comment should hold up the merge:
+- **(blocking)** — resolve before merge; reserve for genuine correctness/security issues.
+- **(non-blocking)** — should not prevent merge; the default for `suggestion` and `nitpick`.
+- **(if-minor)** — resolve only if the fix is small.
 
 #### Comment guidelines
 
@@ -104,10 +113,10 @@ Do **not** flag:
 
 #### Good and bad comment examples
 
-**Good comments** (specific, actionable, about added code):
-- "This null check on line 26 won't prevent the NPE because `userId` can still be null after validation"
-- "The new SQL query on line 45 is vulnerable to injection — use parameterized queries"
-- "This added loop will be infinite when the array is empty due to the counter logic"
+**Good comments** (specific, actionable, labelled, about added code):
+- "**issue (blocking):** This null check on line 26 won't prevent the NPE — `userId` can still be null after validation."
+- "**issue (blocking):** The new SQL query on line 45 is vulnerable to injection; use parameterized queries."
+- "**suggestion (non-blocking):** Extract lines 30–42 into a helper — the same block is repeated on line 58."
 
 **Bad comments** (vague, redundant, or about already-added code):
 - "Consider adding a public field" (when diff shows a public field is already being added)
@@ -126,11 +135,11 @@ Output a structured review:
 
 ### Findings
 
-**[P1] Title of finding**
+**issue (blocking):** Title of finding
 File: `path/to/file.ext`, lines 42–48
 Description of the issue and why it matters.
 
-**[P2] Title of finding**
+**nitpick (non-blocking):** Title of finding
 File: `path/to/file.ext`, line 15
 Description.
 
@@ -147,24 +156,24 @@ Always ask before posting. Never post comments without user confirmation.
 
 Use the post-comment script. It auto-detects `glab` and falls back to outputting a payload for the `create_merge_request_note` DWS tool.
 
-The script automatically prepends `:robot: AI-generated` to every comment.
+The script automatically appends a `> :robot: posted by agent` footer to every comment, so each one is attributed to the AI agent that posted it.
 
 ```bash
 # Inline diff comment on an added/modified line (new side)
 $SKILL_DIR/scripts/post-comment.sh --mr <IID> --file path/to/file.ext --line 42 \
-  --message "**[P1] Title**
+  --message "**issue (blocking):** Title
 
 Description of the issue."
 
 # Inline diff comment on a removed line (old side)
 $SKILL_DIR/scripts/post-comment.sh --mr <IID> --file path/to/file.ext --old-line 10 \
-  --message "**[P2] Title**
+  --message "**nitpick (non-blocking):** Title
 
 Description."
 
 # Multiline comment (range on new side)
 $SKILL_DIR/scripts/post-comment.sh --mr <IID> --file path/to/file.ext --line 42:48 \
-  --message "**[P1] Title**
+  --message "**issue (blocking):** Title
 
 Description."
 
@@ -181,4 +190,4 @@ Line selection rules:
 - `--line` and `--old-line` cannot be used together.
 - Pick the most relevant single line or narrow range for the finding.
 
-If the first call outputs `posted: false` (meaning `glab` is not available), skip the script for remaining comments and use the `create_merge_request_note` DWS tool directly. Prefix every comment body with `:robot: AI-generated\n\n`.
+If the first call outputs `posted: false` (meaning `glab` is not available), skip the script for remaining comments and use the `create_merge_request_note` DWS tool directly. Append `\n\n> :robot: posted by agent` to every comment body.
