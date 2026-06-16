@@ -151,7 +151,7 @@ Treat them as advice, not policy.*
 
 - Symptom is "the request is slow" not "this method is slow" → use
   QueryRecorder for query-count regressions, or k6 / CPT for end-to-end
-  latency. See [getting-started.md](getting-started.md).
+  latency. See [getting-started.md](../tooling/getting-started.md).
 - Need to compare *before and after* a code change with statistical
   confidence → use [benchmark-ips](profiling.md#4-benchmark-ips-block-iterationssec-benchmark) directly in
   a script, or `derailed_benchmarks` for full-app boot/memory comparison.

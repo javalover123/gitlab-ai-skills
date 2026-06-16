@@ -1,7 +1,7 @@
 ---
 name: self-service-performance-testing
 description: Help engineers write performance tests that detect regressions, using k6 for load testing, sitespeed.io for frontend Core Web Vitals, rspec-benchmark for unit-level perf assertions, and Ruby profilers (Stackprof, memory_profiler, derailed_benchmarks, etc.) for investigating slow code paths. Use when the user is adding or changing API endpoints, database queries, critical paths, or frontend pages and needs to decide whether to write a performance test, what kind, or how to integrate it into CI. Also activate when the user mentions load testing, stress testing, response times, benchmarking, performance budgets, CPT, component performance testing, MR pipeline performance testing, profiling slow Ruby code, memory bloat, or wants to run tests against staging - this skill enforces shared infrastructure safety rules. Does not cover APM or debugging production incidents.
-version: 0.3.1
+version: 0.4.0
 category: Testing
 license: MIT
 compatibility: opencode
@@ -109,16 +109,30 @@ Read the relevant reference file based on where the conversation goes.
 These cover GitLab-specific tooling that isn't in public training data —
 don't try to guess how these tools work, consult the references.
 
+### General
+
 | When you need to... | Read |
 |---|---|
-| Help decide: test or not? what tool? what thresholds? | [getting-started.md](references/getting-started.md) |
-| Advise on or configure GPT (GitLab Performance Tool) | [gpt.md](references/gpt.md) |
-| Advise on or configure Sitespeed Runway | [sitespeed-runway.md](references/sitespeed-runway.md) |
-| Advise on or configure CPT (Component Performance Testing) | [cpt.md](references/cpt.md) |
-| Write or review a k6 test stub | [quick-reference.md](references/quick-reference.md) |
-| Add perf tests to CI pipeline | [gitlab-ci-integration.md](references/gitlab-ci-integration.md) |
-| Write unit-level perf assertions with rspec-benchmark | [unit-performance-testing.md](references/unit-performance-testing.md) |
-| Profile slow Ruby code, memory bloat, allocations | [profiling.md](references/profiling.md) |
+| Help decide: test or not? what tool? what thresholds? | [getting-started.md](references/tooling/getting-started.md) |
+| Advise on or configure GPT (GitLab Performance Tool) | [gpt.md](references/tooling/gpt.md) |
+| Advise on or configure Sitespeed Runway | [sitespeed-runway.md](references/tooling/sitespeed-runway.md) |
+| Advise on or configure CPT (Component Performance Testing) | [cpt.md](references/tooling/cpt.md) |
+| Write or review a k6 test stub | [quick-reference.md](references/tooling/quick-reference.md) |
+| Add perf tests to CI pipeline | [gitlab-ci-integration.md](references/tooling/gitlab-ci-integration.md) |
+
+### Ruby-specific
+
+These reference files describe Ruby gems (rspec-benchmark, Stackprof,
+memory_profiler, derailed_benchmarks, benchmark-ips, rbtrace, ruby-prof,
+rspec_profiling) and apply only to projects with Ruby code. For non-Ruby
+projects, ignore the rows below; downstream consumers of this skill may
+omit `references/ruby/` from disk entirely, in which case treat any
+reference there as not applicable to the current project.
+
+| When you need to... | Read |
+|---|---|
+| Write unit-level perf assertions with rspec-benchmark | [unit-performance-testing.md](references/ruby/unit-performance-testing.md) |
+| Profile slow Ruby code, memory bloat, allocations | [profiling.md](references/ruby/profiling.md) |
 
 ## Advisory Flow
 
@@ -134,15 +148,22 @@ confirming the tool choice) risks wasted work if the wrong tool was assumed.
    exist, point the engineer to them instead.
 
 2. **Does this change need a perf test?** Consult the decision framework
-   in [getting-started.md](references/getting-started.md). Many changes
+   in [getting-started.md](references/tooling/getting-started.md). Many changes
    don't need one — say so clearly and directly when that's the case. A
    confident "no, this doesn't need a performance test because X" is more
    useful than hedging.
 
 3. **Which tool?** The key question is: at what level does the engineer
-   want feedback?
-   - Single method / class, want assertion in the spec suite → **rspec-benchmark**
-   - Investigating *why* something is slow (CPU, memory, allocations) → **a profiler** (see [profiling.md](references/profiling.md))
+   want feedback? Some tools are language-conditional — flag any
+   recommendation that wouldn't apply to the current project's language.
+   - Single method / class, want assertion in the spec suite →
+     **rspec-benchmark** (Ruby only)
+   - Investigating *why* something is slow (CPU, memory, allocations) in
+     Ruby code → **a Ruby profiler** (see
+     [profiling.md](references/ruby/profiling.md)). For non-Ruby projects,
+     profilers are out of scope for this skill — point the engineer to
+     language-native tooling (e.g., `pprof` for Go) or
+     **#g_performance_enablement** on Slack
    - On every push, before merge, component-level load → **CPT**
    - Scheduled load testing or full reference architecture validation → **GPT**
    - Frontend page load / Core Web Vitals → **Sitespeed Runway**
@@ -158,23 +179,23 @@ confirming the tool choice) risks wasted work if the wrong tool was assumed.
 
 4. **What does "too slow" mean?** Help the engineer arrive at a concrete
    threshold — baseline measurement plus a regression budget. See the
-   budgets table in [getting-started.md](references/getting-started.md).
+   budgets table in [getting-started.md](references/tooling/getting-started.md).
 
 5. **Produce something useful.** Depending on the tool:
    - **GPT/custom k6** → write a basic test stub using
-     [quick-reference.md](references/quick-reference.md) patterns, or point
+     [quick-reference.md](references/tooling/quick-reference.md) patterns, or point
      to existing GPT tests if the endpoint is already covered.
    - **CPT** → help set up the CI trigger and test files using
-     [cpt.md](references/cpt.md) conventions.
+     [cpt.md](references/tooling/cpt.md) conventions.
    - **Sitespeed Runway** → walk them through the Web UI or API setup
-     from [sitespeed-runway.md](references/sitespeed-runway.md).
+     from [sitespeed-runway.md](references/tooling/sitespeed-runway.md).
    - **rspec-benchmark** → write the matcher-based spec using patterns
-     from [unit-performance-testing.md](references/unit-performance-testing.md).
+     from [unit-performance-testing.md](references/ruby/unit-performance-testing.md).
    - **Profiling** → point them to the right profiler for their symptom
      (CPU vs memory vs allocations vs whole-app boot) using
-     [profiling.md](references/profiling.md).
+     [profiling.md](references/ruby/profiling.md).
    - **CI integration** → provide a pipeline snippet from
-     [gitlab-ci-integration.md](references/gitlab-ci-integration.md).
+     [gitlab-ci-integration.md](references/tooling/gitlab-ci-integration.md).
 
 When in doubt, ask. The engineer knows their system better than you do.
 **#g_performance_enablement** on Slack is always a valid answer for
