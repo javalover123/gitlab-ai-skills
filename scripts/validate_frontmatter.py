@@ -18,7 +18,7 @@ try:
 except ImportError:
     HAS_YAML = False
 
-from lib.frontmatter import parse_frontmatter
+from lib.frontmatter import extract_raw_frontmatter, parse_frontmatter
 
 # Paths relative to the script's directory
 SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
@@ -42,18 +42,6 @@ def log_debug(message):
     """Log debug messages to stderr if debugging is enabled."""
     if DEBUG:
         print(f"DEBUG: {message}", file=sys.stderr)
-
-
-def extract_raw_frontmatter(skill_file):
-    """Return the raw YAML text between the ``---`` delimiters, or *None*."""
-    with open(skill_file, "r") as f:
-        content = f.read()
-    if not content.startswith("---"):
-        return None
-    parts = content.split("---", 2)
-    if len(parts) < 3:
-        return None
-    return parts[1]
 
 
 def strict_yaml_check(skill_file):
@@ -115,9 +103,13 @@ def validate_skills():
             if yaml_err:
                 format_errors.append(yaml_err)
         elif not yaml_warned:
-            log_debug(
-                "PyYAML not installed — skipping strict YAML validation. "
-                "Install with: pip install PyYAML"
+            # Print unconditionally (not gated on --debug) so Lefthook users
+            # see that the strict check was skipped — silent skip is the
+            # exact footgun this change is meant to prevent.
+            print(
+                "WARNING: PyYAML not installed — strict YAML validation "
+                "skipped. Install with: pip install PyYAML",
+                file=sys.stderr,
             )
             yaml_warned = True
 

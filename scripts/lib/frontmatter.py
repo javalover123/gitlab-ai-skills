@@ -6,6 +6,33 @@ Nested keys (indented under a mapping parent) are intentionally skipped.
 """
 
 
+def _read_lines(skill_file):
+    """Read all lines from *skill_file* and return them as a list."""
+    with open(skill_file, "r") as f:
+        return f.readlines()
+
+
+def extract_raw_frontmatter(skill_file):
+    """Return the raw YAML text between the ``---`` delimiters, or *None*.
+
+    The closing delimiter is a ``---`` that appears **on its own line**
+    (matching the same rule ``parse_frontmatter`` uses), so a ``---`` inside a
+    quoted value does not truncate the block.
+    """
+    lines = _read_lines(skill_file)
+    if not lines or lines[0].strip() != "---":
+        return None
+
+    body_lines = []
+    for line in lines[1:]:
+        if line.strip() == "---":
+            return "".join(body_lines)
+        body_lines.append(line)
+
+    # Reached EOF without a closing ``---``.
+    return None
+
+
 def parse_frontmatter(skill_file, *, debug=False):
     """Extract all top-level key-value pairs from YAML frontmatter.
 
@@ -17,8 +44,7 @@ def parse_frontmatter(skill_file, *, debug=False):
     """
     fields = {}
 
-    with open(skill_file, "r") as f:
-        lines = f.readlines()
+    lines = _read_lines(skill_file)
 
     if not lines or lines[0].strip() != "---":
         return fields
