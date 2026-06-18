@@ -80,8 +80,13 @@ def strict_yaml_check(skill_file):
         yaml.safe_load(raw)
         return None
     except yaml.YAMLError as exc:
-        # Condense the error to the first line for readability.
-        msg = str(exc).split("\n")[0]
+        # Preserve line/column context when available so the developer
+        # knows exactly where in the frontmatter the error is.
+        if getattr(exc, "problem_mark", None) is not None:
+            mark = exc.problem_mark
+            msg = f"{exc.problem} (line {mark.line + 1}, column {mark.column + 1})"
+        else:
+            msg = str(exc).split("\n")[0]
         return f"frontmatter is not valid YAML: {msg}"
 
 

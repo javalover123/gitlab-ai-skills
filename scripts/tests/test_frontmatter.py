@@ -146,6 +146,29 @@ class TestStrictYamlDetectsUnquotedColon(unittest.TestCase):
         finally:
             os.unlink(path)
 
+    @unittest.skipUnless(HAS_YAML, "PyYAML not installed")
+    def test_strict_yaml_check_includes_line_and_column(self):
+        """The error message must include line/column for actionability."""
+        from validate_frontmatter import strict_yaml_check
+
+        content = (
+            '---\n'
+            'name: foo\n'
+            'description: MUST USE before ... Triggers: review, plan\n'
+            'version: 1.0.0\n'
+            'license: MIT\n'
+            '---\n'
+        )
+        path = _write_temp(content)
+        try:
+            err = strict_yaml_check(path)
+            self.assertIsNotNone(err)
+            self.assertIn("not valid YAML", err)
+            # Must include line/column context from problem_mark.
+            self.assertRegex(err, r"line \d+, column \d+")
+        finally:
+            os.unlink(path)
+
 
 class TestMissingClosingDelimiter(unittest.TestCase):
     """A file that opens with ``---`` but never closes must be caught."""
