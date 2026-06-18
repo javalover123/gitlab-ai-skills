@@ -147,6 +147,66 @@ class TestStrictYamlDetectsUnquotedColon(unittest.TestCase):
             os.unlink(path)
 
 
+class TestMissingClosingDelimiter(unittest.TestCase):
+    """A file that opens with ``---`` but never closes must be caught."""
+
+    def test_unclosed_frontmatter_returns_none(self):
+        """extract_raw_frontmatter returns None for an unclosed block."""
+        content = (
+            '---\n'
+            'name: badskill\n'
+            'description: MUST USE. Triggers: a, b\n'
+            'version: 1.0.0\n'
+            'license: MIT\n'
+        )
+        path = _write_temp(content)
+        try:
+            self.assertIsNone(extract_raw_frontmatter(path))
+        finally:
+            os.unlink(path)
+
+    def test_unclosed_frontmatter_detected_by_validator(self):
+        """The validator must surface an explicit error, not silently pass."""
+        # Import the check function from validate_frontmatter
+        sys.path.insert(0, SCRIPTS_DIR)
+        from validate_frontmatter import check_frontmatter_delimiters
+
+        content = (
+            '---\n'
+            'name: badskill\n'
+            'description: MUST USE. Triggers: a, b\n'
+            'version: 1.0.0\n'
+            'license: MIT\n'
+        )
+        path = _write_temp(content)
+        try:
+            err = check_frontmatter_delimiters(path)
+            self.assertIsNotNone(err)
+            self.assertIn("missing closing frontmatter delimiter", err)
+        finally:
+            os.unlink(path)
+
+    def test_closed_frontmatter_no_delimiter_error(self):
+        """A properly closed block must not trigger the delimiter error."""
+        sys.path.insert(0, SCRIPTS_DIR)
+        from validate_frontmatter import check_frontmatter_delimiters
+
+        content = (
+            '---\n'
+            'name: goodskill\n'
+            'description: A valid skill\n'
+            'version: 1.0.0\n'
+            'license: MIT\n'
+            '---\n'
+        )
+        path = _write_temp(content)
+        try:
+            err = check_frontmatter_delimiters(path)
+            self.assertIsNone(err)
+        finally:
+            os.unlink(path)
+
+
 class TestParseFrontmatterBackcompat(unittest.TestCase):
     """The lenient parser must keep working for existing callers."""
 

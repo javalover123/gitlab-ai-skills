@@ -107,7 +107,7 @@ Some skills are **synced in** from another repository — their source of truth
 
 | Check | What it enforces |
 |---|---|
-| `validate_frontmatter.py` | Required fields, semver, **kebab name == dir name**, **strict YAML parse** (PyYAML) |
+| `validate_frontmatter.py` | Required fields, semver, **kebab name == dir name**, **strict YAML parse**¹ |
 | `validate_skill_length.py` | SKILL.md length (warn-only: <100 target, 150 cap) |
 | `lint_shell.sh` (shellcheck) | Bash footguns in `skills/**/*.sh` |
 | `check_version_bump.py` | `version` bumped when a skill changes |
@@ -115,6 +115,11 @@ Some skills are **synced in** from another repository — their source of truth
 | `validate-{opencode,claudecode,pi}-distribution.py` | Per-channel distribution format |
 | `sync_skill.py` / `bin/sync-skill` | SKILL.md versions synced into plugin manifests |
 | `check_synced_skills_untouched.sh` | MR doesn't edit a synced skill (SSoT elsewhere) |
+
+¹ The strict YAML parse requires PyYAML. CI always has it; locally the check
+is best-effort — if PyYAML is missing the script prints a visible warning and
+skips the strict pass. Install with `pip install PyYAML` for full local
+coverage.
 
 If a generated file is out of sync, run `lefthook run auto-fix` and commit the
 result — don't hand-edit generated files.

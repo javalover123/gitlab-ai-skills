@@ -44,6 +44,24 @@ def log_debug(message):
         print(f"DEBUG: {message}", file=sys.stderr)
 
 
+def check_frontmatter_delimiters(skill_file):
+    """Return an error string if the file opens a frontmatter block but never closes it.
+
+    A ``SKILL.md`` that starts with ``---`` but has no closing ``---`` on its
+    own line is structurally broken — downstream consumers won't load it.  The
+    lenient ``parse_frontmatter`` still extracts fields (running to EOF), so
+    without this check the validator silently passes a malformed file.
+    """
+    with open(skill_file, "r") as f:
+        first_line = f.readline()
+    if first_line.strip() != "---":
+        return None  # No frontmatter block at all — other checks handle this.
+    raw = extract_raw_frontmatter(skill_file)
+    if raw is None:
+        return "missing closing frontmatter delimiter (---)"
+    return None
+
+
 def strict_yaml_check(skill_file):
     """Parse the frontmatter with ``yaml.safe_load`` and return an error string on failure.
 
@@ -92,6 +110,11 @@ def validate_skills():
         fields = parse_frontmatter(skill_file)
         missing = [f for f in REQUIRED_FIELDS if f not in fields or not fields[f]]
         format_errors = []
+
+        # Structural check: frontmatter opened but never closed.
+        delimiter_err = check_frontmatter_delimiters(skill_file)
+        if delimiter_err:
+            format_errors.append(delimiter_err)
 
         # Strict YAML validation — catches frontmatter that the lenient
         # parse_frontmatter accepts but real YAML parsers (used by pi.dev,
