@@ -31,8 +31,11 @@ verify-readme:
 validate-frontmatter:
   stage: verify
   extends: .verify-rules
+  before_script:
+    - pip install --no-cache-dir "PyYAML==6.0.2"
   script:
     - python3 scripts/validate_frontmatter.py --ci --debug
+    - python3 -m unittest discover -s scripts/tests -p 'test_*.py' -v
 
 validate-skill-length:
   stage: verify

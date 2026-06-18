@@ -11,7 +11,14 @@ import os
 import re
 import sys
 
-from lib.frontmatter import parse_frontmatter
+try:
+    import yaml  # PyYAML — strict YAML validation
+
+    HAS_YAML = True
+except ImportError:
+    HAS_YAML = False
+
+from lib.frontmatter import extract_raw_frontmatter, parse_frontmatter
 
 # Paths relative to the script's directory
 SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
@@ -37,6 +44,52 @@ def log_debug(message):
         print(f"DEBUG: {message}", file=sys.stderr)
 
 
+def check_frontmatter_delimiters(skill_file):
+    """Return an error string if the file opens a frontmatter block but never closes it.
+
+    A ``SKILL.md`` that starts with ``---`` but has no closing ``---`` on its
+    own line is structurally broken — downstream consumers won't load it.  The
+    lenient ``parse_frontmatter`` still extracts fields (running to EOF), so
+    without this check the validator silently passes a malformed file.
+    """
+    with open(skill_file, "r") as f:
+        first_line = f.readline()
+    if first_line.strip() != "---":
+        return None  # No frontmatter block at all — other checks handle this.
+    raw = extract_raw_frontmatter(skill_file)
+    if raw is None:
+        return "missing closing frontmatter delimiter (---)"
+    return None
+
+
+def strict_yaml_check(skill_file):
+    """Parse the frontmatter with ``yaml.safe_load`` and return an error string on failure.
+
+    This mirrors what downstream consumers (pi.dev, Duo CLI) do when loading
+    skills — if ``yaml.safe_load`` rejects the frontmatter, the skill is
+    effectively broken for agents even though the lenient ``parse_frontmatter``
+    accepts it.
+
+    Returns *None* when the frontmatter is valid YAML (or when no frontmatter is
+    found — other checks already cover that case).
+    """
+    raw = extract_raw_frontmatter(skill_file)
+    if raw is None:
+        return None
+    try:
+        yaml.safe_load(raw)
+        return None
+    except yaml.YAMLError as exc:
+        # Preserve line/column context when available so the developer
+        # knows exactly where in the frontmatter the error is.
+        if getattr(exc, "problem_mark", None) is not None:
+            mark = exc.problem_mark
+            msg = f"{exc.problem} (line {mark.line + 1}, column {mark.column + 1})"
+        else:
+            msg = str(exc).split("\n")[0]
+        return f"frontmatter is not valid YAML: {msg}"
+
+
 def validate_skills():
     """Validate all skills and return (results, has_errors).
 
@@ -51,6 +104,7 @@ def validate_skills():
 
     results = []
     has_errors = False
+    yaml_warned = False
 
     for skill_name in sorted(os.listdir(SKILLS_DIR)):
         skill_file = os.path.join(SKILLS_DIR, skill_name, "SKILL.md")
@@ -61,6 +115,31 @@ def validate_skills():
         fields = parse_frontmatter(skill_file)
         missing = [f for f in REQUIRED_FIELDS if f not in fields or not fields[f]]
         format_errors = []
+
+        # Structural check: frontmatter opened but never closed.
+        delimiter_err = check_frontmatter_delimiters(skill_file)
+        if delimiter_err:
+            format_errors.append(delimiter_err)
+
+        # Strict YAML validation — catches frontmatter that the lenient
+        # parse_frontmatter accepts but real YAML parsers (used by pi.dev,
+        # Duo CLI) reject. See gitlab-org/gitlab!241268 for the motivating
+        # bug: an unquoted description containing "Triggers: …" broke
+        # downstream consumers.
+        if HAS_YAML:
+            yaml_err = strict_yaml_check(skill_file)
+            if yaml_err:
+                format_errors.append(yaml_err)
+        elif not yaml_warned:
+            # Print unconditionally (not gated on --debug) so Lefthook users
+            # see that the strict check was skipped — silent skip is the
+            # exact footgun this change is meant to prevent.
+            print(
+                "WARNING: PyYAML not installed — strict YAML validation "
+                "skipped. Install with: pip install PyYAML",
+                file=sys.stderr,
+            )
+            yaml_warned = True
 
         # Validate version format if present
         if "version" in fields and fields["version"]:

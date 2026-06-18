@@ -7,6 +7,8 @@ pre-push:
       run: python3 scripts/update_skills_list.py --ci
     validate-frontmatter:
       run: python3 scripts/validate_frontmatter.py --ci
+    test-frontmatter:
+      run: python3 -m unittest discover -s scripts/tests -p 'test_*.py'
     validate-skill-length:
       run: python3 scripts/validate_skill_length.py --ci
     lint-shell:
