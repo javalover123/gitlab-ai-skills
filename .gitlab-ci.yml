@@ -31,6 +31,8 @@ verify-readme:
 validate-frontmatter:
   stage: verify
   extends: .verify-rules
+  before_script:
+    - pip install --no-cache-dir PyYAML
   script:
     - python3 scripts/validate_frontmatter.py --ci --debug
 

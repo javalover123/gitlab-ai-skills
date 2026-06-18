@@ -42,6 +42,9 @@ should land under it.
 ### Descriptions
 
 - One line, written so an agent can decide *when* to load the skill.
+- **Quote values containing colons** — an unquoted `description: foo: bar` is
+  invalid YAML and will silently break skill loading for consumers (pi.dev, Duo
+  CLI). Wrap in double quotes: `description: "foo: bar"`.
 - Avoid embedding facts that go stale (version numbers, "currently in alpha",
   handbook specifics) — link to the source of truth instead of restating it.
 - Keep generic where the detail belongs in the body; the description is a router.
@@ -104,7 +107,7 @@ Some skills are **synced in** from another repository — their source of truth
 
 | Check | What it enforces |
 |---|---|
-| `validate_frontmatter.py` | Required fields, semver, **kebab name == dir name** |
+| `validate_frontmatter.py` | Required fields, semver, **kebab name == dir name**, **strict YAML parse** (PyYAML) |
 | `validate_skill_length.py` | SKILL.md length (warn-only: <100 target, 150 cap) |
 | `lint_shell.sh` (shellcheck) | Bash footguns in `skills/**/*.sh` |
 | `check_version_bump.py` | `version` bumped when a skill changes |

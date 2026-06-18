@@ -11,6 +11,13 @@ import os
 import re
 import sys
 
+try:
+    import yaml  # PyYAML — strict YAML validation
+
+    HAS_YAML = True
+except ImportError:
+    HAS_YAML = False
+
 from lib.frontmatter import parse_frontmatter
 
 # Paths relative to the script's directory
@@ -37,6 +44,41 @@ def log_debug(message):
         print(f"DEBUG: {message}", file=sys.stderr)
 
 
+def extract_raw_frontmatter(skill_file):
+    """Return the raw YAML text between the ``---`` delimiters, or *None*."""
+    with open(skill_file, "r") as f:
+        content = f.read()
+    if not content.startswith("---"):
+        return None
+    parts = content.split("---", 2)
+    if len(parts) < 3:
+        return None
+    return parts[1]
+
+
+def strict_yaml_check(skill_file):
+    """Parse the frontmatter with ``yaml.safe_load`` and return an error string on failure.
+
+    This mirrors what downstream consumers (pi.dev, Duo CLI) do when loading
+    skills — if ``yaml.safe_load`` rejects the frontmatter, the skill is
+    effectively broken for agents even though the lenient ``parse_frontmatter``
+    accepts it.
+
+    Returns *None* when the frontmatter is valid YAML (or when no frontmatter is
+    found — other checks already cover that case).
+    """
+    raw = extract_raw_frontmatter(skill_file)
+    if raw is None:
+        return None
+    try:
+        yaml.safe_load(raw)
+        return None
+    except yaml.YAMLError as exc:
+        # Condense the error to the first line for readability.
+        msg = str(exc).split("\n")[0]
+        return f"frontmatter is not valid YAML: {msg}"
+
+
 def validate_skills():
     """Validate all skills and return (results, has_errors).
 
@@ -51,6 +93,7 @@ def validate_skills():
 
     results = []
     has_errors = False
+    yaml_warned = False
 
     for skill_name in sorted(os.listdir(SKILLS_DIR)):
         skill_file = os.path.join(SKILLS_DIR, skill_name, "SKILL.md")
@@ -61,6 +104,22 @@ def validate_skills():
         fields = parse_frontmatter(skill_file)
         missing = [f for f in REQUIRED_FIELDS if f not in fields or not fields[f]]
         format_errors = []
+
+        # Strict YAML validation — catches frontmatter that the lenient
+        # parse_frontmatter accepts but real YAML parsers (used by pi.dev,
+        # Duo CLI) reject. See gitlab-org/gitlab!241268 for the motivating
+        # bug: an unquoted description containing "Triggers: …" broke
+        # downstream consumers.
+        if HAS_YAML:
+            yaml_err = strict_yaml_check(skill_file)
+            if yaml_err:
+                format_errors.append(yaml_err)
+        elif not yaml_warned:
+            log_debug(
+                "PyYAML not installed — skipping strict YAML validation. "
+                "Install with: pip install PyYAML"
+            )
+            yaml_warned = True
 
         # Validate version format if present
         if "version" in fields and fields["version"]:
