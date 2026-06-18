@@ -25,6 +25,7 @@ run python3 scripts/validate_skill_length.py --ci
 run scripts/lint_shell.sh
 run diff AGENTS.md CLAUDE.md
 run python3 scripts/validate-opencode-distribution.py --ci
+run python3 scripts/validate-agents-distribution.py --ci
 run python3 scripts/validate-claudecode-distribution.py --ci
 run python3 scripts/validate-pi-distribution.py --ci
 run python3 scripts/check_version_bump.py --ci
