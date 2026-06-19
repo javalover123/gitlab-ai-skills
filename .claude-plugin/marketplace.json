@@ -44,6 +44,10 @@
       "source": "./.claude-plugin/plugins/glab-glql"
     },
     {
+      "name": "local-duo-review",
+      "source": "./.claude-plugin/plugins/local-duo-review"
+    },
+    {
       "name": "mr-adversarial-review",
       "source": "./.claude-plugin/plugins/mr-adversarial-review"
     },

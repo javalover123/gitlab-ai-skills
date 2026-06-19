@@ -73,6 +73,14 @@
       "path": "skills/glab-glql/SKILL.md"
     },
     {
+      "name": "local-duo-review",
+      "description": "Run a GitLab Duo Code Review locally \u2014 detect a project's custom review instructions in `.gitlab/duo/mr-review-instructions.yaml`, match changed files against each instruction group's glob filters, and review the local diff against only those user-defined rules, emulating Duo before you push or open an MR. Use when asked to apply custom/duo review instructions, check changes against `.gitlab/duo` rules, or preview a Duo review locally. Do not use for a general MR review (use `mr-review`) or a skeptical critique (use `mr-adversarial-review`).",
+      "category": "Development Workflow",
+      "license": "MIT",
+      "compatibility": "opencode",
+      "path": "skills/local-duo-review/SKILL.md"
+    },
+    {
       "name": "mr-adversarial-review",
       "description": "Use when running a critical, skeptical pass over a GitLab MR \u2014 either as the author before requesting human review, or as a reviewer wanting a structured first cut \u2014 produces a severity-bucketed findings report (High / Medium / Low / Done well) and posts it as a single comment on the MR.",
       "category": "Development Workflow",

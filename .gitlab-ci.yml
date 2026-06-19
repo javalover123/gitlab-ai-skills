@@ -43,6 +43,16 @@ validate-skill-length:
   script:
     - python3 scripts/validate_skill_length.py --ci --debug
 
+test-skills:
+  stage: verify
+  extends: .verify-rules
+  before_script:
+    # Some skill tests shell out to git (e.g. fork-point resolution); the base
+    # python image does not ship it.
+    - apk add --no-cache git
+  script:
+    - python3 scripts/run_skill_tests.py --ci --debug
+
 lint-shell:
   stage: lint
   extends: .verify-rules

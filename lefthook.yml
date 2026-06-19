@@ -11,6 +11,8 @@ pre-push:
       run: python3 -m unittest discover -s scripts/tests -p 'test_*.py'
     validate-skill-length:
       run: python3 scripts/validate_skill_length.py --ci
+    test-skills:
+      run: python3 scripts/run_skill_tests.py --ci
     lint-shell:
       run: scripts/lint_shell.sh
     agent-file-sync:
