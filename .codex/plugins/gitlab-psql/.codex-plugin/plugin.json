@@ -1,0 +1,19 @@
+{
+  "name": "gitlab-psql",
+  "version": "1.0.1",
+  "description": "Inspect GitLab GDK PostgreSQL test and development databases with gdk psql. Use for Postgres schema checks, table and index inspection, read-only SQL queries, migration verification, and investigating GitLab application data in local test or development databases.",
+  "author": {
+    "name": "GitLab"
+  },
+  "license": "MIT",
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "GitLab Psql",
+    "shortDescription": "Inspect GitLab GDK PostgreSQL test and development databases with gdk psql.",
+    "longDescription": "Uses gdk psql to connect to the local GDK PostgreSQL databases for read-only inspection. Covers schema checks, table and index exploration, SQL queries, migration verification, and investigating GitLab application data. Prefers the test database to avoid corrupting development data. Use this skill when you need to answer questions about the Postgres schema, verify a migration, or explore application data without leaving your GDK environment.",
+    "developerName": "GitLab",
+    "category": "Developer Tools",
+    "capabilities": [],
+    "defaultPrompt": "Use the gitlab-psql skill for this task."
+  }
+}

@@ -2,7 +2,7 @@
 
 ![Pipeline Status](https://gitlab.com/gitlab-org/ai/skills/badges/main/pipeline.svg)
 
-Reusable agent skills for GitLab projects. Skills are structured prompt files that AI coding assistants (like [pi](https://github.com/badlogic/pi-mono), [OpenCode](https://opencode.ai) and [Claude Code](https://code.claude.com)) can load on demand to gain domain-specific knowledge and workflows.
+Reusable agent skills for GitLab projects. Skills are structured prompt files that AI coding assistants (like [pi](https://github.com/badlogic/pi-mono), [OpenCode](https://opencode.ai), [Claude Code](https://code.claude.com), and Codex) can load on demand to gain domain-specific knowledge and workflows.
 
 ## Table of Contents
 
@@ -21,6 +21,7 @@ Reusable agent skills for GitLab projects. Skills are structured prompt files th
     - [GitLab Duo CLI](#gitlab-duo-cli)
     - [Pi (Package)](#pi-package)
     - [OpenCode (Native)](#opencode-native)
+    - [Codex](#codex)
     - [Via `@dgruzd/skills` CLI](#via-dgruzdskills-cli)
     - [Claude Code Plugin Marketplace](#claude-code-plugin-marketplace)
   - [Contributing](#contributing)
@@ -188,6 +189,20 @@ for skill in ~/gitlab-skills/.opencode/skills/*/; do
 done
 ```
 
+### Codex
+
+This repo ships as a [Codex plugin marketplace](https://developers.openai.com/codex/plugins/build#add-a-marketplace-from-the-cli):
+
+- `.codex-plugin/marketplace.json`
+- `.codex-plugin/plugins/<skill>/.codex-plugin/plugin.json`
+- `.codex-plugin/plugins/<skill>/skills/<skill>` symlinked to `skills/<skill>`
+
+To (re)generate Codex plugin scaffolding for a skill:
+
+```bash
+bin/distribute-skill <skill-name> --env=codex
+```
+
 ### Via `@dgruzd/skills` CLI
 
 [`@dgruzd/skills`](https://github.com/dgruzd/skills) is a fork of [`vercel-labs/skills`](https://github.com/vercel-labs/skills) that adds GitLab update detection — without it, `skills check` and `skills update` silently skip GitLab-hosted skills. It handles symlinking, multi-agent installs, updates, and discovery with no global install required.
@@ -247,7 +262,7 @@ This repo ships as a [Claude Code plugin marketplace](https://code.claude.com/do
 To add a new skill:
 
 1. Create `skills/<skill-name>/SKILL.md` with required frontmatter (`name`, `description`, `version`)
-2. Run `bin/distribute-skill <skill-name>` to register it in `.opencode/` and `.claude-plugin/`
+2. Run `bin/distribute-skill <skill-name>` to register it in `.opencode/`, `.claude-plugin/`, and `.codex-plugin/`
 3. Run `lefthook run auto-fix` to regenerate all derived files (README table, ToC, catalog, plugin manifests)
 4. Run `bin/ci-checks` to verify CI checks locally.
 5. Commit, push and open a MR

@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
-"""Sync the version in SKILL.md frontmatter into the ClaudeCode plugin.json.
+"""Sync SKILL.md frontmatter versions into distributed plugin manifests.
 
-For each skill that has a corresponding .claude-plugin/plugins/<skill>/plugin.json,
-reads the version from SKILL.md and writes it into plugin.json.
+For each distributed skill in:
+- .claude-plugin/plugins/<skill>/plugin.json
+- .codex-plugin/plugins/<skill>/.codex-plugin/plugin.json
+reads the version from SKILL.md and writes it into the manifest.
 
 Usage:
     bin/sync-skill               # Sync all distributed skills and report

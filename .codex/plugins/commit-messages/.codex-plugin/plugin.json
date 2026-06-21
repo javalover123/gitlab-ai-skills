@@ -1,0 +1,19 @@
+{
+  "name": "commit-messages",
+  "version": "1.0.1",
+  "description": "Use when creating git commits, writing commit messages, or when about to run git commit -- enforces structured commit message format with imperative mood, capitalized subjects, 72-char wrapping, and atomic commits",
+  "author": {
+    "name": "GitLab"
+  },
+  "license": "MIT",
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Commit Messages",
+    "shortDescription": "Write conventional and atomic git commits.",
+    "longDescription": "Enforces a consistent, high-quality commit message format for every git commit. The skill applies the imperative mood convention (subject completes \"If applied, this commit will …\"), capitalizes the subject line, wraps the body at 72 characters, and encourages atomic commits. It detects the project's existing commit style before writing, so the output always fits naturally into the repository's history. Use this skill whenever you are about to run git commit or need to draft a commit message.",
+    "developerName": "GitLab",
+    "category": "Developer Tools",
+    "capabilities": [],
+    "defaultPrompt": "Use the commit-messages skill for this task."
+  }
+}

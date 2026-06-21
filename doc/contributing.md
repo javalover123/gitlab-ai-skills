@@ -27,8 +27,8 @@
    bin/distribute-skill my-workflow
    ```
 
-   This creates the necessary symlinks and manifests in `.opencode/` and `.claude-plugin/`, and verifies pi package discovery.
-   To target a specific environment only: `--env=opencode`, `--env=claudecode`, or `--env=pi`. See more in `bin/distribute-skill` manual.
+   This creates the necessary symlinks and manifests in `.opencode/`, `.claude-plugin/`, and `.codex-plugin/`, and verifies pi package discovery.
+   To target a specific environment only: `--env=opencode`, `--env=claudecode`, `--env=codex`, or `--env=pi`. See more in `bin/distribute-skill` manual.
 
 4. Regenerate all derived files:
 
@@ -69,6 +69,7 @@ Skills are distributed to editor-specific directories using `bin/distribute-skil
 bin/distribute-skill SKILLNAME                          # all environments
 bin/distribute-skill SKILLNAME --env=opencode           # opencode only
 bin/distribute-skill SKILLNAME --env=claudecode         # ClaudeCode only
+bin/distribute-skill SKILLNAME --env=codex              # Codex only
 bin/distribute-skill SKILLNAME --env=pi                 # pi only
 bin/distribute-skill SKILLNAME --env=claudecode --plugin=PLUGINNAME  # custom plugin name
 bin/distribute-skill SKILLNAME --env=opencode --overwrite  # remove from all other envs
@@ -77,6 +78,8 @@ bin/distribute-skill SKILLNAME --env=opencode --overwrite  # remove from all oth
 **opencode** (`.opencode/skills/`): creates a symlink to `skills/<name>/`.
 
 **ClaudeCode** (`.claude-plugin/plugins/<name>/`): writes a `plugin.json` manifest, creates a symlink under `skills/`, and registers the plugin in `marketplace.json`.
+
+**Codex** (`.codex-plugin/plugins/<name>/`): writes `.codex-plugin/plugin.json`, creates a symlink under `skills/`, and registers the plugin in `.codex-plugin/marketplace.json`.
 
 **pi** (root `package.json`): no per-skill symlinks needed. Pi discovers all skills under `skills/` via the `pi.skills` manifest in `package.json`. The distribute command verifies the manifest is correctly configured.
 

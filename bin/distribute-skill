@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 """Distribute a skill into editor-specific directories.
 
-Supports: opencode, claudecode
+Supports: opencode, claudecode, codex
 Usage:
     bin/distribute-skill SKILLNAME # all envs
     bin/distribute-skill SKILLNAME --env=opencode
     bin/distribute-skill SKILLNAME --env=claudecode --plugin=PLUGINNAME
+    bin/distribute-skill SKILLNAME --env=codex --plugin=PLUGINNAME
     bin/distribute-skill SKILLNAME --env=opencode --overwrite   # removes from all other envs
 """
 
@@ -50,6 +51,10 @@ def resolve_skill(skill_name):
         sys.exit(1)
     log_debug(f"Resolved skill: {skill_name}")
     return skill_name
+
+
+def _display_name(plugin_name):
+    return " ".join(part.capitalize() for part in plugin_name.split("-"))
 
 
 # ---------------------------------------------------------------------------
@@ -188,6 +193,128 @@ def undistribute_claudecode(skill_name):
 
 
 # ---------------------------------------------------------------------------
+# Codex
+# ---------------------------------------------------------------------------
+
+CODEX_PLUGINS_DIR = os.path.join(REPO_ROOT, ".codex-plugin", "plugins")
+CODEX_MARKETPLACE_FILE = os.path.join(REPO_ROOT, ".codex-plugin", "marketplace.json")
+
+
+def _read_codex_marketplace():
+    if os.path.isfile(CODEX_MARKETPLACE_FILE):
+        with open(CODEX_MARKETPLACE_FILE) as f:
+            return json.load(f)
+    return {
+        "name": "gitlab-skills",
+        "interface": {"displayName": "GitLab Skills"},
+        "plugins": [],
+    }
+
+
+def _write_codex_marketplace(data):
+    os.makedirs(os.path.dirname(CODEX_MARKETPLACE_FILE), exist_ok=True)
+    with open(CODEX_MARKETPLACE_FILE, "w") as f:
+        f.write(json.dumps(data, indent=2) + "\n")
+
+
+def distribute_codex(skill_name, plugin_name=None, **_kwargs):
+    plugin_name = plugin_name or skill_name
+    plugin_dir = os.path.join(CODEX_PLUGINS_DIR, plugin_name)
+    display_name = _display_name(plugin_name)
+
+    skill_file = os.path.join(SKILLS_DIR, skill_name, "SKILL.md")
+    fields = parse_frontmatter(skill_file)
+    description = fields.get("description", "")
+    plugin_json = {
+        "name": plugin_name,
+        "version": fields.get("version", "0.0.0"),
+        "description": description,
+        "author": {"name": "GitLab"},
+        "license": fields.get("license", "MIT"),
+        "skills": "./skills/",
+        "interface": {
+            "displayName": display_name,
+            "shortDescription": description or f"{display_name} Codex plugin",
+            "longDescription": (
+                f"{display_name} provides GitLab AI skill workflows for Codex."
+            ),
+            "developerName": "GitLab",
+            "category": "Developer Tools",
+            "capabilities": [],
+            "defaultPrompt": f"Use the {skill_name} skill for this task.",
+        },
+    }
+    plugin_json_path = os.path.join(plugin_dir, ".codex-plugin", "plugin.json")
+    os.makedirs(os.path.dirname(plugin_json_path), exist_ok=True)
+    with open(plugin_json_path, "w") as f:
+        f.write(json.dumps(plugin_json, indent=2) + "\n")
+    print(f"Wrote: {os.path.relpath(plugin_json_path, REPO_ROOT)}")
+
+    # skills/<skill_name> symlink
+    skills_dir = os.path.join(plugin_dir, "skills")
+    os.makedirs(skills_dir, exist_ok=True)
+    symlink_path = os.path.join(skills_dir, skill_name)
+    symlink_target = os.path.join("..", "..", "..", "..", "skills", skill_name)
+    if os.path.islink(symlink_path):
+        if os.readlink(symlink_path) == symlink_target:
+            log_debug(f"Symlink already correct: {symlink_path}")
+            print(f"Already up to date: {os.path.relpath(symlink_path, REPO_ROOT)}")
+        else:
+            os.remove(symlink_path)
+            os.symlink(symlink_target, symlink_path)
+            print(f"Updated symlink: {os.path.relpath(symlink_path, REPO_ROOT)} -> {symlink_target}")
+    else:
+        os.symlink(symlink_target, symlink_path)
+        print(f"Created symlink: {os.path.relpath(symlink_path, REPO_ROOT)} -> {symlink_target}")
+
+    # marketplace.json — add entry if missing
+    marketplace = _read_codex_marketplace()
+    existing = [p for p in marketplace["plugins"] if p.get("name") == plugin_name]
+    if not existing:
+        marketplace["plugins"].append(
+            {
+                "name": plugin_name,
+                "source": {
+                    "source": "local",
+                    "path": f"./.codex/plugins/{plugin_name}",
+                },
+                "policy": {
+                    "installation": "AVAILABLE",
+                    "authentication": "ON_INSTALL",
+                },
+                "category": "Developer Tools",
+            }
+        )
+        marketplace["plugins"].sort(key=lambda p: p["name"])
+        _write_codex_marketplace(marketplace)
+        print(f"Added '{plugin_name}' to {os.path.relpath(CODEX_MARKETPLACE_FILE, REPO_ROOT)}")
+    else:
+        log_debug(f"Plugin '{plugin_name}' already in codex marketplace.json")
+        print(f"Already in marketplace: {os.path.relpath(CODEX_MARKETPLACE_FILE, REPO_ROOT)}")
+
+
+def undistribute_codex(skill_name):
+    if not os.path.isdir(CODEX_PLUGINS_DIR):
+        return
+    for plugin_name in os.listdir(CODEX_PLUGINS_DIR):
+        symlink_path = os.path.join(CODEX_PLUGINS_DIR, plugin_name, "skills", skill_name)
+        if not os.path.islink(symlink_path):
+            continue
+        os.remove(symlink_path)
+        print(f"Removed symlink: {os.path.relpath(symlink_path, REPO_ROOT)}")
+
+        # Remove plugin from marketplace if its skills/ dir is now empty
+        skills_dir = os.path.join(CODEX_PLUGINS_DIR, plugin_name, "skills")
+        if not any(True for _ in os.scandir(skills_dir)):
+            marketplace = _read_codex_marketplace()
+            before = len(marketplace["plugins"])
+            marketplace["plugins"] = [p for p in marketplace["plugins"] if p.get("name") != plugin_name]
+            if len(marketplace["plugins"]) < before:
+                _write_codex_marketplace(marketplace)
+                print(f"Removed '{plugin_name}' from {os.path.relpath(CODEX_MARKETPLACE_FILE, REPO_ROOT)}")
+
+
+# ---------------------------------------------------------------------------
 # Pi
 # ---------------------------------------------------------------------------
 
@@ -219,12 +346,14 @@ def undistribute_pi(skill_name):
 HANDLERS = {
     "opencode": distribute_opencode,
     "claudecode": distribute_claudecode,
+    "codex": distribute_codex,
     "pi": distribute_pi,
 }
 
 UNDISTRIBUTE_HANDLERS = {
     "opencode": undistribute_opencode,
     "claudecode": undistribute_claudecode,
+    "codex": undistribute_codex,
     "pi": undistribute_pi,
 }
 

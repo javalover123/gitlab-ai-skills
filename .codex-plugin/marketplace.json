@@ -1,0 +1,128 @@
+{
+  "name": "gitlab-skills",
+  "interface": {
+    "displayName": "GitLab Skills"
+  },
+  "plugins": [
+    {
+      "name": "commit-messages",
+      "source": {
+        "source": "local",
+        "path": "./.codex/plugins/commit-messages"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Developer Tools"
+    },
+    {
+      "name": "gitlab-babysit-mr",
+      "source": {
+        "source": "local",
+        "path": "./.codex/plugins/gitlab-babysit-mr"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Developer Tools"
+    },
+    {
+      "name": "gitlab-clickhouse",
+      "source": {
+        "source": "local",
+        "path": "./.codex/plugins/gitlab-clickhouse"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Developer Tools"
+    },
+    {
+      "name": "gitlab-pipeline-watch",
+      "source": {
+        "source": "local",
+        "path": "./.codex/plugins/gitlab-pipeline-watch"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Developer Tools"
+    },
+    {
+      "name": "gitlab-psql",
+      "source": {
+        "source": "local",
+        "path": "./.codex/plugins/gitlab-psql"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Developer Tools"
+    },
+    {
+      "name": "glab",
+      "source": {
+        "source": "local",
+        "path": "./.codex/plugins/glab"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Developer Tools"
+    },
+    {
+      "name": "pushify",
+      "source": {
+        "source": "local",
+        "path": "./.codex/plugins/pushify"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Developer Tools"
+    },
+    {
+      "name": "run-in-tmux-pane",
+      "source": {
+        "source": "local",
+        "path": "./.codex/plugins/run-in-tmux-pane"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Developer Tools"
+    },
+    {
+      "name": "self-service-performance-testing",
+      "source": {
+        "source": "local",
+        "path": "./.codex/plugins/self-service-performance-testing"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Developer Tools"
+    },
+    {
+      "name": "write-large-file",
+      "source": {
+        "source": "local",
+        "path": "./.codex/plugins/write-large-file"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Developer Tools"
+    }
+  ]
+}

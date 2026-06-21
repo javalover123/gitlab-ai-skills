@@ -1,0 +1,19 @@
+{
+  "name": "gitlab-babysit-mr",
+  "version": "0.10.0",
+  "description": "Monitor a GitLab MR's pipeline until green. Classifies failures (flaky, master-broken, lint, coverage, real), retries jobs where appropriate, makes light-touch auto-fixes, and posts findings as an MR comment.",
+  "author": {
+    "name": "GitLab"
+  },
+  "license": "MIT",
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "GitLab Babysit MR",
+    "shortDescription": "Monitor a GitLab MR's pipeline until green.",
+    "longDescription": "Monitors a GitLab merge request's CI pipeline until it reaches a green state. The skill classifies each failure as flaky, master-broken, a lint error, a coverage drop, or a genuine regression, then takes the appropriate action: retrying transient jobs, applying light-touch code fixes, or posting a structured findings report as a resolved discussion thread on the MR. Use this skill when you want to hand off pipeline-watching and triage to the agent so you can focus on other work.",
+    "developerName": "GitLab",
+    "category": "Developer Tools",
+    "capabilities": [],
+    "defaultPrompt": "Use the gitlab-babysit-mr skill for this task."
+  }
+}
