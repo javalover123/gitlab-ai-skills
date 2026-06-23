@@ -1,6 +1,9 @@
 # Handoff
 
-Example structure — adapt to the task; skip sections that don't apply.
+Example structure - adapt to the task; skip sections that don't apply.
+
+**Saved to:** `<path>`
+**Redaction check:** all secrets/tokens/PII replaced with `[REDACTED]`.
 
 ## Goal
 
@@ -14,7 +17,7 @@ Links and commands to re-fetch live state:
 |----------|---------------|
 | Issue | URL |
 | MR | URL or `glab mr view <iid> -R <project>` |
-| Branch | `git checkout <branch>` |
+| Branch | `git fetch origin <branch> && git switch <branch>` |
 | Pipeline | `glab ci status -R <project> --branch <branch>` |
 
 ## Done / Current state

@@ -75,7 +75,7 @@
     {
       "name": "handoff",
       "description": "Compact the current session into a handoff document so a fresh agent can continue the work. Use when the user says hand off, wrap up, save context, continue later, pick this up in a new session, running low on context, or context is getting long.",
-      "category": "Productivity",
+      "category": "Agent Tooling",
       "license": "MIT",
       "compatibility": "opencode",
       "path": "skills/handoff/SKILL.md"
