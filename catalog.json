@@ -73,6 +73,14 @@
       "path": "skills/glab-glql/SKILL.md"
     },
     {
+      "name": "handoff",
+      "description": "Compact the current session into a handoff document so a fresh agent can continue the work. Use when the user says hand off, wrap up, save context, continue later, pick this up in a new session, running low on context, or context is getting long.",
+      "category": "Productivity",
+      "license": "MIT",
+      "compatibility": "opencode",
+      "path": "skills/handoff/SKILL.md"
+    },
+    {
       "name": "mr-adversarial-review",
       "description": "Use when running a critical, skeptical pass over a GitLab MR \u2014 either as the author before requesting human review, or as a reviewer wanting a structured first cut \u2014 produces a severity-bucketed findings report (High / Medium / Low / Done well) and posts it as a single comment on the MR.",
       "category": "Development Workflow",

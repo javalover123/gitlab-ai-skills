@@ -44,6 +44,10 @@
       "source": "./.claude-plugin/plugins/glab-glql"
     },
     {
+      "name": "handoff",
+      "source": "./.claude-plugin/plugins/handoff"
+    },
+    {
       "name": "mr-adversarial-review",
       "source": "./.claude-plugin/plugins/mr-adversarial-review"
     },
