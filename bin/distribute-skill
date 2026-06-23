@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
-"""Distribute a skill into editor-specific directories.
+"""Distribute a skill into per-environment discovery formats.
 
-Supports: opencode, claudecode
+Supports: opencode, agents, claudecode, pi
 Usage:
     bin/distribute-skill SKILLNAME # all envs
     bin/distribute-skill SKILLNAME --env=opencode
+    bin/distribute-skill SKILLNAME --env=agents     # .agents/skills/ convention
     bin/distribute-skill SKILLNAME --env=claudecode --plugin=PLUGINNAME
     bin/distribute-skill SKILLNAME --env=opencode --overwrite   # removes from all other envs
 """
@@ -85,6 +86,46 @@ def undistribute_opencode(skill_name):
         print(f"Removed symlink: {os.path.relpath(path, REPO_ROOT)}")
     else:
         log_debug(f"Not distributed to opencode: {skill_name}")
+
+
+# ---------------------------------------------------------------------------
+# Agent Skills convention (.agents/skills/)
+#
+# The cross-tool ".agents/skills/" discovery location described by the Agent
+# Skills spec (https://agentskills.io): a flat directory of skills read in
+# place, same SKILL.md format. Distributed as symlinks, like opencode. See the
+# README for the tools that consume this location.
+# ---------------------------------------------------------------------------
+
+AGENTS_SKILLS_DIR = os.path.join(REPO_ROOT, ".agents", "skills")
+
+
+def _agents_symlink(skill_name):
+    path = os.path.join(AGENTS_SKILLS_DIR, skill_name)
+    target = os.path.join("..", "..", "skills", skill_name)
+    return path, target
+
+
+def distribute_agents(skill_name, **_kwargs):
+    os.makedirs(AGENTS_SKILLS_DIR, exist_ok=True)
+    path, target = _agents_symlink(skill_name)
+    if os.path.islink(path):
+        if os.readlink(path) == target:
+            log_debug(f"Symlink already correct: {path}")
+            print(f"Already up to date: {os.path.relpath(path, REPO_ROOT)}")
+            return
+        os.remove(path)
+    os.symlink(target, path)
+    print(f"Created symlink: {os.path.relpath(path, REPO_ROOT)} -> {target}")
+
+
+def undistribute_agents(skill_name):
+    path, _ = _agents_symlink(skill_name)
+    if os.path.islink(path):
+        os.remove(path)
+        print(f"Removed symlink: {os.path.relpath(path, REPO_ROOT)}")
+    else:
+        log_debug(f"Not distributed to .agents/skills: {skill_name}")
 
 
 # ---------------------------------------------------------------------------
@@ -218,12 +259,14 @@ def undistribute_pi(skill_name):
 
 HANDLERS = {
     "opencode": distribute_opencode,
+    "agents": distribute_agents,
     "claudecode": distribute_claudecode,
     "pi": distribute_pi,
 }
 
 UNDISTRIBUTE_HANDLERS = {
     "opencode": undistribute_opencode,
+    "agents": undistribute_agents,
     "claudecode": undistribute_claudecode,
     "pi": undistribute_pi,
 }
