@@ -16,9 +16,9 @@ Links and commands to re-fetch live state:
 | Artifact | Link / command |
 |----------|---------------|
 | Issue | URL |
-| MR | URL or `glab mr view <iid> -R <project>` |
-| Branch | `git fetch origin <branch> && git switch <branch>` |
-| Pipeline | `glab ci status -R <project> --branch <branch>` |
+| MR | URL or re-fetch command |
+| Branch | checkout / switch command |
+| Pipeline | re-fetch command |
 
 ## Done / Current state
 

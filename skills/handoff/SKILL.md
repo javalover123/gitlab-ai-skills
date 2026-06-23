@@ -1,7 +1,7 @@
 ---
 name: handoff
 description: "Compact the current session into a handoff document so a fresh agent can continue the work. Use when the user says hand off, wrap up, save context, continue later, pick this up in a new session, running low on context, or context is getting long."
-version: 0.3.0
+version: 0.4.0
 license: MIT
 category: Agent Tooling
 compatibility: opencode
@@ -18,13 +18,9 @@ Anchor to durable artifacts instead of freezing stale state inline.
 ## Principles
 
 **Anchor to GitLab artifacts.** Link issues, MRs, branches, and commits by URL.
-For anything whose state changes (pipeline, approvals, open threads), give `glab`
-commands the next agent can run instead of pasting a snapshot:
-
-```
-glab mr view <iid> -R <project>
-glab ci status -R <project> --branch <branch>
-```
+For anything whose state changes (pipeline, approvals, open threads), include a
+command the next agent can run to re-fetch current state rather than pasting a
+snapshot.
 
 **Reference, don't duplicate.** Issue descriptions, commit messages, PRDs, diffs,
 and plans are already persisted - link by URL or path, don't repeat them.
