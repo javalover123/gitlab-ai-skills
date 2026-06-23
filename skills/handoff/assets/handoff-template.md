@@ -1,59 +1,38 @@
-# Handoff — [DATE]
+# Handoff
+
+Example structure — adapt to the task; skip sections that don't apply.
 
 ## Goal
 
-<!-- One sentence: what is the user trying to accomplish? -->
+What the user is trying to accomplish (one sentence).
 
-## GitLab Artifacts
+## Artifacts
 
-<!-- Link every relevant artifact. These are the durable anchors. -->
+Links and commands to re-fetch live state:
 
 | Artifact | Link / command |
 |----------|---------------|
-| Issue | `https://gitlab.com/...` |
-| MR | `https://gitlab.com/...` or N/A |
+| Issue | URL |
+| MR | URL or `glab mr view <iid> -R <project>` |
 | Branch | `git checkout <branch>` |
 | Pipeline | `glab ci status -R <project> --branch <branch>` |
 
-## Done so far
+## Done / Current state
 
-<!-- Bullet list of completed work. Reference commits/MRs, not prose summaries
-     of code changes. -->
-
-- ...
-
-## Current state
-
-<!-- Where things stand RIGHT NOW. For anything that changes (pipeline, MR
-     status, review threads), give a glab command instead of a snapshot. -->
-
-- ...
+What's been completed. Reference commits and MRs, not prose about code changes.
 
 ## Next steps
 
-<!-- Ordered list of what the next agent should do. Be specific and actionable. -->
+What the next agent should do, in rough priority order.
 
-1. ...
+## Open questions
 
-## Open questions / blockers
+Decisions needing human input, or blockers.
 
-<!-- Decisions that need human input, or things that are stuck. -->
+## Key files
 
-- ...
-
-## Key files & paths
-
-<!-- Files the next agent will need to read or edit. Paths relative to repo root. -->
-
-- ...
+Paths the next agent will need (relative to repo root).
 
 ## Suggested skills
 
-<!-- Skills the next agent should load to continue effectively. -->
-
-- ...
-
-## Session notes
-
-<!-- Anything not covered above: gotchas discovered, failed approaches, context
-     the next agent should know but that isn't in any artifact. Keep brief. -->
+Skills the next session should load.
