@@ -1,7 +1,7 @@
 ---
 name: handoff
 description: "Compact the current session into a handoff document so a fresh agent can continue the work. Use when the user says hand off, wrap up, save context, continue later, pick this up in a new session, running low on context, or context is getting long."
-version: 0.4.0
+version: 0.5.0
 license: MIT
 category: Agent Tooling
 compatibility: opencode
@@ -39,9 +39,9 @@ relevant, skip what isn't. See
 [assets/handoff-template.md](assets/handoff-template.md) for an example to adapt.
 
 **Save location.** Save to `./tmp/handoff-<slug>.md` where `<slug>` is a short
-date or topic identifier (e.g. `handoff-2025-06-23.md`, `handoff-search-reindex.md`).
+date or topic identifier (e.g. `handoff-YYYY-MM-DD.md`, `handoff-search-reindex.md`).
 Before writing, verify `./tmp/` is gitignored (check `.gitignore`); if it is not,
-create and gitignore it, or fall back to an OS temp directory (`mktemp -d`).
+create and gitignore it, or fall back to a temp file (`mktemp /tmp/handoff-XXXXXX.md`).
 Honor an explicit path if the user provides one. Tell the user the saved path so
 they can load it in the next session.
 
