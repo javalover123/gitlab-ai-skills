@@ -8,6 +8,22 @@ include:
     inputs:
       job_stage: lint
   - component: ${CI_SERVER_FQDN}/gitlab-org/orbit/components/lgtm-agent/lgtm-agent@main
+  - component: ${CI_SERVER_FQDN}/components/opentofu/full-pipeline@4.7.0
+    inputs:
+      auto_define_backend: true
+      enable_id_tokens: true
+      opentofu_version: 1.12.1
+      root_dir: tofu/
+      stage_validate: lint
+      stage_test: verify
+      stage_build: verify
+      stage_deploy: sync
+      stage_cleanup: sync
+
+.gitlab-tofu:id_tokens:
+  id_tokens:
+    ANTHROPIC_IDENTITY_TOKEN:
+      aud: https://api.anthropic.com
 
 variables:
   GLAB_VERSION: "1.101.0"
