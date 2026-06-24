@@ -1,0 +1,28 @@
+# Compiled binaries
+terraform-provider-claude
+dist/
+
+# Go
+*.test
+*.out
+vendor/
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+.terraform.lock.hcl
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+crash.log
+crash.*.log
+
+# Editors
+*.swp
+.idea/
+.vscode/
+
+# Local development overrides
+*.tfrc
