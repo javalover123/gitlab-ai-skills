@@ -1,7 +1,7 @@
 ---
 name: gitlab-mr-description
 description: Write or update a GitLab MR description. Reads the branch diff, drafts structured markdown using GitLab's standard sections, and applies conventions for feature flags, database queries, and local testing matrices. Use when opening a new MR or refreshing an existing description.
-version: 1.1.0
+version: 1.2.0
 license: MIT
 category: Development Workflow
 ---
@@ -23,6 +23,16 @@ cat .gitlab/merge_request_templates/Default.md 2>/dev/null
 ```
 
 Answer: *What does this MR add or fix? Why? What surfaces does it touch? Does the project have a default MR template?*
+
+### Updating an existing description
+
+The author may have edited it in GitLab since it was generated. Fetch the current remote version:
+
+```bash
+glab mr view <number> --output json | jq -r '.description'
+```
+
+Reconcile it against your draft using the diff — keep the author's edits, refresh what the code made inaccurate, add what's new. Remote = author intent; diff = what the code does. On conflict or doubt, ask the author rather than overwriting.
 
 ## Step 2 — Write the description
 
