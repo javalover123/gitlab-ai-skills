@@ -1,7 +1,7 @@
 ---
 name: glab
 description: GitLab workflow automation using glab CLI
-version: 1.10.2
+version: 1.11.0
 category: Development Workflow
 license: MIT
 metadata:
@@ -184,7 +184,7 @@ glab api "projects/org%2Fproject/work_items/<iid>"   # → 404
 URL parsing: `https://gitlab.com/org/project/-/work_items/539076`
 → `glab api "projects/org%2Fproject/issues/539076"`
 
-Full details, GraphQL alternative, and group-level work items: **[references/work-items.md](references/work-items.md)**
+Full details, GraphQL alternative, group-level work items, and the agent plan (Workplan) widget: **[references/work-items.md](references/work-items.md)**
 
 ## MR Review
 
