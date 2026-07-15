@@ -52,6 +52,10 @@
       "source": "./.claude-plugin/plugins/mr-adversarial-review"
     },
     {
+      "name": "mr-guided-review",
+      "source": "./.claude-plugin/plugins/mr-guided-review"
+    },
+    {
       "name": "mr-review",
       "source": "./.claude-plugin/plugins/mr-review"
     },
