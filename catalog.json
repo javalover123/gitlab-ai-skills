@@ -193,6 +193,14 @@
       "path": "skills/natural-writing-style/SKILL.md"
     },
     {
+      "name": "nixify",
+      "description": "Analyze an existing codebase or a hand-rolled build system and generate maintainable, modular, ergonomic Nix build infrastructure for it \u2014 a thin flake.nix wiring up a lib/ + pkgs/ layout via callPackage, with scoped outputs, dev shells, nix2container images, and NixOS VM test checks \u2014 in a single reviewable MR that keeps the developer's native workflow (cargo, go, bundle, poetry/uv, npm/pnpm) working unchanged. Use when the user wants to Nixify, add a flake.nix, add reproducible or hermetic builds, set up nix develop / direnv, build containers or VM tests with Nix, or replace a Make/shell/Omnibus/Docker build system with Nix \u2014 even without saying Nix, if they describe reproducible builds, pinned toolchains, or a single-command dev environment for a Ruby, Go, Rust, Python, Node, or C/C++ project.",
+      "category": "Development Workflow",
+      "license": "MIT",
+      "compatibility": "opencode",
+      "path": "skills/nixify/SKILL.md"
+    },
+    {
       "name": "opencode-refine",
       "description": "Iteratively test and refine prompts, skills, and agent configurations using opencode run",
       "category": "Agent Tooling",
