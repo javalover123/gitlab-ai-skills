@@ -1,5 +1,5 @@
 import type { Plugin } from "@opencode-ai/plugin"
-import { existsSync, readFileSync } from "node:fs"
+import { existsSync, readFileSync, readdirSync } from "node:fs"
 import { homedir } from "node:os"
 import { join } from "node:path"
 
@@ -186,11 +186,28 @@ export const SkillHooksPlugin: Plugin = async ({ client, $, directory, worktree 
           // paths (scripts/foo.py) resolve, but with cwd forced to the
           // target project via CLAUDE_PROJECT_DIR so gap analysis inspects
           // the user's code, not the skills install.
-          const proc = await $`sh -c ${`cd ${JSON.stringify(skillDir)} && ${spec.command}`} < ${hookInput}`
+          //
+          // The `$` API has no timeout method, so enforce the spec's `timeout`
+          // by racing the shell promise against a timer: whichever settles
+          // first wins. A hung hook can't block the session past `timeoutMs`
+          // (the losing shell process is left to exit on its own). A `TIMEOUT`
+          // sentinel distinguishes the timeout branch from a real empty result.
+          const shellPromise = $`sh -c ${`cd ${JSON.stringify(skillDir)} && ${spec.command}`} < ${hookInput}`
             .cwd(root)
             .env({ ...process.env, CLAUDE_PROJECT_DIR: root })
             .nothrow()
             .quiet()
+          let timer: ReturnType<typeof setTimeout> | undefined
+          const timeoutPromise = new Promise<"TIMEOUT">((resolve) => {
+            timer = setTimeout(() => resolve("TIMEOUT"), timeoutMs)
+          })
+          const raced = await Promise.race([shellPromise, timeoutPromise])
+          if (timer) clearTimeout(timer)
+          if (raced === "TIMEOUT") {
+            out.push({ skill, result: null })
+            continue
+          }
+          const proc = raced as { stdout?: { toString(): string } }
           const stdout = proc.stdout?.toString().trim() ?? ""
           let result: StopResult | null = null
           if (stdout) {
@@ -323,10 +340,11 @@ export const SkillHooksPlugin: Plugin = async ({ client, $, directory, worktree 
   async function discoverAllSkills(): Promise<string[]> {
     const found = new Set<string>()
     for (const rootDir of skillRoots(root)) {
+      if (!existsSync(rootDir)) continue
       try {
-        const proc = await $`sh -c ${`ls -1 ${JSON.stringify(rootDir)}`}`.nothrow().quiet()
-        const names = (proc.stdout?.toString() ?? "").split("\n").map((s) => s.trim()).filter(Boolean)
-        for (const name of names) {
+        // readdirSync avoids a shell dependency and the platform-varying,
+        // silently-failing behaviour of `ls` on unusual paths.
+        for (const name of readdirSync(rootDir)) {
           if (existsSync(join(rootDir, name, "hooks.json"))) found.add(name)
         }
       } catch {

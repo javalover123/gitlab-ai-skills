@@ -39,7 +39,7 @@ A spec has:
 | Field | Required | Meaning |
 |-------|----------|---------|
 | `command` | yes | Shell command, run with `cwd` = the skill directory (so `scripts/foo.py` resolves). |
-| `timeout` | no | Seconds before the command is killed. Defaults to 60. |
+| `timeout` | no | Seconds the plugin waits for the command before giving up on it and moving on. Defaults to 60. |
 
 Commands run with `CLAUDE_PROJECT_DIR` set to the **target project**, so a
 checker inspects the user's code, not the skills install.
