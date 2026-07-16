@@ -10,8 +10,8 @@ Build your test suite from the bottom up:
 2. **In-process integration** — Full protocol via duplex channels, no subprocess
 3. **Child process integration** — Test the compiled binary end-to-end
 4. **MCP Inspector** — Interactive debugging and CI validation
-6. **Claude Code end-to-end** — Real-world usage testing
-7. **Conformance testing** — Official protocol compliance checks
+5. **Claude Code end-to-end** — Real-world usage testing
+6. **Conformance testing** — Official protocol compliance checks
 
 ## Unit Testing Tool Handlers
 

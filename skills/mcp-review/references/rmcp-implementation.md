@@ -22,7 +22,7 @@ tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 ```
 
-**Critical:** rmcp requires **Rust Edition 2024** (nightly toolchain). Add a `rust-toolchain.toml`:
+**Critical:** rmcp requires a **nightly toolchain** because it uses unstable compiler features (Edition 2024 itself has been stable since Rust 1.85 and doesn't need nightly). It also targets Rust Edition 2024. Add a `rust-toolchain.toml`:
 
 ```toml
 [toolchain]

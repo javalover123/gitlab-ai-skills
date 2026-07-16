@@ -29,7 +29,7 @@ reference set).
 
 If not told which server to review, discover candidates: `grep -rl "rmcp"
 --include="Cargo.toml" .` and look for MCP config (`.mcp.json`,
-`opencode.json` `mcp`, `mcp-config.*`). Present the options and let the user
+`opencode.json` (the `mcp` key), `mcp-config.*`). Present the options and let the user
 pick.
 
 ### Phase 1 — Scope
