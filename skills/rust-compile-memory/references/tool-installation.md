@@ -8,10 +8,29 @@ This guide covers installing and configuring tools for profiling Rust compilatio
 
 **Via Nix (recommended):**
 
-Already configured in the flake.nix created by the skill. Just run:
+Add a `flake.nix` to your project (or extend an existing one), then run
+`nix develop`:
 
-```bash
-nix develop
+```nix
+{
+  inputs = {
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    rust-overlay.url = "github:oxalica/rust-overlay";
+    flake-utils.url = "github:numtide/flake-utils";
+  };
+  outputs = { self, nixpkgs, rust-overlay, flake-utils }:
+    flake-utils.lib.eachDefaultSystem (system:
+      let
+        pkgs = import nixpkgs { inherit system; overlays = [ (import rust-overlay) ]; };
+        rustToolchain = pkgs.rust-bin.nightly.latest.default.override {
+          extensions = [ "rust-src" ];
+        };
+      in {
+        devShells.default = pkgs.mkShell {
+          buildInputs = [ rustToolchain pkgs.heaptrack pkgs.cargo-llvm-lines pkgs.inferno ];
+        };
+      });
+}
 ```
 
 **Via rustup:**

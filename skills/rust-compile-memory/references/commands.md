@@ -70,7 +70,8 @@ CARGO_PROFILE_RELEASE_DEBUG=true cargo rustc --release -- \
   -Z self-profile=rustc-profile-after \
   -Z self-profile-events=default,args
 
-heaptrack cargo build --release
+heaptrack -o heaptrack-after cargo build --release
+heaptrack_print heaptrack-after.*.zst > heaptrack-report-after.txt
 cargo llvm-lines --release > llvm-lines-after.txt
 
 echo "Before: $(grep 'peak heap memory' heaptrack-report.txt)"

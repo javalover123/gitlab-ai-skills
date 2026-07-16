@@ -50,11 +50,10 @@ pub fn process_data<T: Serialize + Clone>(items: Vec<T>) -> Result<String> {
 ```rust
 // Generic wrapper - thin, minimal IR
 pub fn process_data<T: Serialize + Clone>(items: Vec<T>) -> Result<String> {
-    items.iter()
+    let parts = items.iter()
         .map(|item| serialize_item(item))
-        .collect::<Result<Vec<_>>>()?
-        .join("\n")
-        .into()
+        .collect::<Result<Vec<_>>>()?;
+    Ok(parts.join("\n"))
 }
 
 // Non-generic validation (shared across all types)
@@ -456,7 +455,7 @@ Document each change with before/after measurements to track cumulative improvem
 
 ---
 
-## Strategy 6: Build-Cache Hygiene (Non-Code)
+## Strategy 7: Build-Cache Hygiene (Non-Code)
 
 Not every "rebuilds everything, uses tons of RAM" problem is a code problem. A meaningful share of apparent compile-memory issues are really cache-invalidation issues: the same deps get compiled two, three, sometimes four times into the same `target/` because different tooling modes keep separate fingerprints. Cut this first — it's mechanical and the gain is immediate.
 
@@ -553,6 +552,38 @@ Both forms resolve to `target/rust-analyzer/`. `.gitignore` rule for `target/` c
 ### When to apply before profiling
 
 Run through this strategy *before* establishing a baseline. Otherwise the baseline captures the cache-invalidation thrash instead of the compile memory you're trying to measure, and the after-refactor numbers tell you nothing.
+
+## Strategy 8: Replace lazy_static! with OnceCell
+
+`lazy_static!` expands to a fair amount of code per static — a wrapper type, a
+`Deref` impl, and thread-safe init glue — all of which the macro regenerates at
+every call site. On a crate with many statics this adds up in both IR and
+compile memory. `std::sync::OnceLock` (or `once_cell`'s `OnceCell`) does the same
+job with a plain function and no macro expansion.
+
+**Before:**
+
+```rust
+lazy_static! {
+    static ref CACHE: Mutex<HashMap<String, Data>> = Mutex::new(HashMap::new());
+}
+```
+
+**After:**
+
+```rust
+use std::sync::OnceLock;
+
+static CACHE: OnceLock<Mutex<HashMap<String, Data>>> = OnceLock::new();
+
+fn cache() -> &'static Mutex<HashMap<String, Data>> {
+    CACHE.get_or_init(|| Mutex::new(HashMap::new()))
+}
+```
+
+Call `cache()` where you referenced `CACHE` before. No macro, no per-static
+generated types, and the standard-library path drops the `lazy_static`
+dependency entirely.
 
 ## References
 

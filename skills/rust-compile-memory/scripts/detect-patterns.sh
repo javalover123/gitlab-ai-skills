@@ -114,8 +114,9 @@ if command -v rg &> /dev/null; then
         fi
     done
 
-    # Count derive macros (serde is particularly heavy)
-    derive_count=$(rg -t rust "#\[derive\(" -c . || echo "0")
+    # Count derive macros (serde is particularly heavy). `rg -c .` against a
+    # directory prints one `path:count` line per file, so sum the counts.
+    derive_count=$(rg -t rust "#\[derive\(" -c . 2>/dev/null | awk -F: '{sum+=$NF} END {print sum+0}')
     echo ""
     echo "  Found $derive_count derive macro usages"
     if [ "$derive_count" -gt 100 ]; then
@@ -140,8 +141,8 @@ if [ -f "Cargo.toml" ]; then
         echo "      → Consider feature groups or simplification"
     fi
 
-    # Check for feature combinations in code
-    cfg_count=$(rg -t rust '#\[cfg\(.*feature.*\)\]' -c . || echo "0")
+    # Check for feature combinations in code (sum per-file counts, as above).
+    cfg_count=$(rg -t rust '#\[cfg\(.*feature.*\)\]' -c . 2>/dev/null | awk -F: '{sum+=$NF} END {print sum+0}')
     echo "  Found $cfg_count feature gates in code"
 
     if [ "$cfg_count" -gt 50 ]; then
