@@ -57,9 +57,12 @@ kebab-case, that it matches the directory name, and that the frontmatter is
 contain colons (e.g. `description: "Use when: planning, reviewing"`).
 The `check-version-bump` job
 verifies that the `version` field is incremented whenever files under
-`skills/<name>/` change. See [`AGENTS.md`](../AGENTS.md) for the full list of
-conventions and their enforcing checks (skill length, shell-script linting,
-`AGENTS.md`/`CLAUDE.md` sync).
+`skills/<name>/` change. The `validate-content-quality` job fails on any broken
+relative link in a `SKILL.md` or its `references/*.md`, and warns (without
+blocking) on a missing "When to Use"/"Use when"/"Triggers" cue, stray
+`TODO`/`FIXME` in prose, or AGENTS.md-banned voice words. See
+[`AGENTS.md`](../AGENTS.md) for the full list of conventions and their enforcing
+checks (skill length, shell-script linting, `AGENTS.md`/`CLAUDE.md` sync).
 
 ## Distribution
 
