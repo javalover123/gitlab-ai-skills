@@ -6,6 +6,7 @@ Run:  python3 scripts/tests/test_content_quality.py
 """
 
 import os
+import shutil
 import sys
 import tempfile
 import unittest
@@ -37,8 +38,6 @@ class TempSkill:
         return self
 
     def __exit__(self, *a):
-        import shutil
-
         shutil.rmtree(self.dir, ignore_errors=True)
 
 
@@ -84,6 +83,10 @@ class TestVoice(unittest.TestCase):
     def test_frontmatter_not_scanned(self):
         body = "---\nname: x\ndescription: robust thing\n---\n# body\n"
         with TempSkill(body) as s:
+            self.assertEqual(vcq.check_voice(s.skill_md), [])
+
+    def test_banned_word_in_code_span_not_flagged(self):
+        with TempSkill("The word `utilize` is on the blocklist.\n") as s:
             self.assertEqual(vcq.check_voice(s.skill_md), [])
 
 

@@ -107,7 +107,7 @@ def check_links(md_file):
     skill_dir = os.path.dirname(md_file)
     with open(md_file, "r") as f:
         text = f.read()
-    for _, line in prose_lines(text):
+    for line_no, line in prose_lines(text):
         # Ignore links inside inline code spans.
         line = re.sub(r"`[^`]*`", "", line)
         for m in LINK_RE.finditer(line):
@@ -119,7 +119,7 @@ def check_links(md_file):
                 continue
             resolved = os.path.normpath(os.path.join(skill_dir, path))
             if not os.path.exists(resolved):
-                errors.append(f"broken link [{m.group(1)}]({target})")
+                errors.append(f"line {line_no}: broken link [{m.group(1)}]({target})")
     return errors
 
 
@@ -166,9 +166,12 @@ def check_voice(md_file):
     for line_no, line in prose_lines(text):
         if is_teaching_line(line):
             continue
-        for m in word_re.finditer(line):
+        # Strip inline code spans first, matching check_structure/check_links,
+        # so a banned word quoted in backticks (e.g. `utilize`) isn't flagged.
+        no_code = re.sub(r"`[^`]*`", "", line)
+        for m in word_re.finditer(no_code):
             warnings.append(f"line {line_no}: blocklisted word '{m.group(1)}' — {line.strip()}")
-        low = line.lower()
+        low = no_code.lower()
         for phrase in VOICE_PHRASE_BLOCKLIST:
             if phrase in low:
                 warnings.append(f"line {line_no}: filler phrase '{phrase}'")
