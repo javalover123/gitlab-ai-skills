@@ -9,7 +9,7 @@
     "eval:all": "scripts/run_evals.sh"
   },
   "devDependencies": {
-    "promptfoo": "^0.117.0"
+    "promptfoo": "0.117.0"
   },
   "pi": {
     "skills": ["./skills"]
