@@ -145,6 +145,14 @@
       "path": "skills/iterate/SKILL.md"
     },
     {
+      "name": "iteratotron",
+      "description": "Drives a project through any stage of the implementation lifecycle \u2014 from documentation (or none) through partial implementation to verifiable completion. Wraps the iterate and bug-burndown skills via bounded parallel subagent dispatch in isolated git worktrees, with a Constitution Check, a per-language harness vector (unit/coverage/mutation, integration/contract, chaos/DST), adversarial completion review, a stop-bias-pattern catalogue, and an attestable done predicate. Auto-detects whether a project needs greenfield bootstrap, partial-implementation completion, or a completion-readiness sweep. Use for drive this to completion, no stubs no TODOs, ship-ready burndown, project genesis, doc-to-impl, spec-driven development, constitution check, burn down the gaps, or build the implementation harness.",
+      "category": "Development Workflow",
+      "license": "MIT",
+      "compatibility": "opencode",
+      "path": "skills/iteratotron/SKILL.md"
+    },
+    {
       "name": "mcp-creator",
       "description": "Guides building production-quality MCP servers in Rust using the rmcp crate. Covers protocol design, tool implementation, testing, security hardening, and AI-tool integration. Use when building an MCP server, creating MCP tools, implementing MCP in Rust, adding tools/resources/prompts to an MCP server, or starting a new MCP project.",
       "category": "Development Workflow",
