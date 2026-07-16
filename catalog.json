@@ -17,6 +17,14 @@
       "path": "skills/bug-burndown/SKILL.md"
     },
     {
+      "name": "bugfix",
+      "description": "Drives a rigorous, evidence-gated bug fix or regression investigation from first report to Definition-of-Done. When invoked without a specific target, proactively scans logs, code, docs, git history, and issue trackers to discover bug candidates autonomously. User-given direction (bug report, issue ref, log path, class of bugs) takes priority. Enforces reproducer-first testing, root-cause fixes, a three-way diff between desired/documented/implemented behaviour, mandatory delegation to companion doc skills, and a hostile adversarial review before any done claim. Use when fixing bugs, investigating regressions, chasing spec/ADR/threat-model drift, or running a routine bug-hunting pass, especially for changes touching auth, crypto, supply chain, concurrency, persistence, or any trust boundary.",
+      "category": "Development Workflow",
+      "license": "MIT",
+      "compatibility": "opencode",
+      "path": "skills/bugfix/SKILL.md"
+    },
+    {
       "name": "commit-messages",
       "description": "Use when creating git commits, writing commit messages, or when about to run git commit -- enforces structured commit message format with imperative mood, capitalized subjects, 72-char wrapping, and atomic commits",
       "category": "Development Workflow",

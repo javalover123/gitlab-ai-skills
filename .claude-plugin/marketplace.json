@@ -16,6 +16,10 @@
       "source": "./.claude-plugin/plugins/bug-burndown"
     },
     {
+      "name": "bugfix",
+      "source": "./.claude-plugin/plugins/bugfix"
+    },
+    {
       "name": "commit-messages",
       "source": "./.claude-plugin/plugins/commit-messages"
     },
