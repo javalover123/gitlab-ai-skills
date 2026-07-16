@@ -6,9 +6,9 @@ Covers smart pointer overhead, enum layout, Cow and zero-copy patterns, arena al
 
 ## Smart Pointer Overhead
 
-On 64-bit systems:
+On 64-bit systems (stack size of the pointer itself):
 - `Box<T>`: 8 bytes (one pointer)
-- `Rc<T>` and `Arc<T>`: 16 bytes (strong + weak refcounts on the heap)
+- `Rc<T>` and `Arc<T>`: also 8 bytes on the stack (a single thin pointer). They add 16 bytes of *heap* overhead — the strong and weak reference counts stored alongside the value.
 - `Option<Box<T>>`: still just 8 bytes — niche optimization makes `None` the null pointer
 
 The niche optimization also applies to `Option<&T>`, `Option<NonZeroU64>`, and similar. Use these freely — they're zero-overhead.

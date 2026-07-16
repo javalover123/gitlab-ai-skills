@@ -30,7 +30,9 @@ sudo mount -t tmpfs -o size=8G tmpfs /path/to/project/target
 
 ---
 
-## CI/CD (GitHub Actions)
+## CI/CD
+
+### GitHub Actions
 
 GitHub Actions standard runners have 7 GB RAM and 2 vCPUs. Key setup:
 
@@ -50,6 +52,29 @@ steps:
 
   - name: Test
     run: cargo nextest run --locked   # ~40% faster than cargo test
+```
+
+### GitLab CI
+
+The same principles on GitLab CI — cache the registry and `target/` keyed on
+`Cargo.lock`, disable incremental, and run tests with `--locked`:
+
+```yaml
+variables:
+  CARGO_INCREMENTAL: "0"
+  CARGO_HOME: "$CI_PROJECT_DIR/.cargo"
+
+build-and-test:
+  cache:
+    key:
+      files:
+        - Cargo.lock
+    paths:
+      - .cargo/
+      - target/
+  script:
+    - cargo build --locked
+    - cargo nextest run --locked
 ```
 
 ### Memory-constrained runners

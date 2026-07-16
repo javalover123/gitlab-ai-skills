@@ -21,7 +21,7 @@ The linker is often the bottleneck. Switching from GNU `ld` to a modern parallel
 rustflags = ["-C", "link-arg=-fuse-ld=mold"]
 ```
 
-**Tradeoffs**: `mold` doesn't support LTO. For release builds needing LTO, use `lld`. On macOS, the system linker is already fast — `mold` doesn't support macOS.
+**Tradeoffs**: `mold` doesn't support LTO. For release builds needing LTO, use `lld`. On macOS, `mold` does work (install via Homebrew) but the system linker is already fast, so the win is smaller than on Linux; `sold` (the macOS port) or the default linker is usually fine.
 
 ---
 
