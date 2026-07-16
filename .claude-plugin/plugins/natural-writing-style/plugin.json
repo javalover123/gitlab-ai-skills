@@ -1,0 +1,10 @@
+{
+  "name": "natural-writing-style",
+  "description": "Enforces team writing style guidelines across all written output. Apply whenever writing, editing, or reviewing code comments, docstrings, documentation, README files, MR/PR descriptions, commit messages, issue descriptions, changelogs, technical specifications, API docs, inline comments, or any other text-based output. Also apply when reviewing existing text for style compliance. Triggers on all writing, documentation, review, and communication tasks.",
+  "version": "2.0.0",
+  "author": {
+    "name": "GitLab"
+  },
+  "license": "MIT",
+  "skills": "./"
+}

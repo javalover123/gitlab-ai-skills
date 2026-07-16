@@ -76,6 +76,10 @@
       "source": "./.claude-plugin/plugins/mr-review"
     },
     {
+      "name": "natural-writing-style",
+      "source": "./.claude-plugin/plugins/natural-writing-style"
+    },
+    {
       "name": "prep-review",
       "source": "./.claude-plugin/plugins/prep-review"
     },
