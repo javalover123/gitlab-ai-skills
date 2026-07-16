@@ -1,0 +1,10 @@
+{
+  "name": "harness-builder",
+  "description": "Scaffolds project-specific harness crates or modules that drive a project through its natural interface, observe and instrument the output, and triage it against documented requirements (stories, ADRs, specs, threat-model items) to schedule and burn down implementation gaps and defects in a continuous loop. Generates a runtime quality harness, an implementation genesis harness, or both, and can audit an existing harness up to standard. Use when asked to build a harness, scaffold project genesis, drive X and fix what breaks, loop until clean, build a closed-loop harness, or burn down bugs agentically.",
+  "version": "2.3.0",
+  "author": {
+    "name": "GitLab"
+  },
+  "license": "MIT",
+  "skills": "./"
+}
