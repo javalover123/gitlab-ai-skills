@@ -168,6 +168,10 @@ Video URLs and YouTube links: extract actionable takeaways with timestamp hyperl
 
 ### Documentation
 
+#### story-creator
+
+Creates formal E2E user stories with BDD acceptance criteria, EARS constraints, and INVEST compliance through interactive user prompting. Use when creating new feature stories, documenting agent behaviors, writing acceptance criteria for multi-agent systems, or starting a new feature that needs behavioral verification coverage. Triggers: write user story, create story, BDD story, acceptance criteria, feature story, E2E behavior, agent story, INVEST story, Gherkin story. → [`SKILL.md`](skills/story-creator/SKILL.md)
+
 #### story-reviewer
 
 Reviews E2E user stories for INVEST compliance, Gherkin correctness, EARS constraint coverage, and test derivation quality. Produces a structured verdict with per-dimension scores, specific issues, and actionable feedback. Use when validating a story before sprint planning, reviewing stories created by story-creator or an AI generator, or auditing story quality in a PR. Triggers: review story, validate story, story quality, BDD review, acceptance criteria review, story audit, story feedback, INVEST check. → [`SKILL.md`](skills/story-reviewer/SKILL.md)
