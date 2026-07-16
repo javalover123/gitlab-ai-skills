@@ -22,6 +22,13 @@ if [ -z "$DEFAULT" ]; then
   done
 fi
 
+# Bail out if the default branch couldn't be detected — otherwise the
+# commands below silently operate on the bare ref "origin/".
+if [ -z "$DEFAULT" ]; then
+  echo "ERROR: could not detect the default branch. Set it manually, e.g. DEFAULT=main." >&2
+  exit 1
+fi
+
 # Fetch latest state from remote
 git fetch origin "$DEFAULT" --quiet
 
@@ -104,22 +111,38 @@ git rebase --abort
 # Files that exist on default but are missing from the rebased branch
 git diff --name-only "origin/$DEFAULT" HEAD --diff-filter=D
 
-# Diff against the pre-rebase backup
-git diff "backup/${CURRENT}-pre-rebase-"* HEAD --stat
+# Diff against the pre-rebase backup. The backup branch is a git ref, not a
+# filesystem path, so a shell glob won't expand it — resolve the name via
+# `git branch --list` first.
+BACKUP_BRANCH=$(git branch --list "backup/${CURRENT}-pre-rebase-*" | tr -d ' ' | tail -1)
+git diff "$BACKUP_BRANCH" HEAD --stat
 
 # Your feature commits should all be represented
 git log --oneline "origin/$DEFAULT..HEAD"
 ```
 
 Key safety check — walk each default-branch commit and confirm its changes
-survived:
+weren't lost during conflict resolution. Comparing `HEAD` against
+`origin/$DEFAULT` directly is wrong: every file the feature branch
+intentionally changed differs, so it flags the whole branch. Instead compare
+the file at three points — the merge base, the default branch, and `HEAD` — and
+only flag a file the default branch changed (`default != base`) whose default
+change isn't reflected at `HEAD` (`head == base`), which means the change was
+dropped:
 
 ```bash
 for commit in $(git rev-list "$MERGE_BASE..origin/$DEFAULT"); do
   files=$(git diff-tree --no-commit-id --name-only -r "$commit")
   for file in $files; do
-    if ! git diff --quiet "origin/$DEFAULT" HEAD -- "$file" 2>/dev/null; then
-      echo "REVIEW: $file differs from default branch (commit: $(git log --oneline -1 "$commit"))"
+    base=$(git show "$MERGE_BASE:$file" 2>/dev/null || true)
+    default=$(git show "origin/$DEFAULT:$file" 2>/dev/null || true)
+    head=$(git show "HEAD:$file" 2>/dev/null || true)
+    # Default changed this file, but HEAD still matches the merge base:
+    # the default-branch change was lost. (If the feature branch also
+    # changed the file, head != base and it's not flagged here — inspect
+    # those in the both-modified bucket from Phase 2.)
+    if [ "$default" != "$base" ] && [ "$head" = "$base" ]; then
+      echo "REVIEW: default-branch change to $file may be lost (commit: $(git log --oneline -1 "$commit"))"
     fi
   done
 done

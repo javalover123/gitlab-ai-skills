@@ -161,6 +161,14 @@
       "path": "skills/skopeo/SKILL.md"
     },
     {
+      "name": "smart-rebase",
+      "description": "Orchestrates intelligent git rebases by identifying the merge base between the current branch, its upstream tracking branch, and the default branch, then carefully reconciling all changes to produce a cleanly mergeable result. Use when rebasing a diverged feature branch onto an updated main/master, when preparing a branch for merge after the default branch has advanced, or when manual rebase conflicts risk clobbering default branch changes. Triggers: rebase, merge base, diverged branch, catch up with main, rebase onto main, reconcile branches, update feature branch.",
+      "category": "Development Workflow",
+      "license": "MIT",
+      "compatibility": "opencode",
+      "path": "skills/smart-rebase/SKILL.md"
+    },
+    {
       "name": "stack-changes",
       "description": "Splits a large local change (uncommitted or committed) into a stacked-MR chain. Use when the user asks to split an MR they find too big to review, wants stacked diffs, has sprawling AI-mode work to publish, or types /stack-changes.",
       "category": "Development Workflow",
