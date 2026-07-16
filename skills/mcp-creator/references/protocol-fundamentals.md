@@ -4,12 +4,12 @@ Complete reference for the Model Context Protocol architecture, lifecycle, messa
 
 ## Architecture
 
-MCP follows a **client-host-server architecture** built on JSON-RPC 2.0. The **host** is the LLM application (e.g., Claude Code) that creates and manages **client** instances, each maintaining an isolated 1:1 connection to a **server**. Servers expose three core primitives:
+MCP follows a **client-host-server architecture** built on JSON-RPC 2.0. The **host** is the LLM application (e.g., Claude Code) that creates and manages **client** instances, each maintaining an isolated 1:1 connection to a **server**. Servers expose three core primitives, plus a server-provided instructions feature:
 
 - **Tools** (model-controlled) — invoked by the LLM to perform actions
 - **Resources** (application-controlled) — read-only data identified by URIs
 - **Prompts** (user-controlled) — explicit templates triggered by users
-- **Instructions** (server-provided) — guidance injected into the LLM's system prompt
+- **Instructions** (server-provided, not a primitive) — guidance injected into the LLM's system prompt
 
 Two client features complement these:
 
