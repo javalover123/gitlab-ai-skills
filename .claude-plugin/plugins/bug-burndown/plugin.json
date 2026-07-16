@@ -1,0 +1,10 @@
+{
+  "name": "bug-burndown",
+  "description": "Runs a continuous, autonomous bug burndown session \u2014 collecting defects from logs, tests, issue queues, and spec drift; deduplicating and triaging them through an 8-phase pipeline; then dispatching bounded parallel bugfix subagents in isolated worktrees until the queue is empty or the time budget runs out. Use when asked to burn down the bugs, clear the backlog, triage CI failures, find regressions, run a fix session, or anything that's batch quality-improvement rather than a single targeted bug fix.",
+  "version": "1.0.0",
+  "author": {
+    "name": "GitLab"
+  },
+  "license": "MIT",
+  "skills": "./"
+}

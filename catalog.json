@@ -9,6 +9,14 @@
       "path": "skills/authoring-skills/SKILL.md"
     },
     {
+      "name": "bug-burndown",
+      "description": "Runs a continuous, autonomous bug burndown session \u2014 collecting defects from logs, tests, issue queues, and spec drift; deduplicating and triaging them through an 8-phase pipeline; then dispatching bounded parallel bugfix subagents in isolated worktrees until the queue is empty or the time budget runs out. Use when asked to burn down the bugs, clear the backlog, triage CI failures, find regressions, run a fix session, or anything that's batch quality-improvement rather than a single targeted bug fix.",
+      "category": "Development Workflow",
+      "license": "MIT",
+      "compatibility": "opencode",
+      "path": "skills/bug-burndown/SKILL.md"
+    },
+    {
       "name": "commit-messages",
       "description": "Use when creating git commits, writing commit messages, or when about to run git commit -- enforces structured commit message format with imperative mood, capitalized subjects, 72-char wrapping, and atomic commits",
       "category": "Development Workflow",

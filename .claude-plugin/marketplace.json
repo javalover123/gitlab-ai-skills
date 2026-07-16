@@ -12,6 +12,10 @@
       "source": "./.claude-plugin/plugins/authoring-skills"
     },
     {
+      "name": "bug-burndown",
+      "source": "./.claude-plugin/plugins/bug-burndown"
+    },
+    {
       "name": "commit-messages",
       "source": "./.claude-plugin/plugins/commit-messages"
     },
