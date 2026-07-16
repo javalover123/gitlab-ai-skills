@@ -101,6 +101,26 @@ abort on the first one, but they are still shellcheck-linted.
 *Enforced:* `scripts/run_skill_tests.sh` discovers and runs every suite in CI
 and on pre-push.
 
+### Skill hooks (`skills/<name>/hooks.json`)
+
+Claude Code lets a skill declare lifecycle `hooks:` (SessionStart, PreToolUse,
+Stop) that run shell commands — used by autonomous-loop skills to keep going
+until work is genuinely done. opencode has no built-in equivalent, so the
+[`.opencode/plugins/skill-hooks.ts`](.opencode/plugins/skill-hooks.ts) plugin
+bridges Claude-style hooks onto opencode's event listener.
+
+- **Opt in with a `hooks.json`** next to the skill's `SKILL.md` — no code lives
+  in the plugin per skill. It's discovery-based: any skill shipping the manifest
+  gets its hooks run.
+- **Self-gate your checker.** A `Stop` command must return `approve` unless its
+  own project-scoped state says the loop is active. The plugin also gates by
+  session (a skill's hooks only fire when that skill was loaded in the current
+  session), but that's a backstop, not a substitute.
+- **Contract, mapping, and safety model:** [`doc/skill-hooks.md`](doc/skill-hooks.md).
+
+*Tested:* `node .opencode/plugins/__tests__/skill-hooks.test.mjs` covers the
+session-gating logic without needing a live opencode server.
+
 ### Synced skills (source of truth elsewhere)
 
 Some skills are **synced in** from another repository — their source of truth
