@@ -1,0 +1,55 @@
+# promptfoo eval for the commit-messages skill.
+#
+# Feeds the skill's SKILL.md as the system prompt and a commit scenario as the
+# task, then asserts the drafted message follows the skill's format rules.
+#
+# Run: scripts/run_evals.sh commit-messages   (needs ANTHROPIC_API_KEY)
+description: commit-messages skill evaluation
+
+prompts:
+  - |
+    {{skill}}
+
+    ---
+
+    Task: {{task}}
+
+    Draft the commit message now.
+
+providers:
+  - id: anthropic:messages:claude-haiku-4-5
+    config:
+      max_tokens: 1024
+
+defaultTest:
+  vars:
+    skill: file://../SKILL.md
+
+tests:
+  - description: Imperative, capitalized, wrapped subject for a bugfix
+    vars:
+      task: >-
+        I fixed a bug where the pipeline-watch skill retried cancelled jobs.
+        The fix skips jobs whose status is 'canceled'. Write the commit message.
+    assert:
+      - type: llm-rubric
+        value: |
+          Score 1.0 only if ALL hold, else 0.5 for minor issues, 0.0 if wrong:
+          - Subject is in the imperative mood ("Skip ..." not "Skipped/Skips ...")
+          - Subject line is capitalized and has no trailing period
+          - Subject line is ~50 chars and at most 72
+          - If a body is present, it explains WHY, not a restatement of the diff
+          - Subject completes "If applied, this commit will <subject>"
+
+  - description: Suggests splitting an unrelated-changes commit (atomic commits)
+    vars:
+      task: >-
+        I changed two unrelated things in one go: renamed a database column
+        AND bumped the CI image version. Help me commit this.
+    assert:
+      - type: llm-rubric
+        value: |
+          Score 1.0 if the response recognizes these are two unrelated changes
+          and recommends splitting them into separate atomic commits (rather
+          than writing one combined message). 0.0 if it writes a single commit
+          mixing both concerns without flagging the problem.
