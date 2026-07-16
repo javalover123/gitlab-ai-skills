@@ -33,7 +33,11 @@ cargo mutants --file crates/foo-sys/src/ffi.rs
 | `TIMEOUT` | Raise `--timeout-multiplier`; if it persists, the test's too slow at this layer |
 | `UNVIABLE` | Mutant produced uncompilable code — ignore |
 
-The full runbook (including common surviving-mutant patterns and what they mean) lives in `bugfix/references/reproducer-and-mutation.md` — read it the first time you run cargo-mutants.
+When you run cargo-mutants, read the surviving mutants rather than just the
+count: a survivor is a line the suite can't constrain. For unsafe code, a
+survivor on an `unsafe` block means the `// SAFETY:` claim isn't backed by a
+test — write the test that would fail if the invariant were violated, then
+re-run.
 
 **What to check for unsafe code specifically:**
 
@@ -94,4 +98,4 @@ If you're reviewing FFI bindings that include the C side of the boundary:
 | .NET (P/Invoke) | `Stryker.NET` | NDepend (commercial; integrates with dotCover/OpenCover) |
 | Python (PyO3 wrappers) | `mutmut` | Compute from `radon cc` + `coverage.py` lcov |
 
-See `.claude/rules/static-analysis.md` for the canonical guidance and the full ecosystem table.
+See [`static-analysis-tools.md`](static-analysis-tools.md) for the canonical guidance and the full ecosystem table.

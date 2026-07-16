@@ -112,10 +112,12 @@ cargo +nightly miri test
 # Run a specific binary
 cargo +nightly miri run
 
-# With Stacked Borrows validation (default, stricter)
+# Stacked Borrows is the default — no extra flag needed. -Zmiri-tag-gc=1
+# only tunes how often Miri garbage-collects its internal pointer tags
+# (a performance knob, not a stricter mode).
 MIRIFLAGS="-Zmiri-tag-gc=1" cargo +nightly miri test
 
-# With Tree Borrows (experimental, less strict)
+# Switch to Tree Borrows (an alternative, experimental aliasing model)
 MIRIFLAGS="-Zmiri-tree-borrows" cargo +nightly miri test
 ```
 
