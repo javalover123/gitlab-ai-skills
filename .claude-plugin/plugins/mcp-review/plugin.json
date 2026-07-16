@@ -1,0 +1,10 @@
+{
+  "name": "mcp-review",
+  "description": "Reviews and improves existing MCP server implementations for protocol compliance, tool quality, Rust best practices, security, and testing coverage. Lists available MCP servers for selection when none specified. Use when reviewing an MCP server, auditing MCP tool quality, checking protocol compliance, improving MCP server code, or when the user mentions MCP review, MCP audit, or MCP server quality.",
+  "version": "1.0.0",
+  "author": {
+    "name": "GitLab"
+  },
+  "license": "MIT",
+  "skills": "./"
+}
