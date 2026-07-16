@@ -52,6 +52,10 @@
       "source": "./.claude-plugin/plugins/handoff"
     },
     {
+      "name": "human-review",
+      "source": "./.claude-plugin/plugins/human-review"
+    },
+    {
       "name": "mr-adversarial-review",
       "source": "./.claude-plugin/plugins/mr-adversarial-review"
     },

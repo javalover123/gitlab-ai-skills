@@ -89,6 +89,14 @@
       "path": "skills/handoff/SKILL.md"
     },
     {
+      "name": "human-review",
+      "description": "Interactively resolves items that iteratotron and bug-burndown have escalated to needs_human or requires_human_review status. Reads the active session queues, reconstructs each item's context from linked specs/ADRs/threat-model entries plus the current gap analysis, drafts 2-4 candidate resolutions consistent with the in-flight scope, and runs an interview per item. Records each decision and re-queues actionable items so the parent skill re-engages. Scans all sessions by default, including the bug-burndown sessions a harness-builder runtime harness spawns per iteration. Use when iteratotron or bug-burndown has parked items for human input, when a harness loop won't converge because of parked needs_human items, or to clear the human review queue between sessions.",
+      "category": "Agent Tooling",
+      "license": "MIT",
+      "compatibility": "opencode",
+      "path": "skills/human-review/SKILL.md"
+    },
+    {
       "name": "mr-adversarial-review",
       "description": "Use when running a critical, skeptical pass over a GitLab MR \u2014 either as the author before requesting human review, or as a reviewer wanting a structured first cut \u2014 produces a severity-bucketed findings report (High / Medium / Low / Done well) and posts it as a single comment on the MR.",
       "category": "Development Workflow",
