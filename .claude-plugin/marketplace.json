@@ -76,6 +76,10 @@
       "source": "./.claude-plugin/plugins/human-review"
     },
     {
+      "name": "iterate",
+      "source": "./.claude-plugin/plugins/iterate"
+    },
+    {
       "name": "mcp-creator",
       "source": "./.claude-plugin/plugins/mcp-creator"
     },
