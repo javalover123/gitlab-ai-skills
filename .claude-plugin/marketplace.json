@@ -8,6 +8,10 @@
   },
   "plugins": [
     {
+      "name": "adr-review",
+      "source": "./.claude-plugin/plugins/adr-review"
+    },
+    {
       "name": "authoring-skills",
       "source": "./.claude-plugin/plugins/authoring-skills"
     },
