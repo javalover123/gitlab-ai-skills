@@ -208,6 +208,10 @@ Video URLs and YouTube links: extract actionable takeaways with timestamp hyperl
 
 Reviews Architecture Decision Records for quality, completeness, and consistency. Identifies undocumented decisions by analyzing code, specs, and threat models. Backfills missing ADRs for past decisions, validates cross-references, and checks the decision log for staleness or contradictions. Use when auditing ADRs, finding missing decisions, reviewing ADR quality, checking for undocumented architecture choices, or when spec-review or threat-model-review flags missing ADRs. Triggers: review ADR, audit decisions, missing ADRs, ADR quality, backfill ADRs, decision log, undocumented decisions. → [`SKILL.md`](skills/adr-review/SKILL.md)
 
+#### spec-create
+
+Creates and updates implementation specifications using IEEE 830 structure, RFC 2119 requirement levels, EARS syntax, and Gherkin acceptance criteria. Produces traceable, testable specs with cross-references to ADRs and threat models. Use when writing a spec, creating a specification document, defining requirements, documenting acceptance criteria, or updating an existing spec to cover new functionality. Triggers: write spec, create specification, document requirements, define acceptance criteria, update spec, spec gaps. → [`SKILL.md`](skills/spec-create/SKILL.md)
+
 #### story-creator
 
 Creates formal E2E user stories with BDD acceptance criteria, EARS constraints, and INVEST compliance through interactive user prompting. Use when creating new feature stories, documenting agent behaviors, writing acceptance criteria for multi-agent systems, or starting a new feature that needs behavioral verification coverage. Triggers: write user story, create story, BDD story, acceptance criteria, feature story, E2E behavior, agent story, INVEST story, Gherkin story. → [`SKILL.md`](skills/story-creator/SKILL.md)
