@@ -185,6 +185,14 @@
       "path": "skills/run-in-tmux-pane/SKILL.md"
     },
     {
+      "name": "rust-compile-memory",
+      "description": "Profiles Rust compilation memory usage with rustc nightly and measureme tools, identifies high-memory patterns (monomorphization, large types, LLVM bottlenecks), and refactors code to reduce compilation RSS. Use when Rust builds trigger the OOM killer or consume excessive memory. Triggers: compilation memory, rustc OOM, reduce compile memory, profile compilation.",
+      "category": "Development Workflow",
+      "license": "MIT",
+      "compatibility": "opencode",
+      "path": "skills/rust-compile-memory/SKILL.md"
+    },
+    {
       "name": "rust-unsafe-ffi-review",
       "description": "Reviews Rust unsafe code and FFI bindings for memory safety and soundness issues. Use when auditing unsafe blocks, FFI interfaces, or preparing Rust code for security-critical use.",
       "category": "Testing",
