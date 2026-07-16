@@ -1,0 +1,10 @@
+{
+  "name": "story-reviewer",
+  "description": "Reviews E2E user stories for INVEST compliance, Gherkin correctness, EARS constraint coverage, and test derivation quality. Produces a structured verdict with per-dimension scores, specific issues, and actionable feedback. Use when validating a story before sprint planning, reviewing stories created by story-creator or an AI generator, or auditing story quality in a PR. Triggers: review story, validate story, story quality, BDD review, acceptance criteria review, story audit, story feedback, INVEST check.",
+  "version": "1.0.0",
+  "author": {
+    "name": "GitLab"
+  },
+  "license": "MIT",
+  "skills": "./"
+}
