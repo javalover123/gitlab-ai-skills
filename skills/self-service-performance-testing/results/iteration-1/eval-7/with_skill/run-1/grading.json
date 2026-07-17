@@ -1,0 +1,43 @@
+{
+  "expectations": [
+    {
+      "text": "Recommends a Ruby profiler for investigating where time/memory goes, not a load-testing tool",
+      "passed": true,
+      "evidence": "'You want a profiler, not a load test.'"
+    },
+    {
+      "text": "Maps the symptoms to the right profiler: Stackprof for the CPU/time symptom and memory_profiler (or derailed_benchmarks) for the growing-memory symptom",
+      "passed": true,
+      "evidence": "Stackprof for the CPU/'getting slower' symptom; memory_profiler for the 'memory climbing' symptom."
+    },
+    {
+      "text": "Explicitly distinguishes profiling (finding WHY it is slow) from load testing (GPT/k6/CPT) and does not push a load test as the primary answer",
+      "passed": true,
+      "evidence": "'Load tests (GPT, k6, CPT) tell you whether an endpoint is slow ... won't point at the line of Ruby'."
+    },
+    {
+      "text": "Treats profiling as in scope and engages with it \u2014 does not refuse or redirect profiling out of scope",
+      "passed": true,
+      "evidence": "Engages fully with profiling as the answer; does not refuse or redirect out of scope."
+    },
+    {
+      "text": "Notes these profilers apply to Ruby code specifically; for a non-Ruby project points to language-native tooling (e.g. pprof for Go) or #g_performance_enablement",
+      "passed": false,
+      "evidence": "Does not state profilers apply to Ruby specifically or give a non-Ruby (pprof) fallback; assumes Ruby throughout."
+    },
+    {
+      "text": "Does not suggest running the investigation as a test against staging or production",
+      "passed": true,
+      "evidence": "'you'd never point them at staging or production ... your task is investigation, which is local/dev profiling'."
+    }
+  ],
+  "summary": {
+    "passed": 5,
+    "failed": 1,
+    "total": 6,
+    "pass_rate": 0.8333
+  },
+  "timing": {
+    "total_duration_seconds": 34.5
+  }
+}

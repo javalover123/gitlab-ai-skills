@@ -1,0 +1,43 @@
+{
+  "expectations": [
+    {
+      "text": "Proactively raises performance as a concern even though the engineer only asked for a code review",
+      "passed": true,
+      "evidence": "Proactively flags perf despite an ask for code review only: 'I do want to flag one thing up front'."
+    },
+    {
+      "text": "Names a specific performance risk (e.g., JOIN on hot path, N+1, missing index) rather than generic 'consider performance'",
+      "passed": true,
+      "evidence": "'a JOIN across those tables can turn into extra queries per row (or a missing-index scan)'."
+    },
+    {
+      "text": "The performance nudge is concise (2-4 sentences), not a full advisory wall of text",
+      "passed": true,
+      "evidence": "The nudge is ~2 short paragraphs with an opt-out, not a full advisory wall."
+    },
+    {
+      "text": "Gives the engineer an easy way to dismiss the concern (e.g., 'if you've already accounted for this...')",
+      "passed": true,
+      "evidence": "'If you've already accounted for this ... then no action needed and I'll just review the code'."
+    },
+    {
+      "text": "Suggests a specific next step (e.g., 'a baseline k6 test' or 'check GPT's test suite') not just 'think about performance'",
+      "passed": true,
+      "evidence": "'get a performance baseline ... a 20% regression budget on p95'; offers CPT."
+    },
+    {
+      "text": "Does not suggest running tests against staging or production",
+      "passed": true,
+      "evidence": "'Never run these against staging or production'."
+    }
+  ],
+  "summary": {
+    "passed": 6,
+    "failed": 0,
+    "total": 6,
+    "pass_rate": 1.0
+  },
+  "timing": {
+    "total_duration_seconds": 31.5
+  }
+}

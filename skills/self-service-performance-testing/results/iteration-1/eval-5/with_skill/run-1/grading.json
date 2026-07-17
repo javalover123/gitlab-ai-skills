@@ -1,0 +1,33 @@
+{
+  "expectations": [
+    {
+      "text": "Gives a clear direct 'no' \u2014 does not hedge with 'it depends' or 'you might want to consider'",
+      "passed": true,
+      "evidence": "'No, you don't need to run any performance tests before merging this.'"
+    },
+    {
+      "text": "Briefly explains why no test is needed (docs and config comments only, no runtime impact)",
+      "passed": true,
+      "evidence": "'Both of your changes are documentation-only ... YAML comments are ignored at parse time'."
+    },
+    {
+      "text": "Does not recommend any performance testing tools or suggest running any tests",
+      "passed": false,
+      "evidence": "Introduces a conditional GPT recommendation ('the right tool would be GPT') for the hypothetical pool-value change \u2014 a tool suggestion beyond a plain no."
+    },
+    {
+      "text": "Response is brief \u2014 a short paragraph or less, not a full advisory flow",
+      "passed": true,
+      "evidence": "A short answer with one caveat paragraph; not a full advisory flow."
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 1,
+    "total": 4,
+    "pass_rate": 0.75
+  },
+  "timing": {
+    "total_duration_seconds": 17.9
+  }
+}

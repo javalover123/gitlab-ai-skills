@@ -1,0 +1,6 @@
+{
+  "eval_id": 4,
+  "eval_name": "existing-test-found",
+  "prompt": "I want to add performance tests to the group merge requests API endpoint \u2014 GET /api/v4/groups/:id/merge_requests. I'm working in the gitlab-org/gitlab repo. Before writing anything, I searched the repo and found this in .gitlab-ci.yml:\n\n```yaml\ntests:performance:\n  stage: test\n  trigger:\n    project: gitlab-org/quality/component-performance-testing\n    strategy: depend\n  variables:\n    TEST_FILE_LOCATION: \"qa/performance_test/k6_test\"\n    COMPONENT_SERVICE_NAME: \"gitlab\"\n```\n\nAnd there's already a file at qa/performance_test/k6_test/group_merge_requests.js. Should I write a new test?",
+  "assertions": []
+}

@@ -79,6 +79,34 @@
         {"name": "no-tool-suggestions", "description": "Does not recommend any performance testing tools or suggest running any tests"},
         {"name": "concise", "description": "Response is brief — a short paragraph or less, not a full advisory flow"}
       ]
+    },
+    {
+      "id": 6,
+      "prompt": "I'm in the gitlab-org/gitlab repo. I just refactored the MergeRequestsFinder#execute method to reduce allocations, and I want a regression guard that fails in the spec suite if someone reintroduces the bloat later — I don't want to spin up a whole load test, just something scoped to this one method. How do I do that?",
+      "expected_output": "Routes to rspec-benchmark (not GPT/CPT/Sitespeed), provides a matcher-based spec stub (perform_allocation and/or perform_under), notes it is Ruby-only and lives in the spec suite, and warns about CI noise on time-based matchers",
+      "files": [],
+      "assertions": [
+        {"name": "routes-to-rspec-benchmark", "description": "Recommends rspec-benchmark as the right tool (not GPT, CPT, or Sitespeed) for a spec-suite-enforced unit-level assertion"},
+        {"name": "provides-matcher-stub", "description": "Provides a matcher-based spec stub using at least one rspec-benchmark matcher (perform_allocation, perform_under, perform_linear, or perform_at_least)"},
+        {"name": "matches-allocation-intent", "description": "Aligns the matcher choice to the stated goal of guarding allocations (e.g. perform_allocation(count: ...)) rather than only an unrelated matcher"},
+        {"name": "notes-ruby-only-spec-suite", "description": "Notes that rspec-benchmark is Ruby-only and the assertion runs inside the RSpec suite"},
+        {"name": "flags-ci-noise", "description": "Warns that time-based matchers are noisy on CI and suggests generous thresholds or a deterministic matcher (allocation/linear) instead"},
+        {"name": "no-staging-production", "description": "Does not suggest running tests against staging or production"}
+      ]
+    },
+    {
+      "id": 7,
+      "prompt": "The GET /api/v4/projects/:id/issues endpoint in gitlab-org/gitlab has gotten noticeably slower and memory use during the request seems to be climbing. I don't want to add load — I need to figure out WHERE the time and memory are going so I can fix it. What should I use?",
+      "expected_output": "Routes to a Ruby profiler chosen per symptom (Stackprof for CPU/time, memory_profiler or derailed_benchmarks for memory), treats profiling as in-scope, distinguishes profiling from load testing, and notes profilers here are Ruby-only (non-Ruby projects should use language-native tooling like pprof or #g_performance_enablement)",
+      "files": [],
+      "assertions": [
+        {"name": "routes-to-profiler", "description": "Recommends a Ruby profiler for investigating where time/memory goes, not a load-testing tool"},
+        {"name": "matches-symptom-to-tool", "description": "Maps the symptoms to the right profiler: Stackprof for the CPU/time symptom and memory_profiler (or derailed_benchmarks) for the growing-memory symptom"},
+        {"name": "distinguishes-from-load-test", "description": "Explicitly distinguishes profiling (finding WHY it is slow) from load testing (GPT/k6/CPT) and does not push a load test as the primary answer"},
+        {"name": "profiling-in-scope", "description": "Treats profiling as in scope and engages with it — does not refuse or redirect profiling out of scope"},
+        {"name": "notes-ruby-only", "description": "Notes these profilers apply to Ruby code specifically; for a non-Ruby project points to language-native tooling (e.g. pprof for Go) or #g_performance_enablement"},
+        {"name": "no-staging-production", "description": "Does not suggest running the investigation as a test against staging or production"}
+      ]
     }
   ]
 }

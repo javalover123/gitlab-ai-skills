@@ -1,0 +1,6 @@
+{
+  "eval_id": 7,
+  "eval_name": "ruby-profiler-investigation",
+  "prompt": "The GET /api/v4/projects/:id/issues endpoint in gitlab-org/gitlab has gotten noticeably slower and memory use during the request seems to be climbing. I don't want to add load \u2014 I need to figure out WHERE the time and memory are going so I can fix it. What should I use?",
+  "assertions": []
+}

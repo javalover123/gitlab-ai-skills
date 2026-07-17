@@ -1,0 +1,38 @@
+{
+  "expectations": [
+    {
+      "text": "Recommends Sitespeed Runway (not GPT or k6 as primary tool)",
+      "passed": true,
+      "evidence": "'the GitLab tool to use is Sitespeed Runway'; explicitly not k6/GPT/CPT."
+    },
+    {
+      "text": "Mentions specific CWV thresholds (LCP < 2.5s and/or CLS < 0.1)",
+      "passed": true,
+      "evidence": "Table: LCP < 2.5s, CLS < 0.1, TBT < 200ms."
+    },
+    {
+      "text": "Recommends comparing performance before vs after the change",
+      "passed": true,
+      "evidence": "'Measure before vs. after ... run the old version first and record the numbers'."
+    },
+    {
+      "text": "Points to the Sitespeed Runway Web UI or API as a concrete next step",
+      "passed": true,
+      "evidence": "Points to Web UI https://sitespeed.runway.gitlab.net/ and Docker/API option."
+    },
+    {
+      "text": "Does not suggest running tests against staging or production",
+      "passed": true,
+      "evidence": "'don't test against staging or production ... point at a review app or dedicated environment'."
+    }
+  ],
+  "summary": {
+    "passed": 5,
+    "failed": 0,
+    "total": 5,
+    "pass_rate": 1.0
+  },
+  "timing": {
+    "total_duration_seconds": 37.2
+  }
+}

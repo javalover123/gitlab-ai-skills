@@ -1,0 +1,33 @@
+{
+  "expectations": [
+    {
+      "text": "Does not generate or offer to write a new k6 test file",
+      "passed": true,
+      "evidence": "'No, don't write a new test.' \u2014 no new file authored."
+    },
+    {
+      "text": "Points the engineer to the existing file at qa/performance_test/k6_test/group_merge_requests.js",
+      "passed": true,
+      "evidence": "'group_merge_requests.js is a CPT test for GET /api/v4/groups/:id/merge_requests ... I read it'."
+    },
+    {
+      "text": "Explains that the existing CPT setup already covers or likely covers this endpoint",
+      "passed": true,
+      "evidence": "Explains CPT trigger semantics and that the existing test already drives the endpoint."
+    },
+    {
+      "text": "Does not suggest running tests against staging or production",
+      "passed": true,
+      "evidence": "'never run perf tests against shared staging/production'."
+    }
+  ],
+  "summary": {
+    "passed": 4,
+    "failed": 0,
+    "total": 4,
+    "pass_rate": 1.0
+  },
+  "timing": {
+    "total_duration_seconds": 57.9
+  }
+}

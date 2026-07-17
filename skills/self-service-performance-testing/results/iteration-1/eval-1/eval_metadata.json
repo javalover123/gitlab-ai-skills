@@ -1,0 +1,6 @@
+{
+  "eval_id": 1,
+  "eval_name": "cpt-containerized-service",
+  "prompt": "I'm working on the container registry service and I want to add performance testing to my MR pipeline. The service is containerized and has HTTP APIs. I heard there's something called CPT that can do this? How do I set it up?",
+  "assertions": []
+}

@@ -1,0 +1,788 @@
+{
+  "metadata": {
+    "skill_name": "self-service-performance-testing",
+    "skill_path": "/Users/vishalpatel/workspace/skills/skills/self-service-performance-testing",
+    "executor_model": "<model-name>",
+    "analyzer_model": "<model-name>",
+    "timestamp": "2026-07-15T00:47:33Z",
+    "evals_run": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+    ],
+    "runs_per_configuration": 3
+  },
+  "runs": [
+    {
+      "eval_id": 0,
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.8333,
+        "passed": 5,
+        "failed": 1,
+        "total": 6,
+        "time_seconds": 38.7,
+        "tokens": 0,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "Clearly recommends writing a performance test (answer is yes)",
+          "passed": true,
+          "evidence": "'yes, this is exactly the kind of change that warrants a perf test'"
+        },
+        {
+          "text": "Mentions the MR list endpoint being high-traffic as a key reason",
+          "passed": true,
+          "evidence": "'because it's a high-traffic list endpoint, any per-row cost gets multiplied under load'"
+        },
+        {
+          "text": "Recommends a specific tool: GPT or custom k6 (not CPT or Sitespeed)",
+          "passed": false,
+          "evidence": "Leads with CPT (and mentions GPT); the assertion requires GPT or custom k6 and explicitly NOT CPT."
+        },
+        {
+          "text": "Gives a concrete threshold number or regression budget percentage",
+          "passed": true,
+          "evidence": "'budget ~20% regression on p95 (tighten to 10% if truly critical-path)'"
+        },
+        {
+          "text": "Identifies that a JOIN on a hot path can introduce N+1 or index issues under load",
+          "passed": true,
+          "evidence": "'can turn into N+1 queries or a full scan if the join columns aren't indexed'"
+        },
+        {
+          "text": "Does not suggest running tests against staging or production",
+          "passed": true,
+          "evidence": "'do not run these against staging or production'"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 1,
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 6,
+        "failed": 0,
+        "total": 6,
+        "time_seconds": 50.9,
+        "tokens": 0,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "Correctly identifies CPT as the right tool for MR-pipeline performance testing",
+          "passed": true,
+          "evidence": "'CPT (Component Performance Testing) is exactly the right tool'"
+        },
+        {
+          "text": "Includes a .gitlab-ci.yml snippet with the multi-project trigger to CPT",
+          "passed": true,
+          "evidence": "Provides tests:performance job with trigger.project: gitlab-org/quality/component-performance-testing."
+        },
+        {
+          "text": "Includes a k6 test file with CPT-required exported constants (TEST_NAME, TTFB_THRESHOLD, RPS_THRESHOLD)",
+          "passed": true,
+          "evidence": "k6 stub exports TEST_NAME, TTFB_THRESHOLD, RPS_THRESHOLD."
+        },
+        {
+          "text": "Shows or describes the expected qa/performance_test/ folder layout",
+          "passed": true,
+          "evidence": "Shows qa/performance_test/k6_test/ and setup/ layout."
+        },
+        {
+          "text": "Notes CPT is in alpha and/or suggests reaching out to #g_performance_enablement",
+          "passed": true,
+          "evidence": "'CPT is currently in alpha ... reach out in #g_performance_enablement'"
+        },
+        {
+          "text": "Does not suggest running tests against staging or production",
+          "passed": true,
+          "evidence": "'Never point performance tests at staging or production'; notes CPT provisions isolated VMs."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 2,
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "time_seconds": 37.2,
+        "tokens": 0,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "Recommends Sitespeed Runway (not GPT or k6 as primary tool)",
+          "passed": true,
+          "evidence": "'the GitLab tool to use is Sitespeed Runway'; explicitly not k6/GPT/CPT."
+        },
+        {
+          "text": "Mentions specific CWV thresholds (LCP < 2.5s and/or CLS < 0.1)",
+          "passed": true,
+          "evidence": "Table: LCP < 2.5s, CLS < 0.1, TBT < 200ms."
+        },
+        {
+          "text": "Recommends comparing performance before vs after the change",
+          "passed": true,
+          "evidence": "'Measure before vs. after ... run the old version first and record the numbers'."
+        },
+        {
+          "text": "Points to the Sitespeed Runway Web UI or API as a concrete next step",
+          "passed": true,
+          "evidence": "Points to Web UI https://sitespeed.runway.gitlab.net/ and Docker/API option."
+        },
+        {
+          "text": "Does not suggest running tests against staging or production",
+          "passed": true,
+          "evidence": "'don't test against staging or production ... point at a review app or dedicated environment'."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 3,
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 6,
+        "failed": 0,
+        "total": 6,
+        "time_seconds": 31.5,
+        "tokens": 0,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "Proactively raises performance as a concern even though the engineer only asked for a code review",
+          "passed": true,
+          "evidence": "Proactively flags perf despite an ask for code review only: 'I do want to flag one thing up front'."
+        },
+        {
+          "text": "Names a specific performance risk (e.g., JOIN on hot path, N+1, missing index) rather than generic 'consider performance'",
+          "passed": true,
+          "evidence": "'a JOIN across those tables can turn into extra queries per row (or a missing-index scan)'."
+        },
+        {
+          "text": "The performance nudge is concise (2-4 sentences), not a full advisory wall of text",
+          "passed": true,
+          "evidence": "The nudge is ~2 short paragraphs with an opt-out, not a full advisory wall."
+        },
+        {
+          "text": "Gives the engineer an easy way to dismiss the concern (e.g., 'if you've already accounted for this...')",
+          "passed": true,
+          "evidence": "'If you've already accounted for this ... then no action needed and I'll just review the code'."
+        },
+        {
+          "text": "Suggests a specific next step (e.g., 'a baseline k6 test' or 'check GPT's test suite') not just 'think about performance'",
+          "passed": true,
+          "evidence": "'get a performance baseline ... a 20% regression budget on p95'; offers CPT."
+        },
+        {
+          "text": "Does not suggest running tests against staging or production",
+          "passed": true,
+          "evidence": "'Never run these against staging or production'."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 4,
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "time_seconds": 36.8,
+        "tokens": 0,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "Does not generate or offer to write a new k6 test file",
+          "passed": true,
+          "evidence": "'don't write a new one yet' \u2014 no new k6 file authored."
+        },
+        {
+          "text": "Points the engineer to the existing file at qa/performance_test/k6_test/group_merge_requests.js",
+          "passed": true,
+          "evidence": "'open group_merge_requests.js and confirm what it hits'."
+        },
+        {
+          "text": "Explains that the existing CPT setup already covers or likely covers this endpoint",
+          "passed": true,
+          "evidence": "Explains the block is a CPT trigger and the file almost certainly covers GET /api/v4/groups/:id/merge_requests."
+        },
+        {
+          "text": "Does not suggest running tests against staging or production",
+          "passed": true,
+          "evidence": "'don't point any k6 run at staging or production'."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 5,
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.75,
+        "passed": 3,
+        "failed": 1,
+        "total": 4,
+        "time_seconds": 17.9,
+        "tokens": 0,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "Gives a clear direct 'no' \u2014 does not hedge with 'it depends' or 'you might want to consider'",
+          "passed": true,
+          "evidence": "'No, you don't need to run any performance tests before merging this.'"
+        },
+        {
+          "text": "Briefly explains why no test is needed (docs and config comments only, no runtime impact)",
+          "passed": true,
+          "evidence": "'Both of your changes are documentation-only ... YAML comments are ignored at parse time'."
+        },
+        {
+          "text": "Does not recommend any performance testing tools or suggest running any tests",
+          "passed": false,
+          "evidence": "Introduces a conditional GPT recommendation ('the right tool would be GPT') for the hypothetical pool-value change \u2014 a tool suggestion beyond a plain no."
+        },
+        {
+          "text": "Response is brief \u2014 a short paragraph or less, not a full advisory flow",
+          "passed": true,
+          "evidence": "A short answer with one caveat paragraph; not a full advisory flow."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 6,
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 6,
+        "failed": 0,
+        "total": 6,
+        "time_seconds": 35.1,
+        "tokens": 0,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "Recommends rspec-benchmark as the right tool (not GPT, CPT, or Sitespeed) for a spec-suite-enforced unit-level assertion",
+          "passed": true,
+          "evidence": "'You want rspec-benchmark \u2014 it's already in the gitlab-org/gitlab Gemfile'; explicitly no k6/CPT/GPT."
+        },
+        {
+          "text": "Provides a matcher-based spec stub using at least one rspec-benchmark matcher (perform_allocation, perform_under, perform_linear, or perform_at_least)",
+          "passed": true,
+          "evidence": "Spec stub uses perform_allocation(count: 1..N) (and perform_linear alternative)."
+        },
+        {
+          "text": "Aligns the matcher choice to the stated goal of guarding allocations (e.g. perform_allocation(count: ...)) rather than only an unrelated matcher",
+          "passed": true,
+          "evidence": "Chooses perform_allocation specifically because the refactor targeted allocations."
+        },
+        {
+          "text": "Notes that rspec-benchmark is Ruby-only and the assertion runs inside the RSpec suite",
+          "passed": true,
+          "evidence": "'fail in the normal spec run'; 'These run in the normal bundle exec rspec'."
+        },
+        {
+          "text": "Warns that time-based matchers are noisy on CI and suggests generous thresholds or a deterministic matcher (allocation/linear) instead",
+          "passed": true,
+          "evidence": "'time-based matchers are noisy on shared CI runners ... Prefer allocation over time'."
+        },
+        {
+          "text": "Does not suggest running tests against staging or production",
+          "passed": true,
+          "evidence": "In-suite spec approach; no staging/production run suggested."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 7,
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.8333,
+        "passed": 5,
+        "failed": 1,
+        "total": 6,
+        "time_seconds": 34.5,
+        "tokens": 0,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "Recommends a Ruby profiler for investigating where time/memory goes, not a load-testing tool",
+          "passed": true,
+          "evidence": "'You want a profiler, not a load test.'"
+        },
+        {
+          "text": "Maps the symptoms to the right profiler: Stackprof for the CPU/time symptom and memory_profiler (or derailed_benchmarks) for the growing-memory symptom",
+          "passed": true,
+          "evidence": "Stackprof for the CPU/'getting slower' symptom; memory_profiler for the 'memory climbing' symptom."
+        },
+        {
+          "text": "Explicitly distinguishes profiling (finding WHY it is slow) from load testing (GPT/k6/CPT) and does not push a load test as the primary answer",
+          "passed": true,
+          "evidence": "'Load tests (GPT, k6, CPT) tell you whether an endpoint is slow ... won't point at the line of Ruby'."
+        },
+        {
+          "text": "Treats profiling as in scope and engages with it \u2014 does not refuse or redirect profiling out of scope",
+          "passed": true,
+          "evidence": "Engages fully with profiling as the answer; does not refuse or redirect out of scope."
+        },
+        {
+          "text": "Notes these profilers apply to Ruby code specifically; for a non-Ruby project points to language-native tooling (e.g. pprof for Go) or #g_performance_enablement",
+          "passed": false,
+          "evidence": "Does not state profilers apply to Ruby specifically or give a non-Ruby (pprof) fallback; assumes Ruby throughout."
+        },
+        {
+          "text": "Does not suggest running the investigation as a test against staging or production",
+          "passed": true,
+          "evidence": "'you'd never point them at staging or production ... your task is investigation, which is local/dev profiling'."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 0,
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.6667,
+        "passed": 4,
+        "failed": 2,
+        "total": 6,
+        "time_seconds": 32.3,
+        "tokens": 0,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "Clearly recommends writing a performance test (answer is yes)",
+          "passed": true,
+          "evidence": "'yes, this is a good candidate for a performance test'"
+        },
+        {
+          "text": "Mentions the MR list endpoint being high-traffic as a key reason",
+          "passed": true,
+          "evidence": "'It's hot ... even a small per-request slowdown becomes a large aggregate load'"
+        },
+        {
+          "text": "Recommends a specific tool: GPT or custom k6 (not CPT or Sitespeed)",
+          "passed": true,
+          "evidence": "Recommends GPT (k6-based) and QueryRecorder; does not push CPT/Sitespeed."
+        },
+        {
+          "text": "Gives a concrete threshold number or regression budget percentage",
+          "passed": false,
+          "evidence": "Discusses p95/p99 and query-count guards but gives no concrete regression budget number/percentage."
+        },
+        {
+          "text": "Identifies that a JOIN on a hot path can introduce N+1 or index issues under load",
+          "passed": true,
+          "evidence": "'a multi-table join is where N+1s and missing indexes show up under load'"
+        },
+        {
+          "text": "Does not suggest running tests against staging or production",
+          "passed": false,
+          "evidence": "Says 'a proper load test against staging/a perf environment' \u2014 names staging as an acceptable target (only later softens to 'coordinate before hitting shared staging')."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 1,
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 6,
+        "failed": 0,
+        "total": 6,
+        "time_seconds": 51.9,
+        "tokens": 0,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "Correctly identifies CPT as the right tool for MR-pipeline performance testing",
+          "passed": true,
+          "evidence": "'CPT (Component Performance Testing) is exactly the right tool'"
+        },
+        {
+          "text": "Includes a .gitlab-ci.yml snippet with the multi-project trigger to CPT",
+          "passed": true,
+          "evidence": "Provides dotenv-vars + tests:performance trigger to component-performance-testing."
+        },
+        {
+          "text": "Includes a k6 test file with CPT-required exported constants (TEST_NAME, TTFB_THRESHOLD, RPS_THRESHOLD)",
+          "passed": true,
+          "evidence": "k6 stub exports TEST_NAME, TTFB_THRESHOLD, RPS_THRESHOLD."
+        },
+        {
+          "text": "Shows or describes the expected qa/performance_test/ folder layout",
+          "passed": true,
+          "evidence": "Shows qa/performance_test/k6_test/ and setup/ layout."
+        },
+        {
+          "text": "Notes CPT is in alpha and/or suggests reaching out to #g_performance_enablement",
+          "passed": true,
+          "evidence": "'CPT is currently in alpha ... reach out in #g_performance_enablement'"
+        },
+        {
+          "text": "Does not suggest running tests against staging or production",
+          "passed": true,
+          "evidence": "'never run perf tests against shared staging/production'."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 2,
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "time_seconds": 33.7,
+        "tokens": 0,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "Recommends Sitespeed Runway (not GPT or k6 as primary tool)",
+          "passed": true,
+          "evidence": "'the tool for that at GitLab is Sitespeed Runway'."
+        },
+        {
+          "text": "Mentions specific CWV thresholds (LCP < 2.5s and/or CLS < 0.1)",
+          "passed": true,
+          "evidence": "Table: LCP < 2.5s, CLS < 0.1, TBT < 200ms, FCP < 1.8s."
+        },
+        {
+          "text": "Recommends comparing performance before vs after the change",
+          "passed": true,
+          "evidence": "'The core method is a before/after comparison ... measure the OLD page and the NEW page'."
+        },
+        {
+          "text": "Points to the Sitespeed Runway Web UI or API as a concrete next step",
+          "passed": true,
+          "evidence": "Points to Web UI https://sitespeed.runway.gitlab.net/ and Docker/API path."
+        },
+        {
+          "text": "Does not suggest running tests against staging or production",
+          "passed": true,
+          "evidence": "'Do NOT point this at staging or production ... run against a dedicated performance environment or a review app'."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 3,
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.6667,
+        "passed": 4,
+        "failed": 2,
+        "total": 6,
+        "time_seconds": 36.4,
+        "tokens": 0,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "Proactively raises performance as a concern even though the engineer only asked for a code review",
+          "passed": true,
+          "evidence": "Raises perf strongly: 'exactly the kind of change that needs a performance test before it ships'."
+        },
+        {
+          "text": "Names a specific performance risk (e.g., JOIN on hot path, N+1, missing index) rather than generic 'consider performance'",
+          "passed": true,
+          "evidence": "'a multi-table join is where N+1s and missing indexes show up under load'."
+        },
+        {
+          "text": "The performance nudge is concise (2-4 sentences), not a full advisory wall of text",
+          "passed": false,
+          "evidence": "Delivers a full advisory flow \u2014 'Why this needs a perf test', a 5-point code review, a full k6 threshold plan \u2014 not a brief 2-4 sentence nudge."
+        },
+        {
+          "text": "Gives the engineer an easy way to dismiss the concern (e.g., 'if you've already accounted for this...')",
+          "passed": false,
+          "evidence": "No easy dismiss offered; frames the test as required ('clear yes', 'write a Smoke + Baseline test')."
+        },
+        {
+          "text": "Suggests a specific next step (e.g., 'a baseline k6 test' or 'check GPT's test suite') not just 'think about performance'",
+          "passed": true,
+          "evidence": "Concrete: GPT/custom k6, 10% p95 budget, k6 thresholds snippet."
+        },
+        {
+          "text": "Does not suggest running tests against staging or production",
+          "passed": true,
+          "evidence": "'Do not run this against staging or production'."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 4,
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "time_seconds": 57.9,
+        "tokens": 0,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "Does not generate or offer to write a new k6 test file",
+          "passed": true,
+          "evidence": "'No, don't write a new test.' \u2014 no new file authored."
+        },
+        {
+          "text": "Points the engineer to the existing file at qa/performance_test/k6_test/group_merge_requests.js",
+          "passed": true,
+          "evidence": "'group_merge_requests.js is a CPT test for GET /api/v4/groups/:id/merge_requests ... I read it'."
+        },
+        {
+          "text": "Explains that the existing CPT setup already covers or likely covers this endpoint",
+          "passed": true,
+          "evidence": "Explains CPT trigger semantics and that the existing test already drives the endpoint."
+        },
+        {
+          "text": "Does not suggest running tests against staging or production",
+          "passed": true,
+          "evidence": "'never run perf tests against shared staging/production'."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 5,
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "time_seconds": 18.9,
+        "tokens": 0,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "Gives a clear direct 'no' \u2014 does not hedge with 'it depends' or 'you might want to consider'",
+          "passed": true,
+          "evidence": "'No, you don't need to run performance tests for this change.'"
+        },
+        {
+          "text": "Briefly explains why no test is needed (docs and config comments only, no runtime impact)",
+          "passed": true,
+          "evidence": "'CHANGELOG.md is pure documentation ... YAML comments are stripped during parsing'."
+        },
+        {
+          "text": "Does not recommend any performance testing tools or suggest running any tests",
+          "passed": true,
+          "evidence": "Suggests only sanity checks (git diff, YAML load); recommends no perf tools or perf tests."
+        },
+        {
+          "text": "Response is brief \u2014 a short paragraph or less, not a full advisory flow",
+          "passed": true,
+          "evidence": "Short reasoning plus two quick checks; not a full advisory flow."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 6,
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.3333,
+        "passed": 2,
+        "failed": 4,
+        "total": 6,
+        "time_seconds": 79.1,
+        "tokens": 0,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "Recommends rspec-benchmark as the right tool (not GPT, CPT, or Sitespeed) for a spec-suite-enforced unit-level assertion",
+          "passed": false,
+          "evidence": "Recommends raw GC.stat(:total_allocated_objects) delta and ActiveRecord::QueryRecorder \u2014 never names rspec-benchmark."
+        },
+        {
+          "text": "Provides a matcher-based spec stub using at least one rspec-benchmark matcher (perform_allocation, perform_under, perform_linear, or perform_at_least)",
+          "passed": false,
+          "evidence": "No rspec-benchmark matcher used; uses a manual GC.stat comparison and exceed_query_limit instead."
+        },
+        {
+          "text": "Aligns the matcher choice to the stated goal of guarding allocations (e.g. perform_allocation(count: ...)) rather than only an unrelated matcher",
+          "passed": false,
+          "evidence": "Addresses allocation intent, but not via an rspec-benchmark matcher as the assertion requires."
+        },
+        {
+          "text": "Notes that rspec-benchmark is Ruby-only and the assertion runs inside the RSpec suite",
+          "passed": true,
+          "evidence": "'in-suite RSpec regression guard ... runs in the normal rspec suite on every MR'."
+        },
+        {
+          "text": "Warns that time-based matchers are noisy on CI and suggests generous thresholds or a deterministic matcher (allocation/linear) instead",
+          "passed": false,
+          "evidence": "Discusses allocation-count drift/stability but does not flag CI noise on time-based matchers (no time matcher used)."
+        },
+        {
+          "text": "Does not suggest running tests against staging or production",
+          "passed": true,
+          "evidence": "In-suite spec approach; explicitly contrasts with load tests, no staging/production run suggested."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 7,
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.6667,
+        "passed": 4,
+        "failed": 2,
+        "total": 6,
+        "time_seconds": 41.9,
+        "tokens": 0,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "Recommends a Ruby profiler for investigating where time/memory goes, not a load-testing tool",
+          "passed": true,
+          "evidence": "'You want profiling, not load testing' \u2014 Stackprof, memory_profiler, derailed_benchmarks."
+        },
+        {
+          "text": "Maps the symptoms to the right profiler: Stackprof for the CPU/time symptom and memory_profiler (or derailed_benchmarks) for the growing-memory symptom",
+          "passed": true,
+          "evidence": "stackprof for CPU time; memory_profiler for the memory/allocations symptom."
+        },
+        {
+          "text": "Explicitly distinguishes profiling (finding WHY it is slow) from load testing (GPT/k6/CPT) and does not push a load test as the primary answer",
+          "passed": true,
+          "evidence": "'Keep any real load testing out of this investigation until you've got a candidate fix'."
+        },
+        {
+          "text": "Treats profiling as in scope and engages with it \u2014 does not refuse or redirect profiling out of scope",
+          "passed": true,
+          "evidence": "Fully engages with profiling workflow; does not refuse."
+        },
+        {
+          "text": "Notes these profilers apply to Ruby code specifically; for a non-Ruby project points to language-native tooling (e.g. pprof for Go) or #g_performance_enablement",
+          "passed": false,
+          "evidence": "No mention that profilers are Ruby-specific or a non-Ruby fallback (pprof)."
+        },
+        {
+          "text": "Does not suggest running the investigation as a test against staging or production",
+          "passed": false,
+          "evidence": "Suggests reading api_json.log via 'Kibana in staging/prod' and pulling profiles 'from real traffic' on staging/prod \u2014 points investigation at shared prod/staging rather than a dedicated/local path."
+        }
+      ],
+      "notes": []
+    }
+  ],
+  "run_summary": {
+    "with_skill": {
+      "pass_rate": {
+        "mean": 0.9271,
+        "stddev": 0.1039,
+        "min": 0.75,
+        "max": 1.0
+      },
+      "time_seconds": {
+        "mean": 35.325,
+        "stddev": 9.092,
+        "min": 17.9,
+        "max": 50.9
+      },
+      "tokens": {
+        "mean": 0.0,
+        "stddev": 0.0,
+        "min": 0,
+        "max": 0
+      }
+    },
+    "without_skill": {
+      "pass_rate": {
+        "mean": 0.7917,
+        "stddev": 0.248,
+        "min": 0.3333,
+        "max": 1.0
+      },
+      "time_seconds": {
+        "mean": 44.0125,
+        "stddev": 18.6041,
+        "min": 18.9,
+        "max": 79.1
+      },
+      "tokens": {
+        "mean": 0.0,
+        "stddev": 0.0,
+        "min": 0,
+        "max": 0
+      }
+    },
+    "delta": {
+      "pass_rate": "+0.14",
+      "time_seconds": "-8.7",
+      "tokens": "+0"
+    }
+  },
+  "notes": []
+}
