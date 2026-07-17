@@ -73,9 +73,10 @@ The skill ships a `hooks.json` with a `Stop` checker
 (`scripts/check-completion.py`). On each Stop it reads the active session's
 `queue.jsonl` and **blocks** (`{"decision": "block", ...}`) while any bug is in
 a non-terminal status (`queued`, `in_flight`, `re-evaluate`, `needs_rebase`) and
-the time budget hasn't expired; it **approves** only when every entry is
-terminal (`fixed`, `blocked`, `needs_human`, `skipped`,
-`requires_human_review`, `introduced_regression`) or the budget is exhausted.
+the time budget hasn't expired (an `introduced_regression` counts as
+non-terminal — reconciliation reverts and re-queues it); it **approves** only
+when every entry is terminal (`fixed`, `blocked`, `needs_human`, `skipped`,
+`requires_human_review`) or the budget is exhausted.
 Under the repository's skill-hooks plugin this drives the loop; the checker is
 skipped in subagent context so a `bugfix` subagent's own stop isn't caught.
 Without the plugin, re-run until the checker approves.

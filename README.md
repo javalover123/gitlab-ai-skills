@@ -43,6 +43,10 @@ Skills are loaded explicitly by the agent when relevant to a task (e.g. "load th
 <!-- SKILLS_START -->
 ### Development Workflow
 
+#### bug-burndown
+
+Runs a continuous, autonomous bug burndown session — collecting defects from logs, tests, issue queues, and spec drift; deduplicating and triaging them through an 8-phase pipeline; then dispatching bounded parallel bugfix subagents in isolated worktrees until the queue is empty or the time budget runs out. Use when asked to burn down the bugs, clear the backlog, triage CI failures, find regressions, run a fix session, or anything that's batch quality-improvement rather than a single targeted bug fix. → [`SKILL.md`](skills/bug-burndown/SKILL.md)
+
 #### commit-messages
 
 Use when creating git commits, writing commit messages, or when about to run git commit -- enforces structured commit message format with imperative mood, capitalized subjects, 72-char wrapping, and atomic commits → [`SKILL.md`](skills/commit-messages/SKILL.md)
@@ -251,6 +255,7 @@ This repo ships as a [Claude Code plugin marketplace](https://code.claude.com/do
 | Plugin | Skills | Description | Version |
 | ------ | ------ | ----------- | ------- |
 | [`authoring-skills`](.claude-plugin/plugins/authoring-skills) | [`authoring-skills`](skills/authoring-skills/SKILL.md) | Author a new agent skill or improve an existing one - write the SKILL.md frontmatter and description, structure the body, and fix skills that under- or over-trigger. Use when asked to create/write a skill, make a SKILL.md, improve/refactor a skill, or fix a skill's description. | 0.2.0 |
+| [`bug-burndown`](.claude-plugin/plugins/bug-burndown) | [`bug-burndown`](skills/bug-burndown/SKILL.md) | Runs a continuous, autonomous bug burndown session — collecting defects from logs, tests, issue queues, and spec drift; deduplicating and triaging them through an 8-phase pipeline; then dispatching bounded parallel bugfix subagents in isolated worktrees until the queue is empty or the time budget runs out. Use when asked to burn down the bugs, clear the backlog, triage CI failures, find regressions, run a fix session, or anything that's batch quality-improvement rather than a single targeted bug fix. | 1.0.0 |
 | [`commit-messages`](.claude-plugin/plugins/commit-messages) | [`commit-messages`](skills/commit-messages/SKILL.md) | Use when creating git commits, writing commit messages, or when about to run git commit -- enforces structured commit message format with imperative mood, capitalized subjects, 72-char wrapping, and atomic commits | 1.0.2 |
 | [`gitlab-agent-plan`](.claude-plugin/plugins/gitlab-agent-plan) | [`gitlab-agent-plan`](skills/gitlab-agent-plan/SKILL.md) | Read or write a GitLab work item's Workplan / Agent Plan widget — the AI work plan property — via GraphQL. Use when asked to get/show/pull or attach/set/update a work item's workplan or agent plan, as opposed to its description or comments. | 0.1.0 |
 | [`gitlab-babysit-mr`](.claude-plugin/plugins/gitlab-babysit-mr) | [`gitlab-babysit-mr`](skills/gitlab-babysit-mr/SKILL.md) | Monitor a GitLab MR's pipeline until green. Classifies failures (flaky, master-broken, lint, coverage, real), retries jobs where appropriate, makes light-touch auto-fixes, and posts findings as an MR comment. | 0.11.0 |

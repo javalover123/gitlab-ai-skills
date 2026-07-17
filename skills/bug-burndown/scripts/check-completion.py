@@ -46,13 +46,16 @@ TERMINAL_STATUSES = {
     "needs_human",
     "skipped",
     "requires_human_review",
-    "introduced_regression",
 }
 NON_TERMINAL_STATUSES = {
     "queued",
     "in_flight",
     "re-evaluate",
     "needs_rebase",
+    # Reconciliation reverts the offending merge and re-queues with escalated
+    # severity (see dispatcher.md detect_introduced_regressions), so an
+    # introduced regression is unfinished work, not a terminal state.
+    "introduced_regression",
 }
 
 
@@ -147,10 +150,26 @@ def time_budget_exhausted(manifest):
         return False
 
 
+def latest_by_id(queue_entries):
+    """Collapse the append-only queue to one entry per bug — latest wins.
+
+    queue.jsonl is append-only: a status transition appends a new line that
+    references the same `id`, and the latest line wins on read. Counting raw
+    lines would tally a fixed bug (queued -> in_flight -> fixed = 3 lines) as
+    two non-terminal plus one terminal, so the loop would never drain. Keep
+    only the last entry seen for each id (order-preserving).
+    """
+    latest = {}
+    for i, entry in enumerate(queue_entries):
+        key = entry.get("id", i)  # entries without an id can't collapse; keep each
+        latest[key] = entry
+    return list(latest.values())
+
+
 def count_by_status(queue_entries):
     counts = {"non_terminal": 0, "terminal": 0, "unknown": 0}
     breakdown = {}
-    for entry in queue_entries:
+    for entry in latest_by_id(queue_entries):
         status = entry.get("status", "unknown")
         breakdown[status] = breakdown.get(status, 0) + 1
         if status in NON_TERMINAL_STATUSES:

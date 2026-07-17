@@ -300,7 +300,8 @@ Before dispatching, query the harness's slot-status command and compare
 capacity to the requested parallelism:
 
 ```bash
-capacity=$(a verification harness --work-dir .bug-burndown/<session-id> slot status | jq .capacity)
+# $HARNESS is your project's verification-harness binary, if it provides one.
+capacity=$("$HARNESS" --work-dir .bug-burndown/<session-id> slot status | jq .capacity)
 if (( capacity < 2 * parallelism )); then
     parallelism=$(( capacity / 2 ))
     parallelism=$(( parallelism < 1 ? 1 : parallelism ))
@@ -319,7 +320,9 @@ comfortably; 5 only if you accept one will block briefly.
 Before launching the first subagent, run the active language profile's
 prewarm command (typically `cargo build --workspace`) once on the
 baseline. This populates `sccache` / `GOCACHE` so the first subagent
-to verify doesn't pay full compile cost. The prewarm step is
+to verify doesn't pay full compile cost. The prewarm step is best-effort:
+if it fails, log a warning and continue — a cold cache costs time, not
+correctness.
 
 ### Slot semaphore unavailable
 
@@ -475,8 +478,9 @@ safe cap, so cranking subagent fan-out to `5` is the new baseline.
 The capability check runs at Phase 1d:
 
 ```bash
-if command -v a verification harness >/dev/null; then
-    capacity=$(a verification harness --work-dir .bug-burndown/<session-id> slot status | jq .capacity)
+# $HARNESS is your project's verification-harness binary, if it provides one.
+if command -v "$HARNESS" >/dev/null; then
+    capacity=$("$HARNESS" --work-dir .bug-burndown/<session-id> slot status | jq .capacity)
     if (( capacity < 2 * parallelism )); then
         parallelism=$(( capacity / 2 ))
         parallelism=$(( parallelism < 1 ? 1 : parallelism ))
