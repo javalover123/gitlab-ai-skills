@@ -30,7 +30,7 @@ decision, and re-queue actionable items so the parent skill's loop resumes.
 ## Arguments and defaults
 
 `[session:<id>] [skill:iteratotron|bug-burndown|both] [scope:all|current|harness]
-[include-blocked:yes|no]`
+[include-blocked:yes|no] [include-decided:yes|no]`
 
 **Scan every session by default** (`scope:all`), not just `CURRENT` — a harness
 loop parks items in the session *it* spawned, never in `.bug-burndown/CURRENT`, so

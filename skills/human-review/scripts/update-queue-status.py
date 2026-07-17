@@ -21,7 +21,8 @@ Exit codes:
   1 — invalid arguments
   2 — queue file not found or unreadable
   3 — item id not found in queue
-  4 — entry already had a terminal-not-needs_human status; refused
+  4 — entry already had a protected terminal-not-needs_human status; refused
+  5 — entry's current status isn't in the human-review-eligible set; refused
       (preserves the prior fix/blocked/skipped decision)
 """
 
@@ -193,7 +194,7 @@ def main(argv):
             f"not in the human-review-eligible set "
             f"{sorted(VALID_CURRENT_STATUSES)}. Refusing.\n"
         )
-        return 4
+        return 5
 
     decision_record = Path(args.decision_record)
     if not decision_record.is_file():

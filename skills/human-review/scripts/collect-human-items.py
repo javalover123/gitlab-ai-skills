@@ -19,7 +19,7 @@ default CURRENT-only discovery and silently block the harness loop from
 ever reaching its global fixpoint.
 
 `--scan-harness` enumerates every `.bug-burndown/<id>/` session whose
-`manifest.yaml` carries `origin: <toolname>-harness` and collects its parked
+`manifest.yaml` carries `origin: <something>-harness` and collects its parked
 items. The harness iteration that spawned each session (parsed from the
 manifest's `log_files: .harness/iter-NNN/...` entry) is surfaced in the
 `harness_iter` field so the interview can name the run that produced the
@@ -55,7 +55,7 @@ Output schema (one JSON object per line):
     "last_error":         "<short string>",
     "queue_path":         "<absolute path to queue.jsonl or scope_queue.jsonl>",
     "needs_human_dir":    "<absolute path to needs_human/<id>/ if present, else null>",
-    "origin":             "<manifest origin, e.g. <toolname>-harness, or null>",
+    "origin":             "<manifest origin, e.g. vulnmapper-harness, or null>",
     "harness_iter":       "<iter-NNN that spawned a harness session, or null>",
     "raw":                { ...original queue entry, opaque... }
   }
@@ -74,20 +74,20 @@ PARKED_PLUS_BLOCKED = PARKED_STATUSES | {"blocked"}
 ITERATOTRON_QUEUE_NAME = "scope_queue.jsonl"
 BUG_BURNDOWN_QUEUE_NAME = "queue.jsonl"
 
-HARNESS_ORIGIN = "<toolname>-harness"
-# Recognised harness origins. Different repos tag their harness-spawned
-# sessions with a project-specific origin (e.g. "vulnmapper-harness"), so
-# match any origin ending in "-harness" as well as the canonical name.
-# Override or extend via --harness-origin.
-HARNESS_ORIGINS = {HARNESS_ORIGIN}
 ITER_RE = re.compile(r"\.harness/(iter-\d+)")
 
 
 def is_harness_origin(origin, extra_origins):
-    """True if a session's manifest origin marks it harness-spawned."""
+    """True if a session's manifest origin marks it harness-spawned.
+
+    Repos tag harness-spawned sessions with a project-specific origin ending
+    in "-harness" (e.g. "vulnmapper-harness"), so the suffix is the general
+    match. Pass extra exact origins via --harness-origin for anything that
+    doesn't follow the convention.
+    """
     if not origin:
         return False
-    if origin in HARNESS_ORIGINS or origin in extra_origins:
+    if origin in extra_origins:
         return True
     return origin.endswith("-harness")
 ORIGIN_RE = re.compile(r"^\s*origin:\s*(\S+)", re.MULTILINE)
@@ -110,7 +110,7 @@ def read_jsonl(path):
 def read_manifest_meta(session_dir):
     """Return (origin, harness_iter) parsed from a session's manifest.yaml.
 
-    `origin` is the manifest's `origin:` value (e.g. "<toolname>-harness") or
+    `origin` is the manifest's `origin:` value (e.g. "vulnmapper-harness") or
     None. `harness_iter` is the first `.harness/iter-NNN` reference found
     anywhere in the manifest (usually under `log_files:`) or None. We parse
     with regexes rather than a YAML dependency — the two fields we need are
@@ -128,10 +128,17 @@ def read_manifest_meta(session_dir):
     return origin, harness_iter
 
 
-def has_recorded_decisions(session_dir):
-    """True if the session already has a non-empty human_decisions/ dir."""
+def item_has_decision(session_dir, item_id):
+    """True if a decision record already exists for this specific item.
+
+    Records are written as human_decisions/<item_id>.md (see Phase 5). We match
+    the stem so an item is skipped only when its own decision exists — never
+    because a sibling in the same session was decided.
+    """
     hd = session_dir / "human_decisions"
-    return hd.is_dir() and any(hd.iterdir())
+    if not hd.is_dir():
+        return False
+    return any(p.stem == item_id for p in hd.iterdir() if p.is_file())
 
 
 def session_for(skill_root, override):
@@ -199,16 +206,21 @@ def normalise_bug_burndown(entry, session_id, session_dir, origin, harness_iter)
     }
 
 
-def collect(session_dir, queue_name, normaliser, session_id, parked_set):
+def collect(session_dir, queue_name, normaliser, session_id, parked_set,
+            include_decided=False):
     queue_path = session_dir / queue_name
     origin, harness_iter = read_manifest_meta(session_dir)
     items = []
     for entry in read_jsonl(queue_path):
         status = entry.get("status", "")
-        if status in parked_set:
-            items.append(
-                normaliser(entry, session_id, session_dir, origin, harness_iter)
-            )
+        if status not in parked_set:
+            continue
+        item = normaliser(entry, session_id, session_dir, origin, harness_iter)
+        # Skip only items that already have their own decision record, not the
+        # whole session — otherwise undecided siblings are silently dropped.
+        if not include_decided and item_has_decision(session_dir, item["item_id"]):
+            continue
+        items.append(item)
     return items
 
 
@@ -233,7 +245,7 @@ def parse_args(argv):
         "--scan-harness",
         action="store_true",
         help="scan every .bug-burndown session whose manifest origin marks "
-        "it harness-spawned (the canonical <toolname>-harness, any origin ending "
+        "it harness-spawned (any origin ending "
         "in '-harness' such as vulnmapper-harness, or one named via "
         "--harness-origin) \u2014 harness-spawned sessions, not just CURRENT",
     )
@@ -325,12 +337,11 @@ def main(argv):
                     )
 
     all_items = []
-    skipped_decided = 0
     for skill, sid, sdir, queue_name, normaliser in targets.values():
-        if not args.include_decided and has_recorded_decisions(sdir):
-            skipped_decided += 1
-            continue
-        all_items.extend(collect(sdir, queue_name, normaliser, sid, parked_set))
+        all_items.extend(
+            collect(sdir, queue_name, normaliser, sid, parked_set,
+                    include_decided=args.include_decided)
+        )
 
     # Stable sort: source_skill, then priority (P0 < P1 < ... < P?), then item_id
     priority_order = {"P0": 0, "P1": 1, "P2": 2, "P3": 3}
@@ -364,11 +375,7 @@ def main(argv):
         mode = "scan-harness"
     else:
         mode = "current"
-    decided_note = (
-        f", skipped {skipped_decided} already-decided session(s)"
-        if skipped_decided
-        else ""
-    )
+    decided_note = "" if args.include_decided else " (items with an existing decision skipped; pass --include-decided to re-surface)"
     sys.stderr.write(
         f"collected {len(all_items)} parked item(s) across "
         f"{sessions_with_items} session(s) [mode={mode}, "

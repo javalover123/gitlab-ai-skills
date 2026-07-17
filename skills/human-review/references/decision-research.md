@@ -119,7 +119,7 @@ field is for.
 
 ## When the artefact's missing entirely
 
-A parked item whose linked artefact doesn't exist is a tells you the
+A parked item whose linked artefact doesn't exist tells you the
 parent skill's Phase 3a (or equivalent) tagged this for `/all-aboard`
 but the bootstrap didn't complete. Don't paper over the gap — surface
 it explicitly as an option:
