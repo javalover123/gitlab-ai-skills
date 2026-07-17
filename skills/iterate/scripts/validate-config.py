@@ -31,6 +31,9 @@ def validate_config(config_path: Path) -> bool:
         # Flat schema (preferred)
         "include_paths", "exclude_paths",
         "include_extensions", "exclude_extensions",
+        # Behaviour / tuning keys read by IterateConfig
+        "timeouts", "skip_in_background", "custom_output_filters",
+        "env", "cargo", "coverage_threshold",
         # Legacy nested schema
         "include", "exclude"
     }
