@@ -3,7 +3,7 @@
     "name": "opencode-serve",
     "version": "0.1.0",
     "description": "Least-privilege sandbox for a headless `opencode serve` instance driven by a harness. Replaces the claude-code profile/network-profile for opencode. No TUI assumptions.",
-    "author": "vulnmapper harness"
+    "author": "harness-builder"
   },
   "extends": "default",
   "groups": {

@@ -177,7 +177,8 @@ module <Project>
         end
 
         setup_out, _serr, _sstatus = Open3.capture3("nono", "setup", "--check-only")
-        network_profile = if setup_out.match?(/landlock_abi: [45]/)
+        abi = setup_out[/landlock_abi:\s*(\d+)/, 1]&.to_i
+        network_profile = if abi && abi >= 4
           "claude-code"
         else
           warn "[sandbox] Landlock ABI < 4 — dropping --network-profile claude-code"

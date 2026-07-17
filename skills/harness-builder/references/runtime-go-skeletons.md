@@ -64,6 +64,8 @@ import (
     "os"
     "os/exec"
     "path/filepath"
+    "regexp"
+    "strconv"
     "strings"
     "time"
 
@@ -209,10 +211,17 @@ func checkSandboxAndClaude(ctx context.Context, claudeBin string, allowUnsandbox
     } else {
         verdict.NonoVersion = strings.TrimSpace(string(nonoOut))
 
-        // Step 2 — check Landlock ABI
+        // Step 2 — check Landlock ABI. Parse the version and compare >= 4 so
+        // future ABIs (6+) still qualify for --network-profile.
         setupOut, _ := exec.CommandContext(ctx, "nono", "setup", "--check-only").Output()
-        if strings.Contains(string(setupOut), "landlock_abi: 4") ||
-            strings.Contains(string(setupOut), "landlock_abi: 5") {
+        abiMatch := regexp.MustCompile(`landlock_abi:\s*(\d+)`).FindSubmatch(setupOut)
+        abiOK := false
+        if abiMatch != nil {
+            if v, err := strconv.Atoi(string(abiMatch[1])); err == nil && v >= 4 {
+                abiOK = true
+            }
+        }
+        if abiOK {
             verdict.NetworkProfile = networkProfileDefault
             slog.Info("[sandbox] nono ready", "version", verdict.NonoVersion,
                 "network_profile", verdict.NetworkProfile)
@@ -650,6 +659,11 @@ The two-pass orchestration in Go is structurally identical to Rust.
 Use `os/exec.CommandContext` with `context.WithTimeout` for the
 `claude --print` call wrapped in `wrapWithNono` when sandboxed. See
 `references/nono-integration.md` for the sandbox contract.
+
+This excerpt continues `reviewer.go`; the dispatch below feeds stdin with
+`bytes.NewReader`, so the file's import block needs `"bytes"`, `"context"`,
+and `"os/exec"` alongside the imports already shown above (the full block is
+in the `implementation-go.md` skeleton).
 
 ```go
 func reviewBatch(

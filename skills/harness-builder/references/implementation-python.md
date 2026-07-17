@@ -185,8 +185,11 @@ async def check_sandbox(allow_unsandboxed: bool = False) -> SandboxVerdict:
         subprocess.run, ["nono", "setup", "--check-only"],
         capture_output=True, text=True,
     )
-    # Landlock ABI v4+ required for --network-profile (Linux 6.7+)
-    if "landlock_abi: 4" in setup.stdout or "landlock_abi: 5" in setup.stdout:
+    # Landlock ABI v4+ required for --network-profile (Linux 6.7+).
+    # Parse the version and compare >= 4 so future ABIs (6+) still qualify.
+    import re as _re
+    _m = _re.search(r"landlock_abi:\s*(\d+)", setup.stdout)
+    if _m and int(_m.group(1)) >= 4:
         verdict.network_profile = "claude-code"
     else:
         import logging
@@ -286,7 +289,7 @@ async def dispatch(
         with log_path.open("w") as log:
             async for msg in client.query(prompt):
                 # tee raw message to disk BEFORE filtering
-                log.write(json.dumps(msg.dict() if hasattr(msg, "dict") else msg) + "\n")
+                log.write(json.dumps(msg.model_dump() if hasattr(msg, "model_dump") else msg) + "\n")
                 log.flush()
                 if isinstance(msg, ResultMessage):
                     cost = msg.total_cost_usd
