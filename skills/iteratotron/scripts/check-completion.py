@@ -23,10 +23,10 @@ Skipped when:
 
 Configuration:
 - Terminal statuses (treated as "done"): complete, blocked, needs_human,
-  skipped_recently_complete, requires_human_review, introduced_regression
-  (only after revert + re-queue).
+  skipped_recently_complete, requires_human_review.
 - Non-terminal statuses (treated as "still working"): queued, in_flight,
-  re-evaluate, needs_rebase.
+  re-evaluate, needs_rebase, introduced_regression (reverted and re-queued,
+  so still unfinished).
 
 Exit protocol per Claude Code hooks spec:
 - Print JSON `{"decision": "block", "reason": "..."}` to stdout → keep going
@@ -53,6 +53,8 @@ NON_TERMINAL_STATUSES = {
     "in_flight",
     "re-evaluate",
     "needs_rebase",
+    # A regression is reverted and re-queued, so it's unfinished work.
+    "introduced_regression",
 }
 
 

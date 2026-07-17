@@ -2,7 +2,7 @@
 """
 Genesis done-predicate evaluator.
 
-Reads .genesis/state.json (or a path passed as --state) and evaluates
+Reads .iteratotron/state.json (or a path passed as --state) and evaluates
 every clause of the done predicate (see references/done-predicate.md).
 Exits 0 when done(project) == true; exits 1 with a clause-by-clause
 report otherwise.
@@ -33,15 +33,21 @@ class ClauseResult:
 
 
 def check_clause_1_scopes_complete(state: dict) -> ClauseResult:
-    incomplete = [s for s in state.get("scope_queue", []) if s.get("status") != "complete"]
+    # done-predicate.md clause 1 requires BOTH status=complete AND an APPROVED
+    # adversarial review — a scope completed without Phase 7 review isn't done.
+    incomplete = [
+        s for s in state.get("scope_queue", [])
+        if s.get("status") != "complete"
+        or (s.get("adversarial_review") or {}).get("verdict") != "APPROVED"
+    ]
     return ClauseResult(
         idx=1,
-        name="all scopes complete",
+        name="all scopes complete and adversarially approved",
         passed=not incomplete,
         evidence=(
-            "all scope_queue entries in status=complete"
+            "all scope_queue entries status=complete with adversarial_review.verdict=APPROVED"
             if not incomplete
-            else f"incomplete scopes: {[s.get('id') for s in incomplete]}"
+            else f"incomplete or unreviewed scopes: {[s.get('id') for s in incomplete]}"
         ),
     )
 
@@ -137,7 +143,7 @@ def check_clause_5_tier3(state: dict, root: Path) -> ClauseResult:
 
 
 def check_clause_6_traceability(state: dict, root: Path) -> ClauseResult:
-    csv_path = root / state.get("traceability_csv", ".genesis/traceability.csv")
+    csv_path = root / state.get("traceability_csv", ".iteratotron/traceability.csv")
     if not csv_path.is_file():
         return ClauseResult(
             idx=6,
@@ -169,7 +175,14 @@ def check_clause_7_drift(state: dict, root: Path) -> ClauseResult:
         "|| true",
         root,
     )
-    lines = [line for line in output.split("\n") if line.strip() and "test" not in line.lower()]
+    # Ignore markers under standard test/vendored/generated locations, not just
+    # paths literally containing "test".
+    _skip_dirs = ("test", "spec/", "__tests__/", "fixtures/", "testdata/",
+                  "vendor/", "node_modules/", "target/", ".git/", "generated/")
+    lines = [
+        line for line in output.split("\n")
+        if line.strip() and not any(d in line.lower() for d in _skip_dirs)
+    ]
     if lines:
         return ClauseResult(
             idx=7,
@@ -182,27 +195,34 @@ def check_clause_7_drift(state: dict, root: Path) -> ClauseResult:
 
 
 def check_clause_8_slsa(state: dict, root: Path) -> ClauseResult:
-    layout = root / state.get("in_toto_layout", ".genesis/in-toto/layout.json")
+    layout = root / state.get("in_toto_layout", ".iteratotron/in-toto/layout.json")
     if not layout.is_file():
         return ClauseResult(idx=8, name="SLSA L3 attested", passed=False,
                             evidence=f"in-toto layout not found at {layout}")
-    rc, output = _run_cmd("which cosign", root)
+    rc, _ = _run_cmd("which cosign", root)
     if rc != 0:
         return ClauseResult(idx=8, name="SLSA L3 attested", passed=False,
-                            evidence="cosign not installed")
-    # cosign verify happens here in production — for genesis, presence of
-    # the layout + signature artefact is the deterministic gate
+                            evidence="cosign not installed — cannot verify the attestation")
     sig = layout.with_suffix(".sig")
     if not sig.is_file():
         return ClauseResult(idx=8, name="SLSA L3 attested", passed=False,
                             evidence=f"attestation signature not found at {sig}")
+    # Actually verify — presence of a .sig proves nothing about validity.
+    # done-predicate.md requires cosign verify-attestation to exit 0.
+    key = state.get("cosign_public_key", "cosign.pub")
+    vrc, voutput = _run_cmd(
+        f"cosign verify-attestation --key {key} --type slsaprovenance {layout}", root
+    )
+    if vrc != 0:
+        return ClauseResult(idx=8, name="SLSA L3 attested", passed=False,
+                            evidence=f"cosign verify-attestation failed: {voutput.strip()[:200]}")
     return ClauseResult(idx=8, name="SLSA L3 attested", passed=True,
-                        evidence=f"layout + signature present at {layout}")
+                        evidence=f"cosign verify-attestation passed for {layout}")
 
 
 def check_clause_9_postmortem(state: dict, root: Path) -> ClauseResult:
     sid = state.get("session_id", "")
-    pm = root / ".genesis" / "postmortems" / f"{sid}.md"
+    pm = root / ".iteratotron" / "postmortems" / f"{sid}.md"
     if not pm.is_file() or pm.stat().st_size == 0:
         return ClauseResult(idx=9, name="post-implementation review written", passed=False,
                             evidence=f"postmortem not found or empty at {pm}")
@@ -226,8 +246,8 @@ def check_clause_10_needs_human(state: dict) -> ClauseResult:
 
 def main() -> int:
     ap = argparse.ArgumentParser(description="Genesis done-predicate evaluator")
-    ap.add_argument("--state", default=".genesis/state.json",
-                    help="path to state.json (default: .genesis/state.json)")
+    ap.add_argument("--state", default=".iteratotron/state.json",
+                    help="path to state.json (default: .iteratotron/state.json)")
     ap.add_argument("--repo-root", default=".",
                     help="repo root for commands (default: cwd)")
     ap.add_argument("--skip", action="append", default=[],
