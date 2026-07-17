@@ -27,8 +27,8 @@ integrations.
 inputs.poetry2nix.url = "github:nix-community/poetry2nix";
 
 # package
-{ poetry2nix, python312 }:
-(poetry2nix.lib.mkPoetry2Nix { pkgs; }).mkPoetryApplication {
+{ poetry2nix, python312, pkgs }:
+(poetry2nix.lib.mkPoetry2Nix { inherit pkgs; }).mkPoetryApplication {
   projectDir = ../..;
   python = python312;
   # overrides for wheels / native libs go here

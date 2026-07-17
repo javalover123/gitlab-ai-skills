@@ -113,6 +113,7 @@ validating that outputs make sense, and it's an extra input. A one-liner does
 the job with zero dependencies — see `assets/templates/lib/eachSystem.nix`:
 
 ```nix
-# lib/eachSystem.nix
-systems: f: nixpkgs.lib.genAttrs systems (system: f system)
+# lib/eachSystem.nix — import with { inherit lib systems; }, then call with f
+{ lib, systems }:
+f: lib.genAttrs systems (system: f system)
 ```

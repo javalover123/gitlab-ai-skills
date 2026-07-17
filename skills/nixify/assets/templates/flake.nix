@@ -94,7 +94,7 @@
         in
         (self.packages.${system} or { })
         // {
-          # integration = pkgs.callPackage ./checks/integration.nix { };
+          # integration = pkgs.callPackage ./checks/integration.nix { inherit (self.packages.${system}) myapp; };
         }
       );
 
