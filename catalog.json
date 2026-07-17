@@ -89,6 +89,14 @@
       "path": "skills/mr-adversarial-review/SKILL.md"
     },
     {
+      "name": "mr-guided-review",
+      "description": "Use when you want to understand and review a GitLab MR as a reasoning companion rather than an automated reviewer. Phase 1 explains the MR's goal and purpose concisely with a concrete example, then gates on your confirmation before Phase 2 does a thorough code review that surfaces genuine issues, not nitpicks. Read-only \u2014 never posts anything to the MR; you post any feedback yourself. Triggers when you want to review, understand, or walk through an MR.",
+      "category": "Development Workflow",
+      "license": "MIT",
+      "compatibility": "opencode",
+      "path": "skills/mr-guided-review/SKILL.md"
+    },
+    {
       "name": "mr-review",
       "description": "Review a GitLab merge request - read diffs, analyze changes, present findings, and optionally post comments on the MR",
       "category": "Development Workflow",
