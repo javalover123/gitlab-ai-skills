@@ -1,6 +1,0 @@
-{
-  "eval_id": 0,
-  "eval_name": "sql-join-hot-path",
-  "prompt": "I just changed a SQL query in the merge requests API \u2014 added a join to pull in approval data. It's on the MR list endpoint which gets hit a lot. Do I need to write a performance test for this?",
-  "assertions": []
-}

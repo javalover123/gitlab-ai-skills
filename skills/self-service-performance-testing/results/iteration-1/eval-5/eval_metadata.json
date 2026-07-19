@@ -1,6 +1,0 @@
-{
-  "eval_id": 5,
-  "eval_name": "docs-config-only-negative",
-  "prompt": "I just updated CHANGELOG.md and added some inline comments to config/database.yml to document our connection pool settings. Nothing in the actual application code changed. Do I need to run any performance tests before merging this?",
-  "assertions": []
-}

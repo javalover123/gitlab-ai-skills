@@ -1,6 +1,0 @@
-{
-  "eval_id": 3,
-  "eval_name": "proactive-nudge-mr-review",
-  "prompt": "I just added a new endpoint to the merge requests controller that returns approval status. It joins the approvals table and the approval_rules table. Can you review this MR for me?",
-  "assertions": []
-}

@@ -1,6 +1,0 @@
-{
-  "eval_id": 6,
-  "eval_name": "rspec-benchmark-unit-guard",
-  "prompt": "I'm in the gitlab-org/gitlab repo. I just refactored the MergeRequestsFinder#execute method to reduce allocations, and I want a regression guard that fails in the spec suite if someone reintroduces the bloat later \u2014 I don't want to spin up a whole load test, just something scoped to this one method. How do I do that?",
-  "assertions": []
-}

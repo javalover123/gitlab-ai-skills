@@ -1,6 +1,0 @@
-{
-  "eval_id": 2,
-  "eval_name": "frontend-cwv-sitespeed",
-  "prompt": "We just redesigned the project overview page \u2014 new layout, lazy-loaded components, changed the JS bundle. My manager wants me to check if performance got worse. What should I do?",
-  "assertions": []
-}
