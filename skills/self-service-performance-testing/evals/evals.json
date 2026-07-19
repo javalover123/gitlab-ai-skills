@@ -97,14 +97,26 @@
     {
       "id": 7,
       "prompt": "The GET /api/v4/projects/:id/issues endpoint in gitlab-org/gitlab has gotten noticeably slower and memory use during the request seems to be climbing. I don't want to add load — I need to figure out WHERE the time and memory are going so I can fix it. What should I use?",
-      "expected_output": "Routes to a Ruby profiler chosen per symptom (Stackprof for CPU/time, memory_profiler or derailed_benchmarks for memory), treats profiling as in-scope, distinguishes profiling from load testing, and notes profilers here are Ruby-only (non-Ruby projects should use language-native tooling like pprof or #g_performance_enablement)",
+      "expected_output": "Routes to a Ruby profiler chosen per symptom (Stackprof for CPU/time, memory_profiler or derailed_benchmarks for memory), treats profiling as in-scope, distinguishes profiling from load testing, and — because gitlab-org/gitlab is obviously Ruby — gives Ruby profiler advice directly without derailing into non-Ruby caveats",
       "files": [],
       "assertions": [
         {"name": "routes-to-profiler", "description": "Recommends a Ruby profiler for investigating where time/memory goes, not a load-testing tool"},
         {"name": "matches-symptom-to-tool", "description": "Maps the symptoms to the right profiler: Stackprof for the CPU/time symptom and memory_profiler (or derailed_benchmarks) for the growing-memory symptom"},
         {"name": "distinguishes-from-load-test", "description": "Explicitly distinguishes profiling (finding WHY it is slow) from load testing (GPT/k6/CPT) and does not push a load test as the primary answer"},
         {"name": "profiling-in-scope", "description": "Treats profiling as in scope and engages with it — does not refuse or redirect profiling out of scope"},
-        {"name": "notes-ruby-only", "description": "Notes these profilers apply to Ruby code specifically; for a non-Ruby project points to language-native tooling (e.g. pprof for Go) or #g_performance_enablement"},
+        {"name": "assumes-ruby-appropriately", "description": "Correctly treats gitlab-org/gitlab as a Ruby project and gives Ruby profiler advice directly, without derailing into non-Ruby caveats or refusing"},
+        {"name": "no-staging-production", "description": "Does not suggest running the investigation as a test against staging or production"}
+      ]
+    },
+    {
+      "id": 8,
+      "prompt": "I maintain a Go microservice (not the Rails monolith — it's a standalone service in its own repo). One of its HTTP endpoints has gotten noticeably slower and its memory use keeps climbing during the request. I don't want to add load — I need to figure out WHERE the time and memory are going so I can fix it. What should I use?",
+      "expected_output": "Recognises this is a Go (non-Ruby) project, so does NOT recommend the Ruby profilers (Stackprof/memory_profiler/derailed_benchmarks); routes to Go-native tooling (pprof) or #g_performance_enablement; still distinguishes profiling from load testing; does not push staging/production",
+      "files": [],
+      "assertions": [
+        {"name": "does-not-recommend-ruby-profilers", "description": "Does NOT recommend the Ruby profilers (Stackprof, memory_profiler, derailed_benchmarks, rbspy, ruby-prof) for this Go service"},
+        {"name": "routes-non-ruby-correctly", "description": "Points to Go-native profiling tooling (e.g. pprof / net/http/pprof) or to #g_performance_enablement, rather than assuming Ruby"},
+        {"name": "distinguishes-from-load-test", "description": "Keeps the answer about profiling/investigation (finding WHERE it is slow) rather than pushing a GPT/k6/CPT load test as the primary answer"},
         {"name": "no-staging-production", "description": "Does not suggest running the investigation as a test against staging or production"}
       ]
     }
