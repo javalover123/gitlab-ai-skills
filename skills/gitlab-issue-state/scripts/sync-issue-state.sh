@@ -46,11 +46,12 @@ if [[ "$issue_state" == "closed" ]]; then
   exit 0
 fi
 
-# Gather related + closing MRs (deduped by iid).
+# Gather related + closing MRs (deduped by project + iid: IIDs are only unique
+# within a project, and related MRs can come from other projects).
 mrs_json="$( {
   glab api "projects/${enc}/issues/${ISSUE_IID}/related_merge_requests" 2>/dev/null || echo '[]'
   glab api "projects/${enc}/issues/${ISSUE_IID}/closed_by" 2>/dev/null || echo '[]'
-} | jq -s 'add | unique_by(.iid)')"
+} | jq -s 'add | unique_by([.project_id, .iid])')"
 
 mr_count="$(jq 'length' <<<"$mrs_json")"
 if [[ "$mr_count" -eq 0 ]]; then
@@ -68,7 +69,7 @@ else
   target="In review"
 fi
 
-summary="$(jq -r '[.[] | "!\(.iid)=\(.state)\(if .draft then " (draft)" else "" end)"] | join(", ")' <<<"$mrs_json")"
+summary="$(jq -r '[.[] | "!\(.iid)=\(.state)\(if (.draft or .work_in_progress) then " (draft)" else "" end)"] | join(", ")' <<<"$mrs_json")"
 echo "MRs: ${summary}"
 echo "target status: ${target}"
 

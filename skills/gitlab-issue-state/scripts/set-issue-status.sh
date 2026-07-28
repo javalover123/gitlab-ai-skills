@@ -39,6 +39,12 @@ mutation {
   }
 }")"
 
+# A failed GraphQL call (auth, malformed query, network) returns top-level
+# `errors` with `data: null`; check that first so the failure is legible
+# instead of a jq type error on `null | join`.
+top_errors="$(jq -r 'if .errors then (.errors | map(.message) | join("; ")) else "" end' <<<"$result")"
+[[ -z "$top_errors" ]] || die "GraphQL error: $top_errors"
+
 errors="$(jq -r '.data.workItemUpdate.errors | join("; ")' <<<"$result")"
 [[ -z "$errors" ]] || die "workItemUpdate failed: $errors"
 

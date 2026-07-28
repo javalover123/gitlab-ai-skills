@@ -1,7 +1,7 @@
 ---
 name: gitlab-issue-state
 description: Keep a GitLab issue's native Status in sync with its merge requests, and start implementing an issue by assigning it to the current user and setting the active milestone. Use when asked to start work on an issue, update an issue's status as MRs progress, or track issue state through the dev/review/complete lifecycle.
-version: 1.0.0
+version: 1.0.1
 license: MIT
 category: Development Workflow
 compatibility: opencode
