@@ -1,7 +1,7 @@
 ---
 name: gitlab-issue-state
 description: Keep a GitLab issue's native Status in sync with its merge requests, and start implementing an issue by assigning it to the current user and setting the active milestone. Use when asked to start work on an issue, update an issue's status as MRs progress, or track issue state through the dev/review/complete lifecycle.
-version: 1.0.1
+version: 1.1.0
 license: MIT
 category: Development Workflow
 compatibility: opencode
@@ -38,12 +38,22 @@ Set the status as work progresses, not only at the end:
 |-----------|--------|
 | Actively implementing; any MR still an open **draft** | **In dev** |
 | All of the issue's MRs are in review, closed, or merged (none still a draft) | **In review** |
-| MR(s) merged / issue closed | **Complete** — usually set automatically on close |
+| Issue closed (MR merged with a closing pattern) | **Complete** — set by GitLab's close automation, not by this skill |
 
 If any MR is still a draft, keep the issue **In dev** even if others are in review. Status names
 must exist in the project's lifecycle — `resolve-statuses.sh` lists the valid names for any given
 issue (in `gitlab-org/gitlab` these are `In dev`, `In review`, `Complete`; other namespaces may
 differ).
+
+**Only the draft flag separates *In dev* from *In review*.** Pushing more commits to an MR that is
+already in review does *not* move the issue back to *In dev* — convert the MR back to a Draft if
+that is the intent.
+
+**Terminal statuses are never overwritten.** An issue can be open yet already *Complete* (an MR was
+merged without a closing pattern). `sync-issue-state.sh` leaves any status in a `done` or `canceled`
+category alone unless `--force` is passed. When it sees every MR merged with the issue still open it
+says so and asks you to decide — closing an issue is a judgement call (follow-up work may remain),
+so the skill reports rather than closes.
 
 ## Scripts
 
@@ -84,5 +94,7 @@ Full usage, flags, and examples: [references/scripts.md](references/scripts.md).
 3. **Update status as MRs move** — run `sync-issue-state.sh` after pushing/opening/merging MRs, not just at the end.
 4. **Keep *In dev* while any MR is a draft** — only advance to *In review* once no MR is still a draft.
 5. **Don't fight the close automation** — merging/closing usually sets *Complete*; let it, rather than forcing the status.
-6. **Use `--dry-run`** on `sync-issue-state.sh` to preview the decision before changing anything.
-7. **Unknown lifecycle?** Run `resolve-statuses.sh` to see the valid status names for that project before setting one.
+6. **Never close an issue on your own initiative** — if `sync-issue-state.sh` reports every MR merged while the issue is still open, *ask the user* whether to close it. Follow-up work may remain, and only they can judge that.
+7. **Don't use `--force` to "fix" a terminal status** — it exists for genuine mis-sets. If an issue is *Complete*, that is usually correct; confirm with the user first.
+8. **Use `--dry-run`** on `sync-issue-state.sh` to preview the decision before changing anything.
+9. **Unknown lifecycle?** Run `resolve-statuses.sh` to see the valid status names for that project before setting one.

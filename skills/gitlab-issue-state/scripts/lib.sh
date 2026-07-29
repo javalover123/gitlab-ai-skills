@@ -83,3 +83,26 @@ work_item_gid() {
   }
 }" | jq -r '.data.project.workItems.nodes[0].id // empty'
 }
+
+# Statuses in these lifecycle categories are terminal: something (usually the
+# close automation, or a human) has already decided the outcome. Don't move an
+# issue out of them just because its MRs look a certain way.
+# shellcheck disable=SC2034  # consumed by sourcing scripts (sync-issue-state.sh)
+TERMINAL_STATUS_CATEGORIES='["done","canceled"]'
+
+# Print the issue's current status as compact JSON: {"name":...,"category":...}
+# Prints nothing if the work item has no status set or no STATUS widget.
+# Requires PROJECT_PATH and ISSUE_IID to be set.
+current_status_json() {
+  glab api graphql -f query="
+{
+  project(fullPath: \"${PROJECT_PATH}\") {
+    workItems(first: 1, iid: \"${ISSUE_IID}\") {
+      nodes {
+        widgets { ... on WorkItemWidgetStatus { status { name category } } }
+      }
+    }
+  }
+}" | jq -c '[.data.project.workItems.nodes[0].widgets[]?
+             | select(.status != null) | .status] | .[0] // empty'
+}

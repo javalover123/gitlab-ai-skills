@@ -28,15 +28,45 @@ Inspects the issue's related and closing MRs and applies the progression rules f
 ```bash
 skills/gitlab-issue-state/scripts/sync-issue-state.sh <issue-url>
 skills/gitlab-issue-state/scripts/sync-issue-state.sh <issue-url> --dry-run   # show decision only
+skills/gitlab-issue-state/scripts/sync-issue-state.sh <issue-url> --force     # allow overwriting a terminal status
 ```
 
 Decision logic:
 
 - Issue already closed → leave as-is (Status is usually auto-set to a done category on close).
+- Current status in a terminal category (`done`, `canceled`) → leave as-is unless `--force`.
 - Any related MR still an open draft/WIP → `In dev`.
 - Otherwise, at least one MR still open (in review) → `In review`.
 - All related MRs merged/closed (none open) → `In review` (merge/close handles `Complete`).
 - No related MRs at all → leave as-is.
+
+### What does *not* trigger a status change
+
+- **Pushing more commits** to an MR that is already in review. Only the MR's `draft`/
+  `work_in_progress` flag distinguishes *In dev* from *In review*, so re-running the script after a
+  round of review fixes correctly leaves the issue at *In review*. Convert the MR back to a Draft if
+  you want it to read *In dev* again.
+- **Review comments or approvals** — not inspected at all.
+- **A status that already matches** the target: `set-issue-status.sh` skips the `workItemUpdate`
+  entirely, so repeated runs don't pile up "changed status" system notes on the issue.
+
+### Terminal statuses and closing
+
+An issue can be **open yet already `Complete`** — GitLab's close automation only fires when the MR
+description carries a closing pattern (`Closes #123`), so merging without one sets the status but
+leaves the issue open. Re-deriving status from MR state would drag it back to *In review*, so any
+status in a `done` or `canceled` category is left untouched unless `--force` is given.
+
+When every related MR is merged but the issue is still open, the script prints a note and defers:
+
+```
+note: all 2 MR(s) merged but the issue is still open - no closing pattern took effect.
+      ask the user whether to close it (and set a done status); this script will not decide.
+```
+
+It deliberately does **not** close the issue. Follow-up work often remains after the MRs land, so
+that call belongs to the user — ask, don't assume. Note the check requires *all* MRs to be `merged`:
+a mix of merged and closed-unmerged stays silent, since a closed MR may signal abandoned work.
 
 ## `set-issue-status.sh` — set a status by name
 

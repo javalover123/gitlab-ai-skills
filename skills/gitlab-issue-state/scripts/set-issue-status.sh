@@ -7,6 +7,9 @@
 #
 # The status name must exist in the project's status lifecycle
 # (run resolve-statuses.sh to list valid names).
+#
+# Skips the write when the issue is already in the requested status, so repeated
+# runs don't add redundant "changed status" system notes to the issue.
 
 set -Eeuo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -21,6 +24,15 @@ status_name="${2:-}"
 shift 2
 
 parse_issue_ref "$ref" "$@"
+
+# No-op guard: if the status already matches, skip the mutation entirely.
+# Comparison is case-insensitive because the caller passes a human-typed name.
+current="$(current_status_json)"
+if [[ -n "$current" ]] &&
+  [[ "$(jq -r '.name | ascii_downcase' <<<"$current")" == "$(printf '%s' "$status_name" | tr '[:upper:]' '[:lower:]')" ]]; then
+  echo "${PROJECT_PATH}#${ISSUE_IID} already ${status_name}; no change"
+  exit 0
+fi
 
 status_id="$("${SCRIPT_DIR}/resolve-statuses.sh" "$ref" "$@" --name "$status_name")"
 gid="$(work_item_gid)"
