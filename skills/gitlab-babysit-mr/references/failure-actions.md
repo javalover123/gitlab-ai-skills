@@ -2,10 +2,12 @@
 
 ## While the Pipeline Is Running
 
-When Phase 1 exits with `EARLY_FAILURE`, act immediately only on failures that are safe to retry without changing the branch:
+Early detection exists to retry jobs that failed because of transient conditions, such as network, Gitaly, runner, or service-availability problems, without waiting for the rest of the pipeline.
 
-- **FLAKY**, **MASTER_BROKEN**, and **UNKNOWN**: follow the retry rules below immediately.
-- **LINT**, **COVERAGE**, and **REAL_FAILURE**: record and report the failure, add its job ID to `HANDLED_EARLY_FAILURE_IDS`, then keep watching until the pipeline reaches a terminal state before fixing it. Pushing a fix early would cancel the in-flight pipeline and discard useful results.
+When Phase 1 exits with `EARLY_FAILURE`:
+
+- **FLAKY**: follow the job retry rules below immediately.
+- **MASTER_BROKEN**, **UNKNOWN**, **LINT**, **COVERAGE**, and **REAL_FAILURE**: add the job ID to `SEEN_EARLY_FAILURE_IDS` and return to Phase 1 without consuming an action round. Apply the normal action for these classes after the pipeline reaches a terminal state.
 
 Never act on `allow_failure: true` or superseded retried jobs.
 

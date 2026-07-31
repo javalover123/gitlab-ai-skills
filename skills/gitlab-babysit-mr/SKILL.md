@@ -30,7 +30,7 @@ Phase 0: Resolve MR URL → PROJECT_PATH, MR_IID, PROJECT_ENCODED
 ACTION_ROUND = 0, MAX_ROUNDS = 5
 JOB_RETRY_COUNT = {}      # keyed by job name, persisted across rounds
 DUO_LINT_REQUESTED = {}   # keyed by job name, tracks Duo Developer requests
-HANDLED_EARLY_FAILURE_IDS = set()  # deferred failures already reported while the pipeline runs
+SEEN_EARLY_FAILURE_IDS = set()  # failures already classified while the pipeline runs
 DISCUSSION_ID = null      # set after first report, reused for thread replies
 
 while ACTION_ROUND < MAX_ROUNDS:
@@ -40,7 +40,7 @@ while ACTION_ROUND < MAX_ROUNDS:
     Phase 4: Take action per classification
     Phase 5: Post report in resolved discussion thread
     Phase 6: Diagnose blocking failures before final report
-    Phase 7: Loop back if action taken, else post final report and exit
+    Phase 7: Loop back after an early classification or action; otherwise post final report and exit
 ```
 
 ## Phases — Reference Files
@@ -55,7 +55,7 @@ Each phase has detailed instructions in a reference file. Load on demand.
 | **4** | Retry flaky jobs, retry pipelines, delegate lint to Duo Developer | [references/failure-actions.md](references/failure-actions.md) |
 | **5** | Post report in a resolved discussion thread (collapsed by default) | [references/mr-reporting.md](references/mr-reporting.md) |
 | **6** | Root-cause diagnosis for blocking failures | [references/failure-diagnosis.md](references/failure-diagnosis.md) |
-| **7** | Set `WAIT_FOR_PUSH=true` and loop, or exit if no actions possible | — |
+| **7** | Keep watching after early classifications/actions, or exit when terminal with no action | — |
 
 **Classification guide:** [references/failure-classification.md](references/failure-classification.md) — FLAKY, MASTER_BROKEN, LINT, COVERAGE, REAL_FAILURE, UNKNOWN.
 
@@ -68,5 +68,5 @@ Each phase has detailed instructions in a reference file. Load on demand.
 - **Max 5 action rounds** — caps retries/fixes, NOT waiting time
 - **Never give up on a running pipeline** — keep polling until it needs action or reaches a terminal state
 - **Only blocking failures trigger action** — ignore `allow_failure: true` and superseded retried jobs
-- **Do not push fixes while a pipeline runs** — retry safe failures immediately; defer pushes until the pipeline finishes
+- **Only retry flaky jobs early** — use early detection for transient failures; handle other classes after pipeline completion
 - **No force-push or amend** — always new commits for fixes

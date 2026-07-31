@@ -15,7 +15,7 @@ This skill ships with specific opinions baked in. They reflect one workflow; you
 | Decision | What the skill does | Why you might change it |
 |---|---|---|
 | **Max 5 action rounds** | Caps retries/fixes at 5, but waits indefinitely for running pipelines | Fewer rounds for faster feedback, or more if your project has many flaky jobs |
-| **Detect blocking failures early** | Polls failed jobs every 30 seconds and retries safe failures before the rest of the pipeline finishes; ignores `allow_failure: true` jobs | You might prefer to wait for the full pipeline before taking any action |
+| **Retry flaky failures early** | Polls failed jobs every 30 seconds and retries transient failures before the rest of the pipeline finishes; ignores `allow_failure: true` jobs | You might prefer to wait for the full pipeline before retrying flaky jobs |
 | **Auto-fix lint and push** | Runs `rubocop --autocorrect`, `eslint --fix`, `haml-lint --auto-correct` on changed files, commits, and pushes | You might prefer to only report lint failures. Or you use different linters (e.g. `biome`, `black`) |
 | **Retry flaky jobs up to 2×, then pipeline** | Retries any `FLAKY`-classified job up to 2 times. On the 3rd failure of the same job, escalates to a full pipeline retry | You might want fewer retries, or to require a known flaky-test issue before retrying |
 | **Retry entire pipeline for master-broken** | If a failure is in code the MR didn't touch, retries the whole pipeline | You might prefer to just report it and wait for someone to fix master |

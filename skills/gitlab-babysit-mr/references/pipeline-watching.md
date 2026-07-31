@@ -7,11 +7,11 @@ Poll the latest pipeline every 30 seconds. Exit the polling loop as soon as a bl
 ```pseudocode
 POLL_INTERVAL=30
 EXIT_REASON=null
-HANDLED_EARLY_FAILURE_IDS=set()
+SEEN_EARLY_FAILURE_IDS=set()
 
 loop:
     result=$(bash scripts/pipeline_status.sh --blocking-only "$MR_URL")
-    new_failures=result.failed_jobs excluding IDs in HANDLED_EARLY_FAILURE_IDS
+    new_failures=result.failed_jobs excluding IDs in SEEN_EARLY_FAILURE_IDS
 
     if new_failures is not empty:
         EXIT_REASON=EARLY_FAILURE
@@ -36,4 +36,4 @@ bash scripts/pipeline_status.sh "$MR_URL"
 
 Pass `EXIT_REASON` to Phase 4. If `blocking_failure_count` is 0 but the pipeline status is `failed`, all failures are non-blocking. Treat the pipeline as green.
 
-When Phase 4 defers a failure until the pipeline finishes, add its job ID to `HANDLED_EARLY_FAILURE_IDS` before returning to this loop. This prevents repeated reports for the same failure while still detecting newly failed jobs.
+After classifying a failure that is not flaky, add its job ID to `SEEN_EARLY_FAILURE_IDS` before returning to this loop. This prevents repeated analysis of the same failure while still detecting newly failed jobs. A retried flaky job is superseded by GitLab and is already excluded by `--blocking-only`.
