@@ -1,5 +1,14 @@
 # Phase 4: Take Action by Classification
 
+## While the Pipeline Is Running
+
+When Phase 1 exits with `EARLY_FAILURE`, act immediately only on failures that are safe to retry without changing the branch:
+
+- **FLAKY**, **MASTER_BROKEN**, and **UNKNOWN**: follow the retry rules below immediately.
+- **LINT**, **COVERAGE**, and **REAL_FAILURE**: record and report the failure, add its job ID to `HANDLED_EARLY_FAILURE_IDS`, then keep watching until the pipeline reaches a terminal state before fixing it. Pushing a fix early would cancel the in-flight pipeline and discard useful results.
+
+Never act on `allow_failure: true` or superseded retried jobs.
+
 ## FLAKY → Retry job (up to 2 retries per job; on 3rd failure, retry pipeline)
 
 Track retry counts per job across action rounds using a `JOB_RETRY_COUNT` map (keyed by job name, since job IDs change on retry).
