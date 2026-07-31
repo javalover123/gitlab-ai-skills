@@ -83,6 +83,8 @@ EOF
 
 run_pipeline_status() {
   stderr_file="$BATS_TEST_TMPDIR/stderr"
+  # bash -c 'script' name arg1... sets $0=name and $@=arg1...; $0 redirects
+  # stderr while $@ forwards SCRIPT_PATH and all caller arguments.
   run bash -c '"$@" 2>"$0"' "$stderr_file" "$SCRIPT_PATH" "$@"
 }
 
@@ -146,6 +148,7 @@ run_pipeline_status() {
   [ "$status" -eq 0 ]
   echo "$output" | jq -e '
     .mode == "blocking_only" and
+    .pipeline_status != null and
     .blocking_failure_count == 1 and
     (.failed_jobs | length == 1) and
     (has("status_summary") | not)
