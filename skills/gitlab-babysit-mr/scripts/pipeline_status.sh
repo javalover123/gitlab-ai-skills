@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # pipeline_status.sh - Get MR pipeline status with failed jobs
-# Usage: ./pipeline_status.sh <mr-url>
+# Usage: ./pipeline_status.sh [--blocking-only] <mr-url>
 # Output: JSON with pipeline status, failed jobs, and counts
 
 set -Eeuo pipefail
@@ -11,9 +11,31 @@ error_handler() {
 
 trap 'error_handler $LINENO $?' ERR
 
-MR_URL="${1:-}"
+BLOCKING_ONLY=false
+MR_URL=""
+
+for arg in "$@"; do
+  case "$arg" in
+  --blocking-only)
+    BLOCKING_ONLY=true
+    ;;
+  -*)
+    echo "Unknown option: $arg" >&2
+    exit 1
+    ;;
+  *)
+    if [[ -n "$MR_URL" ]]; then
+      echo "Only one MR URL may be provided." >&2
+      exit 1
+    fi
+
+    MR_URL="$arg"
+    ;;
+  esac
+done
+
 if [[ -z "$MR_URL" ]]; then
-  echo '{"error": "Usage: pipeline_status.sh <mr-url>"}' >&2
+  echo '{"error": "Usage: pipeline_status.sh [--blocking-only] <mr-url>"}' >&2
   exit 1
 fi
 
@@ -40,9 +62,15 @@ PIPELINE_STATUS=$(echo "$PIPELINES_JSON" | jq -r '.[0].status')
 PIPELINE_URL=$(echo "$PIPELINES_JSON" | jq -r '.[0].web_url')
 PIPELINE_SHA=$(echo "$PIPELINES_JSON" | jq -r '.[0].sha[0:8]')
 
-# Get all jobs for this pipeline (handles pagination)
-echo "Fetching jobs for pipeline ${PIPELINE_ID}..." >&2
-ALL_JOBS=$(glab api --paginate "projects/${PROJECT_ENCODED}/pipelines/${PIPELINE_ID}/jobs?per_page=100" 2>/dev/null | jq -s 'add // []')
+# Fetch only failed jobs while polling, avoiding pagination over every job in a
+# large pipeline. The full mode still fetches all jobs for its status summary.
+if [[ "$BLOCKING_ONLY" == true ]]; then
+  echo "Fetching failed jobs for pipeline ${PIPELINE_ID}..." >&2
+  ALL_JOBS=$(glab api --paginate "projects/${PROJECT_ENCODED}/pipelines/${PIPELINE_ID}/jobs?scope[]=failed&per_page=100" 2>/dev/null | jq -s 'add // []')
+else
+  echo "Fetching jobs for pipeline ${PIPELINE_ID}..." >&2
+  ALL_JOBS=$(glab api --paginate "projects/${PROJECT_ENCODED}/pipelines/${PIPELINE_ID}/jobs?per_page=100" 2>/dev/null | jq -s 'add // []')
+fi
 
 # Extract current failed jobs (exclude jobs that were retried, i.e. superseded)
 FAILED_JOBS=$(echo "$ALL_JOBS" | jq '[
@@ -60,28 +88,29 @@ FAILED_JOBS=$(echo "$ALL_JOBS" | jq '[
   }
 ]')
 
-# Count by status for summary
-STATUS_SUMMARY=$(echo "$ALL_JOBS" | jq '
-  group_by(.status) |
-  map({key: .[0].status, value: length}) |
-  from_entries
-')
+# Keep non-blocking failures in the full report, but do not expose them as
+# candidates to the early-action polling mode.
+BLOCKING_FAILED_JOBS=$(echo "$FAILED_JOBS" | jq '[.[] | select(.allow_failure != true)]')
+BLOCKING_FAILURES=$(echo "$BLOCKING_FAILED_JOBS" | jq 'length')
 
-# Count blocking failures (allow_failure: false)
-BLOCKING_FAILURES=$(echo "$FAILED_JOBS" | jq '[.[] | select(.allow_failure != true)] | length')
+if [[ "$BLOCKING_ONLY" == true ]]; then
+  OUTPUT_FAILED_JOBS="$BLOCKING_FAILED_JOBS"
+else
+  OUTPUT_FAILED_JOBS="$FAILED_JOBS"
+fi
 
-jq -n \
-  --arg project "$PROJECT_PATH" \
-  --arg project_encoded "$PROJECT_ENCODED" \
-  --arg mr_iid "$MR_IID" \
-  --arg pipeline_id "$PIPELINE_ID" \
-  --arg pipeline_status "$PIPELINE_STATUS" \
-  --arg pipeline_url "$PIPELINE_URL" \
-  --arg pipeline_sha "$PIPELINE_SHA" \
-  --argjson failed_jobs "$FAILED_JOBS" \
-  --argjson status_summary "$STATUS_SUMMARY" \
-  --argjson blocking_failures "$BLOCKING_FAILURES" \
-  '{
+OUTPUT=$(
+  jq -n \
+    --arg project "$PROJECT_PATH" \
+    --arg project_encoded "$PROJECT_ENCODED" \
+    --arg mr_iid "$MR_IID" \
+    --arg pipeline_id "$PIPELINE_ID" \
+    --arg pipeline_status "$PIPELINE_STATUS" \
+    --arg pipeline_url "$PIPELINE_URL" \
+    --arg pipeline_sha "$PIPELINE_SHA" \
+    --argjson failed_jobs "$OUTPUT_FAILED_JOBS" \
+    --argjson blocking_failures "$BLOCKING_FAILURES" \
+    '{
     project: $project,
     project_encoded: $project_encoded,
     mr_iid: $mr_iid,
@@ -90,6 +119,17 @@ jq -n \
     pipeline_url: $pipeline_url,
     pipeline_sha: $pipeline_sha,
     failed_jobs: $failed_jobs,
-    blocking_failure_count: $blocking_failures,
-    status_summary: $status_summary
+    blocking_failure_count: $blocking_failures
   }'
+)
+
+if [[ "$BLOCKING_ONLY" == true ]]; then
+  echo "$OUTPUT" | jq '. + {mode: "blocking_only"}'
+else
+  STATUS_SUMMARY=$(echo "$ALL_JOBS" | jq '
+    group_by(.status) |
+    map({key: .[0].status, value: length}) |
+    from_entries
+  ')
+  echo "$OUTPUT" | jq --argjson status_summary "$STATUS_SUMMARY" '. + {status_summary: $status_summary}'
+fi
