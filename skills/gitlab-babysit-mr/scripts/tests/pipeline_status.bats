@@ -26,6 +26,26 @@ for arg in "$@"; do
           ;;
       esac
       ;;
+    *"jobs?scope[]=failed"*)
+      case "${MOCK_SCENARIO:-default}" in
+        only_nonblocking_failures)
+          echo '[{"id":1,"status":"failed","name":"optional-lint","stage":"test","failure_reason":"script_failure","web_url":"https://example.com/jobs/1","allow_failure":true,"retried":false}]'
+          exit 0
+          ;;
+        retried_jobs)
+          echo '[{"id":1,"status":"failed","name":"rspec","stage":"test","failure_reason":"script_failure","web_url":"https://example.com/jobs/1","allow_failure":false,"retried":true},{"id":2,"status":"failed","name":"lint","stage":"test","failure_reason":"script_failure","web_url":"https://example.com/jobs/2","allow_failure":false,"retried":false}]'
+          exit 0
+          ;;
+        allow_failure_jobs)
+          echo '[{"id":1,"status":"failed","name":"rspec","stage":"test","failure_reason":"script_failure","web_url":"https://example.com/jobs/1","allow_failure":true,"retried":false},{"id":2,"status":"failed","name":"lint","stage":"test","failure_reason":"script_failure","web_url":"https://example.com/jobs/2","allow_failure":false,"retried":false}]'
+          exit 0
+          ;;
+        *)
+          echo '[{"id":1,"status":"failed","name":"rspec","stage":"test","failure_reason":"script_failure","web_url":"https://example.com/jobs/1","allow_failure":false,"retried":false}]'
+          exit 0
+          ;;
+      esac
+      ;;
     *jobs?per_page*)
       case "${MOCK_SCENARIO:-default}" in
         paginated_jobs)
@@ -63,7 +83,9 @@ EOF
 
 run_pipeline_status() {
   stderr_file="$BATS_TEST_TMPDIR/stderr"
-  run bash -c "\"$SCRIPT_PATH\" \"$1\" 2>\"$stderr_file\""
+  # bash -c 'script' name arg1... sets $0=name and $@=arg1...; $0 redirects
+  # stderr while $@ forwards SCRIPT_PATH and all caller arguments.
+  run bash -c '"$@" 2>"$0"' "$stderr_file" "$SCRIPT_PATH" "$@"
 }
 
 @test "exits non-zero with no arguments" {
@@ -119,4 +141,34 @@ run_pipeline_status() {
   MOCK_SCENARIO=allow_failure_jobs run_pipeline_status "https://gitlab.com/mygroup/myproject/-/merge_requests/42"
   [ "$status" -eq 0 ]
   echo "$output" | jq -e '.blocking_failure_count == 1' >/dev/null
+}
+
+@test "blocking-only mode returns blocking failures without a status summary" {
+  run_pipeline_status --blocking-only "https://gitlab.com/mygroup/myproject/-/merge_requests/42"
+  [ "$status" -eq 0 ]
+  echo "$output" | jq -e '
+    .mode == "blocking_only" and
+    .pipeline_status != null and
+    .blocking_failure_count == 1 and
+    (.failed_jobs | length == 1) and
+    (has("status_summary") | not)
+  ' >/dev/null
+}
+
+@test "blocking-only mode ignores allow_failure jobs" {
+  MOCK_SCENARIO=only_nonblocking_failures run_pipeline_status --blocking-only "https://gitlab.com/mygroup/myproject/-/merge_requests/42"
+  [ "$status" -eq 0 ]
+  echo "$output" | jq -e '.blocking_failure_count == 0 and .failed_jobs == []' >/dev/null
+}
+
+@test "blocking-only mode ignores retried jobs" {
+  MOCK_SCENARIO=retried_jobs run_pipeline_status --blocking-only "https://gitlab.com/mygroup/myproject/-/merge_requests/42"
+  [ "$status" -eq 0 ]
+  echo "$output" | jq -e '.blocking_failure_count == 1 and (.failed_jobs | length == 1) and .failed_jobs[0].id == 2' >/dev/null
+}
+
+@test "blocking-only flag may follow the MR URL" {
+  run_pipeline_status "https://gitlab.com/mygroup/myproject/-/merge_requests/42" --blocking-only
+  [ "$status" -eq 0 ]
+  echo "$output" | jq -e '.mode == "blocking_only" and .blocking_failure_count == 1' >/dev/null
 }

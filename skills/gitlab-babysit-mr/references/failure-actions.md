@@ -1,5 +1,16 @@
 # Phase 4: Take Action by Classification
 
+## While the Pipeline Is Running
+
+Early detection exists to retry jobs that failed because of transient conditions, such as network, Gitaly, runner, or service-availability problems, without waiting for the rest of the pipeline.
+
+When Phase 1 exits with `EARLY_FAILURE`:
+
+- **FLAKY**: follow the job retry rules below immediately.
+- **MASTER_BROKEN**, **UNKNOWN**, **LINT**, **COVERAGE**, and **REAL_FAILURE**: add the job ID to `SEEN_EARLY_FAILURE_IDS` and return to Phase 1 without consuming an action round. Apply the normal action for these classes after the pipeline reaches a terminal state.
+
+Never act on `allow_failure: true` or superseded retried jobs.
+
 ## FLAKY → Retry job (up to 2 retries per job; on 3rd failure, retry pipeline)
 
 Track retry counts per job across action rounds using a `JOB_RETRY_COUNT` map (keyed by job name, since job IDs change on retry).
