@@ -5,7 +5,7 @@ Poll the latest pipeline every 30 seconds. Exit the polling loop as soon as a bl
 `pipeline_status.sh --blocking-only` uses GitLab's `scope[]=failed` filter instead of fetching every job. It excludes `allow_failure: true` and superseded retried jobs from `blocking_failure_count`.
 
 ```pseudocode
-POLL_INTERVAL=30
+POLL_INTERVAL=60
 EXIT_REASON=null
 SEEN_EARLY_FAILURE_IDS=set()
 
