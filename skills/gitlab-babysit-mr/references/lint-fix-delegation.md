@@ -55,7 +55,7 @@ Run `bundle exec rubocop --autocorrect` on the affected files.
 
 ## Step 3: Wait for Duo Developer to push a fix commit
 
-After posting the comment, set `WAIT_FOR_PUSH=true` and loop back to Phase 1. The pipeline watcher will use `--wait-for-push` to detect Duo Developer's new commit and the resulting pipeline.
+After posting the comment, call `pipeline-watch.py --wait-for-push` to detect Duo Developer's new commit and the resulting pipeline, then return to Phase 1.
 
 ## Step 4: Handle incomplete fixes
 
@@ -115,7 +115,7 @@ if ! git diff --quiet; then
   git add -u
   git commit -m "fix: auto-correct lint violations"
   git push
-  WAIT_FOR_PUSH=false  # we pushed directly, no need to wait
+  # Our own push can return to Phase 1 directly; no --wait-for-push is needed.
 fi
 ```
 

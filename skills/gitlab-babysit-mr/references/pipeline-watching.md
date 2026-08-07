@@ -1,34 +1,39 @@
-# Phase 1: Wait for Pipeline to Finish
+# Phase 1: Watch for Blocking Failures or Pipeline Completion
 
-Use `pipeline-watch.py` (from the `gitlab-pipeline-watch` skill) in a polling loop. Each invocation blocks for up to 15 minutes (staying within tool-call timeout limits), then re-invoke if the pipeline is still running. **Never give up on a running pipeline.**
+Poll the latest pipeline every 60 seconds. Exit the polling loop as soon as a blocking job fails, even if other jobs are still running, so retryable failures do not wait for the entire pipeline to finish.
 
-Locate pipeline-watch.py from the installed `gitlab-pipeline-watch` skill's `scripts/` directory.
+`pipeline_status.sh --blocking-only` uses GitLab's `scope[]=failed` filter instead of fetching every job. It excludes `allow_failure: true` and superseded retried jobs from `blocking_failure_count`.
 
 ```pseudocode
-WAIT_FOR_PUSH=false   # set to true after pushing a fix or retrying
+POLL_INTERVAL=60
+EXIT_REASON=null
+SEEN_EARLY_FAILURE_IDS=set()
 
 loop:
-    if WAIT_FOR_PUSH:
-        output=$(python3 pipeline-watch.py "$PROJECT_PATH" \
-          --no-all --no-watch-new "$MR_IID" \
-          --wait-for-push --timeout 900)
-    else:
-        output=$(python3 pipeline-watch.py "$PROJECT_PATH" \
-          --no-all --no-watch-new "$MR_IID" \
-          --timeout 900)
+    result=$(bash scripts/pipeline_status.sh --blocking-only "$MR_URL")
+    new_failures=result.failed_jobs excluding IDs in SEEN_EARLY_FAILURE_IDS
 
-    if output contains "SUCCESS" → pipeline green, proceed to report
-    if output contains "FAILED"  → proceed to Phase 2
-    if output contains "CANCELED" → post comment, exit
-    if timeout (no event)        → loop again
+    if new_failures is not empty:
+        EXIT_REASON=EARLY_FAILURE
+        break
+
+    if result.pipeline_status in [success, failed, canceled, skipped, manual]:
+        EXIT_REASON=TERMINAL
+        break
+
+    sleep POLL_INTERVAL
 ```
 
-**CRITICAL**: Use `timeout=960000` (16 min) on the Bash tool call so it outlasts the 900s script timeout. The script exits cleanly on timeout — it's not an error, just means the pipeline is still running.
+Keep polling while the pipeline is running. A polling-tool timeout is not a pipeline failure; start another polling window.
 
-After the watcher reports a terminal state, get the structured JSON:
+After pushing a fix, use `pipeline-watch.py --wait-for-push` to wait for a new pipeline ID before returning to the loop above. A job retry stays in the same pipeline and does not need this step.
+
+When the loop exits, fetch the complete job data for analysis and reporting:
 
 ```bash
 bash scripts/pipeline_status.sh "$MR_URL"
 ```
 
-Check `blocking_failure_count`: if 0 but status is `failed`, all failures are `allow_failure: true` (non-blocking). Treat as green.
+Pass `EXIT_REASON` to Phase 4. If `blocking_failure_count` is 0 but the pipeline status is `failed`, all failures are non-blocking. Treat the pipeline as green.
+
+After classifying a failure that is not flaky, add its job ID to `SEEN_EARLY_FAILURE_IDS` before returning to this loop. This prevents repeated analysis of the same failure while still detecting newly failed jobs. A retried flaky job is superseded by GitLab and is already excluded by `--blocking-only`.
