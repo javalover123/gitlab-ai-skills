@@ -1,6 +1,6 @@
 # Phase 1: Watch for Blocking Failures or Pipeline Completion
 
-Poll the latest pipeline every 30 seconds. Exit the polling loop as soon as a blocking job fails, even if other jobs are still running, so retryable failures do not wait for the entire pipeline to finish.
+Poll the latest pipeline every 60 seconds. Exit the polling loop as soon as a blocking job fails, even if other jobs are still running, so retryable failures do not wait for the entire pipeline to finish.
 
 `pipeline_status.sh --blocking-only` uses GitLab's `scope[]=failed` filter instead of fetching every job. It excludes `allow_failure: true` and superseded retried jobs from `blocking_failure_count`.
 

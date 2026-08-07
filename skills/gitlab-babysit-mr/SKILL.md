@@ -50,7 +50,7 @@ Each phase has detailed instructions in a reference file. Load on demand.
 | Phase | Summary | Reference |
 |-------|---------|-----------|
 | **0** | Resolve MR from argument or current branch | [references/mr-resolution.md](references/mr-resolution.md) |
-| **1** | Poll every 30s for blocking job failures or a terminal pipeline | [references/pipeline-watching.md](references/pipeline-watching.md) |
+| **1** | Poll every 60s for blocking job failures or a terminal pipeline | [references/pipeline-watching.md](references/pipeline-watching.md) |
 | **2–3** | Fetch job logs, classify failures, search known issues | [references/job-analysis.md](references/job-analysis.md) |
 | **4** | Retry flaky jobs, retry pipelines, delegate lint to Duo Developer | [references/failure-actions.md](references/failure-actions.md) |
 | **5** | Post report in a resolved discussion thread (collapsed by default) | [references/mr-reporting.md](references/mr-reporting.md) |
