@@ -77,7 +77,10 @@ Implements /health that returns 200 when DB healthy.
 
 ## Platform-Specific Notes
 
-**Keywords are case-insensitive:** `Fixes #123` = `fixes #123`. See platform docs for issue linking: GitHub (`Fixes #N`), GitLab (`Closes #N`), Jira (`PROJ-123`), Gerrit (auto `Change-Id`).
+**Keywords are case-insensitive:** `Fixes URL` = `fixes URL`. For GitHub and
+GitLab, use the issue's full URL by default so it remains meaningful outside the
+platform; closing keywords such as `Fixes` and `Closes` work with full URLs.
+Jira uses `PROJ-123`; Gerrit adds `Change-Id` automatically.
 
 ## Gotchas
 
