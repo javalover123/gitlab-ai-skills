@@ -46,6 +46,10 @@ Skills are loaded explicitly by the agent when relevant to a task (e.g. "load th
 
 Use when creating git commits, writing commit messages, or when about to run git commit -- enforces structured commit message format with imperative mood, capitalized subjects, 72-char wrapping, and atomic commits → [`SKILL.md`](skills/commit-messages/SKILL.md)
 
+#### find-reusable-patterns
+
+Find reusable implementations across a codebase before writing new code, using the GitLab Orbit knowledge graph. Use when someone asks "is there an existing X", "how do we usually do Y", or wants to reuse a pattern instead of rebuilding it. Returns candidate implementations ranked by how widely they are already used. → [`SKILL.md`](skills/find-reusable-patterns/SKILL.md)
+
 #### gitlab-babysit-mr
 
 Monitor a GitLab MR's pipeline until green. Classifies failures (flaky, master-broken, lint, coverage, real), retries jobs where appropriate, makes light-touch auto-fixes, and posts findings as an MR comment. → [`SKILL.md`](skills/gitlab-babysit-mr/SKILL.md)

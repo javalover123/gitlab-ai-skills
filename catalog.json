@@ -17,6 +17,14 @@
       "path": "skills/commit-messages/SKILL.md"
     },
     {
+      "name": "find-reusable-patterns",
+      "description": "Find reusable implementations across a codebase before writing new code, using the GitLab Orbit knowledge graph. Use when someone asks \"is there an existing X\", \"how do we usually do Y\", or wants to reuse a pattern instead of rebuilding it. Returns candidate implementations ranked by how widely they are already used.",
+      "category": "Development Workflow",
+      "license": "MIT",
+      "compatibility": "",
+      "path": "skills/find-reusable-patterns/SKILL.md"
+    },
+    {
       "name": "gitlab-babysit-mr",
       "description": "Monitor a GitLab MR's pipeline until green. Classifies failures (flaky, master-broken, lint, coverage, real), retries jobs where appropriate, makes light-touch auto-fixes, and posts findings as an MR comment.",
       "category": "Development Workflow",
