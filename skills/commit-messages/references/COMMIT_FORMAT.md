@@ -18,7 +18,7 @@ Complete guide to commit message formatting, line wrapping, and conventions.
 | 72 char max | `Add CPU arch filter support` | `Add CPU architecture filter to scheduler...` | Hard limit |
 | No trailing period | `Add user auth` | `Add user auth.` | Subject is title, not sentence |
 | No scope prefix | `Fix null pointer in auth` | `auth: fix null pointer` | Unless Conventional Commits |
-| Meaningful standalone | `Add CPU arch filter support` | `Fix #847` | Readable outside platform |
+| Meaningful standalone | `Add CPU arch filter support` | `Fix issue 847` | Readable outside platform |
 
 ```bash
 # ✅ Correct
@@ -93,7 +93,11 @@ Implement the technique at [1] to prevent exhaustion.
 
 ## Issue References
 
-**Only add if project uses them** (check `git log --oneline -20`).
+**Only add if the project uses them** (check `git log --oneline -20`).
+
+Use the issue's **full URL** by default so the reference remains meaningful in
+`git log` and other tools outside the hosting platform. Closing keywords work
+with full URLs too.
 
 Put in **body** on **own line** at end:
 
@@ -103,13 +107,14 @@ Add CPU arch filter support
 
 [explanation]
 
-Fixes #847
+Fixes https://gitlab.com/group/project/-/issues/847
 
 # ❌ Wrong (in subject)
-Fix #847: Add CPU arch filter
+Fix issue 847: Add CPU arch filter
 ```
 
-**Keywords:** `Fixes #N`, `Closes #N`, `Resolves #N` (GitHub/GitLab), `PROJ-123` (Jira)
+**Keywords:** `Fixes URL`, `Closes URL`, `Resolves URL` (GitHub/GitLab),
+`PROJ-123` (Jira)
 
 ## Full Example
 
@@ -127,7 +132,7 @@ scheduled only on compatible architectures.
 Current limitation: only x86 and ARM are supported. Adding
 new architectures requires updating the label enum.
 
-Fixes #847
+Fixes https://gitlab.com/group/project/-/issues/847
 ```
 
 ## Conventional Commits Compatibility
