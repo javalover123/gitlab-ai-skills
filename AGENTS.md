@@ -80,6 +80,24 @@ the [Claude Code docs](https://code.claude.com/docs/en/skills#inject-dynamic-con
 `skills/` in CI (catches the glob-test footgun as `SC2144`, unquoted
 expansions, and more).
 
+### Skill test suites (`skills/**/tests/test_*.sh`)
+
+A skill whose helper scripts are non-trivial may ship its own tests. They're
+optional — most skills have nothing to test — but if present they must:
+
+- live at `skills/<name>/tests/test_*.sh` (that glob is what CI discovers),
+- run with no arguments and exit non-zero if any case fails,
+- need **no network and no credentials** — stub out `glab`, `skopeo`, etc. by
+  putting a fake on `PATH`, so the suite is reproducible even when a
+  feature flag or registry is unavailable.
+
+Keep fixtures beside them in `tests/`. Test scripts are exempt from the
+`set -Eeuo pipefail` rule to the extent they need to count failures rather than
+abort on the first one, but they are still shellcheck-linted.
+
+*Enforced:* `scripts/run_skill_tests.sh` discovers and runs every suite in CI
+and on pre-push.
+
 ### Synced skills (source of truth elsewhere)
 
 Some skills are **synced in** from another repository — their source of truth
@@ -112,6 +130,7 @@ Some skills are **synced in** from another repository — their source of truth
 | `validate_frontmatter.py` | Required fields, semver, **kebab name == dir name**, **strict YAML parse**¹ |
 | `validate_skill_length.py` | SKILL.md length (warn-only: <100 target, 150 cap) |
 | `lint_shell.sh` (shellcheck) | Bash footguns in `skills/**/*.sh` |
+| `run_skill_tests.sh` | Skill-shipped suites (`skills/**/tests/test_*.sh`) pass |
 | `check_version_bump.py` | `version` bumped when a skill changes |
 | `update_skills_list.py` / `update_toc.py` / `generate_catalog.py` / `update_claudecode_readme.py` | Generated README/catalog/manifests are in sync |
 | `validate-{opencode,claudecode,pi}-distribution.py` | Per-channel distribution format |

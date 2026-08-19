@@ -72,6 +72,17 @@ lint-shell:
   script:
     - scripts/lint_shell.sh
 
+# Runs the test suites skills ship next to their helper scripts
+# (skills/*/tests/test_*.sh). They stub out anything networked, so no
+# credentials or registry access are needed.
+skill-tests:
+  stage: verify
+  extends: .verify-rules
+  before_script:
+    - apk add --no-cache bash diffutils
+  script:
+    - scripts/run_skill_tests.sh
+
 agent-file-sync:
   stage: lint
   extends: .verify-rules
