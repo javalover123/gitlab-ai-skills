@@ -13,6 +13,8 @@ pre-push:
       run: python3 scripts/validate_skill_length.py --ci
     lint-shell:
       run: scripts/lint_shell.sh
+    skill-tests:
+      run: scripts/run_skill_tests.sh
     agent-file-sync:
       run: diff AGENTS.md CLAUDE.md || (echo "AGENTS.md and CLAUDE.md are out of sync. Run 'cp AGENTS.md CLAUDE.md'." && exit 1)
     validate-claudecode-distribution:
