@@ -6,15 +6,20 @@ or need to adapt them. Run queries with `glab api graphql -f query='…'`.
 ## Read: item + widget content in one query
 
 ```graphql
-query {
-  project(fullPath: "<project/path>") {
-    workItems(iid: "<iid>") {
+query($fullPath: ID!, $iid: String!) {
+  project(fullPath: $fullPath) {
+    workItems(iid: $iid) {
       nodes { id iid title
         widgets { type ... on WorkItemWidgetAgentPlan { content } } }
     }
   }
 }
 ```
+
+Pass the values as variables:
+`glab api graphql -f query='…' -f fullPath='<project/path>' -f iid='<iid>'`.
+Use `-f`/`--raw-field`. `-F`/`--field` sends `iid` as a JSON number, and the
+`String!` variable then fails.
 
 Pick the widget whose `type` is `AGENT_PLAN` and read its `content`. The widget
 also exposes `contentHtml` if rendered HTML is wanted instead of Markdown. If
@@ -27,8 +32,8 @@ from "feature not available here" without touching any item, query the type's
 widget definitions:
 
 ```graphql
-query {
-  project(fullPath: "<project/path>") {
+query($fullPath: ID!) {
+  project(fullPath: $fullPath) {
     workItemTypes(name: ISSUE) { nodes { name widgetDefinitions { type } } }
   }
 }
@@ -40,9 +45,9 @@ carry an agent plan — say so rather than reporting the item as merely unset.
 The write path's preflight combines both lookups so nothing is modified:
 
 ```graphql
-query {
-  project(fullPath: "<project/path>") {
-    workItems(iid: "<iid>") { nodes { id workItemType { name } widgets { type } } }
+query($fullPath: ID!, $iid: String!) {
+  project(fullPath: $fullPath) {
+    workItems(iid: $iid) { nodes { id workItemType { name } widgets { type } } }
     workItemTypes { nodes { name widgetDefinitions { type } } }
   }
 }

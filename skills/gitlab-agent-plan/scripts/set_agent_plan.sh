@@ -53,7 +53,13 @@ echo "Project: ${project}  iid: ${iid}  plan: ${plan_file}" >&2
 #        ("widget keys are not supported by <Type> type"). Fail before writing.
 #      - present for the type but missing from *this item's* widgets -> odd but
 #        writable; warn and proceed.
-lookup=$(glab api graphql -f query="query { project(fullPath: \"${project}\") { workItems(iid: \"${iid}\") { nodes { id workItemType { name } widgets { type } } } workItemTypes { nodes { name widgetDefinitions { type } } } } }")
+#    Use GraphQL variables, as the mutation below does. For the -f/-F rule, see
+#    the comment in get_agent_plan.sh.
+# shellcheck disable=SC2016  # $fullPath/$iid are GraphQL variables, not shell vars
+lookup=$(glab api graphql \
+  -f query='query($fullPath: ID!, $iid: String!) { project(fullPath: $fullPath) { workItems(iid: $iid) { nodes { id workItemType { name } widgets { type } } } workItemTypes { nodes { name widgetDefinitions { type } } } } }' \
+  -f fullPath="$project" \
+  -f iid="$iid")
 
 set +e
 meta=$(printf '%s' "$lookup" | python3 -c '

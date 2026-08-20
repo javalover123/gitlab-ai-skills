@@ -72,8 +72,10 @@ run() {
   rc=$?
 }
 
-# glab is invoked as `-f query=<text>`, so the recorded argv line is `query=query {…}`.
-field_of() { grep -m1 '^query=query {' "$MOCK_ARGS_FILE" | grep -o "$1: \"[^\"]*\"" | head -1; }
+# project and iid go to glab as GraphQL variables. Each one is its own argv
+# line, for example `fullPath=grp/proj`. Read the value that glab receives.
+field_of() { grep -m1 "^$1=" "$MOCK_ARGS_FILE" | cut -d= -f2-; }
+query_of() { grep -m1 '^query=' "$MOCK_ARGS_FILE"; }
 
 echo "== fixtures =="
 # A plan with unicode, a trailing newline, and shell/GraphQL metacharacters that
@@ -107,24 +109,30 @@ has   "byte count is UTF-8 bytes, not characters" \
 echo
 echo "== argument parsing (assert the query glab receives) =="
 run plan "$work/plan.md" -- https://gitlab.com/grp/sub/proj/-/work_items/7
-check "url: nested subgroup fullPath" 'fullPath: "grp/sub/proj"' "$(field_of fullPath)"
-check "url: iid"                      'iid: "7"'                 "$(field_of iid)"
+check "url: nested subgroup fullPath" 'grp/sub/proj' "$(field_of fullPath)"
+check "url: iid"                      '7'            "$(field_of iid)"
+q_baseline=$(query_of)
 
 run plan "$work/plan.md" -- 'https://gitlab.com/grp/proj/-/work_items/12/'
-check "url: trailing slash trimmed" 'iid: "12"' "$(field_of iid)"
+check "url: trailing slash trimmed" '12' "$(field_of iid)"
 
 run plan "$work/plan.md" -- 'https://gitlab.com/grp/proj/-/work_items/13?work_item_iid=99'
-check "url: query string trimmed" 'iid: "13"' "$(field_of iid)"
+check "url: query string trimmed" '13' "$(field_of iid)"
 
 run plan "$work/plan.md" -- 'https://gitlab.com/grp/proj/-/work_items/14#note_1'
-check "url: fragment trimmed" 'iid: "14"' "$(field_of iid)"
+check "url: fragment trimmed" '14' "$(field_of iid)"
 
 run plan "$work/plan.md" -- 'http://self.managed.example/grp/proj/-/work_items/15'
-check "url: http scheme + self-managed host discarded" 'fullPath: "grp/proj"' "$(field_of fullPath)"
+check "url: http scheme + self-managed host discarded" 'grp/proj' "$(field_of fullPath)"
 
 run plan "$work/plan.md" -- grp/sub/proj 21
-check "explicit: fullPath" 'fullPath: "grp/sub/proj"' "$(field_of fullPath)"
-check "explicit: iid"      'iid: "21"'                "$(field_of iid)"
+check "explicit: fullPath" 'grp/sub/proj' "$(field_of fullPath)"
+check "explicit: iid"      '21'           "$(field_of iid)"
+
+# A quote in an argument must not change the query.
+run plan "$work/plan.md" -- 'grp/proj" ) { evil }' 99
+check "injection: hostile fullPath stays a variable value" 'grp/proj" ) { evil }' "$(field_of fullPath)"
+check "injection: query text does not change"              "$q_baseline"          "$(query_of)"
 has   "query uses AgentPlan inline fragment" 'on WorkItemWidgetAgentPlan' "$MOCK_ARGS_FILE"
 if grep -qi 'mutation' "$MOCK_ARGS_FILE"; then
   bad "read-only: no mutation in query" "query contains a mutation"

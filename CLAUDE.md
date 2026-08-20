@@ -71,8 +71,11 @@ the [Claude Code docs](https://code.claude.com/docs/en/skills#inject-dynamic-con
 ### Bash helper scripts (`skills/**/*.sh`)
 
 - Start with `set -Eeuo pipefail` (add an `ERR` trap for non-trivial scripts).
-- Prefer `glab ... --field key=val` over `--raw-field` with shell interpolation
-  of untrusted content (avoids shell-expansion of `$`, backticks, etc.).
+- Pass untrusted content as a field value (`--field` or `--raw-field`). Do not
+  build it into an interpolated command string.
+- For a GraphQL `String` variable, use `-f`/`--raw-field`. `-F`/`--field`
+  infers types: it sends an integer-like value as a JSON number, and GitLab
+  rejects it ("Could not coerce value 2332 to String").
 - Never use `[ -f glob* ]` — `[ ]` does not glob-expand, so it silently never
   matches. Use a `for` loop or `compgen -G`.
 

@@ -40,7 +40,16 @@ fi
 [[ -n "${project:-}" && -n "${iid:-}" ]] || die "could not determine project/iid; see usage"
 
 # 1. Fetch the work item and its Agent Plan widget in a single query.
-resp=$(glab api graphql -f query="query { project(fullPath: \"${project}\") { workItems(iid: \"${iid}\") { nodes { id iid title widgets { type ... on WorkItemWidgetAgentPlan { content } } } } } }")
+#    Pass project and iid as GraphQL variables. Do not put them in the query
+#    text. A quote in either value must not change the query.
+#    Use -f (--raw-field). Do not use -F (--field): -F sends an integer-like
+#    value as a JSON number, and GitLab rejects a number for a String!
+#    variable ("Could not coerce value 2332 to String").
+# shellcheck disable=SC2016  # $fullPath/$iid are GraphQL variables, not shell vars
+resp=$(glab api graphql \
+  -f query='query($fullPath: ID!, $iid: String!) { project(fullPath: $fullPath) { workItems(iid: $iid) { nodes { id iid title widgets { type ... on WorkItemWidgetAgentPlan { content } } } } } }' \
+  -f fullPath="$project" \
+  -f iid="$iid")
 
 # 2. Parse, report to stderr, emit the plan to stdout or the out file.
 printf '%s' "$resp" | python3 -c '
