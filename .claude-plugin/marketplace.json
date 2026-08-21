@@ -24,6 +24,10 @@
       "source": "./.claude-plugin/plugins/gitlab-clickhouse"
     },
     {
+      "name": "gitlab-issue-state",
+      "source": "./.claude-plugin/plugins/gitlab-issue-state"
+    },
+    {
       "name": "gitlab-mr-description",
       "source": "./.claude-plugin/plugins/gitlab-mr-description"
     },
