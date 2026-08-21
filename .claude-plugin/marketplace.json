@@ -16,6 +16,10 @@
       "source": "./.claude-plugin/plugins/commit-messages"
     },
     {
+      "name": "find-reusable-patterns",
+      "source": "./.claude-plugin/plugins/find-reusable-patterns"
+    },
+    {
       "name": "gitlab-babysit-mr",
       "source": "./.claude-plugin/plugins/gitlab-babysit-mr"
     },

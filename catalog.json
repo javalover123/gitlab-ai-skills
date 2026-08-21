@@ -18,7 +18,7 @@
     },
     {
       "name": "find-reusable-patterns",
-      "description": "Find reusable implementations across a codebase before writing new code, using the GitLab Orbit knowledge graph. Use when someone asks \"is there an existing X\", \"how do we usually do Y\", or wants to reuse a pattern instead of rebuilding it. Returns candidate implementations ranked by how widely they are already used.",
+      "description": "Find reusable implementations across a codebase before writing new code, using the GitLab Orbit knowledge graph. Use when someone asks \"is there an existing X\", \"how do we usually do Y\", wants to reuse a pattern instead of rebuilding it, or types /find-reusable-patterns. Returns candidate implementations ranked by how widely they are already used.",
       "category": "Development Workflow",
       "license": "MIT",
       "compatibility": "",
