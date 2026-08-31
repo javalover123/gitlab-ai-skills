@@ -38,6 +38,7 @@ CATEGORY_ORDER = [
     "Testing",
     "Shell & Environment",
     "Agent Tooling",
+    "Research & Notes",
 ]
 
 # Debug flag
