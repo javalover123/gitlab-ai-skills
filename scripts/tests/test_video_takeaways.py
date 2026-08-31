@@ -3,6 +3,7 @@
 
 import os
 from pathlib import Path
+import shutil
 import stat
 import subprocess
 import tempfile
@@ -132,6 +133,22 @@ you today
 
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertIn("no existing tags found", result.stderr)
+
+    @unittest.skipUnless(
+        all(shutil.which(command) for command in ("pandoc", "unzip")),
+        "Pandoc and unzip are required",
+    )
+    def test_create_epub_validates_links_with_multiple_query_parameters(self):
+        (self.bin_dir / "pandoc").unlink()
+        markdown = self.root / "input.md"
+        output = self.root / "output.epub"
+        markdown.write_text("# Title\n\n[Link](https://www.youtube.com/watch?v=ID&list=LIST)\n")
+
+        result = self.run_script("create-epub", "--no-cover", "--output", output, markdown)
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertTrue(output.is_file())
+        self.assertIn("validation=passed", result.stdout)
 
 
 if __name__ == "__main__":
