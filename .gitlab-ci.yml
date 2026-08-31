@@ -53,6 +53,7 @@ validate-frontmatter:
   stage: verify
   extends: .verify-rules
   before_script:
+    - apk add --no-cache bash jq pandoc perl unzip
     - pip install --no-cache-dir "PyYAML==6.0.2"
   script:
     - python3 scripts/validate_frontmatter.py --ci --debug
