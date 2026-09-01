@@ -1,0 +1,10 @@
+{
+  "name": "skopeo",
+  "description": "Interrogate container images and registries with skopeo \u2014 read manifests, configs, layers, platforms, and tags over the network without pulling the image or running a daemon. Use when asked about an image's digest, platforms, labels, entrypoint, layers, size, or available tags, instead of reaching for docker pull / docker inspect.",
+  "version": "0.1.0",
+  "author": {
+    "name": "GitLab"
+  },
+  "license": "MIT",
+  "skills": "./"
+}

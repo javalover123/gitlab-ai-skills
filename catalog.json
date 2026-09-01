@@ -17,6 +17,14 @@
       "path": "skills/commit-messages/SKILL.md"
     },
     {
+      "name": "gitlab-agent-plan",
+      "description": "Read or write a GitLab work item's Workplan / Agent Plan widget \u2014 the AI work plan property \u2014 via GraphQL. Use when asked to get/show/pull or attach/set/update a work item's workplan or agent plan, as opposed to its description or comments.",
+      "category": "Development Workflow",
+      "license": "MIT",
+      "compatibility": "opencode",
+      "path": "skills/gitlab-agent-plan/SKILL.md"
+    },
+    {
       "name": "gitlab-babysit-mr",
       "description": "Monitor a GitLab MR's pipeline until green. Classifies failures (flaky, master-broken, lint, coverage, real), retries jobs where appropriate, makes light-touch auto-fixes, and posts findings as an MR comment.",
       "category": "Development Workflow",
@@ -143,6 +151,14 @@
       "license": "MIT",
       "compatibility": "opencode",
       "path": "skills/self-service-performance-testing/SKILL.md"
+    },
+    {
+      "name": "skopeo",
+      "description": "Interrogate container images and registries with skopeo \u2014 read manifests, configs, layers, platforms, and tags over the network without pulling the image or running a daemon. Use when asked about an image's digest, platforms, labels, entrypoint, layers, size, or available tags, instead of reaching for docker pull / docker inspect.",
+      "category": "Shell & Environment",
+      "license": "MIT",
+      "compatibility": "opencode",
+      "path": "skills/skopeo/SKILL.md"
     },
     {
       "name": "stack-changes",
