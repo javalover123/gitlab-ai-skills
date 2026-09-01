@@ -153,6 +153,14 @@
       "path": "skills/self-service-performance-testing/SKILL.md"
     },
     {
+      "name": "skopeo",
+      "description": "Interrogate container images and registries with skopeo \u2014 read manifests, configs, layers, platforms, and tags over the network without pulling the image or running a daemon. Use when asked about an image's digest, platforms, labels, entrypoint, layers, size, or available tags, instead of reaching for docker pull / docker inspect.",
+      "category": "Shell & Environment",
+      "license": "MIT",
+      "compatibility": "opencode",
+      "path": "skills/skopeo/SKILL.md"
+    },
+    {
       "name": "stack-changes",
       "description": "Splits a large local change (uncommitted or committed) into a stacked-MR chain. Use when the user asks to split an MR they find too big to review, wants stacked diffs, has sprawling AI-mode work to publish, or types /stack-changes.",
       "category": "Development Workflow",
