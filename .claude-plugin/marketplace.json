@@ -76,6 +76,10 @@
       "source": "./.claude-plugin/plugins/self-service-performance-testing"
     },
     {
+      "name": "skopeo",
+      "source": "./.claude-plugin/plugins/skopeo"
+    },
+    {
       "name": "stack-changes",
       "source": "./.claude-plugin/plugins/stack-changes"
     },
