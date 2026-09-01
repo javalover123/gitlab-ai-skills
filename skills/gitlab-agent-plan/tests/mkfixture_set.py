@@ -17,6 +17,7 @@ Mutation-response kinds:
   mut-errors     workItemUpdate.errors is non-empty (the flag-gated rejection)
   empty-after    workItemUpdate returns AGENT_PLAN with empty content
   no-payload     data.workItemUpdate == null
+  null-item      workItemUpdate.workItem == null with errors == []
 """
 import json
 import sys
@@ -78,6 +79,10 @@ elif kind == "empty-after":
     doc = {"data": {"workItemUpdate": {
         "workItem": {"widgets": [{"type": "AGENT_PLAN", "content": ""}]},
         "errors": []}}}
+elif kind == "null-item":
+    # A null workItem with an *empty* errors list: neither guard above
+    # catches it, so the report stage must not subscript it blindly.
+    doc = {"data": {"workItemUpdate": {"workItem": None, "errors": []}}}
 elif kind == "no-payload":
     doc = {"data": {"workItemUpdate": None}}
 else:

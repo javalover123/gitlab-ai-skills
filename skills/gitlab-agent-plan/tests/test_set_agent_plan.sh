@@ -135,6 +135,11 @@ run avail-set no-payload
 check "null payload: exit 1" 1 "$rc"
 has   "null payload message" 'no workItemUpdate payload' "$err"
 
+run avail-set null-item
+check "null workItem, empty errors: exit 1" 1 "$rc"
+has   "null workItem message" 'no AGENT_PLAN content after update' "$err"
+hasnt "no traceback from null workItem" 'Traceback' "$work/err"
+
 echo
 echo "== preflight-stage failures (exit 1) =="
 run no-nodes ok

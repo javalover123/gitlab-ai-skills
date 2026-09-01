@@ -17,7 +17,6 @@ allowed-tools:
   - Bash(glab api graphql *)
   - Bash(bash *get_agent_plan.sh *)
   - Bash(bash *set_agent_plan.sh *)
-  - Bash(python3 *)
 ---
 
 # gitlab-agent-plan — read and write a work item's Agent Plan (Workplan) widget
@@ -117,7 +116,7 @@ repo they are discovered and run by `scripts/run_skill_tests.sh` (wired into
 
 ```
 bash tests/test_get_agent_plan.sh    # 53 cases
-bash tests/test_set_agent_plan.sh    # 54 cases
+bash tests/test_set_agent_plan.sh    # 57 cases
 bash tests/test_roundtrip_mock.sh    #  7 cases
 ```
 

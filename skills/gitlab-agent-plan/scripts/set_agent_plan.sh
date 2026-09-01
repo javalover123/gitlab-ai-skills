@@ -154,7 +154,8 @@ if not u:
 errs = u.get("errors") or []
 if errs:
     print("MUTATION ERRORS:", errs, file=sys.stderr); sys.exit(1)
-ap = next((w for w in u["workItem"]["widgets"] if w.get("type") == "AGENT_PLAN"), None)
+wi = u.get("workItem") or {}
+ap = next((w for w in wi.get("widgets") or [] if w.get("type") == "AGENT_PLAN"), None)
 if not ap or not (ap.get("content") or ""):
     die("no AGENT_PLAN content after update")
 print("OK: agent plan set,", len(ap["content"].encode("utf-8")), "bytes")
