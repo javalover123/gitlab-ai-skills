@@ -47,6 +47,10 @@ Skills are loaded explicitly by the agent when relevant to a task (e.g. "load th
 
 Use when creating git commits, writing commit messages, or when about to run git commit -- enforces structured commit message format with imperative mood, capitalized subjects, 72-char wrapping, and atomic commits → [`SKILL.md`](skills/commit-messages/SKILL.md)
 
+#### gitlab-agent-plan
+
+Read or write a GitLab work item's Workplan / Agent Plan widget — the AI work plan property — via GraphQL. Use when asked to get/show/pull or attach/set/update a work item's workplan or agent plan, as opposed to its description or comments. → [`SKILL.md`](skills/gitlab-agent-plan/SKILL.md)
+
 #### gitlab-babysit-mr
 
 Monitor a GitLab MR's pipeline until green. Classifies failures (flaky, master-broken, lint, coverage, real), retries jobs where appropriate, makes light-touch auto-fixes, and posts findings as an MR comment. → [`SKILL.md`](skills/gitlab-babysit-mr/SKILL.md)
@@ -108,6 +112,10 @@ Help engineers write performance tests that detect regressions, using k6 for loa
 #### run-in-tmux-pane
 
 Run commands in a temporary tmux pane with full interactive zsh environment (login shell, shims, PATH, aliases, TTY). → [`SKILL.md`](skills/run-in-tmux-pane/SKILL.md)
+
+#### skopeo
+
+Interrogate container images and registries with skopeo — read manifests, configs, layers, platforms, and tags over the network without pulling the image or running a daemon. Use when asked about an image's digest, platforms, labels, entrypoint, layers, size, or available tags, instead of reaching for docker pull / docker inspect. → [`SKILL.md`](skills/skopeo/SKILL.md)
 
 #### write-large-file
 
@@ -244,6 +252,7 @@ This repo ships as a [Claude Code plugin marketplace](https://code.claude.com/do
 | ------ | ------ | ----------- | ------- |
 | [`authoring-skills`](.claude-plugin/plugins/authoring-skills) | [`authoring-skills`](skills/authoring-skills/SKILL.md) | Author a new agent skill or improve an existing one - write the SKILL.md frontmatter and description, structure the body, and fix skills that under- or over-trigger. Use when asked to create/write a skill, make a SKILL.md, improve/refactor a skill, or fix a skill's description. | 0.2.0 |
 | [`commit-messages`](.claude-plugin/plugins/commit-messages) | [`commit-messages`](skills/commit-messages/SKILL.md) | Use when creating git commits, writing commit messages, or when about to run git commit -- enforces structured commit message format with imperative mood, capitalized subjects, 72-char wrapping, and atomic commits | 1.0.2 |
+| [`gitlab-agent-plan`](.claude-plugin/plugins/gitlab-agent-plan) | [`gitlab-agent-plan`](skills/gitlab-agent-plan/SKILL.md) | Read or write a GitLab work item's Workplan / Agent Plan widget — the AI work plan property — via GraphQL. Use when asked to get/show/pull or attach/set/update a work item's workplan or agent plan, as opposed to its description or comments. | 0.1.0 |
 | [`gitlab-babysit-mr`](.claude-plugin/plugins/gitlab-babysit-mr) | [`gitlab-babysit-mr`](skills/gitlab-babysit-mr/SKILL.md) | Monitor a GitLab MR's pipeline until green. Classifies failures (flaky, master-broken, lint, coverage, real), retries jobs where appropriate, makes light-touch auto-fixes, and posts findings as an MR comment. | 0.11.0 |
 | [`gitlab-clickhouse`](.claude-plugin/plugins/gitlab-clickhouse) | [`gitlab-clickhouse`](skills/gitlab-clickhouse/SKILL.md) | Inspect GitLab local ClickHouse tables, schemas, ingestion paths, and data patterns. Use for CH table questions, DESCRIBE TABLE, schema and source-of-truth checks under db/click_house, ingestion debugging, and investigating aggregates, distributions, outliers, or anomalous ClickHouse data in a GitLab GDK environment. | 1.0.1 |
 | [`gitlab-mr-description`](.claude-plugin/plugins/gitlab-mr-description) | [`gitlab-mr-description`](skills/gitlab-mr-description/SKILL.md) | Write or update a GitLab MR description. Reads the branch diff, drafts structured markdown using GitLab's standard sections, and applies conventions for feature flags, database queries, and local testing matrices. Use when opening a new MR or refreshing an existing description. | 1.1.0 |
@@ -258,6 +267,7 @@ This repo ships as a [Claude Code plugin marketplace](https://code.claude.com/do
 | [`pushify`](.claude-plugin/plugins/pushify) | [`pushify`](skills/pushify/SKILL.md) | Run pre-push lefthook checks and iteratively fix failures (up to 3 iterations, then escalate). Invoke when: (a) about to push and wanting hooks to pass cleanly, (b) `git push` has just failed on a pre-push hook and the failure needs to be driven to resolution, or (c) preparing a clean working tree without pushing — e.g. before opening a Draft MR for early review. | 1.1.0 |
 | [`run-in-tmux-pane`](.claude-plugin/plugins/run-in-tmux-pane) | [`run-in-tmux-pane`](skills/run-in-tmux-pane/SKILL.md) | Run commands in a temporary tmux pane with full interactive zsh environment (login shell, shims, PATH, aliases, TTY). | 1.1.1 |
 | [`self-service-performance-testing`](.claude-plugin/plugins/self-service-performance-testing) | [`self-service-performance-testing`](skills/self-service-performance-testing/SKILL.md) | Help engineers write performance tests that detect regressions, using k6 for load testing, sitespeed.io for frontend Core Web Vitals, rspec-benchmark for unit-level perf assertions, and Ruby profilers (Stackprof, memory_profiler, derailed_benchmarks, etc.) for investigating slow code paths. Use when the user is adding or changing API endpoints, database queries, critical paths, or frontend pages and needs to decide whether to write a performance test, what kind, or how to integrate it into CI. Also activate when the user mentions load testing, stress testing, response times, benchmarking, performance budgets, CPT, component performance testing, MR pipeline performance testing, profiling slow Ruby code, memory bloat, or wants to run tests against staging - this skill enforces shared infrastructure safety rules. Does not cover APM or debugging production incidents. | 0.4.1 |
+| [`skopeo`](.claude-plugin/plugins/skopeo) | [`skopeo`](skills/skopeo/SKILL.md) | Interrogate container images and registries with skopeo — read manifests, configs, layers, platforms, and tags over the network without pulling the image or running a daemon. Use when asked about an image's digest, platforms, labels, entrypoint, layers, size, or available tags, instead of reaching for docker pull / docker inspect. | 0.1.0 |
 | [`stack-changes`](.claude-plugin/plugins/stack-changes) | [`stack-changes`](skills/stack-changes/SKILL.md) | Splits a large local change (uncommitted or committed) into a stacked-MR chain. Use when the user asks to split an MR they find too big to review, wants stacked diffs, has sprawling AI-mode work to publish, or types /stack-changes. | 0.1.0 |
 | [`video-takeaways`](.claude-plugin/plugins/video-takeaways) | [`video-takeaways`](skills/video-takeaways/SKILL.md) | Video URLs and YouTube links: extract actionable takeaways with timestamp hyperlinks, then save approved notes as Markdown, to Memos, as an EPUB for Kindle, or to another requested destination. Use when asked to summarize learnings, lessons, rules of thumb, practical advice, Markdown notes, EPUBs, or Send to Kindle documents from a video, talk, tutorial, or interview. | 1.0.2 |
 | [`write-large-file`](.claude-plugin/plugins/write-large-file) | [`write-large-file`](skills/write-large-file/SKILL.md) | Write large files reliably using chunked bash append (>> heredoc) | 1.0.0 |
