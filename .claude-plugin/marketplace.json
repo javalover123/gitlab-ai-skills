@@ -16,6 +16,10 @@
       "source": "./.claude-plugin/plugins/commit-messages"
     },
     {
+      "name": "gitlab-agent-plan",
+      "source": "./.claude-plugin/plugins/gitlab-agent-plan"
+    },
+    {
       "name": "gitlab-babysit-mr",
       "source": "./.claude-plugin/plugins/gitlab-babysit-mr"
     },
@@ -70,6 +74,10 @@
     {
       "name": "self-service-performance-testing",
       "source": "./.claude-plugin/plugins/self-service-performance-testing"
+    },
+    {
+      "name": "skopeo",
+      "source": "./.claude-plugin/plugins/skopeo"
     },
     {
       "name": "stack-changes",
