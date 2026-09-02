@@ -168,7 +168,7 @@ Execute GLQL queries against GitLab projects and groups using glab CLI → [`SKI
 This repo ships `.agents/skills/` with a symlink for each skill. That is the cross-tool discovery location defined by the [Agent Skills spec](https://agentskills.io), so multiple tools can read it:
 
 - **Zed** loads skills from a project-local `<worktree>/.agents/skills/` (in a trusted worktree) as well as the global `~/.agents/skills/`. Cloning this repo is enough for project-local discovery, no extra step needed. See the [Zed skills docs](https://zed.dev/docs/ai/skills).
-- **GitLab Duo CLI** discovers global skills from `~/.agents/skills/` (or `~/.gitlab/duo/skills/`), behind the experimental `--global-skills` flag.
+- **GitLab Duo CLI** discovers global skills from `~/.agents/skills/` (or `~/.gitlab/duo/skills/`).
 
 For global discovery, symlink the shipped skills into `~/.agents/skills/`:
 
