@@ -15,6 +15,19 @@ position needs. The `:fullpath` placeholder resolves from the current repo; for
 an MR in another project, pass the URL-encoded path instead
 (`gitlab-org%2Fgitlab`).
 
+## Stage each approved body in its own file
+
+Write the body the reviewer signed off on to one file per finding. `--rawfile`
+then carries it verbatim, so markdown, backticks and newlines survive without
+shell escaping:
+
+```bash
+mkdir -p /tmp/mr-review
+cat > /tmp/mr-review/01.md <<'BODY'
+**Suggestion (non-blocking):** ...
+BODY
+```
+
 ## Post one draft per finding
 
 Build the JSON with `jq` so multi-line bodies and backticks survive, and pipe it
