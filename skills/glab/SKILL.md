@@ -1,7 +1,7 @@
 ---
 name: glab
 description: GitLab workflow automation using the glab CLI. Use when the user asks to create, update, close, label, or comment on a GitLab issue, merge request, work item, or epic; to post a note, review comment, or discussion reply; to call the GitLab REST or GraphQL API through "glab api"; to inspect or retry pipelines and jobs; or to configure glab auth against gitlab.com, a self-managed instance, or a local GDK. Read it before any glab write operation, because several field flags fail silently - they exit 0 while posting the wrong content.
-version: 1.12.2
+version: 1.12.3
 category: Development Workflow
 license: MIT
 metadata:
@@ -282,11 +282,8 @@ API quirks that are easy to get wrong and not discoverable from `glab <cmd> --he
 
 ## Contributing Improvements
 
-This skill is maintained in the GitLab monolith
-([`gitlab-org/gitlab`](https://gitlab.com/gitlab-org/gitlab), under
-`.claude/skills/glab/`) and synced out to
-[`gitlab-org/ai/skills`](https://gitlab.com/gitlab-org/ai/skills) — the monolith copy
-is the source of truth. If you discover that any guidance here is **inaccurate or
-outdated** (e.g. a command that no longer works, a wrong flag, an incorrect API
-behavior), confirm with the user and open an MR against the monolith with the fix.
-Keep changes focused — one fix per MR.
+This skill is maintained in
+[`gitlab-org/ai/skills`](https://gitlab.com/gitlab-org/ai/skills). If you discover
+that any guidance here is **inaccurate or outdated** (e.g. a command that no longer
+works, a wrong flag, an incorrect API behavior), confirm with the user and open an
+MR against this repository with the fix. Keep changes focused — one fix per MR.
