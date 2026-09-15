@@ -21,6 +21,13 @@ suppression ledger, re-syncing, feedback routing, and parity verification.
 Uses `glab stack` (experimental, with a pure-git fallback), the GitLab MCP for
 MR/review writes, and `glab api` for dependency edges and retargeting.
 
+**vs. `stack-changes`:** that skill does the one-shot local split — turn an
+existing uncommitted or committed diff into a `glab stack` and hand off the
+sync to you. This skill picks up from there (or from a stack built any other
+way) and owns the ongoing MR lifecycle: opening MRs, triaging reviewer
+feedback, re-syncing after merges over days or weeks, and merging bottom-up.
+Use `stack-changes` to create the split; use this skill to run it afterward.
+
 ## Quick Start
 
 1. **Decompose by logic, not lines.** Split on def-use independence, then check

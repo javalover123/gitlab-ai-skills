@@ -165,9 +165,18 @@ git fetch origin --prune
 # Re-sync every remaining branch from the bottom up.
 # glab stack list output format is unverified — check it before relying on the grep.
 for branch in $(glab stack list 2>/dev/null | grep -v merged || git branch -l 'stack/*' | sort); do
-  git rebase --update-refs origin/"$DEFAULT" "$branch" 2>/dev/null || \
-    git rebase origin/"$DEFAULT" "$branch"  # fallback without --update-refs
-  git push origin "$branch" --force-with-lease
+  # Check the exit status before pushing — the --update-refs fallback also
+  # fires on a real conflict, which leaves the repo mid-rebase. Pushing that
+  # state with --force-with-lease would corrupt the branch and let the loop
+  # carry the corruption into every branch stacked on top of it.
+  if git rebase --update-refs origin/"$DEFAULT" "$branch" 2>/dev/null || \
+     git rebase origin/"$DEFAULT" "$branch"; then
+    git push origin "$branch" --force-with-lease
+  else
+    echo "Rebase failed for $branch — resolve conflicts manually, then re-run" >&2
+    git rebase --abort 2>/dev/null
+    break
+  fi
 done
 
 glab stack sync 2>/dev/null || true
@@ -179,6 +188,8 @@ After every re-sync:
 2. Update "part N of M" counts in every remaining MR description
 3. Verify the suppression ledger — any cleared suppressions must be removed
 4. Check that CI is green on every updated branch before continuing
+5. If the loop stopped early on a conflict, finish resolving that branch by
+   hand before re-running the re-sync for the rest of the stack
 
 **Squash hazard:** if a merged MR was squashed, child branches diverge at the
 squash SHA. Always rebase children after a squash merge, never just retarget.
