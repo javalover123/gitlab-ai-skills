@@ -2,15 +2,15 @@
 
 ## Resolving scope before you review
 
-`CODEOWNERS` in `gitlab-org/architecture/readiness` is the single source of truth for who reviews what, and it's easy to get wrong by reading category folder names instead of the file itself. Fetch it fresh:
+`CODEOWNERS` in `gitlab-org/architecture/readiness` is the single source of truth for who reviews what, and category folder names are not a reliable stand-in for it: several categories share one owner, and per-file overrides (including files owned by two sections at once) put individual files under a different owner than the rest of their folder. The full resolution mechanics live in `prep-start`'s reference, [`../../prep-start/references/review-and-splitting.md`](../../prep-start/references/review-and-splitting.md); this section covers what to do with that resolution once you have it.
+
+Fetch `CODEOWNERS` fresh, then resolve the changed files' owner-set:
 
 ```bash
 glab api "projects/gitlab-org%2Farchitecture%2Freadiness/repository/files/CODEOWNERS/raw?ref=main"
 ```
 
-Two rules break the assumption that a category maps to one owner. Several categories share a single team (`service_architecture`, `installation_configuration`, `operational_lifecycle`, and `performance_scalability` are all owned by `@gitlab-com/gl-infra/software-delivery/operate` as of this writing), so an MR touching all of them still needs only one team's sign-off. And per-file overrides beat the section default, with the *last* matching entry winning; a file can even be matched by two sections at once, which means AND rather than OR, and needs approval from both.
-
-If a change resolves to more than one distinct owner or owner-set, ask for a split before you review the content. A real automated check in this repo (`.gitlab/duo/mr-review-instructions.yaml`) posts exactly this kind of request when it detects a multi-owner MR: it names the owning teams, lists which files belong to which, and proposes a split table. Follow the same shape when you raise it by hand.
+If the files resolve to more than one distinct owner or owner-set, ask for a split before you review the content. A real automated check in this repo (`.gitlab/duo/mr-review-instructions.yaml`) posts exactly this kind of request when it detects a multi-owner MR: it names the owning teams, lists which files belong to which, and proposes a split table. Follow the same shape when you raise it by hand.
 
 ## The evidence-quality bar
 

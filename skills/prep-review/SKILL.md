@@ -30,11 +30,11 @@ For a GA-readiness check specifically, verify against the Final Validation bar: 
 
 ## Mode B: reviewing an MR
 
-Confirm scope before you read a single answer. Resolve the changed files' owners from the live `CODEOWNERS`; if they resolve to more than one distinct owner (or owner-set), ask for a split before reviewing content at all. The resolution logic, including per-file overrides and dual ownership, is in [references/evidence-bar.md](references/evidence-bar.md).
+Confirm scope before you read a single answer. Resolve the changed files' owners from the live `CODEOWNERS`; if they resolve to more than one distinct owner (or owner-set), ask for a split before reviewing content at all. The resolution mechanics and what to do about a multi-owner split are in [references/evidence-bar.md](references/evidence-bar.md).
 
 Then review for evidence quality, not completeness. Completeness gaps are already tracked as TODOs and issues by design, so your job is catching claims that are wrong, not claims that are merely unfinished. The checklist, plus the two most common failure modes (unsupported claims, and "Not Applicable" answers that turn out to be answerable), lives in the same reference file.
 
-Once you're satisfied, approve and merge it yourself. No PREP maintainer is needed, as long as the MR stays scoped to your section or sections. Approval is required from every section an MR touches.
+Once you're satisfied, confirm the pipeline is green and no discussion thread is left unresolved, then approve and merge it yourself. No PREP maintainer is needed, as long as the MR stays scoped to your section or sections. Approval is required from every section an MR touches.
 
 ## Mode C: addressing feedback as the feature owner
 
