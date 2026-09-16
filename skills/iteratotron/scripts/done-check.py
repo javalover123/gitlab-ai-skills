@@ -177,7 +177,7 @@ def check_clause_7_drift(state: dict, root: Path) -> ClauseResult:
     )
     # Ignore markers under standard test/vendored/generated locations, not just
     # paths literally containing "test".
-    _skip_dirs = ("test", "spec/", "__tests__/", "fixtures/", "testdata/",
+    _skip_dirs = ("test/", "spec/", "__tests__/", "fixtures/", "testdata/",
                   "vendor/", "node_modules/", "target/", ".git/", "generated/")
     lines = [
         line for line in output.split("\n")
@@ -203,21 +203,56 @@ def check_clause_8_slsa(state: dict, root: Path) -> ClauseResult:
     if rc != 0:
         return ClauseResult(idx=8, name="SLSA L3 attested", passed=False,
                             evidence="cosign not installed — cannot verify the attestation")
-    sig = layout.with_suffix(".sig")
-    if not sig.is_file():
+
+    # cosign verify-attestation takes an artifact/image reference as its
+    # subject, not a path to the predicate JSON: the attestation is stored
+    # against the built artifact (in the registry for keyless, alongside a
+    # detached .sig for key-based), not next to layout.json on disk.
+    artifact_ref = state.get("artifact_ref")
+    if not artifact_ref:
         return ClauseResult(idx=8, name="SLSA L3 attested", passed=False,
-                            evidence=f"attestation signature not found at {sig}")
-    # Actually verify — presence of a .sig proves nothing about validity.
+                            evidence="no artifact_ref recorded in state to verify the attestation against")
+
+    # references/harness-vector.md's global_attestation.cosign_keyless
+    # selects which of the two done-predicate.md flows this project uses;
+    # default true since that's the documented standard flow.
+    keyless = state.get("harness_vector", {}).get("global_attestation", {}).get("cosign_keyless", True)
+
+    if keyless:
+        # Keyless (OIDC-bound) flow: cosign attest --yes signs against Fulcio/
+        # Rekor with no local key material, so the verifier must be told which
+        # CI identity to trust instead of which key. No default issuer/regexp
+        # here: done-predicate.md's own example targets GitHub Actions, so
+        # guessing GitLab (or any other provider) would silently verify
+        # against the wrong identity rather than failing loudly.
+        identity_regexp = state.get("cosign_certificate_identity_regexp")
+        oidc_issuer = state.get("cosign_certificate_oidc_issuer")
+        if not identity_regexp or not oidc_issuer:
+            return ClauseResult(
+                idx=8, name="SLSA L3 attested", passed=False,
+                evidence="cosign_keyless is set but cosign_certificate_identity_regexp "
+                         "and/or cosign_certificate_oidc_issuer are missing from state",
+            )
+        cmd = (
+            f"cosign verify-attestation --certificate-identity-regexp '{identity_regexp}' "
+            f"--certificate-oidc-issuer '{oidc_issuer}' --type slsaprovenance {artifact_ref}"
+        )
+    else:
+        # Key-based flow: verify the artifact against the configured public key.
+        key = state.get("cosign_public_key", "cosign.pub")
+        if not (root / key).is_file():
+            return ClauseResult(idx=8, name="SLSA L3 attested", passed=False,
+                                evidence=f"cosign public key not found at {key}")
+        cmd = f"cosign verify-attestation --key {key} --type slsaprovenance {artifact_ref}"
+
+    # Actually verify — presence of a signature proves nothing about validity.
     # done-predicate.md requires cosign verify-attestation to exit 0.
-    key = state.get("cosign_public_key", "cosign.pub")
-    vrc, voutput = _run_cmd(
-        f"cosign verify-attestation --key {key} --type slsaprovenance {layout}", root
-    )
+    vrc, voutput = _run_cmd(cmd, root)
     if vrc != 0:
         return ClauseResult(idx=8, name="SLSA L3 attested", passed=False,
                             evidence=f"cosign verify-attestation failed: {voutput.strip()[:200]}")
     return ClauseResult(idx=8, name="SLSA L3 attested", passed=True,
-                        evidence=f"cosign verify-attestation passed for {layout}")
+                        evidence=f"cosign verify-attestation passed for {artifact_ref}")
 
 
 def check_clause_9_postmortem(state: dict, root: Path) -> ClauseResult:
