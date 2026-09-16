@@ -8,7 +8,7 @@ description: >-
   memory is high at runtime, or CI times are painful. Triggers: "slow rust
   build", "binary size", "reduce memory", "rust profiling", "cargo timing",
   "cargo flamegraph", "nextest", "dependency audit".
-version: 1.0.0
+version: 1.0.1
 license: MIT
 category: Development Workflow
 compatibility: opencode

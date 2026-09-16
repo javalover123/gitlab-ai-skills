@@ -77,6 +77,15 @@ build-and-test:
     - cargo nextest run --locked
 ```
 
+**Caveat**: this cache key only changes when `Cargo.lock` changes, so the same
+cache entry keeps accumulating artifacts across every commit in between —
+and `target/` can grow 5–20 GB (see the tmpfs section above), so an
+ever-growing cache eventually offsets or reverses the build-time win from
+caching it at all. Clear the cache periodically, or use
+[sccache](references/build-optimization.md#sccache-shared-compilation-cache)
+or [cargo-chef](#docker-builds-with-cargo-chef) instead, neither of which has
+this unbounded-growth problem.
+
 ### Memory-constrained runners
 
 If you're hitting OOM on CI, add swap:
