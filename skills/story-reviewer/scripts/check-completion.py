@@ -24,10 +24,16 @@ def read_hook_input():
 def main():
     hook_input = read_hook_input()
 
-    # chdir to project root so Path() checks work correctly
+    # chdir to project root so Path() checks work correctly. This hook is
+    # advisory-only and must always exit 0 (see module docstring / comments
+    # below), so a stale or invalid cwd (directory deleted/moved) must not
+    # crash the script with an uncaught OSError.
     cwd = hook_input.get("cwd")
     if cwd:
-        os.chdir(cwd)
+        try:
+            os.chdir(cwd)
+        except OSError:
+            pass
 
     # Prevent infinite loop — if already in a stop hook cycle, allow completion
     if hook_input.get("stop_hook_active"):
