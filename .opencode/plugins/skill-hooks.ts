@@ -189,9 +189,15 @@ export const SkillHooksPlugin: Plugin = async ({ client, $, directory, worktree 
           //
           // The `$` API has no timeout method, so enforce the spec's `timeout`
           // by racing the shell promise against a timer: whichever settles
-          // first wins. A hung hook can't block the session past `timeoutMs`
-          // (the losing shell process is left to exit on its own). A `TIMEOUT`
-          // sentinel distinguishes the timeout branch from a real empty result.
+          // first wins. A hung hook can't block the session past `timeoutMs`.
+          // On timeout we also call `.kill()` on the losing shell promise
+          // (Bun's ShellPromise supports this) so the underlying `sh -c`
+          // process is actually terminated rather than left running as an
+          // orphan — PreToolUse hooks fire before every tool call, so a
+          // genuinely hung watchdog would otherwise spawn a fresh abandoned
+          // process on every tool invocation for the rest of the session. A
+          // `TIMEOUT` sentinel distinguishes the timeout branch from a real
+          // empty result.
           const shellPromise = $`sh -c ${`cd ${JSON.stringify(skillDir)} && ${spec.command}`} < ${hookInput}`
             .cwd(root)
             .env({ ...process.env, CLAUDE_PROJECT_DIR: root })
@@ -204,6 +210,13 @@ export const SkillHooksPlugin: Plugin = async ({ client, $, directory, worktree 
           const raced = await Promise.race([shellPromise, timeoutPromise])
           if (timer) clearTimeout(timer)
           if (raced === "TIMEOUT") {
+            try {
+              shellPromise.kill()
+            } catch {
+              // Best-effort: if the process already exited between the race
+              // resolving and this call, or .kill() isn't available, there's
+              // nothing left to clean up.
+            }
             out.push({ skill, result: null })
             continue
           }
