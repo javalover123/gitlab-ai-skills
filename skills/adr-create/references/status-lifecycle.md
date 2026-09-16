@@ -16,6 +16,12 @@
 
 The decision has been agreed upon by the decision-makers listed in frontmatter. In practice, this often happens through PR review — when the PR adding the ADR is merged, the status changes from Proposed to Accepted.
 
+### Proposed → Rejected
+
+The decision-makers considered the proposal and chose not to adopt it — a different option won, or the problem turned out not to need a decision at all. A rejected ADR still records real value: it stops the same option from being re-proposed and re-debated later without anyone remembering why it was turned down.
+
+**How:** Update the frontmatter to `status: rejected` and add a "Rejection Rationale" note (or fold the reasoning into "More Information") explaining why the proposal wasn't adopted. Unlike Accepted → Deprecated/Superseded, this is a terminal transition straight from Proposed — there's no further status change once an ADR is rejected.
+
 ### Accepted → Deprecated
 
 The system or feature the ADR applies to has been removed or fundamentally changed, making the decision irrelevant. The decision isn't *wrong* — it just doesn't apply anymore.

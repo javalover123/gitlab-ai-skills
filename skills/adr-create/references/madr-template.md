@@ -6,7 +6,7 @@ This is the complete Markdown Architectural Decision Record template. All sectio
 
 ```markdown
 ---
-status: {proposed | accepted | deprecated | superseded by ADR-NNNN}
+status: {proposed | accepted | rejected | deprecated | superseded by ADR-NNNN}
 date: YYYY-MM-DD
 decision-makers: [list of people involved in the decision]
 consulted: [list of people whose opinions were sought (RACI: Consulted)]
@@ -25,14 +25,14 @@ should be value-neutral — describe forces at play without jumping to conclusio
 
 - [Driver 1 — a force, concern, or constraint that influences the decision]
 - [Driver 2]
+- [Driver 3]
 - [Driver 4]
-- [Driver 6]
 
 ## Considered Options
 
 1. [Option 1 — title]
 2. [Option 2 — title]
-4. [Option 4 — title (if applicable)]
+3. [Option 3 — title (if applicable)]
 
 ## Decision Outcome
 
