@@ -132,6 +132,7 @@ Some skills are **synced in** from another repository — their source of truth
 |---|---|
 | `validate_frontmatter.py` | Required fields, semver, **kebab name == dir name**, **strict YAML parse**¹ |
 | `validate_skill_length.py` | SKILL.md length (warn-only: <100 target, 150 cap) |
+| `validate_content_quality.py` | Broken relative links (**hard fail**); missing "When to Use"/"Use when"/"Triggers" cue, stray TODO/FIXME, and AGENTS.md-banned voice words (warn-only)² |
 | `lint_shell.sh` (shellcheck) | Bash footguns in `skills/**/*.sh` |
 | `run_skill_tests.sh` | Skill-shipped suites (`skills/**/tests/test_*.sh`) pass |
 | `check_version_bump.py` | `version` bumped when a skill changes |
@@ -144,6 +145,13 @@ Some skills are **synced in** from another repository — their source of truth
 is best-effort — if PyYAML is missing the script prints a visible warning and
 skips the strict pass. Install with `pip install PyYAML` for full local
 coverage.
+
+² Only broken relative links fail the build. Structure and voice findings are
+warn-only for now (like `validate_skill_length.py`) so they surface offenders
+without blocking unrelated MRs; the intent is to promote them to hard gates
+once the corpus is clean. Links in every `SKILL.md` **and** its `references/*.md`
+are checked. Unit tests: `scripts/tests/test_content_quality.py` (run via the
+`validate-frontmatter` job's `unittest discover`).
 
 If a generated file is out of sync, run `lefthook run auto-fix` and commit the
 result — don't hand-edit generated files.
