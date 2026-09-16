@@ -1,7 +1,7 @@
 {
   "name": "rust-performance-optimizer",
   "description": "Analyzes and tunes Rust project performance across build speed, runtime memory, binary size, and test throughput. Applies Cargo profile tuning, linker selection, dependency auditing, profiling, and workspace restructuring to fix bottlenecks. Use when Rust builds are slow, binaries are too large, memory is high at runtime, or CI times are painful. Triggers: \"slow rust build\", \"binary size\", \"reduce memory\", \"rust profiling\", \"cargo timing\", \"cargo flamegraph\", \"nextest\", \"dependency audit\".",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "author": {
     "name": "GitLab"
   },
