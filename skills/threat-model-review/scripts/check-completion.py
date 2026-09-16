@@ -21,7 +21,6 @@ import os
 import sys
 import re
 import time
-import tempfile
 from datetime import datetime
 from pathlib import Path
 from typing import List, Dict, Any, Optional, Tuple
@@ -78,11 +77,13 @@ def is_background_context(hook_input: Dict[str, Any]) -> bool:
     Detect if we're running in a background task or sub-agent context.
 
     Returns True if we should skip expensive checks to avoid resource contention.
-    """
-    # Check for background tasks
-    if hook_input.get("background_tasks"):
-        return True
 
+    Deliberately does NOT treat a non-empty background_tasks list as proof of
+    this on its own: background_tasks means tasks exist to track, not that
+    this invocation itself is running in the background. Conflating the two
+    made main()'s skip_in_background early-return fire before the dedicated
+    background-task timeout/kill logic further down ever got a chance to run.
+    """
     # Check if we're in a sub-agent or task context
     if hook_input.get("task_id") or hook_input.get("agent_id"):
         return True
@@ -102,8 +103,14 @@ def send_output(output: Dict[str, Any]) -> None:
 
 
 def log_hook(skill_name: str, hook_input: Dict[str, Any], output: Dict[str, Any], gaps: List[str]) -> None:
-    """Log hook invocations to temp directory for debugging and auditing."""
-    log_dir = Path(tempfile.gettempdir()) / "claude-code-hooks" / skill_name
+    """Log hook invocations to a per-user cache directory for debugging and auditing.
+
+    Uses ~/.cache rather than the shared system temp root: a fixed,
+    predictable path under a world-writable directory like /tmp lets another
+    local user pre-create it (or plant a symlink there) ahead of this
+    process, per CWE-377/379.
+    """
+    log_dir = Path(os.path.expanduser("~/.cache")) / "claude-code-hooks" / skill_name
     log_dir.mkdir(parents=True, exist_ok=True)
 
     timestamp = datetime.now().isoformat()
@@ -142,8 +149,8 @@ def should_skip(hook_input: Dict[str, Any]) -> bool:
 
 
 def get_task_tracking_file(skill_name: str) -> Path:
-    """Get path to task tracking file."""
-    log_dir = Path(tempfile.gettempdir()) / "claude-code-hooks" / skill_name
+    """Get path to task tracking file, under the same per-user cache dir as log_hook."""
+    log_dir = Path(os.path.expanduser("~/.cache")) / "claude-code-hooks" / skill_name
     log_dir.mkdir(parents=True, exist_ok=True)
     return log_dir / "background-tasks.json"
 
@@ -351,11 +358,18 @@ def check_unresolved_findings() -> List[str]:
 
     content = report.read_text()
 
+    # Match only the single heading line carrying the keyword, then consume
+    # body lines up to (but not including) the next heading. A prior version
+    # used a greedy `.*` spanning the keyword search across the whole
+    # document with DOTALL, which backtracked from the first heading in the
+    # file rather than isolating the intended section, double-counting
+    # unrelated "- [ ]" items from earlier sections (e.g. Summary) as
+    # unresolved Critical/Important findings.
     if re.search(r"critical|block.?release", content, re.IGNORECASE):
         critical_sections = re.findall(
-            r"^#.*(?:[Cc]ritical|[Bb]lock.*[Rr]elease).*?(?=^#|\Z)",
+            r"^#[^\n]*(?:[Cc]ritical|[Bb]lock.?[Rr]elease)[^\n]*\n(?:(?!^#).*\n?)*",
             content,
-            re.MULTILINE | re.DOTALL
+            re.MULTILINE
         )
         for section in critical_sections:
             unchecked = section.count("- [ ]")
@@ -365,9 +379,9 @@ def check_unresolved_findings() -> List[str]:
 
     if re.search(r"important|fix.?soon|high", content, re.IGNORECASE):
         important_sections = re.findall(
-            r"^#.*(?:[Ii]mportant|[Ff]ix.*[Ss]oon|[Hh]igh).*?(?=^#|\Z)",
+            r"^#[^\n]*(?:[Ii]mportant|[Ff]ix.?[Ss]oon|[Hh]igh)[^\n]*\n(?:(?!^#).*\n?)*",
             content,
-            re.MULTILINE | re.DOTALL
+            re.MULTILINE
         )
         for section in important_sections:
             unchecked = section.count("- [ ]")
