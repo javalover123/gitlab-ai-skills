@@ -1,7 +1,7 @@
 ---
 name: spec-review
 description: "Reviews implementation specifications for completeness, correctness, and traceability. Identifies gaps between spec and implementation, missing requirements, broken cross-references to ADRs and threat models, and ambiguous or untestable requirements. Creates new specs when none exist. Use when reviewing a spec, auditing requirements coverage, checking spec quality, finding spec gaps, or when the codebase has drifted from its spec. Triggers: review spec, audit requirements, spec gaps, spec quality, requirements coverage, check specification, spec drift."
-version: 1.0.0
+version: 1.0.1
 license: MIT
 category: Documentation
 compatibility: opencode
