@@ -215,8 +215,8 @@ rg 'if.*== NULL' --type c -A2
 rg -oh '"[a-z_-]+"' --type go | sort | uniq -c | sort -rn | head -40
 
 # Finding inline normalization (should use centralized helpers)
-rg 'ToLower|to_lowercase|\.lower\(\)|tolower' --type go
-rg 'strings\.Replace|\.replace\(' --type go
+rg 'ToLower|to_lowercase|\.lower\(\)|tolower' --type go --type rust --type py --type c
+rg 'strings\.Replace|\.replace\(' --type go --type rust --type py
 ```
 
 ## Complexity Thresholds
