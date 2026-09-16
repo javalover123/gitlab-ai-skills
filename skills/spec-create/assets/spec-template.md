@@ -127,12 +127,12 @@ Scenario: [Name]
 
 ## 11. Open Issues
 
-| ID | Issue | Owner | Status |
-|---|---|---|---|
-| OI-001 | [description] | [name] | Open |
+| ID | Issue | Owner | Due | Status |
+|---|---|---|---|---|
+| OI-001 | [description] | [name] | [date] | Open |
 
 ## Changelog
 
-| Date | Version | Changes |
-|---|---|---|
-| YYYY-MM-DD | 0.1.0 | Initial draft |
+| Date | Version | Author | Changes |
+|---|---|---|---|
+| YYYY-MM-DD | 0.1.0 | [name] | Initial draft |

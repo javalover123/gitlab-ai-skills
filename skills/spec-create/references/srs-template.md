@@ -4,7 +4,7 @@ Based on IEEE 830/29148 with modern adaptations for agile teams.
 
 ## Document Outline
 
-```markdown
+````markdown
 # [System/Feature Name] — Implementation Specification
 
 **Version:** [SemVer]
@@ -168,7 +168,7 @@ Universal across all work items in this spec:
 | Date | Version | Author | Changes |
 |---|---|---|---|
 | YYYY-MM-DD | 0.1.0 | [name] | Initial draft |
-```
+````
 
 ## Section Guidelines
 
