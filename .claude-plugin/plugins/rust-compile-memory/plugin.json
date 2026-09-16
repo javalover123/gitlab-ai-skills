@@ -1,7 +1,7 @@
 {
   "name": "rust-compile-memory",
   "description": "Profiles Rust compilation memory usage with rustc nightly and measureme tools, identifies high-memory patterns (monomorphization, large types, LLVM bottlenecks), and refactors code to reduce compilation RSS. Use when Rust builds trigger the OOM killer or consume excessive memory. Triggers: compilation memory, rustc OOM, reduce compile memory, profile compilation.",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "author": {
     "name": "GitLab"
   },
