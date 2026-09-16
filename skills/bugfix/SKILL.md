@@ -1,7 +1,7 @@
 ---
 name: bugfix
 description: "Drives a rigorous, evidence-gated bug fix or regression investigation from first report to Definition-of-Done. When invoked without a specific target, proactively scans logs, code, docs, git history, and issue trackers to discover bug candidates autonomously. User-given direction (bug report, issue ref, log path, class of bugs) takes priority. Enforces reproducer-first testing, root-cause fixes, a three-way diff between desired/documented/implemented behaviour, mandatory delegation to companion doc skills, and a hostile adversarial review before any done claim. Use when fixing bugs, investigating regressions, chasing spec/ADR/threat-model drift, or running a routine bug-hunting pass, especially for changes touching auth, crypto, supply chain, concurrency, persistence, or any trust boundary."
-version: 1.0.0
+version: 1.0.1
 license: MIT
 category: Development Workflow
 compatibility: opencode
@@ -37,7 +37,10 @@ evidence — premature victory is this skill's cardinal failure mode.
 
 ```
 0. Discovery          — (general only) scan logs/code/docs/git for candidates
-1. Intake             — restate bug; expected vs actual; environment
+1. Intake             — restate bug; expected vs actual; environment; if the
+                         optional DoD gate is registered, write
+                         .bugfix/active-<session> and an empty
+                         .bugfix/dod-<session>.md here
 2. Context gathering  — code, logs, docs; ask only if needed
 3. Reproducer first   — failing test that fails for the right reason
 4. Causal analysis    — three-way diff; >=3 hypotheses; falsify each
@@ -49,7 +52,9 @@ evidence — premature victory is this skill's cardinal failure mode.
 ```
 
 After each phase emit `GATE N: PASS` (or `BLOCKED`) with the evidence that
-justifies it. Detailed mechanics live in the references:
+justifies it; if the optional DoD gate is registered, also write the phase
+number to `.bugfix/phase-<session>` (the hook reads this to decide when to
+start enforcing). Detailed mechanics live in the references:
 
 - Phase 0 discovery scans, prioritisation, stop conditions:
   [references/bug-discovery.md](references/bug-discovery.md). Use `glab issue
@@ -122,10 +127,15 @@ with a docstring caveat.
 ## Optional Definition-of-Done gate
 
 The skill ships `scripts/require-dod.sh` and a `hooks.json` declaring it as a
-`PreToolUse` hook — under the `skill-hooks` plugin (see `doc/skill-hooks.md`) it
-runs advisory during a bugfix session; state lives in `.bugfix/` (ensure it's
-gitignored at Phase 1). Leave it unregistered to keep DoD enforcement purely
-conversational.
+`PreToolUse` hook — under the `skill-hooks` plugin
+(`.opencode/plugins/skill-hooks.ts`) it runs advisory during a bugfix session;
+state lives in `.bugfix/` (ensure it's gitignored at Phase 1). Leave it
+unregistered to keep DoD enforcement purely conversational.
+
+The plugin runs `hooks.json` commands with cwd set to this skill's own
+directory (then forces `CLAUDE_PROJECT_DIR` to the target project for the
+script's own use), so `hooks.json`'s relative `scripts/require-dod.sh` path
+resolves correctly without a `${CLAUDE_PLUGIN_ROOT}`-style substitution.
 
 ## Style
 

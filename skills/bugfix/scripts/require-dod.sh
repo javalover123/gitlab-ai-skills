@@ -9,7 +9,8 @@
 # Behaviour:
 #   - If no DoD checklist file exists for this session, blocks with
 #     exit 2 (Claude will see the stderr and stop).
-#   - If any unchecked "- [ ]" box remains in the DoD file, blocks.
+#   - Once the session reaches Phase 9, blocks if any unchecked "- [ ]" box
+#     remains in the DoD file. Phases 1-8 are never blocked on this.
 #   - Otherwise allows the tool call.
 #
 # The skill writes the DoD checklist to:
@@ -20,15 +21,24 @@
 
 set -euo pipefail
 
+# Bypass entirely if there's no session ID to scope state to. Falling back to
+# a shared constant (e.g. "unknown") here would let concurrent bugfix
+# sessions in the same worktree collide on the same marker/state/phase files
+# whenever CLAUDE_SESSION_ID isn't set, so treat "unset" the same as "not in
+# a tracked bugfix session" rather than guessing an identity.
+if [[ -z "${CLAUDE_SESSION_ID:-}" ]]; then
+  exit 0
+fi
+
 # Bypass entirely if not in a bugfix session. The bugfix skill writes a
 # marker file when it activates. If absent, the hook is a no-op so
 # normal edits aren't blocked.
-marker=".bugfix/active-${CLAUDE_SESSION_ID:-unknown}"
+marker=".bugfix/active-${CLAUDE_SESSION_ID}"
 if [[ ! -f "$marker" ]]; then
   exit 0
 fi
 
-state=".bugfix/dod-${CLAUDE_SESSION_ID:-unknown}.md"
+state=".bugfix/dod-${CLAUDE_SESSION_ID}.md"
 
 if [[ ! -f "$state" ]]; then
   cat >&2 <<EOF
@@ -45,7 +55,7 @@ fi
 # Allow Phase 1–8 edits: only block "final" edits if any DoD box is
 # still unchecked AND we are past Phase 8. Phase tracking lives in a
 # sibling file the skill maintains.
-phase_file=".bugfix/phase-${CLAUDE_SESSION_ID:-unknown}"
+phase_file=".bugfix/phase-${CLAUDE_SESSION_ID}"
 current_phase="$(cat "$phase_file" 2>/dev/null || echo 0)"
 
 if [[ "$current_phase" -ge 9 ]]; then
