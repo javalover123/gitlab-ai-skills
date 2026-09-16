@@ -22,7 +22,7 @@ Add a `flake.nix` to your project (or extend an existing one), then run
     flake-utils.lib.eachDefaultSystem (system:
       let
         pkgs = import nixpkgs { inherit system; overlays = [ (import rust-overlay) ]; };
-        rustToolchain = pkgs.rust-bin.nightly.latest.default.override {
+        rustToolchain = pkgs.rust-bin.nightly."2026-01-19".default.override {
           extensions = [ "rust-src" ];
         };
       in {
