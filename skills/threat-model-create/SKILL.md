@@ -1,7 +1,7 @@
 ---
 name: threat-model-create
 description: "Creates and updates threat models using STRIDE-per-element analysis, DREAD risk scoring, and Data Flow Diagram decomposition. Handles new projects, existing systems without threat models, and updating models when implementation changes. Links threats to spec requirements and ADRs for mitigation tracking. Use when creating a threat model, analyzing security threats, performing STRIDE analysis, assessing attack surface, updating a threat model after changes, or when spec-create flags missing security analysis. Triggers: threat model, STRIDE, security analysis, attack surface, identify threats, risk assessment, create threat model."
-version: 1.0.0
+version: 1.0.1
 license: MIT
 category: Documentation
 compatibility: opencode
@@ -31,8 +31,10 @@ to `docs/threat-models/`.
 - Preparing for a security review, or a feature adds a new trust boundary / data
   flow / external integration.
 
-For code-level vulnerability scanning use `c-security-review` /
-`rust-unsafe-ffi-review` — this skill works at the *architectural* level.
+For code-level vulnerability scanning, use a language-specific security-review
+skill if one is available in your skillset (for example `c-security-review` or
+`rust-unsafe-ffi-review` — neither ships in this repository's catalog as of
+this writing) — this skill works at the *architectural* level instead.
 
 ## Workflow
 
@@ -93,8 +95,8 @@ audit logging / signed transactions; Info Disclosure → encryption at rest+tran
 RBAC/ABAC / least privilege / authz at every layer.
 
 Record each mitigation's status with one of these **exact** values so a
-completion-checking skill (e.g. `iterate` via its `hooks.json` checker) can track
-remaining work:
+completion-checking skill (such as `iterate`, if one is available in your
+skillset) can track remaining work:
 
 | Status | Meaning | Blocks completion |
 |---|---|---|
