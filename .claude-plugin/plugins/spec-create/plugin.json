@@ -1,7 +1,7 @@
 {
   "name": "spec-create",
   "description": "Creates and updates implementation specifications using IEEE 830 structure, RFC 2119 requirement levels, EARS syntax, and Gherkin acceptance criteria. Produces traceable, testable specs with cross-references to ADRs and threat models. Use when writing a spec, creating a specification document, defining requirements, documenting acceptance criteria, or updating an existing spec to cover new functionality. Triggers: write spec, create specification, document requirements, define acceptance criteria, update spec, spec gaps.",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "author": {
     "name": "GitLab"
   },
