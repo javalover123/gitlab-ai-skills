@@ -65,6 +65,12 @@ validate-skill-length:
   script:
     - python3 scripts/validate_skill_length.py --ci --debug
 
+validate-content-quality:
+  stage: verify
+  extends: .verify-rules
+  script:
+    - python3 scripts/validate_content_quality.py --ci --debug
+
 lint-shell:
   stage: lint
   extends: .verify-rules
