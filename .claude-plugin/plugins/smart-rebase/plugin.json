@@ -1,0 +1,10 @@
+{
+  "name": "smart-rebase",
+  "description": "Orchestrates intelligent git rebases by identifying the merge base between the current branch, its upstream tracking branch, and the default branch, then carefully reconciling all changes to produce a cleanly mergeable result. Use when rebasing a diverged feature branch onto an updated main/master, when preparing a branch for merge after the default branch has advanced, or when manual rebase conflicts risk clobbering default branch changes. Triggers: rebase, merge base, diverged branch, catch up with main, rebase onto main, reconcile branches, update feature branch.",
+  "version": "1.0.0",
+  "author": {
+    "name": "GitLab"
+  },
+  "license": "MIT",
+  "skills": "./"
+}
