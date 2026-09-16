@@ -86,7 +86,7 @@ class TestVoice(unittest.TestCase):
             self.assertEqual(vcq.check_voice(s.skill_md), [])
 
     def test_banned_word_in_code_span_not_flagged(self):
-        with TempSkill("The word `utilize` is on the blocklist.\n") as s:
+        with TempSkill("This paragraph mentions `utilize` in a snippet.\n") as s:
             self.assertEqual(vcq.check_voice(s.skill_md), [])
 
 
