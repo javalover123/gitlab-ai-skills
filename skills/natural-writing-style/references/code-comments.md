@@ -9,6 +9,7 @@ The code tells you what it does. Comments tell you why it does it that way. Ever
 - Why was this approach chosen over the obvious alternative?
 - What constraint or edge case drove this decision?
 - What would break if someone changed this without understanding the context?
+- What did you learn the hard way that isn't obvious from reading the code?
 
 If your comment just restates the code in English, delete it.
 

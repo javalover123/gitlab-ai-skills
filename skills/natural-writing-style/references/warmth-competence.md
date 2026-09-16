@@ -66,6 +66,7 @@ When you know something, say it directly.
 - "This will fail on inputs over 10MB because the buffer allocates on the stack."
 - "The timeout value needs to be at least 30 seconds for the upstream service."
 - "Based on my analysis, the memory leak originates in the connection pool."
+- "The lock is required here because two callers can race on the same file descriptor."
 
 **Appropriately qualified (specific uncertainty):**
 
@@ -74,6 +75,7 @@ When you're uncertain, name what you're uncertain about.
 - "I haven't tested this on ARM, so the alignment behaviour might differ there."
 - "The docs suggest this is thread-safe, but I'd want to verify under load before relying on it."
 - "This should handle the happy path. I'm less sure about the behaviour when the upstream returns a partial response."
+- "I'd expect this to scale linearly, but I haven't benchmarked past 10k concurrent connections."
 
 **Over-hedged (banned):**
 

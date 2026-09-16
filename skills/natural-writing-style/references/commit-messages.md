@@ -20,6 +20,7 @@ The diff already shows what changed. Don't repeat it in prose. Instead, answer:
 - What problem does this solve?
 - Why this approach instead of the alternatives you considered?
 - Are there side effects or things reviewers should watch for?
+- How can the reader verify the fix, if that isn't obvious from the diff?
 
 Wrap body text at 72 characters. Separate it from the subject with a blank line.
 

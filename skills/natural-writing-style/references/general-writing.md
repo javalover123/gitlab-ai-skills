@@ -75,6 +75,7 @@ Distinguish requirements from recommendations from optional behaviour. Use RFC 2
 - **Must / shall** -- non-negotiable requirements
 - **Should** -- recommended defaults that can be overridden with good reason
 - **May** -- genuinely optional behaviour
+- **Should not / must not** -- behaviour that's explicitly disallowed
 
 Don't scatter these carelessly. Every "must" creates a compliance obligation. Every "should" implies someone might reasonably do otherwise. If you mean "must," say "must."
 

@@ -8,7 +8,7 @@ description: >-
   comments, or any other text-based output. Also apply when reviewing
   existing text for style compliance. Triggers on all writing,
   documentation, review, and communication tasks.
-version: 2.0.0
+version: 1.0.0
 license: MIT
 category: Meta / Authoring
 compatibility: opencode
