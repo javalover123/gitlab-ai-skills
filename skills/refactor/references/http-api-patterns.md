@@ -54,6 +54,9 @@ rg 'http\.(Get|Post|Head|Do)\(' --type go -A2 | grep -v 'ctx\|context'
 # Unclosed response bodies (Go/Rust/Python)
 rg 'http\.(Get|Post|Do)' -A10 --type go | grep -v 'Close\|defer'
 rg 'response\.text\(\)|response\.json\(' -B2 --type py | grep -v 'with\|finally'
+# reqwest/hyper: a response whose body is never read (no .text()/.bytes()/.json()/.chunk())
+# still ties up the connection until it's dropped — flags calls missing all four
+rg '\.send\(\)(\.await)?\?' --type rust -A3 | grep -v 'text\|bytes\|json\|chunk'
 
 # Middleware missing (check handlers for logging)
 rg 'func.*Handler|def.*handler' --type go --type py | wc -l
