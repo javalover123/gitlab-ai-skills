@@ -1,7 +1,7 @@
 ---
 name: story-creator
 description: "Creates formal E2E user stories with BDD acceptance criteria, EARS constraints, and INVEST compliance through interactive user prompting. Use when creating new feature stories, documenting agent behaviors, writing acceptance criteria for multi-agent systems, or starting a new feature that needs behavioral verification coverage. Triggers: write user story, create story, BDD story, acceptance criteria, feature story, E2E behavior, agent story, INVEST story, Gherkin story."
-version: 1.0.0
+version: 1.0.1
 license: MIT
 category: Documentation
 compatibility: opencode
@@ -23,9 +23,11 @@ features too. Output goes to `docs/stories/STORY-NNN-[kebab-title].md`.
 
 - Starting a feature that needs formal behavioral verification.
 - Documenting multi-agent behaviors where autonomy boundaries matter.
-- Before `tdd-workflow` — the story is the spec that drives the failing tests.
+- Before test-first development — the story is the spec that drives the failing tests.
 - When a project has implementation code but no behavioral stories.
-- When `story-reviewer` flags a story as incomplete and it needs a rewrite.
+- When a story review (`story-reviewer`, if available in your skillset —
+  it doesn't ship in this repository's catalog as of this writing) flags a
+  story as incomplete and it needs a rewrite.
 
 ## Workflow
 
@@ -89,11 +91,12 @@ Validate Independent / Negotiable / Valuable / Estimable / Small / Testable. If
 Assemble into the story format ([assets/story-template.md](assets/story-template.md))
 with statement, trigger, Gherkin acceptance criteria, EARS constraints, autonomy
 limits (agents), security + standards mapping, and dependencies (depends
-on/blocks/related ADR/related spec requirement). Then suggest running
-`story-reviewer` before the story enters a sprint.
+on/blocks/related ADR/related spec requirement). Then suggest running a
+story-review skill (such as `story-reviewer`, if available in your skillset)
+before the story enters a sprint.
 
-Use these **exact** status values so a completion-checking skill (e.g. `iterate`
-via its `hooks.json` checker) can count unfinished stories:
+Use these **exact** status values so a completion-checking skill (such as
+`iterate`, if available in your skillset) can count unfinished stories:
 
 | Status | Meaning | Blocks completion |
 |---|---|---|

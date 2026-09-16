@@ -2,7 +2,7 @@
 
 ## Standard Story Template
 
-```markdown
+````markdown
 # Story: [Title]
 
 **Story ID:** STORY-[NNN]
@@ -72,13 +72,13 @@ Then <expected error handling behavior>
 ## Notes
 
 [Open questions, negotiation points, out-of-scope items]
-```
+````
 
 ---
 
 ## Agent Story Template (with autonomy limits)
 
-```markdown
+````markdown
 # Story: [Agent Name] — [Capability]
 
 **Story ID:** STORY-[NNN]
@@ -168,13 +168,13 @@ And the agent does not modify any persistent state
 ## Notes
 
 [Open questions, behavioral assumptions that need validation]
-```
+````
 
 ---
 
 ## Job Story Template (event-driven, no persona)
 
-```markdown
+````markdown
 # Story: [Capability Description]
 
 **Story ID:** STORY-[NNN]
@@ -203,4 +203,4 @@ so I can <expected outcome>.
 ## Notes
 
 [Use this template when the "who" is less important than the "when" and "why"]
-```
+````

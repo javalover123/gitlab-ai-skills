@@ -4,7 +4,7 @@
 
 **Context:** Security analyst needs to filter vulnerability findings by severity.
 
-```markdown
+````markdown
 # Story: CVE Dashboard — Filter by Severity
 
 **Story ID:** STORY-001
@@ -65,7 +65,7 @@ Then a banner displays "Scan data is [N]+ hours old"
 
 - Depends on: STORY-000 (authentication)
 - Related spec requirement: FR-012
-```
+````
 
 **What makes this work:** The "so that" clause is concrete — "focus remediation" is something a real analyst would care about. Each scenario has a specific observable outcome, not an internal state change. The EARS constraints cover what happens when things go wrong. Authentication is explicitly out-of-scope with a reference.
 
@@ -75,7 +75,7 @@ Then a banner displays "Scan data is [N]+ hours old"
 
 **Context:** An AI agent scans repositories and writes SBOMs to a graph database.
 
-```markdown
+````markdown
 # Story: SBOM Scanner Agent — Dependency Inventory
 
 **Story ID:** STORY-042
@@ -168,7 +168,7 @@ And any partial graph writes are rolled back
 
 - Depends on: STORY-001 (ZeroMQ channel authentication)
 - Related ADR: ADR-0012 (SBOM format selection — SPDX vs CycloneDX)
-```
+````
 
 **What makes this work:** The context package tells the agent exactly what it needs. Prohibited actions are explicit, not vague. The security mapping addresses all six STRIDE categories because this story crosses multiple trust boundaries. The "so that" clause is testable — you can verify the dashboard shows SBOM coverage.
 
@@ -178,7 +178,7 @@ And any partial graph writes are rolled back
 
 **Context:** Scheduled background process, no clear "who".
 
-```markdown
+````markdown
 # Story: Nightly Dependency Vulnerability Rescan
 
 **Story ID:** STORY-055
@@ -222,6 +222,6 @@ And new scan requests are NOT queued for repositories already being scanned
 - The scan scheduler shall not queue more than 50 concurrent scan jobs.
 - If any scan job fails 3 consecutive nightly scans, the scheduler shall emit a PersistentFailureAlert.
 - The scheduler shall complete queue population within 60 seconds of trigger time.
-```
+````
 
 **What makes this work:** Job Stories skip the forced persona ("As a system administrator...") and get straight to the triggering condition. The outcome — "reflects current threat landscape by start of business day" — is something a real stakeholder would want.
