@@ -1,7 +1,7 @@
 {
   "name": "story-creator",
   "description": "Creates formal E2E user stories with BDD acceptance criteria, EARS constraints, and INVEST compliance through interactive user prompting. Use when creating new feature stories, documenting agent behaviors, writing acceptance criteria for multi-agent systems, or starting a new feature that needs behavioral verification coverage. Triggers: write user story, create story, BDD story, acceptance criteria, feature story, E2E behavior, agent story, INVEST story, Gherkin story.",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "author": {
     "name": "GitLab"
   },
