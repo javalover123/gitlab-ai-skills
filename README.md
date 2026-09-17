@@ -22,7 +22,7 @@ Reusable agent skills for GitLab projects. Skills are structured prompt files th
     - [`.agents/skills/` (Zed, GitLab Duo CLI)](#agentsskills-zed-gitlab-duo-cli)
     - [Pi (Package)](#pi-package)
     - [OpenCode (Native)](#opencode-native)
-    - [Via `@dgruzd/skills` CLI](#via-dgruzdskills-cli)
+    - [Via `skills` CLI (npx)](#via-skills-cli-npx)
     - [Claude Code Plugin Marketplace](#claude-code-plugin-marketplace)
   - [Contributing](#contributing)
   - [Related](#related)
@@ -218,28 +218,22 @@ for skill in ~/gitlab-skills/.opencode/skills/*/; do
 done
 ```
 
-### Via `@dgruzd/skills` CLI
+### Via `skills` CLI (npx)
 
-[`@dgruzd/skills`](https://github.com/dgruzd/skills) is a fork of [`vercel-labs/skills`](https://github.com/vercel-labs/skills) that adds GitLab update detection — without it, `skills check` and `skills update` silently skip GitLab-hosted skills. It handles symlinking, multi-agent installs, updates, and discovery with no global install required.
-
-> [!NOTE]
-> We should strongly consider creating `@gitlab/skills` or, better yet, upstream GitLab support to [`vercel-labs/skills`](https://github.com/vercel-labs/skills).
+[`vercel-labs/skills`](https://github.com/vercel-labs/skills) supports installing and updating GitLab-hosted skills since 1.6.x. Run it with `npx` without a global install.
 
 ```bash
 # Install all skills from this repo globally (for OpenCode)
-npx @dgruzd/skills add https://gitlab.com/gitlab-org/ai/skills/-/tree/main/skills --global --agent opencode
+npx skills add https://gitlab.com/gitlab-org/ai/skills/-/tree/main/skills --global --agent opencode
 
 # Install all skills from this repo globally (for Claude Code)
-npx @dgruzd/skills add https://gitlab.com/gitlab-org/ai/skills/-/tree/main/skills --global --agent claude-code
-
-# Check for updates
-npx @dgruzd/skills check
+npx skills add https://gitlab.com/gitlab-org/ai/skills/-/tree/main/skills --global --agent claude-code
 
 # Apply updates
-npx @dgruzd/skills update
+npx skills update
 
 # List installed skills
-npx @dgruzd/skills list -g
+npx skills list -g
 ```
 
 ### Claude Code Plugin Marketplace
