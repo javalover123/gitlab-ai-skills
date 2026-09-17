@@ -64,6 +64,14 @@
       "source": "./.claude-plugin/plugins/mr-review"
     },
     {
+      "name": "prep-review",
+      "source": "./.claude-plugin/plugins/prep-review"
+    },
+    {
+      "name": "prep-start",
+      "source": "./.claude-plugin/plugins/prep-start"
+    },
+    {
       "name": "pushify",
       "source": "./.claude-plugin/plugins/pushify"
     },

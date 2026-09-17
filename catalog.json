@@ -129,6 +129,22 @@
       "path": "skills/playwright-cli/SKILL.md"
     },
     {
+      "name": "prep-review",
+      "description": "Check the status of, review, or respond to feedback on an existing GitLab Platform Readiness Enablement Process (PREP) assessment. Use when asked to review a PREP merge request, check if a PREP/readiness assessment is complete or ready for GA, evaluate PREP evidence quality as a reviewer, or address/respond to PREP reviewer feedback. Do not use for starting a brand-new PREP assessment; use prep-start for that instead.",
+      "category": "Development Workflow",
+      "license": "MIT",
+      "compatibility": "opencode",
+      "path": "skills/prep-review/SKILL.md"
+    },
+    {
+      "name": "prep-start",
+      "description": "Start a GitLab Platform Readiness Enablement Process (PREP) assessment for a new feature, service, or infra change. Use when asked whether a feature needs PREP, to kick off/begin a PREP or readiness assessment, to create a PREP tracking issue, or to set up the first PREP merge request. Do not use for checking the status of, reviewing, or responding to feedback on an already-started PREP; use prep-review for that instead.",
+      "category": "Development Workflow",
+      "license": "MIT",
+      "compatibility": "opencode",
+      "path": "skills/prep-start/SKILL.md"
+    },
+    {
       "name": "pushify",
       "description": "Run pre-push lefthook checks and iteratively fix failures (up to 3 iterations, then escalate). Invoke when: (a) about to push and wanting hooks to pass cleanly, (b) `git push` has just failed on a pre-push hook and the failure needs to be driven to resolution, or (c) preparing a clean working tree without pushing \u2014 e.g. before opening a Draft MR for early review.",
       "category": "Development Workflow",
