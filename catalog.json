@@ -330,7 +330,7 @@
     },
     {
       "name": "threat-model-create",
-      "description": "Creates and updates threat models using STRIDE-per-element analysis, DREAD risk scoring, and Data Flow Diagram decomposition. Handles new projects, existing systems without threat models, and updating models when implementation changes. Links threats to spec requirements and ADRs for mitigation tracking. Use when creating a threat model, analyzing security threats, performing STRIDE analysis, assessing attack surface, updating a threat model after changes, or when spec-create flags missing security analysis. Triggers: threat model, STRIDE, security analysis, attack surface, identify threats, risk assessment, create threat model.",
+      "description": "Use when creating a new threat model, updating one after implementation changes, performing STRIDE analysis, scoring risk with DREAD, assessing attack surface, or when spec-create flags missing security analysis. Triggers: threat model, STRIDE, DREAD, security analysis, attack surface, identify threats, risk assessment.",
       "category": "Documentation",
       "license": "MIT",
       "compatibility": "opencode",

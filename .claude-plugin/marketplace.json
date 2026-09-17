@@ -152,6 +152,10 @@
       "source": "./.claude-plugin/plugins/stack-changes"
     },
     {
+      "name": "threat-model-create",
+      "source": "./.claude-plugin/plugins/threat-model-create"
+    },
+    {
       "name": "video-takeaways",
       "source": "./.claude-plugin/plugins/video-takeaways"
     },
