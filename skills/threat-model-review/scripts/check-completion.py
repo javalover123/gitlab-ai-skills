@@ -297,12 +297,7 @@ TM_DIR = DOCS_DIR / "threat-models"
 
 def find_report() -> Optional[Path]:
     """Locate the threat model review report."""
-    candidates = [
-        DOCS_DIR / "threat-model-review-report.md",
-        DOCS_DIR / "threat-models" / "review-report.md",
-        DOCS_DIR / "reviews" / "threat-model-review.md",
-        DOCS_DIR / "threat-model-review.md",
-    ]
+    candidates = [DOCS_DIR / "threat-model-review-report.md"]
 
     for path in candidates:
         if path.exists():

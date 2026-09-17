@@ -19,9 +19,10 @@ the model has drifted from what's deployed, discovers unmodeled attack surface,
 and validates that risk scores and mitigations aren't stale. When none exists,
 it creates one first via `threat-model-create`.
 
-It answers: **is the DFD current?** **are all threats identified?** (did STRIDE
-miss anything?) **are risk scores accurate?** (have mitigations changed the
-picture?) **are mitigations tracked?** (linked to spec requirements and ADRs?)
+It answers: **is the Data Flow Diagram (DFD) current?** **are all threats
+identified?** (did STRIDE miss anything?) **are risk scores accurate?** (have
+mitigations changed the picture?) **are mitigations tracked?** (linked to spec
+requirements and ADRs?)
 
 ## Completion loop
 
@@ -47,7 +48,7 @@ Find models (`find docs/threat-models/ -name '*.md'`). If none, create one via
 `threat-model-create` and date it. If they exist, count DFD elements and threats,
 note the last-modified date, and check which STRIDE categories are covered.
 
-### Phase 2 — DFD validation (highest-value)
+### Phase 2 — Data Flow Diagram validation (highest-value)
 
 Compare the model's Data Flow Diagram against the code — this is where most drift
 hides. Check external entities (new/removed integrations, correct trust levels),

@@ -1,32 +1,37 @@
 # Threat Model Review Checklist
 
-## DFD Currency
+## Data Flow Diagram (DFD) Currency
 
 ### External Entities
+
 - [ ] All current user roles represented
 - [ ] All third-party services represented
 - [ ] Removed entities marked or removed from model
 - [ ] Trust levels are current for each entity
 
 ### Processes
+
 - [ ] All running services represented
 - [ ] Process descriptions match current functionality
 - [ ] Technology stack information is current
 - [ ] New services added since last review are included
 
 ### Data Stores
+
 - [ ] All databases, caches, queues represented
 - [ ] Data sensitivity classifications are current
 - [ ] Storage technologies match what's deployed
 - [ ] Removed stores are noted
 
 ### Data Flows
+
 - [ ] All API endpoints covered
 - [ ] Protocol information is current (HTTP/HTTPS/gRPC/WebSocket)
 - [ ] Encryption status is accurate for each flow
 - [ ] New inter-service communications are included
 
 ### Trust Boundaries
+
 - [ ] Network boundaries match deployment architecture
 - [ ] Authentication boundaries match implementation
 - [ ] Authorization levels match current RBAC/ABAC setup
@@ -75,24 +80,28 @@ For each DFD element, verify applicable categories are analyzed:
 ## Common Review Findings
 
 ### New attack surfaces not in model
+
 - New API endpoints without threat analysis
 - New third-party integrations without trust boundary documentation
 - Infrastructure changes (new load balancer, new service mesh, new cloud service)
 - WebSocket or real-time communication channels added without analysis
 
 ### Stale mitigations
+
 - "In Progress" for more than one sprint/iteration
 - "Implemented" but the code was later refactored or removed
 - Dependencies that provided mitigation were updated or replaced
 - Configuration-based mitigations that weren't carried over during infrastructure changes
 
 ### Score inflation/deflation
+
 - Threats scored high to get attention but never actually that severe
 - Threats scored low to avoid work but actually significant
 - Scores haven't been updated after the system's user base or data sensitivity changed
 - Mitigations implemented but scores not re-evaluated to reflect reduced risk
 
 ### Missing threat categories
+
 - Privacy threats (LINDDUN) not considered for PII-handling systems
 - Supply chain threats not considered for projects with many dependencies
 - Insider threats not considered for systems with privileged access
