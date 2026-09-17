@@ -220,7 +220,7 @@ done
 
 ### Via `skills` CLI (npx)
 
-[`vercel-labs/skills`](https://github.com/vercel-labs/skills) supports installing and updating GitLab-hosted skills since 1.6.x. Run it with `npx` without a global install.
+[`vercel-labs/skills`](https://github.com/vercel-labs/skills) supports installing and updating GitLab-hosted skills (verified with `skills@1.6.0`). Run it with `npx` without a global install.
 
 ```bash
 # Install all skills from this repo globally (for OpenCode)
