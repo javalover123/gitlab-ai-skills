@@ -74,6 +74,7 @@ Use this checklist during Phase 3 of the review workflow. Each section covers a 
 ## Common Gaps by Project Type
 
 ### Web Applications
+
 - [ ] CSRF protection requirements
 - [ ] XSS prevention requirements
 - [ ] Content Security Policy requirements
@@ -82,6 +83,7 @@ Use this checklist during Phase 3 of the review workflow. Each section covers a 
 - [ ] Clickjacking protection requirements (X-Frame-Options, frame-ancestors)
 
 ### APIs
+
 - [ ] Rate limiting per client/endpoint
 - [ ] Request size limits
 - [ ] Timeout requirements
@@ -90,6 +92,7 @@ Use this checklist during Phase 3 of the review workflow. Each section covers a 
 - [ ] Versioning strategy for breaking changes
 
 ### Microservices
+
 - [ ] Service discovery requirements
 - [ ] Circuit breaker requirements
 - [ ] Distributed tracing requirements
@@ -98,6 +101,7 @@ Use this checklist during Phase 3 of the review workflow. Each section covers a 
 - [ ] Graceful shutdown and deployment strategy requirements
 
 ### Data-Intensive Systems
+
 - [ ] Data consistency model (strong, eventual)
 - [ ] Conflict resolution strategy
 - [ ] Replication requirements
