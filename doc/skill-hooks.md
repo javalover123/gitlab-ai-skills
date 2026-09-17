@@ -17,6 +17,19 @@ stdin/stdout JSON contract Claude Code uses.
 
 Place a `hooks.json` next to the skill's `SKILL.md`:
 
+> **Native Claude Code note:** Claude Code itself only discovers hooks from a
+> plugin's `hooks/hooks.json` or the `hooks` field in `plugin.json` — there's
+> no per-skill hook discovery at that level. Since this repo packages one
+> plugin per skill, `bin/distribute-skill` points the generated `plugin.json`'s
+> `hooks` field at `./skills/<name>/hooks.json` so it's reachable there too.
+> The commands below are written as bare relative paths (`scripts/foo.py`) on
+> the documented assumption that they run with `cwd` set to the skill's own
+> directory — a contract the opencode bridge in this doc guarantees. Whether
+> Claude Code's *native* hook runner also sets `cwd` there, or resolves
+> relative paths from the plugin root instead, hasn't been verified against a
+> live Claude Code session; if it's the latter, these commands need a
+> `skills/<name>/` prefix (or `${CLAUDE_PLUGIN_ROOT}`) to work natively.
+
 ```
 skills/<name>/
 ├── SKILL.md

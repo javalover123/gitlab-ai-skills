@@ -169,6 +169,15 @@ def distribute_claudecode(skill_name, plugin_name=None, **_kwargs):
         "license": fields.get("license", "MIT"),
         "skills": "./",
     }
+    # Claude Code loads hooks from a plugin's own hooks/hooks.json or the
+    # `hooks` field in plugin.json (https://code.claude.com/docs/en/plugins-reference#hooks)
+    # -- there's no per-skill hook discovery. Since this repo packages one
+    # plugin per skill, point `hooks` at the skill's manifest when it ships
+    # one, so Claude Code (not just the opencode skill-hooks bridge) actually
+    # loads it.
+    hooks_file = os.path.join(SKILLS_DIR, skill_name, "hooks.json")
+    if os.path.isfile(hooks_file):
+        plugin_json["hooks"] = f"./skills/{skill_name}/hooks.json"
     plugin_json_path = os.path.join(plugin_dir, "plugin.json")
     os.makedirs(plugin_dir, exist_ok=True)
     with open(plugin_json_path, "w") as f:

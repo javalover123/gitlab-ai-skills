@@ -112,6 +112,13 @@ bridges Claude-style hooks onto opencode's event listener.
 - **Opt in with a `hooks.json`** next to the skill's `SKILL.md` — no code lives
   in the plugin per skill. It's discovery-based: any skill shipping the manifest
   gets its hooks run.
+- **For native Claude Code** (not the opencode bridge): Claude Code loads hooks
+  from a plugin's `hooks/hooks.json` or the `hooks` field in `plugin.json`
+  ([reference](https://code.claude.com/docs/en/plugins-reference#hooks)) — there's
+  no per-skill hook discovery at the Claude Code level. Since this repo packages
+  one plugin per skill (`bin/distribute-skill`), `distribute_claudecode()` points
+  the generated `plugin.json`'s `hooks` field at `./skills/<name>/hooks.json`
+  when a skill ships one, so the manifest is reachable there too.
 - **Self-gate your checker.** A `Stop` command must return `approve` unless its
   own project-scoped state says the loop is active. The plugin also gates by
   session (a skill's hooks only fire when that skill was loaded in the current
