@@ -24,8 +24,7 @@ Apply GitLab's required MR type/subtype labels and an evidence-based milestone w
    - Maintenance: `maintenance::refactor`, `maintenance::removal`, `maintenance::dependency`, `maintenance::scalability`, `maintenance::usability`, `maintenance::pipelines`, `maintenance::workflow`
 5. Resolve conflicts: a fix for a shipped defect is `type::bug` even if it adds a small capability; internal cleanup/dependency/pipeline/tooling work is `type::maintenance` unless it clearly fits automation/process improvement. If the MR mixes unrelated intents, recommend splitting it rather than applying multiple type labels.
 6. Assign the milestone in order of authority: the linked issue/epic's milestone > an explicitly stated milestone that matches an available project milestone > the project's current active milestone if the MR is clearly part of it. Never infer a milestone from the calendar or MR creation date, and never overwrite an existing milestone without evidence the work was rescheduled.
-7. Flag compliance-sensitive scope (privacy, personal data, AI, licensing, exports/encryption, product naming) and point to the relevant Legal Risk Checklist, Privacy Review/DPIA, or AppSec item — don't invent a compliance label to stand in for a real review.
-8. Change only the type/subtype labels and milestone; preserve unrelated labels and don't remove labels owned by another workflow without evidence.
+7. Change only the type/subtype labels and milestone; preserve unrelated labels and don't remove labels owned by another workflow without evidence.
 9. Report the result: **Type**, **Subtype** (or `not applied`), **Milestone** (or `not assigned` with the reason), and any conflicts or compliance follow-up.
 
 ## Examples
@@ -38,7 +37,8 @@ Apply GitLab's required MR type/subtype labels and an evidence-based milestone w
 ## Guidelines
 
 - Prefer the narrowest label the evidence supports; label namespaces are case-sensitive and vary by project.
-- Never apply both `type::feature` and `type::maintenance` to the same MR.
+- Only apply one scoped label for `type::<feature|maintenance|bug>`
+- Only apply one scoped label for `<feature|maintenance|bug>::<subtype>`
 - Don't infer a subtype from a filename — classify the actual purpose of the change.
 - Treat uncertainty as a reason to escalate, not to guess.
 - Don't merge the MR, send messages, or change code as part of this skill.
