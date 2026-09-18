@@ -17,7 +17,7 @@ Apply GitLab's required MR type/subtype labels and an evidence-based milestone w
 
 1. Inspect the MR title, description, diff, linked issues/epics, target project, existing labels/milestone, and the target project's available labels and milestones.
 2. Treat the linked issue or epic as the primary source of intent and scheduling; use the diff only to validate that the implementation matches it.
-3. Apply exactly one primary type label: `type::feature` (new/changed user-facing capability), `type::bug` (defect fix), or `type::maintenance` (upkeep that's neither). Use `type::automation` or `type::process_improvement` only when the target project uses those labels and the work clearly matches.
+3. Apply exactly one primary type label: `type::feature` (new/changed user-facing capability), `type::bug` (defect fix), or `type::maintenance` (upkeep that's neither).
 4. Apply at most one subtype label, only with clear evidence, and only if it exists in the target project's label taxonomy:
    - Feature: `feature::addition`, `feature::enhancement`, `feature::consolidation`
    - Bug: `bug::functional`, `bug::performance`, `bug::availability`, `bug::ux`, `bug::vulnerability`
