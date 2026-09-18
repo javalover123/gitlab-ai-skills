@@ -75,6 +75,10 @@ Use when running a critical, skeptical pass over a GitLab MR — either as the a
 
 Use when you want to understand and review a GitLab MR as a reasoning companion rather than an automated reviewer. Phase 1 explains the MR's goal and purpose concisely with a concrete example, then gates on your confirmation before Phase 2 does a thorough code review that surfaces genuine issues, not nitpicks. Read-only — never posts anything to the MR; you post any feedback yourself. Triggers when you want to review, understand, or walk through an MR. → [`SKILL.md`](skills/mr-guided-review/SKILL.md)
 
+#### mr-label
+
+Apply the correct GitLab MR type/subtype labels and evidence-based milestone when creating or updating a merge request. Use when opening or updating an MR. → [`SKILL.md`](skills/mr-label/SKILL.md)
+
 #### mr-review
 
 Review a GitLab merge request - read diffs, analyze changes, present findings, and optionally post comments on the MR → [`SKILL.md`](skills/mr-review/SKILL.md)
@@ -261,6 +265,7 @@ This repo ships as a [Claude Code plugin marketplace](https://code.claude.com/do
 | [`handoff`](.claude-plugin/plugins/handoff) | [`handoff`](skills/handoff/SKILL.md) | Compact the current session into a handoff document so a fresh agent can continue the work. Use when the user says hand off, wrap up, save context, continue later, pick this up in a new session, running low on context, or context is getting long. | 0.5.0 |
 | [`mr-adversarial-review`](.claude-plugin/plugins/mr-adversarial-review) | [`mr-adversarial-review`](skills/mr-adversarial-review/SKILL.md) | Use when running a critical, skeptical pass over a GitLab MR — either as the author before requesting human review, or as a reviewer wanting a structured first cut — produces a severity-bucketed findings report (High / Medium / Low / Done well) and posts it as a single comment on the MR. | 0.1.0 |
 | [`mr-guided-review`](.claude-plugin/plugins/mr-guided-review) | [`mr-guided-review`](skills/mr-guided-review/SKILL.md) | Use when you want to understand and review a GitLab MR as a reasoning companion rather than an automated reviewer. Phase 1 explains the MR's goal and purpose concisely with a concrete example, then gates on your confirmation before Phase 2 does a thorough code review that surfaces genuine issues, not nitpicks. Read-only — never posts anything to the MR; you post any feedback yourself. Triggers when you want to review, understand, or walk through an MR. | 0.1.0 |
+| [`mr-label`](.claude-plugin/plugins/mr-label) | [`mr-label`](skills/mr-label/SKILL.md) | Apply the correct GitLab MR type/subtype labels and evidence-based milestone when creating or updating a merge request. Use when opening or updating an MR. | 0.1.0 |
 | [`mr-review`](.claude-plugin/plugins/mr-review) | [`mr-review`](skills/mr-review/SKILL.md) | Review a GitLab merge request — read diffs, analyze changes, present findings, and optionally post comments on the MR | 0.1.0 |
 | [`pushify`](.claude-plugin/plugins/pushify) | [`pushify`](skills/pushify/SKILL.md) | Run pre-push lefthook checks and iteratively fix failures (up to 3 iterations, then escalate). Invoke when: (a) about to push and wanting hooks to pass cleanly, (b) `git push` has just failed on a pre-push hook and the failure needs to be driven to resolution, or (c) preparing a clean working tree without pushing — e.g. before opening a Draft MR for early review. | 1.1.0 |
 | [`run-in-tmux-pane`](.claude-plugin/plugins/run-in-tmux-pane) | [`run-in-tmux-pane`](skills/run-in-tmux-pane/SKILL.md) | Run commands in a temporary tmux pane with full interactive zsh environment (login shell, shims, PATH, aliases, TTY). | 1.1.1 |

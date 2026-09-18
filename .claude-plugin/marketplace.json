@@ -60,6 +60,10 @@
       "source": "./.claude-plugin/plugins/mr-guided-review"
     },
     {
+      "name": "mr-label",
+      "source": "./.claude-plugin/plugins/mr-label"
+    },
+    {
       "name": "mr-review",
       "source": "./.claude-plugin/plugins/mr-review"
     },
