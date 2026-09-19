@@ -90,6 +90,13 @@ skill-tests:
   script:
     - scripts/run_skill_tests.sh
 
+test-skill-hooks-plugin:
+  stage: verify
+  extends: .verify-rules
+  image: node:22-alpine
+  script:
+    - node .opencode/plugins/__tests__/skill-hooks.test.mjs
+
 agent-file-sync:
   stage: lint
   extends: .verify-rules
