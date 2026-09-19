@@ -16,6 +16,7 @@ Reusable agent skills for GitLab projects. Skills are structured prompt files th
     - [Shell & Environment](#shell--environment)
     - [Agent Tooling](#agent-tooling)
     - [Research & Notes](#research--notes)
+    - [Documentation](#documentation)
     - [Meta / Authoring](#meta--authoring)
     - [Other](#other)
   - [Installing Skills](#installing-skills)
@@ -160,6 +161,12 @@ Iteratively test and refine prompts, skills, and agent configurations using open
 #### video-takeaways
 
 Video URLs and YouTube links: extract actionable takeaways with timestamp hyperlinks, then save approved notes as Markdown, to Memos, as an EPUB for Kindle, or to another requested destination. Use when asked to summarize learnings, lessons, rules of thumb, practical advice, Markdown notes, EPUBs, or Send to Kindle documents from a video, talk, tutorial, or interview. → [`SKILL.md`](skills/video-takeaways/SKILL.md)
+
+### Documentation
+
+#### story-reviewer
+
+Reviews E2E user stories for INVEST compliance, Gherkin correctness, EARS constraint coverage, and test derivation quality. Produces a structured verdict with per-dimension scores, specific issues, and actionable feedback. Use when validating a story before sprint planning, reviewing stories created by story-creator or an AI generator, or auditing story quality in a PR. Triggers: review story, validate story, story quality, BDD review, acceptance criteria review, story audit, story feedback, INVEST check. → [`SKILL.md`](skills/story-reviewer/SKILL.md)
 
 ### Meta / Authoring
 
