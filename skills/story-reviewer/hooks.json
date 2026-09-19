@@ -1,0 +1,5 @@
+{
+  "Stop": [
+    { "command": "python3 scripts/check-completion.py", "timeout": 120 }
+  ]
+}
