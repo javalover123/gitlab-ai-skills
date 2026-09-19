@@ -40,6 +40,10 @@
       "source": "./.claude-plugin/plugins/gitlab-psql"
     },
     {
+      "name": "gitlab-stacked-mrs",
+      "source": "./.claude-plugin/plugins/gitlab-stacked-mrs"
+    },
+    {
       "name": "glab",
       "source": "./.claude-plugin/plugins/glab"
     },
