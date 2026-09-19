@@ -1,7 +1,7 @@
 {
   "name": "stack-changes",
   "description": "Splits a large local change (uncommitted or committed) into a stacked-MR chain. Use when the user asks to split an MR they find too big to review, wants stacked diffs, has sprawling AI-mode work to publish, or types /stack-changes.",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "author": {
     "name": "GitLab"
   },

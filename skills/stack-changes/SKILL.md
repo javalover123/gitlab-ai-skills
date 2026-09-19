@@ -1,7 +1,7 @@
 ---
 name: stack-changes
 description: Splits a large local change (uncommitted or committed) into a stacked-MR chain. Use when the user asks to split an MR they find too big to review, wants stacked diffs, has sprawling AI-mode work to publish, or types /stack-changes.
-version: 0.1.0
+version: 0.1.1
 category: Development Workflow
 license: MIT
 metadata:
@@ -12,6 +12,10 @@ metadata:
 ---
 
 Split a large local change into a 2-4 layer `glab stack`. Operate locally — never run `glab stack sync`.
+
+**vs. `gitlab-stacked-mrs`:** this skill only does the one-shot split and
+handoff. Once MRs are open, use `gitlab-stacked-mrs` for the ongoing
+lifecycle — opening MRs, feedback triage, re-syncing after merges, merging.
 
 ## 1. Refuse if any of these fail
 
