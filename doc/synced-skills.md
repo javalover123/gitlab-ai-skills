@@ -12,11 +12,11 @@ each entry the manifest records where the SSoT lives:
 
 ```yaml
 skills:
-  glab:
-    source_project: gitlab-org/gitlab        # SSoT repo
-    source_path: .claude/skills/glab         # path within that repo
-    source_ref: master                       # branch/tag/ref to track
-    mode: mr                                  # mr | direct
+  example-skill:
+    source_project: group/project            # SSoT repo
+    source_path: path/to/example-skill       # path within that repo
+    source_ref: main                         # branch/tag/ref to track
+    mode: mr                                 # mr | direct
 ```
 
 Two pieces enforce the model:
@@ -48,7 +48,7 @@ Run it locally to preview drift:
 ```sh
 glab auth status                                   # must be authenticated
 scripts/sync_external_skills.py --check            # report drift, exit 1 if any
-scripts/sync_external_skills.py --skill glab       # apply for one skill
+scripts/sync_external_skills.py --skill example-skill  # apply for one skill
 ```
 
 ### Scheduling
