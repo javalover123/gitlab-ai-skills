@@ -1,0 +1,189 @@
+<!doctype html>
+<!-- Explainer template for the gitlab-explain skill.
+     Copy, replace every {{PLACEHOLDER}}, delete sections that do not apply, keep the palette
+     semantic: one colour per KIND of thing (frontend, API, service, data, repo, work item),
+     never per item. Every colour used must appear in the legend paired with a word.
+     Network: Mermaid and Chart.js load from a pinned CDN. Everything else is inline.
+     Inside a Mermaid block never write {{ }} — Mermaid reads it as a hexagon node. -->
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{{TITLE}}</title>
+<style>
+:root{
+  --page:#fff; --card:#fbfbfc; --border:#dcdcde; --grid:#f0f0f2;
+  --text-primary:#28272d; --text-secondary:#4b4a51; --text-muted:#737278;
+  /* semantic entity colours */
+  --repo:#6f42c1;      /* repositories / projects        */
+  --service:#1f75cb;   /* services, finders, workers     */
+  --api:#217645;       /* API surface: GraphQL / REST    */
+  --ui:#c17d10;        /* frontend / user-facing         */
+  --data:#a4a3a8;      /* models, DB, storage            */
+  --issue:#dd2b0e;     /* work items, blockers           */
+  --edge:#b6b6bd; --edge-strong:#737278; --good:#108548; --warn:#ab6100;
+}
+@media (prefers-color-scheme:dark){:root{
+  --page:#1f1e24; --card:#252429; --border:#3a393f; --grid:#2c2b31;
+  --text-primary:#ececef; --text-secondary:#bfbfc3; --text-muted:#89888d;
+  --repo:#b39ce8; --service:#7ec1f5; --api:#52b87a; --ui:#e9a13a; --data:#89888d;
+  --issue:#f57f6c; --edge:#4a494f; --edge-strong:#89888d; --good:#52b87a; --warn:#e9a13a;
+}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--page);color:var(--text-primary);
+  font:16px/1.6 system-ui,-apple-system,"Segoe UI",sans-serif}
+main{max-width:1120px;margin:0 auto;padding:2.5rem 1.5rem 4rem}
+h1{font-size:1.8rem;line-height:1.25;margin:0 0 .3rem}
+.sub{color:var(--text-muted);margin:0 0 2rem}
+h2{font-size:1.3rem;margin:2.5rem 0 .7rem;padding-top:1.1rem;border-top:1px solid var(--border)}
+h3{font-size:1.02rem;margin:1.4rem 0 .4rem}
+code,pre{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+code{background:var(--grid);padding:.1em .35em;border-radius:4px;font-size:.88em}
+pre{background:var(--grid);border:1px solid var(--border);border-radius:8px;
+  padding:1rem 1.1rem;overflow-x:auto;font-size:.85rem;line-height:1.45}
+pre.mermaid{background:transparent;border:0;padding:0;text-align:center}
+table{border-collapse:collapse;width:100%;margin:1rem 0;font-size:.94rem}
+th,td{border:1px solid var(--border);padding:.55rem .7rem;text-align:left;vertical-align:top}
+th{background:var(--grid)}
+.tldr{background:var(--card);border-left:4px solid var(--api);border-radius:0 8px 8px 0;
+  padding:1rem 1.2rem;margin:1.4rem 0}
+.analogy{background:var(--card);border:1px dashed var(--ui);border-radius:8px;padding:1rem 1.2rem}
+.analogy .limit{color:var(--text-muted);font-size:.9rem;margin-top:.6rem}
+.legend{display:flex;flex-wrap:wrap;gap:.9rem;margin:.8rem 0 1.4rem;font-size:.85rem;
+  color:var(--text-secondary)}
+.legend span{display:inline-flex;align-items:center;gap:.35rem}
+.legend i{width:.7rem;height:.7rem;border-radius:3px;display:inline-block}
+.rail{position:relative;margin:1.2rem 0 0;padding-left:2.2rem}
+.rail:before{content:"";position:absolute;left:.62rem;top:.4rem;bottom:.4rem;width:2px;background:var(--edge)}
+.step{position:relative;margin:0 0 1rem}
+.step .num{position:absolute;left:-2.2rem;top:.1rem;width:1.5rem;height:1.5rem;border-radius:50%;
+  background:var(--page);border:2px solid var(--edge-strong);color:var(--text-secondary);
+  font-size:.78rem;display:grid;place-items:center}
+.step .card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:.75rem .95rem}
+.step .meta{color:var(--text-muted);font-size:.85rem;margin-top:.25rem}
+.done .num{border-color:var(--good);color:var(--good)}
+figure{margin:1.2rem 0}
+figcaption{color:var(--text-muted);font-size:.85rem;margin-top:.4rem}
+.chart{max-width:720px;margin:0 auto}
+.footnote{color:var(--text-muted);font-size:.85rem;border-top:1px solid var(--border);
+  margin-top:3rem;padding-top:1rem}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11.4.1/dist/mermaid.min.js"
+  integrity="sha384-rbtjAdnIQE/aQJGEgXrVUlMibdfTSa4PQju4HDhN3sR2PmaKFzhEafuePsl9H/9I" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"
+  integrity="sha384-vsrfeLOOY6KuIYKDlmVH5UiBmgIdB1oEf7p01YgWHuqmOHfZr374+odEv96n9tNC" crossorigin="anonymous"></script>
+</head>
+<body><main>
+
+<h1>{{TITLE}}</h1>
+<p class="sub">{{ONE_LINE — what changes, for whom, why anyone cares. No implementation words.}}</p>
+
+<div class="tldr"><strong>In one sentence:</strong> {{TLDR}}</div>
+
+<h2>The idea, by analogy</h2>
+<div class="analogy">
+  <p>{{ANALOGY — concrete and load-bearing: it must map onto the real structure.}}</p>
+  <p class="limit"><strong>Where it breaks down:</strong> {{ANALOGY_LIMIT — mandatory.}}</p>
+</div>
+
+<h2>How the pieces connect</h2>
+<div class="legend">
+  <span><i style="background:var(--ui)"></i>frontend</span>
+  <span><i style="background:var(--api)"></i>API surface</span>
+  <span><i style="background:var(--service)"></i>service / worker</span>
+  <span><i style="background:var(--data)"></i>model / DB</span>
+  <span><i style="background:var(--repo)"></i>repository</span>
+</div>
+<figure>
+<!-- Dependency / data-flow graph. 3–7 nodes; more is a second diagram.
+     Label every edge with its mechanism. State new / changed / reused / untouched in the node
+     text, so the graph survives greyscale. Class names below are the palette; do not add colours. -->
+<pre class="mermaid">
+flowchart LR
+  UI["FRONTEND_NAME<br/><small>FRONTEND_PATH · changed</small>"]:::ui
+  API["API_NAME<br/><small>API_PATH · new</small>"]:::api
+  SVC["SERVICE_NAME<br/><small>SERVICE_PATH · reused, unchanged</small>"]:::service
+  DB["MODEL_NAME<br/><small>MODEL_PATH · untouched</small>"]:::data
+  UI -- "GraphQL query" --> API
+  API -- "calls" --> SVC
+  SVC -- "reads" --> DB
+  %% All six palette classes ship; unused ones are harmless. Use only these.
+  classDef ui stroke:#c17d10,stroke-width:2px
+  classDef api stroke:#217645,stroke-width:2px
+  classDef service stroke:#1f75cb,stroke-width:2px
+  classDef data stroke:#a4a3a8,stroke-width:2px
+  classDef repo stroke:#6f42c1,stroke-width:2px
+  classDef issue stroke:#dd2b0e,stroke-width:2px
+</pre>
+<figcaption>{{GRAPH_CAPTION — say what the reader should take away.}}</figcaption>
+</figure>
+
+<h2>Where the code lives</h2>
+<table>
+  <thead><tr><th>Layer</th><th>Path</th><th>Change</th></tr></thead>
+  <tbody>
+    <tr><td>Frontend</td><td><code>{{PATH_UI}}</code></td><td>~ changed</td></tr>
+    <tr><td>API</td><td><code>{{PATH_API}}</code></td><td>+ new</td></tr>
+    <tr><td>Service</td><td><code>{{PATH_SERVICE}}</code></td><td>= reused, unchanged</td></tr>
+    <tr><td>Model / DB</td><td><code>{{PATH_DATA}}</code></td><td>= untouched</td></tr>
+  </tbody>
+</table>
+
+<h2>Repos and projects affected</h2>
+<table>
+  <thead><tr><th>Repo</th><th>What changes there</th></tr></thead>
+  <tbody><tr><td><code>{{REPO}}</code></td><td>{{WHAT}}</td></tr></tbody>
+</table>
+<p>{{If only one repo is touched, say so — readers assume distributed change until told otherwise.}}</p>
+
+<!-- Optional. Keep only when there is a real number worth seeing: files per layer, MRs per
+     stage, tests per criterion. Delete the whole figure otherwise; a chart of two numbers is a
+     sentence. Colours come from the palette above, one per KIND. -->
+<figure class="chart">
+<canvas id="by-layer" aria-label="{{CHART_ALT}}" role="img"></canvas>
+<figcaption>{{CHART_CAPTION}}</figcaption>
+</figure>
+
+<h2>Where the work happens</h2>
+<!-- Issue / epic: delivery order, what blocks what. MR: the order a reviewer should read the
+     diff in. Rails are for sequence; graphs are for structure. -->
+<div class="rail">
+  <div class="step"><div class="num">1</div><div class="card">
+    <strong>{{STEP_1}}</strong><div class="meta">{{layer · blocks / blocked by · MR}}</div></div></div>
+  <div class="step"><div class="num">2</div><div class="card">
+    <strong>{{STEP_2}}</strong><div class="meta">{{…}}</div></div></div>
+</div>
+
+<h2>How we will know it worked</h2>
+<table>
+  <thead><tr><th>Acceptance criterion (plain language)</th><th>What proves it</th></tr></thead>
+  <tbody><tr><td>{{CRITERION}}</td><td><code>{{SPEC_OR_JOB}}</code></td></tr></tbody>
+</table>
+
+<h2>What this is not</h2>
+<ul><li>{{OUT_OF_SCOPE}}</li></ul>
+
+<div class="footnote">
+  Source: <a href="{{SOURCE_URL}}">{{SOURCE_URL}}</a> · written {{DATE}} · {{AUTHOR}}.
+  Generated with the <code>gitlab-explain</code> skill.
+</div>
+
+</main>
+<script>
+(function(){
+  var dark = matchMedia('(prefers-color-scheme: dark)').matches;
+  if (window.mermaid) mermaid.initialize({startOnLoad:true, theme: dark ? 'dark' : 'neutral',
+    themeVariables:{fontFamily:'system-ui, sans-serif'}});
+  var el = document.getElementById('by-layer');
+  if (!el || !window.Chart) return;
+  var css = getComputedStyle(document.documentElement), v = function(n){return css.getPropertyValue(n).trim();};
+  new Chart(el, {
+    type:'bar',
+    data:{labels:['Frontend','API','Service','Model / DB'],
+      datasets:[{label:'{{CHART_SERIES — e.g. files changed}}', data:[0,0,0,0],
+        backgroundColor:[v('--ui'),v('--api'),v('--service'),v('--data')]}]},
+    options:{indexAxis:'y', plugins:{legend:{display:false}},
+      scales:{x:{ticks:{color:v('--text-secondary')},grid:{color:v('--grid')}},
+              y:{ticks:{color:v('--text-secondary')},grid:{display:false}}}}
+  });
+})();
+</script>
+</body></html>
