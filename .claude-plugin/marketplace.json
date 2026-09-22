@@ -20,6 +20,10 @@
       "source": "./.claude-plugin/plugins/commit-messages"
     },
     {
+      "name": "gitlab-adr",
+      "source": "./.claude-plugin/plugins/gitlab-adr"
+    },
+    {
       "name": "gitlab-agent-plan",
       "source": "./.claude-plugin/plugins/gitlab-agent-plan"
     },
