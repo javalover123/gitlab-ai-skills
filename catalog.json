@@ -81,6 +81,14 @@
       "path": "skills/gitlab-demo-videos/SKILL.md"
     },
     {
+      "name": "gitlab-implement",
+      "description": "End-to-end feature implementation workflow for a GitLab issue or epic \u2014 scopes it, asks clarifying questions, writes and adversarially reviews a plan, posts the plan on the issue and waits for approval, then implements, verifies, commits, and opens an MR. Use when asked to build or implement a GitLab feature end-to-end, from issue or epic to open MR.",
+      "category": "Development Workflow",
+      "license": "MIT",
+      "compatibility": "opencode",
+      "path": "skills/gitlab-implement/SKILL.md"
+    },
+    {
       "name": "gitlab-mr-description",
       "description": "Write or update a GitLab MR description. Reads the branch diff, drafts structured markdown using GitLab's standard sections, and applies conventions for feature flags, database queries, and local testing matrices. Use when opening a new MR or refreshing an existing description.",
       "category": "Development Workflow",
