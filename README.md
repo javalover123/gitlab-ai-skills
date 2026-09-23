@@ -64,10 +64,6 @@ Read or write a GitLab work item's Workplan / Agent Plan widget — the AI work 
 
 Monitor a GitLab MR's pipeline until green. Classifies failures (flaky, master-broken, lint, coverage, real), retries jobs where appropriate, makes light-touch auto-fixes, and posts findings as an MR comment. → [`SKILL.md`](skills/gitlab-babysit-mr/SKILL.md)
 
-#### gitlab-fix
-
-End-to-end bug-fix workflow for a reported GitLab issue or work item: fetches it, researches the root cause, reproduces it with a failing spec, confirms it live, applies the minimal fix, verifies downstream, commits, and opens an MR. Use whenever asked to fix a reported GitLab bug end-to-end, from issue to open MR, in a gitlab-org/gitlab (or similarly structured Rails) checkout. → [`SKILL.md`](skills/gitlab-fix/SKILL.md)
-
 #### gitlab-mr-description
 
 Write or update a GitLab MR description. Reads the branch diff, drafts structured markdown using GitLab's standard sections, and applies conventions for feature flags, database queries, and local testing matrices. Use when opening a new MR or refreshing an existing description. → [`SKILL.md`](skills/gitlab-mr-description/SKILL.md)
@@ -75,6 +71,10 @@ Write or update a GitLab MR description. Reads the branch diff, drafts structure
 #### gitlab-pipeline-watch
 
 Watch GitLab MR pipelines and react to state changes → [`SKILL.md`](skills/gitlab-pipeline-watch/SKILL.md)
+
+#### gitlab-rails-fix
+
+End-to-end bug-fix workflow for a reported GitLab issue or work item: fetches it, researches the root cause, reproduces it with a failing spec, confirms it live, applies the minimal fix, verifies downstream, commits, and opens an MR. Use whenever asked to fix a reported GitLab bug end-to-end, from issue to open MR, in a gitlab-org/gitlab (or similarly structured Rails) checkout. → [`SKILL.md`](skills/gitlab-rails-fix/SKILL.md)
 
 #### gitlab-stacked-mrs
 
@@ -331,10 +331,10 @@ This repo ships as a [Claude Code plugin marketplace](https://code.claude.com/do
 | [`gitlab-agent-plan`](.claude-plugin/plugins/gitlab-agent-plan) | [`gitlab-agent-plan`](skills/gitlab-agent-plan/SKILL.md) | Read or write a GitLab work item's Workplan / Agent Plan widget — the AI work plan property — via GraphQL. Use when asked to get/show/pull or attach/set/update a work item's workplan or agent plan, as opposed to its description or comments. | 0.1.0 |
 | [`gitlab-babysit-mr`](.claude-plugin/plugins/gitlab-babysit-mr) | [`gitlab-babysit-mr`](skills/gitlab-babysit-mr/SKILL.md) | Monitor a GitLab MR's pipeline until green. Classifies failures (flaky, master-broken, lint, coverage, real), retries jobs where appropriate, makes light-touch auto-fixes, and posts findings as an MR comment. | 0.12.2 |
 | [`gitlab-clickhouse`](.claude-plugin/plugins/gitlab-clickhouse) | [`gitlab-clickhouse`](skills/gitlab-clickhouse/SKILL.md) | Inspect GitLab local ClickHouse tables, schemas, ingestion paths, and data patterns. Use for CH table questions, DESCRIBE TABLE, schema and source-of-truth checks under db/click_house, ingestion debugging, and investigating aggregates, distributions, outliers, or anomalous ClickHouse data in a GitLab GDK environment. | 1.0.1 |
-| [`gitlab-fix`](.claude-plugin/plugins/gitlab-fix) | [`gitlab-fix`](skills/gitlab-fix/SKILL.md) | End-to-end bug-fix workflow for a reported GitLab issue or work item: fetches it, researches the root cause, reproduces it with a failing spec, confirms it live, applies the minimal fix, verifies downstream, commits, and opens an MR. Use whenever asked to fix a reported GitLab bug end-to-end, from issue to open MR, in a gitlab-org/gitlab (or similarly structured Rails) checkout. | 1.0.0 |
 | [`gitlab-mr-description`](.claude-plugin/plugins/gitlab-mr-description) | [`gitlab-mr-description`](skills/gitlab-mr-description/SKILL.md) | Write or update a GitLab MR description. Reads the branch diff, drafts structured markdown using GitLab's standard sections, and applies conventions for feature flags, database queries, and local testing matrices. Use when opening a new MR or refreshing an existing description. | 1.1.0 |
 | [`gitlab-pipeline-watch`](.claude-plugin/plugins/gitlab-pipeline-watch) | [`gitlab-pipeline-watch`](skills/gitlab-pipeline-watch/SKILL.md) | Watch GitLab MR pipelines and react to state changes | 1.0.2 |
 | [`gitlab-psql`](.claude-plugin/plugins/gitlab-psql) | [`gitlab-psql`](skills/gitlab-psql/SKILL.md) | Inspect GitLab GDK PostgreSQL test and development databases with gdk psql. Use for Postgres schema checks, table and index inspection, read-only SQL queries, migration verification, and investigating GitLab application data in local test or development databases. | 1.0.1 |
+| [`gitlab-rails-fix`](.claude-plugin/plugins/gitlab-rails-fix) | [`gitlab-rails-fix`](skills/gitlab-rails-fix/SKILL.md) | End-to-end bug-fix workflow for a reported GitLab issue or work item: fetches it, researches the root cause, reproduces it with a failing spec, confirms it live, applies the minimal fix, verifies downstream, commits, and opens an MR. Use whenever asked to fix a reported GitLab bug end-to-end, from issue to open MR, in a gitlab-org/gitlab (or similarly structured Rails) checkout. | 1.0.0 |
 | [`gitlab-stacked-mrs`](.claude-plugin/plugins/gitlab-stacked-mrs) | [`gitlab-stacked-mrs`](skills/gitlab-stacked-mrs/SKILL.md) | Manages stacked GitLab merge requests end-to-end: decomposing a feature branch into logical, independently-reviewable MRs; maintaining a suppression ledger for early-stack dead code; re-syncing the stack after merges (GitLab only auto-retargets 4 MRs, not the full 20-entry limit); triaging reviewer feedback back to the owning entry; and verifying parity with the feature branch throughout. Triggers: stacked MRs, stacked diffs, glab stack, split MR, decompose change, chain merge requests, stack workflow, stacked review, retarget stack, mid-stack rebase. | 1.0.0 |
 | [`glab`](.claude-plugin/plugins/glab) | [`glab`](skills/glab/SKILL.md) | GitLab workflow automation using the glab CLI. Use when the user asks to create, update, close, label, or comment on a GitLab issue, merge request, work item, or epic; to post a note, review comment, or discussion reply; to call the GitLab REST or GraphQL API through "glab api"; to inspect or retry pipelines and jobs; or to configure glab auth against gitlab.com, a self-managed instance, or a local GDK. Read it before any glab write operation, because several field flags fail silently - they exit 0 while posting the wrong content. | 1.13.1 |
 | [`glab-glql`](.claude-plugin/plugins/glab-glql) | [`glab-glql`](skills/glab-glql/SKILL.md) | Execute GLQL queries against GitLab projects and groups using glab CLI | 1.0.0 |

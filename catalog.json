@@ -65,14 +65,6 @@
       "path": "skills/gitlab-clickhouse/SKILL.md"
     },
     {
-      "name": "gitlab-fix",
-      "description": "End-to-end bug-fix workflow for a reported GitLab issue or work item: fetches it, researches the root cause, reproduces it with a failing spec, confirms it live, applies the minimal fix, verifies downstream, commits, and opens an MR. Use whenever asked to fix a reported GitLab bug end-to-end, from issue to open MR, in a gitlab-org/gitlab (or similarly structured Rails) checkout.",
-      "category": "Development Workflow",
-      "license": "MIT",
-      "compatibility": "opencode",
-      "path": "skills/gitlab-fix/SKILL.md"
-    },
-    {
       "name": "gitlab-mr-description",
       "description": "Write or update a GitLab MR description. Reads the branch diff, drafts structured markdown using GitLab's standard sections, and applies conventions for feature flags, database queries, and local testing matrices. Use when opening a new MR or refreshing an existing description.",
       "category": "Development Workflow",
@@ -95,6 +87,14 @@
       "license": "MIT",
       "compatibility": "opencode",
       "path": "skills/gitlab-psql/SKILL.md"
+    },
+    {
+      "name": "gitlab-rails-fix",
+      "description": "End-to-end bug-fix workflow for a reported GitLab issue or work item: fetches it, researches the root cause, reproduces it with a failing spec, confirms it live, applies the minimal fix, verifies downstream, commits, and opens an MR. Use whenever asked to fix a reported GitLab bug end-to-end, from issue to open MR, in a gitlab-org/gitlab (or similarly structured Rails) checkout.",
+      "category": "Development Workflow",
+      "license": "MIT",
+      "compatibility": "opencode",
+      "path": "skills/gitlab-rails-fix/SKILL.md"
     },
     {
       "name": "gitlab-stacked-mrs",

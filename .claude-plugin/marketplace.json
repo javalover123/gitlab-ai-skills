@@ -40,10 +40,6 @@
       "source": "./.claude-plugin/plugins/gitlab-clickhouse"
     },
     {
-      "name": "gitlab-fix",
-      "source": "./.claude-plugin/plugins/gitlab-fix"
-    },
-    {
       "name": "gitlab-mr-description",
       "source": "./.claude-plugin/plugins/gitlab-mr-description"
     },
@@ -54,6 +50,10 @@
     {
       "name": "gitlab-psql",
       "source": "./.claude-plugin/plugins/gitlab-psql"
+    },
+    {
+      "name": "gitlab-rails-fix",
+      "source": "./.claude-plugin/plugins/gitlab-rails-fix"
     },
     {
       "name": "gitlab-stacked-mrs",
