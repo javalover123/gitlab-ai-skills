@@ -87,6 +87,23 @@ Only the literal state `failed` sets the exit code. A `canceled`, `skipped` or
 `manual` pipeline exits 0 from every one of these commands. Test the status field
 when you need more than pass/fail.
 
+The exit code is a property of the command, not of the pipeline. On one and the
+same failed pipeline, `glab ci status -b <ref>` exits 1 while
+`glab ci get -p <id>` exits 0. There are three ways to lose the signal: change to
+`ci get`, add `-F json`, or both. An agent that moves to `ci get` for `-p` or
+`--merge-request` addressability must then read `.status` itself.
+
+Exit 1 is also overloaded: a red pipeline and an unreachable project both give
+it. Separate them by stderr. A red pipeline writes nothing to stderr and ends
+stdout with `Pipeline state: failed`. A lookup error writes an `ERROR` block to
+stderr, and a project you cannot read looks the same as one that does not exist:
+
+```bash
+glab ci status -R group/no-such-project -b main
+# ✘ no pipeline found for branch main and failed to find associated merge
+#   request: failed to get merge requests for "main": 404 Not Found
+```
+
 ## JSON shapes differ between the two commands
 
 ```bash

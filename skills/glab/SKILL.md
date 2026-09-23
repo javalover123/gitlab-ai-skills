@@ -249,8 +249,10 @@ Two behaviors decide whether an agent survives the command:
   the only flag that turns the menu off; `--live` and `--compact` do not.
   Redirected stdin (`< /dev/null`) also gives the one-shot behavior.
 - **`-F json` always exits 0**, also for a failed pipeline, because the JSON path
-  returns before the exit-code logic. Read `.pipeline.status`. Text and
-  `--compact` output exit 1 when the pipeline failed.
+  returns before the exit-code logic, and `glab ci get` never sets it at all.
+  Read `.pipeline.status`. Only `ci status` text and `--compact` output exit 1
+  when the pipeline failed — and exit 1 also means "project unreachable", which
+  you tell apart by stderr being empty for a red pipeline.
 
 `ci status` selects only by branch (`-b`, default: the current branch) and always
 reads the newest pipeline for that ref. It has no `--pipeline-id` and no
