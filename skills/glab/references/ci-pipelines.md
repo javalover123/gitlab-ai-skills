@@ -93,15 +93,30 @@ same failed pipeline, `glab ci status -b <ref>` exits 1 while
 `ci get`, add `-F json`, or both. An agent that moves to `ci get` for `-p` or
 `--merge-request` addressability must then read `.status` itself.
 
-Exit 1 is also overloaded: a red pipeline and an unreachable project both give
-it. Separate them by stderr. A red pipeline writes nothing to stderr and ends
-stdout with `Pipeline state: failed`. A lookup error writes an `ERROR` block to
-stderr, and a project you cannot read looks the same as one that does not exist:
+Exit 1 is also overloaded: a red pipeline and a failed lookup both give it.
+**Separate them by stderr**, which is the reliable test. A red pipeline writes
+nothing to stderr. Every lookup failure writes an `ERROR` block there — a project
+that does not exist, a project you cannot read, and a branch with no pipeline all
+produce the same shape, because GitLab answers 404 for a missing and an
+unreadable project alike.
 
 ```bash
-glab ci status -R group/no-such-project -b main
-# ✘ no pipeline found for branch main and failed to find associated merge
-#   request: failed to get merge requests for "main": 404 Not Found
+ERR=$(mktemp)
+if glab ci status --compact 2>"$ERR"; then
+  echo "green"
+elif [ -s "$ERR" ]; then
+  echo "could not resolve a pipeline"; cat "$ERR"
+else
+  echo "pipeline is red"
+fi
+```
+
+The status line is a confirmation, not a test, and it needs care: stdout ends
+with a **blank** line, so `tail -1` gives you an empty string.
+
+```bash
+glab ci status | tail -1                            # → "" , reads as falsy
+glab ci status | grep -v '^[[:space:]]*$' | tail -1  # → Pipeline state: failed
 ```
 
 ## JSON shapes differ between the two commands

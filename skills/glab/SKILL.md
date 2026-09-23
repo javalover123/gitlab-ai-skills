@@ -251,8 +251,9 @@ Two behaviors decide whether an agent survives the command:
 - **`-F json` always exits 0**, also for a failed pipeline, because the JSON path
   returns before the exit-code logic, and `glab ci get` never sets it at all.
   Read `.pipeline.status`. Only `ci status` text and `--compact` output exit 1
-  when the pipeline failed — and exit 1 also means "project unreachable", which
-  you tell apart by stderr being empty for a red pipeline.
+  when the pipeline failed — and exit 1 also means "no pipeline resolved", which
+  you tell apart by stderr: empty for a red pipeline, an `ERROR` block for a
+  lookup that found nothing.
 
 `ci status` selects only by branch (`-b`, default: the current branch) and always
 reads the newest pipeline for that ref. It has no `--pipeline-id` and no
