@@ -142,9 +142,11 @@ of failing. Always check which command produced the document.
 
 Two more rules on these flags:
 
-- `--jq` needs `--output json`. Without it the command exits 1 with
-  `Using --jq requires --output=json (got "text")`. This holds for every glab
-  subcommand, `glab issue list` and `glab mr list` included.
+- `--jq` needs `--output json`. Without it the command exits 1 and writes to
+  stderr: `Using --jq requires --output=json (got "text").` This holds for every
+  glab subcommand, `glab issue list` and `glab mr list` included. Match the text
+  case-insensitively: the Go error is lowercase `using …` with no period, and
+  glab's error renderer capitalizes the first letter and adds the period.
 - `-F json` cannot be combined with `--live`, `--wait` or `--compact`. glab exits
   1 with `--output json cannot be used with --live, --wait, or --compact flags`.
 
