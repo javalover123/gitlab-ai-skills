@@ -296,7 +296,7 @@ The sections above cover the common workflows. These are the non-obvious traps a
 API quirks that are easy to get wrong and not discoverable from `glab <cmd> --help`:
 
 1. **Read context first** — `glab issue view` / `glab mr view` before implementing; check `.gitlab/issue_templates/` and `.gitlab/merge_request_templates/` for templates
-2. **`--jq` works on subcommands, not on `glab api`** — `glab issue list`/`glab mr list`/`glab ci list` accept a global `--jq` flag, but only together with `-F json` (without it: `Using --jq requires --output=json`); `glab api` has no `--jq` at all — pipe its output through `| jq '...'` instead
+2. **`--jq` works on subcommands, not on `glab api`** — `glab issue list`/`glab mr list`/`glab ci list` accept a global `--jq` flag, but only together with `-F json` (without it: `Using --jq requires --output=json (got "text").`); `glab api` has no `--jq` at all — pipe its output through `| jq '...'` instead
 3. **No `--body` flag** — glab uses `--description`, not `--body` (which is a `gh` flag); they are not interchangeable
 4. **Work items use the issues API** — `/work_items/<iid>` URLs → `projects/.../issues/<iid>`; the `/work_items/` REST endpoint is a 404
 5. **Epic comments need GraphQL** — REST `/notes` GET+POST both → 404 (still true on GitLab 19.1); pass `body`/`noteableId` as GraphQL variables, never string-interpolate. See [references/epic-comments.md](references/epic-comments.md)
