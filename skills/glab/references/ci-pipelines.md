@@ -39,6 +39,13 @@ it from an agent.
 4. If both lookups fail, the command prints `no pipeline found for branch …` and
    exits 1.
 
+One commit can carry two pipelines: a push pipeline on the branch ref, and a
+merge-request pipeline on `refs/merge-requests/<iid>/head`. `-b <branch>` reads
+the push pipeline, and the two finish at different times. A branch that reports
+`success` can have a merge-request pipeline that is still running, so use
+`glab ci get --merge-request <iid>` when the merge request is what you must
+report on.
+
 A full `refs/merge-requests/<iid>/head` ref is accepted by `-b`, but rule 2 still
 applies: you get the newest pipeline on that ref, not the one you have in mind.
 Use `glab ci get -p <id>` when the pipeline identity matters.
