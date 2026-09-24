@@ -2,6 +2,8 @@
 
 Monitor a GitLab MR's pipeline until green. Retries flaky/broken jobs, auto-fixes lint, and posts a structured report as an MR comment.
 
+This skill pushes fixes to the MR branch. For someone else's approved, set-to-auto-merge MR where any push would void your approval, use [`gitlab-retry-until-merged`](../gitlab-retry-until-merged/README.md) instead.
+
 ## Dependencies
 
 - [`glab`](https://gitlab.com/gitlab-org/cli) CLI — authenticated
