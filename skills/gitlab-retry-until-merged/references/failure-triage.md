@@ -1,13 +1,13 @@
 # Phase 2: Failure Triage
 
 Classify each blocking failure (`failed_jobs` and `failed_bridges` from
-`mr_state.sh`). The goal is one question: **could the MR's changes have caused
+`mr_state.py`). The goal is one question: **could the MR's changes have caused
 this?** If yes, or if you can't rule it out, don't retry.
 
 ## Gather evidence
 
 ```bash
-bash scripts/job_log_tail.sh "<project_encoded>" "<job_id>" 150   # project_encoded from mr_state.sh
+python3 scripts/job_log_tail.py "<project_encoded>" "<job_id>" 150   # project_encoded from mr_state.py
 ```
 
 - **Bridges** (`failed_bridges`): the real failure is in the downstream
@@ -21,11 +21,11 @@ bash scripts/job_log_tail.sh "<project_encoded>" "<job_id>" 150   # project_enco
   spec path, the file:line in the backtrace, and the code under test.
 - **Known flaky tests** (gitlab-org/gitlab uses the `failure::flaky-test` label):
   `glab issue list -R <project> --search "<spec file or test name>" --label "failure::flaky-test" --output json`
-- **The target branch** (`target_branch` from `mr_state.sh`): did the same job
+- **The target branch** (`target_branch` from `mr_state.py`): did the same job
   fail on its recent pipelines? List them, then their failed jobs:
   `glab api "projects/<project_encoded>/pipelines?ref=<target_branch>&per_page=5"`
   `glab api "projects/<project_encoded>/pipelines/<id>/jobs?scope[]=failed"`
-- **Incident signals**: `bash scripts/incident_status.sh` (see
+- **Incident signals**: `python3 scripts/incident_status.py` (see
   [incident-waiting.md](incident-waiting.md)).
 
 ## Classes

@@ -7,7 +7,7 @@ costs no retries.
 ## Signals
 
 ```bash
-bash scripts/incident_status.sh            # --hours N widens the master-broken window (default 12)
+python3 scripts/incident_status.py            # --hours N widens the master-broken window (default 12)
 ```
 
 | Field | Source | Notes |
@@ -33,10 +33,10 @@ return `TIMEOUT` after about 8 minutes unless the MR itself changes:
 ```pseudocode
 WAIT_START = now, MIN_WAIT = 15 min, MAX_WAIT = 2 h   # defaults; the user may change them
 loop:
-    event = watch_mr.sh --expect-sha EXPECT_SHA --mr-only MR_URL
+    event = watch_mr.py --expect-sha EXPECT_SHA --mr-only MR_URL
     if event == API_ERROR: expected during an incident, so keep waiting
     elif event != TIMEOUT: handle it per watching.md (usually alert and stop)
-    signals = incident_status.sh
+    signals = incident_status.py
     if now - WAIT_START >= MIN_WAIT and matched incidents have cleared: break → Phase 4
     if now - WAIT_START >= MAX_WAIT: alert "incident still active after 2h", stop
 ```
@@ -46,9 +46,9 @@ loop:
 - **Status page**: the matched component is back to `Operational` and the
   matched incident is no longer in `active_incidents`.
 - **Production incident**: closed, or no longer labeled `Incident::Active`:
-  `glab api "projects/gitlab-com%2Fgl-infra%2Fproduction/issues/<iid>" | jq '{state, labels}'`
+  `glab api "projects/gitlab-com%2Fgl-infra%2Fproduction/issues/<iid>"` (read `state` and `labels`)
 - **Master-broken incident**: closed, meaning the fix or revert has landed:
-  `glab api "projects/gitlab-org%2Fquality%2Fengineering-productivity%2Fmaster-broken-incidents/issues/<iid>" | jq '{state, labels}'`
+  `glab api "projects/gitlab-org%2Fquality%2Fengineering-productivity%2Fmaster-broken-incidents/issues/<iid>"` (read `state` and `labels`)
   Load-labeled ones (`gitlab-com-overloaded`) often stay open after the load
   passes. For those, use the status page and production incidents instead.
 - **Broken master with no incident**: the same job has passed on a target-branch

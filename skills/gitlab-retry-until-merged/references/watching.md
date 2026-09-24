@@ -7,7 +7,7 @@ belongs to someone else and is unlikely to be checked out. If no URL was
 given, ask for one.
 
 ```bash
-STATE=$(bash scripts/mr_state.sh --files "$MR_URL")
+STATE=$(python3 scripts/mr_state.py --files "$MR_URL")
 ```
 
 Check before watching anything:
@@ -28,7 +28,7 @@ watching.
 ## Phase 1: Watch
 
 ```bash
-bash scripts/watch_mr.sh --expect-sha "$EXPECT_SHA" --seen "$SEEN" "$MR_URL"
+python3 scripts/watch_mr.py --expect-sha "$EXPECT_SHA" --seen "$SEEN" "$MR_URL"
 ```
 
 It polls every 60 seconds and returns after about 8 minutes, so one call
@@ -36,7 +36,7 @@ fits a 10-minute tool limit. If your agent can run longer blocking commands,
 raise `--timeout`. `SEEN` is a comma-separated list of failed job and bridge
 IDs already triaged.
 
-After a `retry.sh pipeline` call, pass `--grace 120`: a retried pipeline can
+After a `retry.py pipeline` call, pass `--grace 120`: a retried pipeline can
 still read as `failed` for a moment, and without a grace period the watcher
 returns the stale failure immediately.
 
@@ -48,7 +48,7 @@ returns the stale failure immediately.
 | `TIMEOUT` | Nothing actionable yet. | Watch again. Not a failure; doesn't touch the budget. |
 | `NEW_FAILURE` | A blocking job failed while other jobs still run. | Triage just the new failures (Phase 2). MR_RELATED or UNKNOWN → alert now; the pipeline cannot pass. Otherwise add their IDs to `SEEN` and keep watching. Retries wait for the pipeline to finish, so one retry covers every failure. |
 | `PIPELINE_FAILED` | Pipeline finished red. | Phase 2 over **all** blocking failures (`failed_jobs` + `failed_bridges`). If both are empty (for example a CI config error, which the MR may have caused), classify UNKNOWN and alert. |
-| `API_ERROR` | Three polls in a row failed. GitLab itself may be erroring. | Run `incident_status.sh`, then watch again. Doesn't touch the budget. If the API still errors after 30 minutes, alert. |
+| `API_ERROR` | Three polls in a row failed. GitLab itself may be erroring. | Run `incident_status.py`, then watch again. Doesn't touch the budget. If the API still errors after 30 minutes, alert. |
 | `SHA_CHANGED` | Someone pushed. GitLab canceled auto-merge and the new commits need review. | Alert and stop. |
 | `AUTO_MERGE_OFF` | Auto-merge was canceled: by a person, or because a merge train pipeline failed and dropped the MR. | Alert and stop. Re-adding is the user's call. |
 | `CLOSED` | MR closed. | Alert and stop. |

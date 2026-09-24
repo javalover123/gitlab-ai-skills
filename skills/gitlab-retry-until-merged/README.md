@@ -7,11 +7,11 @@ Use [`gitlab-babysit-mr`](../gitlab-babysit-mr/README.md) instead for your own M
 ## Dependencies
 
 - [`glab`](https://gitlab.com/gitlab-org/cli) CLI, authenticated
-- [`jq`](https://jqlang.github.io/jq/) and `curl`
+- Python 3.7+ (standard library only)
 
 ## Why "no code changes" is absolute
 
-When new commits land on the source branch, GitLab cancels auto-merge and the new commits need a fresh review, so your approval no longer covers what would merge. The skill's only write path is `scripts/retry.sh`, which can retry an MR pipeline or start a new MR pipeline, and nothing else. It re-reads the MR before every write and refuses if the MR closed, auto-merge was canceled, or the head SHA moved.
+When new commits land on the source branch, GitLab cancels auto-merge and the new commits need a fresh review, so your approval no longer covers what would merge. The skill's only write path is `scripts/retry.py`, which can retry an MR pipeline or start a new MR pipeline, and nothing else. It re-reads the MR before every write and refuses if the MR closed, auto-merge was canceled, or the head SHA moved.
 
 ## Opinionated defaults
 
@@ -41,4 +41,4 @@ Requests the skill will refuse however they're phrased: pushing, rebasing, apply
 
 ## Tests
 
-`bash tests/test_scripts.sh` runs offline against stubbed `glab` and `curl`, and checks among other things that `retry.sh` writes nothing when a precondition fails.
+`bash tests/test_scripts.sh` (or `python3 tests/test_scripts.py`) runs offline against a stubbed `glab` and a local status-page fixture, and checks among other things that `retry.py` writes nothing when a precondition fails.

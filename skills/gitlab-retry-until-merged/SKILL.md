@@ -20,7 +20,7 @@ pipelines, wait, and alert you**.
 
 ## The hard rule: never change the MR
 
-The **only** CI writes allowed are the two in `scripts/retry.sh`: retry an MR
+The **only** CI writes allowed are the two in `scripts/retry.py`: retry an MR
 pipeline's failed jobs, or start a new MR pipeline. It re-checks, before every
 write, that the MR is open, auto-merge is still set, and the head SHA is
 unchanged. The one other write is a plain MR note, and only if the user asks.
@@ -48,7 +48,7 @@ Phase 0: Resolve MR → preflight (open, auto_merge true) → record EXPECT_SHA
 RETRIES_USED = 0, MAX_RETRIES = 3, SEEN = []   # SEEN: triaged failed job IDs
 
 loop:
-    Phase 1: event = watch_mr.sh --expect-sha EXPECT_SHA --seen SEEN
+    Phase 1: event = watch_mr.py --expect-sha EXPECT_SHA --seen SEEN
     MERGED                           → report success, exit
     TIMEOUT                          → not a failure; watch again
     API_ERROR                        → check incidents; watch again (alert after 30 min)
@@ -62,7 +62,7 @@ loop:
     RETRIES_USED == MAX_RETRIES      → alert "3 retries without success", exit
     MASTER_BROKEN on a non-merged-results pipeline → alert, exit (only a rebase helps)
     Phase 3: any INCIDENT / MASTER_BROKEN → wait for it to clear (max 2h), else alert, exit
-    Phase 4: retry.sh …; RETRIES_USED += 1; next watch uses --grace 120
+    Phase 4: retry.py …; RETRIES_USED += 1; next watch uses --grace 120
 ```
 
 ## Phases: reference files
@@ -77,19 +77,19 @@ loop:
 
 ## Scripts
 
-Run from the skill directory; each prints JSON. Only `retry.sh` writes.
+Run with `python3` from the skill directory (stdlib only). Each prints JSON; only `retry.py` writes.
 
-- `scripts/mr_state.sh [--files] <mr-url>`: MR + latest pipeline + blocking failures
-- `scripts/watch_mr.sh --expect-sha <sha> [--seen IDS] [--grace N] [--mr-only] <mr-url>`: block until an event
-- `scripts/job_log_tail.sh <project-encoded> <job-id> [lines]`: cleaned log tail
-- `scripts/incident_status.sh [--hours N]`: status page, production and master-broken incidents
-- `scripts/retry.sh --expect-sha <sha> <mr-url> pipeline <id> | new-pipeline`
+- `scripts/mr_state.py [--files] <mr-url>`: MR + latest pipeline + blocking failures
+- `scripts/watch_mr.py --expect-sha <sha> [--seen IDS] [--grace N] [--mr-only] <mr-url>`: block until an event
+- `scripts/job_log_tail.py <project-encoded> <job-id> [lines]`: cleaned log tail
+- `scripts/incident_status.py [--hours N]`: status page, production and master-broken incidents
+- `scripts/retry.py --expect-sha <sha> <mr-url> pipeline <id> | new-pipeline`
 
 ## Rules
 
 - **Never change the MR.** See the hard rule above; no exceptions.
 - **When unsure whether the MR caused it, it did.** UNKNOWN alerts, it doesn't retry.
-- **Max 3 retries total** (default). A retry is one `retry.sh` call that
+- **Max 3 retries total** (default). A retry is one `retry.py` call that
   exited 0. Waiting is free. The user may change this and the incident-wait
   limits when invoking; nobody can relax the hard rule.
 - **Merge train pipelines can't be retried.** A train failure drops the MR; alert.
