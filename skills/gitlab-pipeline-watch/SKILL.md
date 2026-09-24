@@ -1,7 +1,7 @@
 ---
 name: gitlab-pipeline-watch
 description: Watch GitLab MR pipelines and react to state changes
-version: 1.0.1
+version: 1.0.2
 category: Development Workflow
 license: MIT
 metadata:
@@ -99,7 +99,7 @@ Based on what happened, take the appropriate action:
 | `MERGED` | Update tracking, dispatch dependent tasks |
 | `NEW` | Review the new MR, assign reviewers |
 | `CONFLICT` | Rebase the branch or notify the author |
-| Timeout | Check current MR states; timeout is not a pipeline failure. For a single-MR watch, restart without `--wait-for-push` to catch a result that finished meanwhile. For multiple MRs, handle terminal ones first, then watch only the running MRs (or keep `--wait-for-push` if used). |
+| Timeout | Check current MR states; timeout is not a pipeline failure. For a single-MR watch, restart without `--wait-for-push` to catch a result that finished meanwhile. For multiple MRs, handle terminal ones first, then list only running MRs with `--no-all` (or keep `--wait-for-push` if used). |
 
 ### 4. Repeat
 
@@ -152,7 +152,7 @@ Only monitors the listed MRs. Use when you know exactly which MRs you care about
 python3 scripts/pipeline-watch.py gitlab-org/gitlab --wait-for-push
 ```
 
-Ignores an old terminal pipeline and waits for a new pipeline's actionable transition, **not** just its new ID. Use when you've dispatched work and expect new commits to be pushed -- you don't want to exit immediately because of an old failure. After a timeout, check the current state before resuming. For a single MR, omit `--wait-for-push` so an already-finished pipeline is reported. With multiple MRs, a terminal MR makes a watch **without** `--wait-for-push` exit immediately, even if another MR is running. Handle finished MRs first and narrow the watch to running MRs, or keep `--wait-for-push` if those pipelines are still running. `--timeout 0` disables the time limit.
+Ignores an old terminal pipeline and waits for a new pipeline's actionable transition, **not** just its new ID. Use when you've dispatched work and expect new commits to be pushed -- you don't want to exit immediately because of an old failure. After a timeout, check the current state before resuming. For a single MR, omit `--wait-for-push` so an already-finished pipeline is reported. With multiple MRs, a terminal MR makes a watch **without** `--wait-for-push` exit immediately, even if another MR is running. Handle finished MRs first and list only running MR IIDs with `--no-all`, or keep `--wait-for-push` if those pipelines are still running. `--timeout 0` disables the time limit.
 
 ### Short timeout for quick checks
 

@@ -8,7 +8,7 @@ Do not substitute `pipeline-watch.py` for this poll: it waits for terminal MR pi
 POLL_INTERVAL=60
 EXIT_REASON=null
 SEEN_EARLY_FAILURE_IDS=set()
-PREV_PIPELINE_ID=null       # set to the old pipeline ID when waiting after a push
+PREV_PIPELINE_ID=null       # record the old pipeline ID before pushing
 NEW_PIPELINE_DEADLINE=null  # set to now + 15 minutes at the same time
 
 loop:
@@ -38,7 +38,7 @@ loop:
 
 Keep polling while the pipeline is running. If a polling window times out, check the latest pipeline again and continue polling; a timeout is not a pipeline failure and does not consume an action round.
 
-After a push, set `PREV_PIPELINE_ID` to the old run's ID and `NEW_PIPELINE_DEADLINE` to now + 15 minutes before returning to the loop. Wait for a different ID before analyzing the new run, even if the old run was terminal. A job or pipeline retry stays in the same pipeline and does not need this guard.
+Before pushing, record the current `pipeline_id` as `PREV_PIPELINE_ID` so a fast new pipeline is not mistaken for the old one. After the push, set `NEW_PIPELINE_DEADLINE` to now + 15 minutes and return to the loop. Wait for a different ID before analyzing the new run, even if the old run was terminal. A job or pipeline retry stays in the same pipeline and does not need this guard.
 
 On `NO_NEW_PIPELINE`, do not analyze or report the old run as the new one. If awaiting Duo Developer's fix, use the [local auto-fix fallback](lint-fix-delegation.md#step-5-fallback-local-auto-fix); otherwise report that the push produced no new pipeline and investigate. This deadline applies only to waiting for a *new* pipeline, not to a pipeline already running.
 
