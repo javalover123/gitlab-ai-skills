@@ -6,7 +6,6 @@ Monitor a GitLab MR's pipeline until green. Retries flaky/broken jobs, auto-fixe
 
 - [`glab`](https://gitlab.com/gitlab-org/cli) CLI — authenticated
 - [`jq`](https://jqlang.github.io/jq/)
-- `gitlab-pipeline-watch` skill — provides `pipeline-watch.py` for blocking pipeline polling
 
 ## Opinionated defaults
 
