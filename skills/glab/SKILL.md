@@ -1,7 +1,7 @@
 ---
 name: glab
 description: GitLab workflow automation using the glab CLI. Use when the user asks to create, update, close, label, or comment on a GitLab issue, merge request, work item, or epic; to post a note, review comment, or discussion reply; to call the GitLab REST or GraphQL API through "glab api"; to inspect or retry pipelines and jobs; or to configure glab auth against gitlab.com, a self-managed instance, or a local GDK. Read it before any glab write operation, because several field flags fail silently - they exit 0 while posting the wrong content.
-version: 1.13.0
+version: 1.13.1
 category: Development Workflow
 license: MIT
 metadata:
@@ -230,37 +230,20 @@ use `--all`, `--merged`, or `--closed` to change the state filter.
 
 ## CI/CD Pipelines
 
-`glab ci status` and `glab ci get` answer different questions. Pick by what you
-must address, and by what reads the output.
+`glab ci status` selects the newest pipeline for a branch (`-b`, default: the
+current branch), but can fall back to an MR pipeline. `glab ci get` addresses one
+pipeline (`-p <id>`) or an MR head pipeline (`--merge-request <iid>`). Use the
+latter when reporting on an MR.
 
-| You must … | Use |
-|---|---|
-| Get a verdict in a script, by exit code | `glab ci status --compact` |
-| Parse pipeline and job fields | `glab ci status -F json` |
-| Address one pipeline, or an MR head pipeline | `glab ci get -p <id>` / `--merge-request <iid>` |
-| Block until the pipeline finishes | `glab ci status --wait` |
-| Watch a pipeline at a terminal | `glab ci status --live` |
+- **Set `GLAB_NO_PROMPT=1`.** When stdin, stdout and stderr are all TTYs,
+  `glab ci status` can end in a `Choose an action` menu with a `Retry` action.
+  `--wait` also turns it off.
+- **`-F json` and `glab ci get` exit 0 on a failed pipeline.** Read
+  `.pipeline.status` (`ci status`) or `.status` (`ci get`). Only `ci status` text
+  and `--compact` exit 1 on failure, and exit 1 can also mean no pipeline found.
 
-Two behaviors decide whether an agent survives the command:
-
-- **On a TTY, `glab ci status` blocks on a menu.** After the job list it opens
-  `Choose an action: View logs / Retry / Exit` and waits for an answer — and
-  `Retry` retries the pipeline, so a read command can start a write. `--wait` is
-  the only flag that turns the menu off; `--live` and `--compact` do not.
-  Redirected stdin (`< /dev/null`) also gives the one-shot behavior.
-- **`-F json` always exits 0**, also for a failed pipeline, because the JSON path
-  returns before the exit-code logic, and `glab ci get` never sets it at all.
-  Read `.pipeline.status`. Only `ci status` text and `--compact` output exit 1
-  when the pipeline failed — and exit 1 also means "no pipeline resolved", which
-  you tell apart by stderr: empty for a red pipeline, an `ERROR` block for a
-  lookup that found nothing.
-
-`ci status` selects only by branch (`-b`, default: the current branch) and always
-reads the newest pipeline for that ref. It has no `--pipeline-id` and no
-`--merge-request`; `glab ci get` has both.
-
-Full behavior (branch fallback, exit codes, JSON shapes, job filters, live flag
-lists): **[references/ci-pipelines.md](references/ci-pipelines.md)**
+Branch fallback, exit codes, JSON shapes, job filters and live flag lists:
+**[references/ci-pipelines.md](references/ci-pipelines.md)**
 
 ## Search
 
@@ -313,7 +296,7 @@ API quirks that are easy to get wrong and not discoverable from `glab <cmd> --he
 16. **Second same-family remote misroutes `mr create`** — with a `security` mirror alongside `origin`, non-interactive `mr create` (no TTY) silently picks the fork as the head. Fix once per checkout: `git config remote.origin.glab-resolved-head head`; per-command fallback: `-H <owner/repo>` (`-R` does not fix it). See the "Creating Merge Requests" section.
 17. **`glab api` note body:** file → `-F "body=@file"`; prose with backticks/`$` → write it literally to a file first. Inline text → `-f`; literal `@here see above` → `-f "body=@here see above"` (never a file). Nested JSON → `--input file -H "Content-Type: application/json"`. Repair: `--method PUT -F "body=@file"`, not `DELETE`. Failures are silent (exit 0, HTTP 201); verify what landed with `| jq '.body | length'`. Details: [references/mr-review.md](references/mr-review.md#5-glab-api-field-flags--f-vs--f).
 18. **Always use full URLs in note/comment bodies** (e.g. `https://gitlab.com/org/project/-/issues/123`) instead of short references (`#123`). This applies to issues, merge requests, epics, and so on. Short refs resolve against project context and render as literal text on group-level items (epics, group work items); full URLs expand everywhere.
-19. **`glab ci status` is two commands in one** — on a TTY it blocks on a `Choose an action` menu unless you pass `--wait`, and `-F json` exits 0 even for a failed pipeline. See the CI/CD Pipelines section and [references/ci-pipelines.md](references/ci-pipelines.md)
+19. **`glab ci status` can prompt and hide a red pipeline** — set `GLAB_NO_PROMPT=1` to disable the menu when all three streams are TTYs; `-F json` and `glab ci get` exit 0 even for a failed pipeline. See [references/ci-pipelines.md](references/ci-pipelines.md)
 
 ## Contributing Improvements
 
