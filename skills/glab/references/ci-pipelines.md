@@ -3,14 +3,15 @@
 How to read pipeline state from a script or an agent, and which of
 `glab ci status` / `glab ci get` answers which question.
 
-All behavior below was checked against `glab 1.118.0` and the command source in
-[`gitlab-org/cli`](https://gitlab.com/gitlab-org/cli/-/blob/main/internal/commands/ci/status/status.go).
+The behavior below was checked against `glab 1.118.0` and the command source at
+[`v1.118.0`](https://gitlab.com/gitlab-org/cli/-/blob/v1.118.0/internal/commands/ci/status/status.go).
+Some TTY and polling cases are source-checked, not live-tested.
 
 ## Which command
 
 | You must … | Use |
 |---|---|
-| Get a verdict in a script, by exit code | `glab ci status --compact` |
+| Get a verdict in a script, by exit code | `GLAB_NO_PROMPT=1 glab ci status --compact` |
 | Parse pipeline and job fields | `glab ci status -F json` |
 | Address one pipeline by ID | `glab ci get -p <id>` |
 | Address the head pipeline of an MR | `glab ci get --merge-request <iid>` |
@@ -33,43 +34,35 @@ it from an agent.
    branch in the other project.
 2. glab reads the **newest** pipeline for that ref. You cannot select an older
    pipeline on the same ref.
-3. If that pipeline has no jobs (for example a detached or merged-results
-   pipeline), glab finds the merge request whose source branch matches and uses
-   its head pipeline instead.
-4. If both lookups fail, the command prints `no pipeline found for branch …` and
-   exits 1.
+3. If that lookup fails or the pipeline has no jobs, glab may fall back to the
+   head pipeline of an MR with that source branch. Do not rely on the fallback:
+   when no push pipeline exists (MR-pipeline-only projects), `-b` can return the
+   MR pipeline. When several MRs share a branch, including merged MRs, MR lookup
+   can fail with prompts off and glab can keep a skipped, job-less push pipeline.
+   With prompts enabled it may ask you to pick an MR.
+4. If nothing resolves, the command reports `no pipeline found …` and exits 1.
 
-One commit can carry two pipelines: a push pipeline on the branch ref, and a
-merge-request pipeline on `refs/merge-requests/<iid>/head`. `-b <branch>` reads
-the push pipeline, and the two finish at different times. A branch that reports
-`success` can have a merge-request pipeline that is still running, so use
-`glab ci get --merge-request <iid>` when the merge request is what you must
-report on.
-
-A full `refs/merge-requests/<iid>/head` ref is accepted by `-b`, but rule 2 still
-applies: you get the newest pipeline on that ref, not the one you have in mind.
-Use `glab ci get -p <id>` when the pipeline identity matters.
+A push pipeline and an MR pipeline can finish at different times. `-b <branch>`
+can return either one. For an MR verdict use `glab ci get --merge-request <iid>`;
+for a specific pipeline use `glab ci get -p <id>`. A full
+`refs/merge-requests/<iid>/head` ref is accepted by `-b`, but rule 2 still applies.
 
 ## The interactive menu (agent hazard)
 
-When stdin is a TTY and the pipeline is not running, `glab ci status` prints the
-job list and then opens a `Choose an action:` menu with `View logs`, `Retry` and
-`Exit`. It blocks until somebody answers. `Retry` retries the whole pipeline, so
-a read command can start a write.
+In text or `--compact` mode, `glab ci status` prints the job list and then opens
+a `Choose an action:` menu with `View logs`, `Retry` and `Exit` when stdin, stdout
+and stderr are all TTYs and prompts are enabled. Without `--live`, it opens even
+for a running pipeline; with `--live`, it opens once the pipeline ends. It blocks
+until somebody answers, and `Retry` retries the whole pipeline, so a read command
+can start a write.
 
-Verified with a pseudo-terminal, `glab 1.118.0`:
+Any one of these turns off the menu:
 
-| Invocation | With a TTY | Without a TTY |
-|---|---|---|
-| `glab ci status` | blocks on the menu | prints and exits |
-| `glab ci status --compact` | blocks on the menu | prints and exits |
-| `glab ci status --live` | blocks on the menu after the pipeline ends | prints and exits |
-| `glab ci status --wait` | prints and exits | prints and exits |
-| `glab ci status -F json` | prints and exits | prints and exits |
-
-`--wait` is the only flag that turns the menu off: it sets `live` and disables
-prompts. Redirecting stdin (`< /dev/null`) also removes the TTY and gives the
-one-shot behavior.
+- `GLAB_NO_PROMPT=1` (or the `no_prompt` config key): the agent-safe default;
+  it also disables other glab prompts, including the MR picker during fallback.
+- `--wait`, which sets `live` and disables prompts.
+- `-F json`, which returns before the menu.
+- Redirecting stdin, stdout or stderr away from the terminal.
 
 ## Blocking
 
@@ -101,29 +94,20 @@ same failed pipeline, `glab ci status -b <ref>` exits 1 while
 `--merge-request` addressability must then read `.status` itself.
 
 Exit 1 is also overloaded: a red pipeline and a failed lookup both give it.
-**Separate them by stderr**, which is the reliable test. A red pipeline writes
-nothing to stderr. Every lookup failure writes an `ERROR` block there — a project
-that does not exist, a project you cannot read, and a branch with no pipeline all
-produce the same shape, because GitLab answers 404 for a missing and an
-unreadable project alike.
+**Separate them by stdout.** A resolved pipeline prints `Pipeline state: <status>`
+even in `--compact` mode; a failed lookup prints a `✘ …` error line there
+instead (usually `no pipeline found …`). Do not test for empty stderr: glab can
+write update notices or update-check errors on any command, with or without a
+TTY.
 
 ```bash
-ERR=$(mktemp)
-if glab ci status --compact 2>"$ERR"; then
-  echo "green"
-elif [ -s "$ERR" ]; then
-  echo "could not resolve a pipeline"; cat "$ERR"
-else
+if OUT=$(GLAB_NO_PROMPT=1 glab ci status --compact); then
+  echo "not failed: $(grep '^Pipeline state:' <<<"$OUT")"
+elif grep -q '^Pipeline state: failed' <<<"$OUT"; then
   echo "pipeline is red"
+else
+  echo "could not resolve a pipeline"
 fi
-```
-
-The status line is a confirmation, not a test, and it needs care: stdout ends
-with a **blank** line, so `tail -1` gives you an empty string.
-
-```bash
-glab ci status | tail -1                            # → "" , reads as falsy
-glab ci status | grep -v '^[[:space:]]*$' | tail -1  # → Pipeline state: failed
 ```
 
 ## JSON shapes differ between the two commands
@@ -161,8 +145,4 @@ Add `-d`/`--with-job-details` for job URLs, durations and stages.
 
 ## Live flag lists
 
-Claude Code injects these; other agents run the commands.
-
-!`glab ci status --help`
-
-!`glab ci get --help`
+Run `glab ci status --help` and `glab ci get --help` for the live flag lists.
