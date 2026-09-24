@@ -89,6 +89,14 @@
       "path": "skills/gitlab-psql/SKILL.md"
     },
     {
+      "name": "gitlab-retry-until-merged",
+      "description": "Shepherd someone else's approved GitLab MR that is set to auto-merge (merge when pipeline succeeds) until it merges, without touching its code. Watches the pipeline, retries failures unrelated to the MR, waits out GitLab.com incidents and broken master before retrying, and alerts you on MR-caused failures or after 3 retries. Never commits, pushes, or rebases. Use when asked to retry until merged, keep an approved MR's pipeline going, or get an auto-merge MR over the line. For your own MR, where fixes may be pushed, use gitlab-babysit-mr instead.",
+      "category": "Development Workflow",
+      "license": "MIT",
+      "compatibility": "opencode",
+      "path": "skills/gitlab-retry-until-merged/SKILL.md"
+    },
+    {
       "name": "gitlab-stacked-mrs",
       "description": "Manages stacked GitLab merge requests end-to-end: decomposing a feature branch into logical, independently-reviewable MRs; maintaining a suppression ledger for early-stack dead code; re-syncing the stack after merges (GitLab only auto-retargets 4 MRs, not the full 20-entry limit); triaging reviewer feedback back to the owning entry; and verifying parity with the feature branch throughout. Triggers: stacked MRs, stacked diffs, glab stack, split MR, decompose change, chain merge requests, stack workflow, stacked review, retarget stack, mid-stack rebase.",
       "category": "Development Workflow",
