@@ -59,9 +59,11 @@ def mr_state(mr_url, with_files=False):
             for job in blocking(jobs)
         ]
 
-        # Trigger jobs for child/downstream pipelines. Their failures hide inside
-        # the downstream pipeline, so surface where to look.
-        bridges = glab_json(api_path(f"{base}/bridges", **{"scope[]": "failed", "per_page": 100}), paginate=True)
+        # Trigger jobs (bridges) for child/downstream pipelines. Their failures
+        # hide inside the downstream pipeline, so surface where to look.
+        # `trigger_jobs` replaces the `bridges` endpoint, deprecated in 19.2.
+        bridges = glab_json(api_path(f"{base}/trigger_jobs", **{"scope[]": "failed", "per_page": 100}),
+                            paginate=True)
         for bridge in blocking(bridges):
             downstream = bridge.get("downstream_pipeline") or {}
             failed_bridges.append({

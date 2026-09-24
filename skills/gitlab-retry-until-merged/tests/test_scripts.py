@@ -45,7 +45,7 @@ rules = [
     (r"/merge_requests/\d+/diffs$", "diffs"),
     (r"/merge_requests/\d+$", "mr"),
     (r"/pipelines/\d+/jobs$", "jobs"),
-    (r"/pipelines/\d+/bridges$", "bridges"),
+    (r"/pipelines/\d+/trigger_jobs$", "bridges"),
     (r"/jobs/\d+/trace$", "trace"),
     (r"/jobs/\d+$", "job"),
     (r"production/issues$", "production"),
