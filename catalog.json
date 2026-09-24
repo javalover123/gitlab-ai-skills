@@ -122,7 +122,7 @@
     },
     {
       "name": "mr-guided-review",
-      "description": "Use when you want to understand and review a GitLab MR as a reasoning companion rather than an automated reviewer. Phase 1 explains the MR's goal and purpose concisely with a concrete example, then gates on your confirmation before Phase 2 does a thorough code review that surfaces genuine issues, not nitpicks. Read-only \u2014 never posts anything to the MR; you post any feedback yourself. Triggers when you want to review, understand, or walk through an MR.",
+      "description": "Use when you want to understand and review a GitLab MR as a reasoning companion rather than an automated reviewer. Phase 1 explains the MR's goal with a concrete example, Phase 2 reports genuine issues (not nitpicks) as a terse findings index, and Phase 3 drafts review comments in your voice and stages them as unpublished draft notes. Each phase gates on your confirmation, and it never publishes a review, posts a plain comment, or approves. Triggers when you want to review, understand, walk through, or draft review comments on an MR.",
       "category": "Development Workflow",
       "license": "MIT",
       "compatibility": "opencode",

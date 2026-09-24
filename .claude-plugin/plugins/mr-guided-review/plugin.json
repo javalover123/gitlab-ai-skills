@@ -1,7 +1,7 @@
 {
   "name": "mr-guided-review",
-  "description": "Use when you want to understand and review a GitLab MR as a reasoning companion rather than an automated reviewer. Phase 1 explains the MR's goal and purpose concisely with a concrete example, then gates on your confirmation before Phase 2 does a thorough code review that surfaces genuine issues, not nitpicks. Read-only \u2014 never posts anything to the MR; you post any feedback yourself. Triggers when you want to review, understand, or walk through an MR.",
-  "version": "0.1.0",
+  "description": "Use when you want to understand and review a GitLab MR as a reasoning companion rather than an automated reviewer. Phase 1 explains the MR's goal and purpose concisely with a concrete example, then gates on your confirmation before Phase 2 does a thorough code review that reports genuine issues, not nitpicks, as a one-line-per-finding index you can expand. Phase 3, only on your explicit go-ahead, drafts review comments in your voice and stages them as unpublished draft notes. Never publishes a review, never posts a plain comment, never approves. Triggers when you want to review, understand, walk through, or draft review comments on an MR.",
+  "version": "0.2.0",
   "author": {
     "name": "GitLab"
   },
