@@ -59,7 +59,7 @@ script tags and their `integrity` attributes as they are.
 ## 4. Check before handing over
 
 - Every file path and repo name verified to exist.
-- Graph has labelled edges, ≤7 nodes, and an untouched node where that's true.
+- Graph has labelled edges, 7 or less nodes, and an untouched node where that's true.
 - Analogy stated *and* bounded (say where it breaks down).
 - No `{{` left in the file: `grep -c '{{' <file>` prints `0`.
 - A newcomer could say where they'd start reading code.
@@ -81,8 +81,3 @@ SAYS:      <one sentence — what a reader will take away>
 
 Publishing the file anywhere (wiki, Pages, a shared doc) is a separate step this skill doesn't
 take — hand the path to the operator and stop.
-
-## References
-
-- [references/workflow.md](references/workflow.md) — full gather/structure/diagram detail
-- [assets/explainer.html](assets/explainer.html) — the fixed HTML template
