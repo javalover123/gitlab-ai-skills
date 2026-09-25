@@ -1,0 +1,10 @@
+{
+  "name": "mr-label",
+  "description": "Apply the correct GitLab MR type/subtype labels and evidence-based milestone when creating or updating a merge request. Use when opening or updating an MR.",
+  "version": "0.1.0",
+  "author": {
+    "name": "GitLab"
+  },
+  "license": "MIT",
+  "skills": "./"
+}
