@@ -2,7 +2,7 @@ locals {
   claude_skills = ["glab"]
   skills_files = {
     for skill in local.claude_skills : skill => {
-      for file in fileset("${path.module}/../skills/${skill}", "**") : file => file("${path.module}/../skills/${skill}/${file}")
+      for file in fileset("${path.module}/../skills", "${skill}/**") : file => file("${path.module}/../skills/${file}")
     }
   }
 }
