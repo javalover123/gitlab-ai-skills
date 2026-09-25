@@ -96,6 +96,10 @@
       "source": "./.claude-plugin/plugins/run-in-tmux-pane"
     },
     {
+      "name": "rust-compile-memory",
+      "source": "./.claude-plugin/plugins/rust-compile-memory"
+    },
+    {
       "name": "rust-unsafe-ffi-review",
       "source": "./.claude-plugin/plugins/rust-unsafe-ffi-review"
     },
