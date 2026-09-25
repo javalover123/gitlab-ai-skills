@@ -1,0 +1,5 @@
+{
+  "PreToolUse": [
+    { "command": "bash scripts/require-dod.sh", "timeout": 30 }
+  ]
+}
