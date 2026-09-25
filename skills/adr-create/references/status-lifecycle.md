@@ -40,7 +40,7 @@ A new ADR makes a different decision about the same topic. The old decision was 
 **How:**
 1. Create the new ADR (e.g., ADR-0015)
 2. Update the old ADR's frontmatter: `status: "superseded by [ADR-0015](0015-new-title.md)"`
-3. In the new ADR, reference the old one: "Supersedes [ADR-0007](0007-old-title.md)"
+3. In the new ADR, reference the old one: `Supersedes [ADR-0007](0007-old-title.md)`
 
 ## Immutability Principle
 
