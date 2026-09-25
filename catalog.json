@@ -153,6 +153,14 @@
       "path": "skills/mr-review/SKILL.md"
     },
     {
+      "name": "natural-writing-style",
+      "description": "Enforces team writing style guidelines across all written output. Apply whenever writing, editing, or reviewing code comments, docstrings, documentation, README files, MR/PR descriptions, commit messages, issue descriptions, changelogs, technical specifications, API docs, inline comments, or any other text-based output. Also apply when reviewing existing text for style compliance. Triggers on all writing, documentation, review, and communication tasks.",
+      "category": "Meta / Authoring",
+      "license": "MIT",
+      "compatibility": "opencode",
+      "path": "skills/natural-writing-style/SKILL.md"
+    },
+    {
       "name": "opencode-refine",
       "description": "Iteratively test and refine prompts, skills, and agent configurations using opencode run",
       "category": "Agent Tooling",
