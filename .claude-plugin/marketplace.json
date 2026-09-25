@@ -64,6 +64,10 @@
       "source": "./.claude-plugin/plugins/human-review"
     },
     {
+      "name": "mcp-creator",
+      "source": "./.claude-plugin/plugins/mcp-creator"
+    },
+    {
       "name": "mr-adversarial-review",
       "source": "./.claude-plugin/plugins/mr-adversarial-review"
     },
