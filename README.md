@@ -184,6 +184,10 @@ Creates formal E2E user stories with BDD acceptance criteria, EARS constraints, 
 
 Reviews E2E user stories for INVEST compliance, Gherkin correctness, EARS constraint coverage, and test derivation quality. Produces a structured verdict with per-dimension scores, specific issues, and actionable feedback. Use when validating a story before sprint planning, reviewing stories created by story-creator or an AI generator, or auditing story quality in a PR. Triggers: review story, validate story, story quality, BDD review, acceptance criteria review, story audit, story feedback, INVEST check. → [`SKILL.md`](skills/story-reviewer/SKILL.md)
 
+#### threat-model-review
+
+Reviews threat models for completeness, accuracy, and alignment with current implementation. Identifies drift between threat model and code, uncovered attack surfaces, missing STRIDE categories, incorrect risk scores, and unlinked mitigations. Creates threat models when none exist. Use when auditing a threat model, checking security coverage, finding unmodeled threats, validating risk scores, or when implementation has changed since the threat model was written. Triggers: review threat model, audit threats, threat model drift, security coverage, unmodeled threats, validate risk, threat model gaps. → [`SKILL.md`](skills/threat-model-review/SKILL.md)
+
 ### Meta / Authoring
 
 #### authoring-skills
