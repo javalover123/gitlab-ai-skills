@@ -1238,7 +1238,7 @@ most-frequent exemplars. Forward the per-exemplar `seen:N` count
 into the prompt so the LLM weighs by occurrence. Below the
 ceiling, behavior is unchanged — full-fidelity raw-line review.
 
-See [reviewer-rubric.md § Adaptive cap on pass 1](reviewer-rubric.md)
+See [runtime-reviewer-rubric.md § Adaptive cap on pass 1](runtime-reviewer-rubric.md)
 for the implementation pattern + rubric paragraph that has to
 match it.
 

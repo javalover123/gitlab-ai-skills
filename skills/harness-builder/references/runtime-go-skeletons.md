@@ -10,7 +10,7 @@ instead of tarpc, JSON-aware pre-filter for Go structured loggers.
 and vice versa.** They're independent. Pick the language that matches
 the codebase you'll be poking at the most.
 
-See [module-skeletons.md](module-skeletons.md) for the canonical Rust
+See [runtime-rust-skeletons.md](runtime-rust-skeletons.md) for the canonical Rust
 implementation — the architecture sections (workflow, gotchas, rubric)
 all apply unchanged. This document covers only the Go-specific diffs.
 
@@ -555,7 +555,7 @@ func fingerprintTemplate(line string) string {
 Pass 1's pre-LLM cap protects against the runaway-pool failure mode
 where one upstream defect emits tens of thousands of failure-shaped
 lines in a single iteration (see
-[gotchas.md § Runaway candidate pools](gotchas.md)). Mirrors pass 2's
+[runtime-gotchas.md § Runaway candidate pools](runtime-gotchas.md)). Mirrors pass 2's
 template cap; uses the same `fingerprintTemplate` function so the
 two passes agree on what counts as "the same line".
 
@@ -612,7 +612,7 @@ func CapAndDedupFailures(records []Record, maxBatches, maxBatchLines int) ([]Rec
 Thread the parallel `counts` slice into the prompt builder so
 exemplars carry `"seen": N` in the per-line JSON. The pass-1 rubric
 already has the paragraph telling the LLM how to weigh them — see
-[reviewer-rubric.md § Adaptive cap on pass 1](reviewer-rubric.md).
+[runtime-reviewer-rubric.md § Adaptive cap on pass 1](runtime-reviewer-rubric.md).
 
 ```go
 func buildFailurePrompt(records []Record, maxLineChars int, counts []int64) string {
@@ -1129,9 +1129,9 @@ Rust variant.
 
 ## What stays the same
 
-- The reviewer rubric file ([reviewer-rubric.md](reviewer-rubric.md))
+- The reviewer rubric file ([runtime-reviewer-rubric.md](runtime-reviewer-rubric.md))
   is unchanged. Rubrics judge log lines, not source code.
-- The gotchas file ([gotchas.md](gotchas.md)) applies to both
+- The gotchas file ([runtime-gotchas.md](runtime-gotchas.md)) applies to both
   languages. Every fix forensics there is implementation-language
   independent.
 - The bug-burndown session format (`.bug-burndown/<id>/` tree) is

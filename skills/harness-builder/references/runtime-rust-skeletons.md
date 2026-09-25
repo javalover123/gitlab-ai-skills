@@ -703,7 +703,7 @@ Two-pass design. Pass 1 forwards failure-shaped lines to the LLM with
 the failure rubric. Pass 2 normalises every INFO/DEBUG/TRACE line to a
 template fingerprint, dedupes, and forwards unique templates to the LLM
 with the silent-divergence rubric. See
-[reviewer-rubric.md](reviewer-rubric.md) for both rubric system-prompt
+[runtime-reviewer-rubric.md](runtime-reviewer-rubric.md) for both rubric system-prompt
 strings (PASS1_SYSTEM, PASS2_SYSTEM) + the fingerprinting regex set +
 the output-format prompt + `build_prompt` and `parse_verdicts`.
 
