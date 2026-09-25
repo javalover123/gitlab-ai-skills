@@ -98,10 +98,10 @@ figcaption{color:var(--text-muted);font-size:.85rem;margin-top:.4rem}
      text, so the graph survives greyscale. Class names below are the palette; do not add colours. -->
 <pre class="mermaid">
 flowchart LR
-  UI["FRONTEND_NAME<br/><small>FRONTEND_PATH · changed</small>"]:::ui
-  API["API_NAME<br/><small>API_PATH · new</small>"]:::api
-  SVC["SERVICE_NAME<br/><small>SERVICE_PATH · reused, unchanged</small>"]:::service
-  DB["MODEL_NAME<br/><small>MODEL_PATH · untouched</small>"]:::data
+  UI["FRONTEND_NAME<br/>FRONTEND_PATH · changed"]:::ui
+  API["API_NAME<br/>API_PATH · new"]:::api
+  SVC["SERVICE_NAME<br/>SERVICE_PATH · reused, unchanged"]:::service
+  DB["MODEL_NAME<br/>MODEL_PATH · untouched"]:::data
   UI -- "GraphQL query" --> API
   API -- "calls" --> SVC
   SVC -- "reads" --> DB
@@ -171,6 +171,7 @@ flowchart LR
 (function(){
   var dark = matchMedia('(prefers-color-scheme: dark)').matches;
   if (window.mermaid) mermaid.initialize({startOnLoad:true, theme: dark ? 'dark' : 'neutral',
+    htmlLabels:false, flowchart:{htmlLabels:false},
     themeVariables:{fontFamily:'system-ui, sans-serif'}});
   var el = document.getElementById('by-layer');
   if (!el || !window.Chart) return;
