@@ -129,6 +129,14 @@
       "path": "skills/mcp-creator/SKILL.md"
     },
     {
+      "name": "mcp-review",
+      "description": "Reviews and improves existing MCP server implementations for protocol compliance, tool quality, Rust best practices, security, and testing coverage. Lists available MCP servers for selection when none specified. Use when reviewing an MCP server, auditing MCP tool quality, checking protocol compliance, improving MCP server code, or when the user mentions MCP review, MCP audit, or MCP server quality.",
+      "category": "Development Workflow",
+      "license": "MIT",
+      "compatibility": "opencode",
+      "path": "skills/mcp-review/SKILL.md"
+    },
+    {
       "name": "mr-adversarial-review",
       "description": "Use when running a critical, skeptical pass over a GitLab MR \u2014 either as the author before requesting human review, or as a reviewer wanting a structured first cut \u2014 produces a severity-bucketed findings report (High / Medium / Low / Done well) and posts it as a single comment on the MR.",
       "category": "Development Workflow",
