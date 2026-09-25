@@ -31,32 +31,74 @@ an epic. Fetch the item's `confidential` flag first (`glab issue view`, `glab mr
 explainer is written to be shared; explaining a confidential ask into a shareable file is the one
 mistake here that cannot be undone.
 
-## 2. Gather, structure, and diagram
+## 2. Gather
 
-Full detail — what to gather, the fixed 8-section order, and the Mermaid/Chart.js rules — is in
-[references/workflow.md](references/workflow.md). Summary:
+- **The ask.** Title, description, acceptance criteria, labels, linked items. For an epic, its
+  child issues and their state. For an MR, the description, the diff stat, and the discussions.
+- **The code reality.** Find the real files: entry points, resolvers, services, models, workers,
+  specs. Prefer `git grep -n` and targeted reads in the checkout over browsing. **Verify every
+  path you will name exists**; a diagram with an invented file is worse than no diagram.
+- **Team memory, if available.** If your environment has a team lessons/knowledge-base skill
+  loaded, check it for the group and cite what you use. Skip if none exists — nothing else
+  depends on it.
+- **Who owns what,** when the item spans groups: `CODEOWNERS` and the stage/group labels.
 
-- Gather the ask (title, description, acceptance criteria, linked items) and the code reality
-  (real files, verified to exist — a diagram with an invented path is worse than no diagram).
-- Fill every section of the fixed template order or delete it; never reorder.
-- One Mermaid `flowchart`, 3–7 nodes, every edge labelled with its mechanism, new/changed/
-  reused/untouched stated in the node text. A Chart.js chart only when a real measured count
-  earns it.
+Do not fetch more than this. Live data belongs on GitLab; the explainer links back to it.
 
-## 3. Write the file
+## 3. Structure
 
-```sh
-OUT=/tmp/gitlab-explain; mkdir -p "$OUT"
-D=<project-slug>; F=<issue|epic|mr>-<iid>.html
-cp assets/explainer.html "$OUT/$D-$F"
-```
+The template fixes the order. Fill every section or delete it; never reorder.
+
+1. **In one sentence** — what changes, for whom, why anyone cares. No implementation words.
+2. **Analogy** — one, concrete, *load-bearing*: it must map onto the actual structure so the
+   reader can reason with it. **Say where it breaks down**; a half-true analogy nobody corrects
+   becomes a wrong mental model.
+3. **How the pieces connect** — the dependency graph (see Diagrams below).
+4. **Where the code lives** — layer table with the real directory per layer, marked
+   `+ new` / `~ changed` / `= reused, unchanged` / `= untouched`. Layers are whatever the repo
+   has (browser → API → services → models → DB for a typical monolith; adapt for other repos).
+   Keep only the rows the change touches or deliberately leaves alone: a backend-only fix has no
+   Frontend row, and says so in the repos section instead.
+5. **Repos and projects affected** — usually one. If only one, say so explicitly; readers assume
+   distributed change until told otherwise.
+6. **Where the work happens** — issue or epic: delivery order and what blocks what, one card per
+   step or MR. MR, or an issue with a single MR already open: the order a reviewer should read
+   the diff in.
+7. **How we will know it worked** — acceptance criteria in plain language, each paired with the
+   spec, job, or check that proves it.
+8. **What this is not** — the out-of-scope list; half of understanding a change is its edges.
+
+## 4. Diagrams and charts
+
+- **Graph: Mermaid `flowchart`,** 3–7 nodes. More is two diagrams; split by concern. Label every
+  edge with its mechanism (`GraphQL query`, `calls`, `enqueues`, `reads`). State new / changed /
+  reused / untouched in the node text. Colour only through the template's `classDef` palette, one
+  class per *kind* of thing; do not add colours. Never write `{{ }}` inside a Mermaid block —
+  Mermaid reads it as a hexagon node.
+- **Plain-text labels only.** The template renders labels as SVG text (`htmlLabels:false`) so
+  Safari draws them the same as Chrome; `<br/>` is the only markup that works in a label.
+- **Show what is untouched.** An untouched node is how the reader sees the blast radius, and how
+  a reuse claim is proved rather than asserted.
+- **Chart: Chart.js, optional.** Keep the chart only when a real count earns it (files per layer,
+  MRs per stage, criteria covered vs. not). Fill `data` with the counts you measured, or delete
+  the figure and the script block that draws it. Two numbers are a sentence, not a chart.
+- **Sequence over time** (delivery path, rollout) uses the stepped rail, not a graph.
+- Every colour used appears in the legend paired with a word; colour is never the only signal.
+- A `figcaption` says what the reader should take away. A diagram nobody can summarise is
+  decoration.
+
+## 5. Write the file
+
+Copy [assets/explainer.html](assets/explainer.html) to a new file named after the source item —
+the project slug, the item type, and its IID, e.g. `/tmp/gitlab-explain/skills-mr-139.html`
+(create the directory if needed). The exact location doesn't matter; report whatever path you used.
 
 Fill the placeholders with the `Edit` tool. `AUTHOR` is the person running the skill (`git config
 user.name`), not the issue author. Keep the page under two screens of scroll (~2,000px at laptop
 width); if it doesn't fit, the source item needs splitting, not smaller type. Keep the pinned CDN
 script tags and their `integrity` attributes as they are.
 
-## 4. Check before handing over
+## 6. Check before handing over
 
 - Every file path and repo name verified to exist.
 - Graph has labelled edges, 7 or less nodes, and an untouched node where that's true.
@@ -69,7 +111,7 @@ script tags and their `integrity` attributes as they are.
 Open the file in a browser (or ask the operator to) and confirm the graph rendered — a Mermaid
 syntax error renders as a visible error box, not silently.
 
-## 5. Report
+## 7. Report
 
 Three lines, nothing before them:
 
