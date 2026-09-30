@@ -19,17 +19,20 @@ done
 # The CLI's own failure passes through with its exit code; the trap only flags unexpected script errors.
 output="$(postgresai joe "$@")" || exit $?
 
-# Expects the budget-expired line, matched from free text:
+# Assumes a budget-expired run prints, on any line, either
 #   started 505167 · pending · budget 25s reached — resume:  pgai joe result 505167
-pending_id="$(printf '%s\n' "$output" | sed -nE 's/^started ([0-9]+) .*pending.*/\1/p' | head -n 1)"
+# or at least the resume command `pgai|postgresai joe result <id>`. Either form yields the id.
+# A complete result never contains these, so it passes straight through.
+pending_id="$(printf '%s\n' "$output" | sed -nE \
+  -e 's/^started ([0-9]+) .*pending.*/\1/p' \
+  -e 's/.*(pgai|postgresai) joe result ([0-9]+).*/\2/p' | head -n 1)"
 if [ -z "$pending_id" ]; then
-  # A reworded budget-expired line must not pass as success.
-  case "$(printf '%s\n' "$output" | head -n 1)" in
-    *"resume:"*|*"pgai joe result"*)
-      printf '%s\n' "$output" >&2
-      echo "joe.sh: output looks budget-expired but the 'started <id> · pending' line was not recognized; resume by hand with 'postgresai joe result <id>'." >&2
-      exit 1 ;;
-  esac
+  # Mentions `resume:` but no id could be extracted: a reworded line must not pass as success.
+  if printf '%s\n' "$output" | grep -q 'resume:'; then
+    printf '%s\n' "$output" >&2
+    echo "joe.sh: output looks budget-expired but no command id was found; resume by hand with 'postgresai joe result <id>'." >&2
+    exit 1
+  fi
   printf '%s\n' "$output"
   exit 0
 fi

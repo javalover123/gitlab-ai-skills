@@ -27,4 +27,7 @@ Run `joe explain` (ANALYZE, BUFFERS) for the real picture; `joe plan` only gives
 4. `reset` between unrelated experiments so earlier indexes don't distort results.
 
 `hypo` (HypoPG) state was not observed to persist between CLI calls, so don't use it to
-rule an index out. Its args omit the word `hypo` (`hypo $P "desc"`).
+rule an index out. The argument string must not repeat
+`hypo`. Correct: `postgresai joe hypo --project <p> "create index on t (c)"` or
+`postgresai joe hypo --project <p> "desc"`. Wrong: `... hypo "hypo desc"`, which errors with
+`invalid args given for the hypo command`.

@@ -15,6 +15,16 @@ if [ "$2" = "result" ]; then
   if [ "$n" -ge "${STUB_READY_AFTER:-2}" ]; then echo "command 42 · ok"; echo "plan: done"; exit 0; fi
   echo "${STUB_RESULT_ERR:-command 42 · pending — result is not ready}" >&2; exit 1
 fi
+if [ "$STUB_MODE" = "banner" ]; then
+  echo "WARNING: new CLI version available"
+  echo "started 42 · pending · budget 25s reached — resume:  pgai joe result 42"; exit 0
+fi
+if [ "$STUB_MODE" = "reworded" ]; then
+  echo "command 42 is still running (budget reached) — resume: postgresai joe result 42"; exit 0
+fi
+if [ "$STUB_MODE" = "noid" ]; then
+  echo "budget reached — resume: later"; exit 0
+fi
 if [ "$STUB_MODE" = "pending" ]; then
   echo "started 42 · pending · budget 25s reached — resume:  pgai joe result 42"; exit 0
 fi
@@ -33,6 +43,9 @@ run() { # name expected_rc expected_output_substring; remaining env set by calle
 
 STUB_MODE=fast run "passes through immediate result" 0 "plan: fast"
 if [ "$(grep -c result "$tmp/calls")" -ne 0 ]; then echo "FAIL - fast path polled"; failures=$((failures + 1)); fi
+STUB_MODE=banner STUB_READY_AFTER=2 run "polls when a banner precedes the status line" 0 "plan: done"
+STUB_MODE=reworded STUB_READY_AFTER=2 run "polls on reworded line carrying the resume command" 0 "plan: done"
+STUB_MODE=noid run "fails loud when resume: has no id" 1 ""
 export STUB_MODE=pending
 STUB_READY_AFTER=2 run "polls pending until ready" 0 "plan: done"
 STUB_READY_AFTER=2 run "prints only the final result" 0 "command 42 · ok"
@@ -55,13 +68,13 @@ err="$(PATH="$tmp:$PATH" STUB_DIR="$tmp" STUB_MODE=pending STUB_READY_AFTER=99 S
 if [[ "$err" == *"command 42"* && "$err" == *"postgresai joe result 42"* ]]; then echo "ok - unrecognized header names id and resume command"
 else echo "FAIL - resume hint missing (err=$err)"; failures=$((failures + 1)); fi
 
-# (c) A reworded budget-expired line must fail instead of passing as success.
+# (c) A budget-expired line with `resume:` but no extractable id must fail instead of passing as success.
 cat > "$tmp/postgresai" <<'STUB'
 #!/usr/bin/env bash
-echo "queued 42 - waiting - to fetch run: pgai joe result 42"
+echo "queued - waiting - resume: ask support"
 STUB
 rc=0; err="$(PATH="$tmp:$PATH" "$joe" plan --project x "SELECT 1" 2>&1 >/dev/null)" || rc=$?
-if [ "$rc" -eq 1 ] && [[ "$err" == *"not recognized"* ]]; then echo "ok - reworded budget-expired line fails"
+if [ "$rc" -eq 1 ] && [[ "$err" == *"no command id"* ]]; then echo "ok - resume without id fails"
 else echo "FAIL - reworded line (rc=$rc err=$err)"; failures=$((failures + 1)); fi
 
 # A failing CLI passes through with its own message and exit code, without a script trailer.
