@@ -121,5 +121,6 @@ metadata:                            # optional; add what aids discovery
 
 ## Contributing Improvements
 
-<!-- Copy the section from references/contributing-improvements.md and fill in
-     the skill's source-of-truth repo. Keep this as the last section. -->
+<!-- Copy the section from the authoring-skills skill's
+     references/contributing-improvements.md (not this skill's own references/)
+     and fill in the source-of-truth repo. Keep this as the last section. -->
