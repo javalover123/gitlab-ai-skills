@@ -201,6 +201,14 @@
       "path": "skills/playwright-cli/SKILL.md"
     },
     {
+      "name": "postgresai",
+      "description": "Run EXPLAIN / EXPLAIN ANALYZE, test indexes, and measure query cost on PostgresAI Database Lab thin clones with the PostgresAI CLI (postgresai, pgai, Joe). Use when asked to explain or optimize a query, check a plan at production scale, try an index on realistic data, or prepare a GitLab database review.",
+      "category": "Database",
+      "license": "MIT",
+      "compatibility": "",
+      "path": "skills/postgresai/SKILL.md"
+    },
+    {
       "name": "prep-review",
       "description": "Check the status of, review, or respond to feedback on an existing GitLab Platform Readiness Enablement Process (PREP) assessment. Use when asked to review a PREP merge request, check if a PREP/readiness assessment is complete or ready for GA, evaluate PREP evidence quality as a reviewer, or address/respond to PREP reviewer feedback. Do not use for starting a brand-new PREP assessment; use prep-start for that instead.",
       "category": "Development Workflow",
