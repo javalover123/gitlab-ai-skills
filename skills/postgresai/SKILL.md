@@ -85,15 +85,15 @@ Plans and iterating: [references/plan-analysis.md](references/plan-analysis.md).
 GitLab monolith: target aliases in [references/gitlab.md](references/gitlab.md); review flow in
 [references/db-review-flow.md](references/db-review-flow.md).
 
-## Contributing improvements
-
-This skill is maintained in [`gitlab-org/ai/skills`](https://gitlab.com/gitlab-org/ai/skills).
-If guidance is **inaccurate or outdated** (a changed command or flag, CLI output-format drift
-that breaks `scripts/joe.sh`, a wrong target or table-ownership note), confirm with the user
-and open a focused MR with the fix: one fix per MR.
-
 ## CLI reference (live)
 
 Flags change between releases; check the installed CLI:
 
 !`postgresai joe --help 2>&1 | head -30`
+
+## Contributing Improvements
+
+This skill is maintained in [`gitlab-org/ai/skills`](https://gitlab.com/gitlab-org/ai/skills).
+If you discover that any guidance here is **inaccurate or outdated** (e.g. a command that no
+longer works, a wrong flag, CLI output drift that breaks `scripts/joe.sh`), confirm with the
+user and open an MR against that repository with the fix. Keep changes focused — one fix per MR.
