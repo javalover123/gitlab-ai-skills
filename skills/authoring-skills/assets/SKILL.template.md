@@ -119,6 +119,7 @@ metadata:                            # optional; add what aids discovery
 | <topic> | `references/<file>.md` |
 | <output template> | `assets/<file>.md` |
 
-## Contributing
+## Contributing Improvements
 
-<!-- Where the canonical source lives if synced from a repo; how to propose fixes. -->
+<!-- Copy the section from references/contributing-improvements.md and fill in
+     the skill's source-of-truth repo. Keep this as the last section. -->

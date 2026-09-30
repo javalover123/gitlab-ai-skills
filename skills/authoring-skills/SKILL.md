@@ -1,7 +1,7 @@
 ---
 name: authoring-skills
 description: Author a new agent skill or improve an existing one - write the SKILL.md frontmatter and description, structure the body, and fix skills that under- or over-trigger. Use when asked to create/write a skill, make a SKILL.md, improve/refactor a skill, or fix a skill's description.
-version: 0.3.0
+version: 0.3.1
 license: MIT
 category: Meta / Authoring
 compatibility: opencode
@@ -111,12 +111,10 @@ To start from a skeleton, copy [assets/SKILL.template.md](assets/SKILL.template.
    should not; read only the `description` and predict; adjust until correct.
 2. **Cold-read test:** would an agent with no prior context follow the body
    without guessing at paths or commands? Resolve every relative path.
+3. **Contributing Improvements:** end with a `## Contributing Improvements`
+   section — add it if missing; keep it when updating ([template](references/contributing-improvements.md)).
 
-3. **Contributing Improvements:** the skill ends with a `## Contributing
-   Improvements` section pointing at its source-of-truth repo — add it, or keep
-   it when updating ([template](references/contributing-improvements.md)).
-
-The `opencode-refine` skill drives the trigger and cold-read tests with `opencode run`.
+The `opencode-refine` skill drives the first two tests with `opencode run`.
 
 ## Improving an existing skill
 
@@ -143,7 +141,6 @@ compound in value.
 
 ## Contributing Improvements
 
-This skill is maintained in
-[`gitlab-org/ai/skills`](https://gitlab.com/gitlab-org/ai/skills). If you find
-guidance here **inaccurate or outdated**, confirm with the user and open an MR
-against that repository with the fix. Keep changes focused — one fix per MR.
+Maintained in [`gitlab-org/ai/skills`](https://gitlab.com/gitlab-org/ai/skills).
+If guidance here is **inaccurate or outdated**, confirm with the user, then open
+a focused MR there (one fix per MR).

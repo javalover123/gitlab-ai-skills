@@ -2,7 +2,7 @@
 
 Every skill authored or updated with `authoring-skills` should end with a
 `## Contributing Improvements` section that tells future agents where to send
-fixes. Add it when creating a skill; keep (and re-check) it when updating one.
+fixes. Add it if missing; keep (and re-check) it when updating one.
 
 ## Template
 
@@ -22,6 +22,8 @@ MR.
 ## Choosing `<source-repo>`
 
 - Ask or check where the skill lives; don't assume this repository.
+- No source repo (personal or local-only skill)? Omit the section, or point to
+  wherever the user keeps it. Never invent a URL.
 - A skill synced in from elsewhere (listed in `synced-skills.yml` in
   `gitlab-org/ai/skills`) must point at its **upstream** `source_project`, not
   the destination copy — edits to the copy are rejected by CI.
