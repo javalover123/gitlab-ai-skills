@@ -9,26 +9,25 @@ category: Database
 # PostgresAI CLI (Database Lab / Joe)
 
 Run `EXPLAIN` and DDL experiments on ephemeral thin clones of production-sized data
-from the terminal, instead of pasting into the Joe chat bot.
+from the terminal, not the Joe chat bot.
 
 ## When to Use
 
-- Checking how a new or changed query plans at production scale.
-- Testing an index or migration idea on a thin clone.
+- Checking query plans at production scale, or testing an index or migration on a thin clone.
 - Collecting queries and plans as evidence for a database review.
 
 Not for local development databases (GitLab: use `gitlab-psql`).
 
 ## Install
 
-Prefer npm: `npm i -g postgresai` (or `npx postgresai ...`). Binaries: `postgresai`, `pgai`.
-A Homebrew tap may be documented elsewhere but may no longer exist; don't rely on it.
+Prefer npm: `npm i -g postgresai` (or `npx postgresai ...`); binaries `postgresai`, `pgai`.
+Don't rely on a Homebrew tap; it may no longer exist.
 
 ## Authenticate
 
-`postgresai auth show-key` shows whether a key is stored. If not, run `postgresai login`
-(browser OAuth; the callback listens on `127.0.0.1`, port selectable with `--port`).
-Headless: `postgresai login --set-key <key>` or set `PGAI_API_KEY`. Never commit or print the key.
+`postgresai auth show-key` shows whether a key is stored; if not, run `postgresai login` (browser
+OAuth, callback on `127.0.0.1`, `--port` selectable). Headless: `login --set-key <key>` or
+`PGAI_API_KEY`. Never commit or print the key.
 
 ## Pick the target
 
@@ -36,15 +35,14 @@ Headless: `postgresai login --set-key <key>` or set `PGAI_API_KEY`. Never commit
 postgresai projects        # JOE column shows which projects are ready
 ```
 
-Pass `--project <id|alias>` (or `--instance-id <id>`) to `joe`, or store a default once with
+Pass `--project <id|alias>` (or `--instance-id <id>`) to `joe`, or store a default with
 `postgresai set-default-project <alias>`; `joe --help` wrongly says `--project` is always required.
-Prefer entries with JOE `ready` (skips stale `-deprecated`/`-new` duplicates). Ask the user
-which database to target if it's ambiguous.
+Prefer JOE `ready` entries (skips stale `-deprecated`/`-new` duplicates); ask the user if ambiguous.
 
 ## Core loop
 
 Run `joe` through [scripts/joe.sh](scripts/joe.sh) (path relative to this skill): same arguments as
-`postgresai joe`, but it waits for commands that outlive the CLI's poll budget and prints only the result.
+`postgresai joe`, but it waits out the CLI's poll budget and prints only the result.
 
 ```shell
 J=scripts/joe.sh; P="--project <alias>"
@@ -52,44 +50,47 @@ $J plan     $P "SELECT ..."            # estimates only, never executes: default
 $J explain  $P "SELECT ..."            # EXPLAIN + ANALYZE + buffers, executes on clone
 $J describe $P <table>                 # \d-style metadata
 $J exec     $P "CREATE INDEX ..."      # real DDL on the clone; prints only the duration
-$J exec     $P "ANALYZE <table>"       # refresh stats so the planner sees the new index
-$J explain  $P "SELECT ..."            # re-measure
+$J exec     $P "ANALYZE <table>"       # refresh stats, then `explain` again to re-measure
 $J reset    $P                         # discard experiments
 ```
 
-Interpreting plans and iterating: [references/plan-analysis.md](references/plan-analysis.md).
+Plans and iterating: [references/plan-analysis.md](references/plan-analysis.md).
 
 ## Gotchas
 
 - **Budget:** plain `postgresai joe` returns exit 0 after `--budget` (default 25 s) with
-  `started <id> · pending … resume: pgai joe result <id>`; the command keeps running.
-  `joe result <id>` returns at once, exit 1 while pending. `joe.sh` polls for you
-  (`JOE_WAIT_SECONDS`, default 600; exit 1 on timeout).
-- **Don't `reset` to stop a slow command**: it kills pending work (`conn closed`). Use
-  `joe activity` and `joe terminate <pid>` for a runaway query.
-- **`hypo` (HypoPG) was not observed to persist between CLI calls**, so a later
-  `plan` won't show it. Test indexes with `exec CREATE INDEX` +
-  `exec ANALYZE` + `explain`. Args omit the word `hypo` (`hypo $P "desc"`).
-- `explain` and `exec` actually execute, so bound queries (`LIMIT`, scoped by tenant/project
-  id). `exec` returns no rows.
-- **Clone creation can fail** with an infra error (`failed to create a Database Lab clone`).
-  Report it; don't retry in a loop. Switch target only if another database can answer the question.
+  `started <id> · pending … resume: pgai joe result <id>`; the command keeps running (`result`
+  exits 1 while pending). `joe.sh` polls (`JOE_WAIT_SECONDS`, default 600; raise it for big tables).
+- **Don't `reset` to stop a slow command** (kills pending work, `conn closed`): use
+  `joe activity` and `joe terminate <pid>`.
+- **`hypo` (HypoPG) didn't persist between CLI calls**: test indexes with `exec CREATE INDEX` +
+  `exec ANALYZE` + `explain` (see plan-analysis).
+- `explain` and `exec` really execute: bound queries (`LIMIT`, tenant/project id). `exec` returns no rows.
+- **Clone creation can fail** (`failed to create a Database Lab clone`). Stop using that target
+  for the session (`explain`/`reset` fail the same way), report it, don't retry in a loop. Switch
+  target only if another database can answer the question.
 - JSON output and explicit clones: [references/advanced.md](references/advanced.md).
 
 ## Safety rules
 
-- Only experiment through the clone commands; never run writes or DDL against
-  production or replicas by any other route.
-- Always `joe reset` when finished.
+- Experiment only through the clone commands; never run writes or DDL against production or
+  replicas by any other route. Always `joe reset` when finished.
 - Clone data is real production data. **Never paste row values, emails, tokens or
   result sets** into public MRs, issues, or repos. Share SQL, plans with literals
   replaced by placeholders, and timings/buffer counts only.
-- Clones may enforce statement timeouts; don't retry a timeout in a loop.
+- Clones may enforce statement timeouts; don't retry them in a loop.
 
 ## GitLab-specific
 
-For the GitLab monolith, see [references/gitlab.md](references/gitlab.md): which aliases to
-target, and the database-review flow ([references/db-review-flow.md](references/db-review-flow.md)).
+GitLab monolith: target aliases in [references/gitlab.md](references/gitlab.md); review flow in
+[references/db-review-flow.md](references/db-review-flow.md).
+
+## Contributing improvements
+
+This skill is maintained in [`gitlab-org/ai/skills`](https://gitlab.com/gitlab-org/ai/skills).
+If guidance is **inaccurate or outdated** (a changed command or flag, CLI output-format drift
+that breaks `scripts/joe.sh`, a wrong target or table-ownership note), confirm with the user
+and open a focused MR with the fix: one fix per MR.
 
 ## CLI reference (live)
 

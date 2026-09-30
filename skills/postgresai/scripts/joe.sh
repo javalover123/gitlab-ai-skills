@@ -16,7 +16,8 @@ for arg in "$@"; do
   fi
 done
 
-output="$(postgresai joe "$@")"
+# The CLI's own failure passes through with its exit code; the trap only flags unexpected script errors.
+output="$(postgresai joe "$@")" || exit $?
 
 # Expects the budget-expired line, matched from free text:
 #   started 505167 · pending · budget 25s reached — resume:  pgai joe result 505167

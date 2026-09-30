@@ -64,13 +64,13 @@ rc=0; err="$(PATH="$tmp:$PATH" "$joe" plan --project x "SELECT 1" 2>&1 >/dev/nul
 if [ "$rc" -eq 1 ] && [[ "$err" == *"not recognized"* ]]; then echo "ok - reworded budget-expired line fails"
 else echo "FAIL - reworded line (rc=$rc err=$err)"; failures=$((failures + 1)); fi
 
-# A failing CLI reports the failure location exactly once.
+# A failing CLI passes through with its own message and exit code, without a script trailer.
 cat > "$tmp/postgresai" <<'STUB'
 #!/usr/bin/env bash
 echo "ERROR: failed to create a Database Lab clone" >&2
-exit 1
+exit 3
 STUB
 rc=0; err="$(PATH="$tmp:$PATH" "$joe" plan --project x "SELECT 1" 2>&1 >/dev/null)" || rc=$?
-if [ "$rc" -eq 1 ] && [ "$(grep -c 'failed at line' <<<"$err")" -eq 1 ] && [[ "$err" == *"failed to create a Database Lab clone"* ]]; then echo "ok - CLI failure reported once"
+if [ "$rc" -eq 3 ] && [[ "$err" != *"failed at line"* ]] && [[ "$err" == *"failed to create a Database Lab clone"* ]]; then echo "ok - CLI failure passes through"
 else echo "FAIL - CLI failure handling (rc=$rc err=$err)"; failures=$((failures + 1)); fi
 exit "$failures"
