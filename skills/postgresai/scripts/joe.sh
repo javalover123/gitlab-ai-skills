@@ -18,9 +18,17 @@ done
 
 output="$(postgresai joe "$@")"
 
-# Budget expired: "started <id> · pending · budget Ns reached — resume: pgai joe result <id>"
+# Expects the budget-expired line, matched from free text:
+#   started 505167 · pending · budget 25s reached — resume:  pgai joe result 505167
 pending_id="$(printf '%s\n' "$output" | sed -nE 's/^started ([0-9]+) .*pending.*/\1/p' | head -n 1)"
 if [ -z "$pending_id" ]; then
+  # A reworded budget-expired line must not pass as success.
+  case "$(printf '%s\n' "$output" | head -n 1)" in
+    *"resume:"*|*"pgai joe result"*)
+      printf '%s\n' "$output" >&2
+      echo "joe.sh: output looks budget-expired but the 'started <id> · pending' line was not recognized; resume by hand with 'postgresai joe result <id>'." >&2
+      exit 1 ;;
+  esac
   printf '%s\n' "$output"
   exit 0
 fi
@@ -36,9 +44,14 @@ while [ "$waited" -lt "$wait_limit" ]; do
     exit 0
   fi
   # Only the status header on the first line counts; the body may echo SQL errors.
+  # Expects, while still running (exit 1):
+  #   command 505167 · pending — result is not ready
   case "$(printf '%s\n' "$output" | head -n 1)" in
     "command $pending_id · pending"*) ;;
-    *) printf '%s\n' "$output" >&2; exit 1 ;;
+    *)
+      printf '%s\n' "$output" >&2
+      echo "joe.sh: unrecognized status for command $pending_id; resume by hand with 'postgresai joe result $pending_id'." >&2
+      exit 1 ;;
   esac
   delay=$((delay * 2 > max_sleep ? max_sleep : delay * 2))
 done

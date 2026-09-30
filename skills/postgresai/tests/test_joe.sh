@@ -49,6 +49,21 @@ if [ "$(grep -c result "$tmp/calls")" -ne 1 ]; then echo "FAIL - polled on pendi
 rc=0; msg="$(PATH="$tmp:$PATH" STUB_DIR="$tmp" "$joe" plan --json --project x "SELECT 1" 2>&1)" || rc=$?
 if [ "$rc" -eq 2 ] && [[ "$msg" == *"text-only"* ]]; then echo "ok - rejects --json with exit 2"
 else echo "FAIL - --json handling (rc=$rc msg=$msg)"; failures=$((failures + 1)); fi
+# (b) An unrecognized result header reports the id and the manual resume command.
+STUB_READY_AFTER=99 STUB_RESULT_ERR="status: waiting" JOE_WAIT_SECONDS=30 run "unrecognized header fails" 1 ""
+err="$(PATH="$tmp:$PATH" STUB_DIR="$tmp" STUB_MODE=pending STUB_READY_AFTER=99 STUB_RESULT_ERR="status: waiting" "$joe" plan --project x "SELECT 1" 2>&1 >/dev/null)" || true
+if [[ "$err" == *"command 42"* && "$err" == *"postgresai joe result 42"* ]]; then echo "ok - unrecognized header names id and resume command"
+else echo "FAIL - resume hint missing (err=$err)"; failures=$((failures + 1)); fi
+
+# (c) A reworded budget-expired line must fail instead of passing as success.
+cat > "$tmp/postgresai" <<'STUB'
+#!/usr/bin/env bash
+echo "queued 42 - waiting - to fetch run: pgai joe result 42"
+STUB
+rc=0; err="$(PATH="$tmp:$PATH" "$joe" plan --project x "SELECT 1" 2>&1 >/dev/null)" || rc=$?
+if [ "$rc" -eq 1 ] && [[ "$err" == *"not recognized"* ]]; then echo "ok - reworded budget-expired line fails"
+else echo "FAIL - reworded line (rc=$rc err=$err)"; failures=$((failures + 1)); fi
+
 # A failing CLI reports the failure location exactly once.
 cat > "$tmp/postgresai" <<'STUB'
 #!/usr/bin/env bash
