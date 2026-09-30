@@ -202,7 +202,7 @@
     },
     {
       "name": "postgresai",
-      "description": "Use when measuring, EXPLAINing or optimizing PostgreSQL queries against GitLab's Database Lab thin clones with the PostgresAI CLI (postgresai/pgai, Joe), or before requesting a GitLab database review.",
+      "description": "Run EXPLAIN / EXPLAIN ANALYZE, test indexes, and measure DB queries on GitLab Database Lab thin clones with the PostgresAI CLI (postgresai, pgai, Joe). Use when asked to explain/optimize a query, check a query plan at production scale, try an index, or prepare for a GitLab database review. Not for local GDK databases (use gitlab-psql).",
       "category": "",
       "license": "MIT",
       "compatibility": "",
