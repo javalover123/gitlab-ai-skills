@@ -15,6 +15,9 @@ if [ "$2" = "result" ]; then
   if [ "$n" -ge "${STUB_READY_AFTER:-2}" ]; then echo "command 42 · ok"; echo "plan: done"; exit 0; fi
   echo "${STUB_RESULT_ERR:-command 42 · pending — result is not ready}" >&2; exit 1
 fi
+if [ "$STUB_MODE" = "literal" ]; then
+  echo "command 43 · ok"; echo "plan:"; echo "  Index Cond: (name = 'resume: pgai joe result 7'::text)"; exit 0
+fi
 if [ "$STUB_MODE" = "banner" ]; then
   echo "WARNING: new CLI version available"
   echo "started 42 · pending · budget 25s reached — resume:  pgai joe result 42"; exit 0
@@ -43,6 +46,8 @@ run() { # name expected_rc expected_output_substring; remaining env set by calle
 
 STUB_MODE=fast run "passes through immediate result" 0 "plan: fast"
 if [ "$(grep -c result "$tmp/calls")" -ne 0 ]; then echo "FAIL - fast path polled"; failures=$((failures + 1)); fi
+STUB_MODE=literal run "passes through a result whose body echoes resume literals" 0 "joe result 7"
+if [ "$(grep -c result "$tmp/calls")" -ne 0 ]; then echo "FAIL - literal path polled"; failures=$((failures + 1)); fi
 STUB_MODE=banner STUB_READY_AFTER=2 run "polls when a banner precedes the status line" 0 "plan: done"
 STUB_MODE=reworded STUB_READY_AFTER=2 run "polls on reworded line carrying the resume command" 0 "plan: done"
 STUB_MODE=noid run "fails loud when resume: has no id" 1 ""
