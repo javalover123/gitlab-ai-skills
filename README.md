@@ -222,7 +222,7 @@ Execute GLQL queries against GitLab projects and groups using glab CLI → [`SKI
 
 #### postgresai
 
-Run EXPLAIN / EXPLAIN ANALYZE, test indexes, and measure DB queries on GitLab Database Lab thin clones with the PostgresAI CLI (postgresai, pgai, Joe). Use when asked to explain/optimize a query, check a query plan at production scale, try an index, or prepare for a GitLab database review. Not for local GDK databases (use gitlab-psql). → [`SKILL.md`](skills/postgresai/SKILL.md)
+Run EXPLAIN / EXPLAIN ANALYZE, test indexes, and measure query cost on PostgresAI Database Lab thin clones with the PostgresAI CLI (postgresai, pgai, Joe). Use when asked to explain or optimize a query, check a plan at production scale, try an index on realistic data, or prepare a GitLab database review. → [`SKILL.md`](skills/postgresai/SKILL.md)
 <!-- SKILLS_END -->
 
 > Skills are grouped by category and auto-generated from skill frontmatter. Run `python3 scripts/update_skills_list.py` to regenerate after adding or modifying skills.
