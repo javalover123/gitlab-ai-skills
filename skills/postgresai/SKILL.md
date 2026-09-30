@@ -69,16 +69,12 @@ Interpreting plans and iterating: [references/plan-analysis.md](references/plan-
   `joe activity` and `joe terminate <pid>` for a runaway query.
 - **`hypo` (HypoPG) was not observed to persist between CLI calls**, so a later
   `plan` won't show it. Test indexes with `exec CREATE INDEX` +
-  `exec ANALYZE` + `explain`. Its args omit the word `hypo` (`hypo $P "desc"`).
+  `exec ANALYZE` + `explain`. Args omit the word `hypo` (`hypo $P "desc"`).
 - `explain` and `exec` actually execute, so bound queries (`LIMIT`, scoped by tenant/project
   id). `exec` returns no rows.
-  `joe.sh` is text-only; for JSON use the raw CLI with `--json` and poll
-  `postgresai joe result <id> --json` (exit 1 and `"status":"pending"` while running).
 - **Clone creation can fail** with an infra error (`failed to create a Database Lab clone`).
   Report it; don't retry in a loop. Switch target only if another database can answer the question.
-- Explicit clones (`postgresai dblab clone create|list|status|reset|destroy`) are rarely
-  needed. Never pass `--protected`; destroy yours if your role allows it (it needs Admin or
-  AllFeaturesUser), otherwise let auto-deletion handle it.
+- JSON output and explicit clones: [references/advanced.md](references/advanced.md).
 
 ## Safety rules
 
