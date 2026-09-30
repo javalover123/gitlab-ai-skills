@@ -8,6 +8,13 @@ trap 'echo "joe.sh: failed at line $LINENO" >&2' ERR
 wait_limit="${JOE_WAIT_SECONDS:-600}"
 max_sleep="${JOE_POLL_MAX_SECONDS:-15}"
 
+for arg in "$@"; do
+  if [ "$arg" = "--json" ]; then
+    echo "joe.sh is text-only: run 'postgresai joe ... --json' directly and poll 'postgresai joe result <id> --json' (exit 1, \"status\":\"pending\" while running)." >&2
+    exit 2
+  fi
+done
+
 output="$(postgresai joe "$@")"
 
 # Budget expired: "started <id> · pending · budget Ns reached — resume: pgai joe result <id>"
@@ -27,8 +34,9 @@ while [ "$waited" -lt "$wait_limit" ]; do
     printf '%s\n' "$output"
     exit 0
   fi
-  case "$output" in
-    *pending*) ;;
+  # Only the status header on the first line counts; the body may echo SQL errors.
+  case "$(printf '%s\n' "$output" | head -n 1)" in
+    "command $pending_id · pending"*) ;;
     *) printf '%s\n' "$output" >&2; exit 1 ;;
   esac
   delay=$((delay * 2 > max_sleep ? max_sleep : delay * 2))

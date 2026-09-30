@@ -66,11 +66,13 @@ Interpreting plans and iterating: [references/plan-analysis.md](references/plan-
   (`JOE_WAIT_SECONDS`, default 600; exit 1 on timeout).
 - **Don't `reset` to stop a slow command**: it kills pending work (`conn closed`). Use
   `joe activity` and `joe terminate <pid>` for a runaway query.
-- **`hypo` (HypoPG) does not persist across CLI calls** in 0.16.0 (each call is a new
-  session), so a later `plan` won't see it. Test indexes with `exec CREATE INDEX` +
+- **`hypo` (HypoPG) was not observed to persist between CLI calls**, so a later
+  `plan` won't show it. Test indexes with `exec CREATE INDEX` +
   `exec ANALYZE` + `explain`. Its args omit the word `hypo` (`hypo $P "desc"`).
 - `explain` and `exec` actually execute, so bound queries (`LIMIT`, scoped by tenant/project
-  id). `exec` returns no rows. `--json` gives parseable output.
+  id). `exec` returns no rows.
+  `joe.sh` is text-only; for JSON use the raw CLI with `--json` and poll
+  `postgresai joe result <id> --json` (exit 1 and `"status":"pending"` while running).
 - Explicit clones (`postgresai dblab clone create|list|status|reset|destroy`) are rarely
   needed. Never pass `--protected`; destroy yours if your role allows it (it needs Admin or
   AllFeaturesUser), otherwise let auto-deletion handle it.

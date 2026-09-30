@@ -16,5 +16,6 @@ Maps to GitLab's [database review guidelines](https://docs.gitlab.com/developmen
    database review docs above.
 5. **Write up in the MR**: for each query, the SQL, a shareable plan link, and timing/buffers.
    Get the link from the Database Lab console session history, or paste the plan into
-   explain.depesz.com or explain.dalibo.com (sanitized first). CLI command IDs are not console URLs. Replace real values with placeholders; no production data.
+   explain.depesz.com or explain.dalibo.com (sanitized first). CLI command IDs are not console URLs.
+   Replace real values with placeholders; no production data.
 6. Request the review with that evidence attached.
