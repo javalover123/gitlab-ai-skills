@@ -201,6 +201,14 @@
       "path": "skills/playwright-cli/SKILL.md"
     },
     {
+      "name": "postgresai",
+      "description": "Use when measuring, EXPLAINing or optimizing PostgreSQL queries against GitLab's Database Lab thin clones with the PostgresAI CLI (postgresai/pgai, Joe), or before requesting a GitLab database review.",
+      "category": "",
+      "license": "MIT",
+      "compatibility": "",
+      "path": "skills/postgresai/SKILL.md"
+    },
+    {
       "name": "prep-review",
       "description": "Check the status of, review, or respond to feedback on an existing GitLab Platform Readiness Enablement Process (PREP) assessment. Use when asked to review a PREP merge request, check if a PREP/readiness assessment is complete or ready for GA, evaluate PREP evidence quality as a reviewer, or address/respond to PREP reviewer feedback. Do not use for starting a brand-new PREP assessment; use prep-start for that instead.",
       "category": "Development Workflow",
