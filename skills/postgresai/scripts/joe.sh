@@ -22,13 +22,15 @@ output="$(postgresai joe "$@")" || exit $?
 # Assumes a budget-expired run prints, on any line, either
 #   started 505167 · pending · budget 25s reached — resume:  pgai joe result 505167
 # or at least the resume command `pgai|postgresai joe result <id>`. Either form yields the id.
-# A complete result never contains these, so it passes straight through.
-pending_id="$(printf '%s\n' "$output" | sed -nE \
+# Only lines before a completed result's `command <id> · ` header count: the body can echo
+# query literals, so a plan filtering on 'resume: pgai joe result 1' must pass straight through.
+status_lines="$(printf '%s\n' "$output" | sed -nE '/^command [0-9]+ · /q; p')"
+pending_id="$(printf '%s\n' "$status_lines" | sed -nE \
   -e 's/^started ([0-9]+) .*pending.*/\1/p' \
   -e 's/.*(pgai|postgresai) joe result ([0-9]+).*/\2/p' | head -n 1)"
 if [ -z "$pending_id" ]; then
   # Mentions `resume:` but no id could be extracted: a reworded line must not pass as success.
-  if printf '%s\n' "$output" | grep -q 'resume:'; then
+  if printf '%s\n' "$status_lines" | grep -q 'resume:'; then
     printf '%s\n' "$output" >&2
     echo "joe.sh: output looks budget-expired but no command id was found; resume by hand with 'postgresai joe result <id>'." >&2
     exit 1
