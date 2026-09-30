@@ -17,12 +17,10 @@ Run `joe explain` (ANALYZE, BUFFERS) for the real picture; `joe plan` only gives
 
 ## Iterating
 
-1. `joe hypo "create index on t (cols)"` to test whether the planner would use an index.
-2. If promising, `joe exec "CREATE INDEX ..."` and re-run `joe explain`. Plan shape
-   alone is not proof; confirm buffers drop.
-3. Try a couple of column orders, partial indexes (`WHERE`), or query rewrites.
-4. `joe reset` between unrelated experiments so earlier indexes don't distort results.
+1. `exec "CREATE INDEX ..."`, then `exec "ANALYZE <table>"` so statistics are fresh, then
+   `explain`. Plan shape alone is not proof; confirm buffers drop.
+2. Try a couple of column orders, partial indexes (`WHERE`), or query rewrites.
+3. `reset` between unrelated experiments so earlier indexes don't distort results.
 
-Hypothetical (`hypo`) results are estimates; confirm real indexes with `exec` + `explain`.
-Check each candidate index against GitLab's migration guidelines (concurrent creation,
-naming, necessity) before turning it into a migration.
+`hypo` (HypoPG) state was not observed to persist between CLI calls, so don't use it to
+rule an index out.

@@ -138,6 +138,10 @@ Inspect GitLab local ClickHouse tables, schemas, ingestion paths, and data patte
 
 Inspect GitLab GDK PostgreSQL test and development databases with gdk psql. Use for Postgres schema checks, table and index inspection, read-only SQL queries, migration verification, and investigating GitLab application data in local test or development databases. → [`SKILL.md`](skills/gitlab-psql/SKILL.md)
 
+#### postgresai
+
+Run EXPLAIN / EXPLAIN ANALYZE, test indexes, and measure query cost on PostgresAI Database Lab thin clones with the PostgresAI CLI (postgresai, pgai, Joe). Use when asked to explain or optimize a query, check a plan at production scale, try an index on realistic data, or prepare a GitLab database review. → [`SKILL.md`](skills/postgresai/SKILL.md)
+
 ### Testing
 
 #### playwright-cli
@@ -219,10 +223,6 @@ Enforces team writing style guidelines across all written output. Apply whenever
 #### glab-glql
 
 Execute GLQL queries against GitLab projects and groups using glab CLI → [`SKILL.md`](skills/glab-glql/SKILL.md)
-
-#### postgresai
-
-Run EXPLAIN / EXPLAIN ANALYZE, test indexes, and measure query cost on PostgresAI Database Lab thin clones with the PostgresAI CLI (postgresai, pgai, Joe). Use when asked to explain or optimize a query, check a plan at production scale, try an index on realistic data, or prepare a GitLab database review. → [`SKILL.md`](skills/postgresai/SKILL.md)
 <!-- SKILLS_END -->
 
 > Skills are grouped by category and auto-generated from skill frontmatter. Run `python3 scripts/update_skills_list.py` to regenerate after adding or modifying skills.
@@ -342,7 +342,7 @@ This repo ships as a [Claude Code plugin marketplace](https://code.claude.com/do
 | [`mr-label`](.claude-plugin/plugins/mr-label) | [`mr-label`](skills/mr-label/SKILL.md) | Apply the correct GitLab MR type/subtype labels and evidence-based milestone when creating or updating a merge request. Use when opening or updating an MR. | 0.1.0 |
 | [`mr-review`](.claude-plugin/plugins/mr-review) | [`mr-review`](skills/mr-review/SKILL.md) | Review a GitLab merge request — read diffs, analyze changes, present findings, and optionally post comments on the MR | 0.1.0 |
 | [`natural-writing-style`](.claude-plugin/plugins/natural-writing-style) | [`natural-writing-style`](skills/natural-writing-style/SKILL.md) | Enforces team writing style guidelines across all written output. Apply whenever writing, editing, or reviewing code comments, docstrings, documentation, README files, MR/PR descriptions, commit messages, issue descriptions, changelogs, technical specifications, API docs, inline comments, or any other text-based output. Also apply when reviewing existing text for style compliance. Triggers on all writing, documentation, review, and communication tasks. | 1.0.0 |
-| [`postgresai`](.claude-plugin/plugins/postgresai) | [`postgresai`](skills/postgresai/SKILL.md) | Use when measuring, EXPLAINing or optimizing PostgreSQL queries against GitLab's Database Lab thin clones with the PostgresAI CLI (postgresai/pgai, Joe), or before requesting a GitLab database review. | 1.0.0 |
+| [`postgresai`](.claude-plugin/plugins/postgresai) | [`postgresai`](skills/postgresai/SKILL.md) | Run EXPLAIN / EXPLAIN ANALYZE, test indexes, and measure query cost on PostgresAI Database Lab thin clones with the PostgresAI CLI (postgresai, pgai, Joe). Use when asked to explain or optimize a query, check a plan at production scale, try an index on realistic data, or prepare a GitLab database review. | 1.0.0 |
 | [`prep-review`](.claude-plugin/plugins/prep-review) | [`prep-review`](skills/prep-review/SKILL.md) | Check the status of, review, or respond to feedback on an existing GitLab Platform Readiness Enablement Process (PREP) assessment. Use when asked to review a PREP merge request, check if a PREP/readiness assessment is complete or ready for GA, evaluate PREP evidence quality as a reviewer, or address/respond to PREP reviewer feedback. Do not use for starting a brand-new PREP assessment; use prep-start for that instead. | 0.1.0 |
 | [`prep-start`](.claude-plugin/plugins/prep-start) | [`prep-start`](skills/prep-start/SKILL.md) | Start a GitLab Platform Readiness Enablement Process (PREP) assessment for a new feature, service, or infra change. Use when asked whether a feature needs PREP, to kick off/begin a PREP or readiness assessment, to create a PREP tracking issue, or to set up the first PREP merge request. Do not use for checking the status of, reviewing, or responding to feedback on an already-started PREP; use prep-review for that instead. | 0.1.0 |
 | [`pushify`](.claude-plugin/plugins/pushify) | [`pushify`](skills/pushify/SKILL.md) | Run pre-push lefthook checks and iteratively fix failures (up to 3 iterations, then escalate). Invoke when: (a) about to push and wanting hooks to pass cleanly, (b) `git push` has just failed on a pre-push hook and the failure needs to be driven to resolution, or (c) preparing a clean working tree without pushing — e.g. before opening a Draft MR for early review. | 1.1.0 |

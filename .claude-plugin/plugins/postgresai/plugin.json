@@ -1,6 +1,6 @@
 {
   "name": "postgresai",
-  "description": "Use when measuring, EXPLAINing or optimizing PostgreSQL queries against GitLab's Database Lab thin clones with the PostgresAI CLI (postgresai/pgai, Joe), or before requesting a GitLab database review.",
+  "description": "Run EXPLAIN / EXPLAIN ANALYZE, test indexes, and measure query cost on PostgresAI Database Lab thin clones with the PostgresAI CLI (postgresai, pgai, Joe). Use when asked to explain or optimize a query, check a plan at production scale, try an index on realistic data, or prepare a GitLab database review.",
   "version": "1.0.0",
   "author": {
     "name": "GitLab"
