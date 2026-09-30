@@ -49,4 +49,13 @@ if [ "$(grep -c result "$tmp/calls")" -ne 1 ]; then echo "FAIL - polled on pendi
 rc=0; msg="$(PATH="$tmp:$PATH" STUB_DIR="$tmp" "$joe" plan --json --project x "SELECT 1" 2>&1)" || rc=$?
 if [ "$rc" -eq 2 ] && [[ "$msg" == *"text-only"* ]]; then echo "ok - rejects --json with exit 2"
 else echo "FAIL - --json handling (rc=$rc msg=$msg)"; failures=$((failures + 1)); fi
+# A failing CLI reports the failure location exactly once.
+cat > "$tmp/postgresai" <<'STUB'
+#!/usr/bin/env bash
+echo "ERROR: failed to create a Database Lab clone" >&2
+exit 1
+STUB
+rc=0; err="$(PATH="$tmp:$PATH" "$joe" plan --project x "SELECT 1" 2>&1 >/dev/null)" || rc=$?
+if [ "$rc" -eq 1 ] && [ "$(grep -c 'failed at line' <<<"$err")" -eq 1 ] && [[ "$err" == *"failed to create a Database Lab clone"* ]]; then echo "ok - CLI failure reported once"
+else echo "FAIL - CLI failure handling (rc=$rc err=$err)"; failures=$((failures + 1)); fi
 exit "$failures"

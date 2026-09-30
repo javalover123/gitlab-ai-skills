@@ -3,7 +3,8 @@
 # expires first. Usage: joe.sh <joe-subcommand> [args...]
 # Env: JOE_WAIT_SECONDS (default 600) total wait; JOE_POLL_MAX_SECONDS (default 15) max sleep.
 set -Eeuo pipefail
-trap 'echo "joe.sh: failed at line $LINENO" >&2' ERR
+# Report once: errtrace makes the trap fire in command substitutions too, so only the main shell prints.
+trap 'if [ "$BASHPID" = "$$" ]; then echo "joe.sh: failed at line $LINENO" >&2; fi' ERR
 
 wait_limit="${JOE_WAIT_SECONDS:-600}"
 max_sleep="${JOE_POLL_MAX_SECONDS:-15}"

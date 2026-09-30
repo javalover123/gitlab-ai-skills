@@ -2,6 +2,9 @@
 
 - Targets: `gitlab-production-main` (main DB) and `gitlab-production-ci` (CI DB); `gitlab-production-registry` for container-registry queries. Other
   databases are listed by `postgresai projects`; skip `*-deprecated` entries.
+- `ci_*` tables (e.g. `ci_pipelines`) are not on `gitlab-production-main` (`describe` answers
+  `Did not find any relation`), so target the CI database for them. `relation does not exist`
+  or that message means the wrong target; check with `joe describe`.
 - Docs: [Database Lab](https://docs.gitlab.com/development/database/database_lab/#use-the-postgresai-cli).
 - Local GDK databases: use the `gitlab-psql` skill instead; this skill is for production-sized data.
 - Before requesting a database review: [db-review-flow.md](db-review-flow.md).

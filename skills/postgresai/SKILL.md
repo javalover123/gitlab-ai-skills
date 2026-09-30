@@ -38,7 +38,8 @@ postgresai projects        # JOE column shows which projects are ready
 
 Pass `--project <id|alias>` (or `--instance-id <id>`) to `joe`, or store a default once with
 `postgresai set-default-project <alias>`; `joe --help` wrongly says `--project` is always required.
-Ask the user which database to target if it's ambiguous.
+Prefer entries with JOE `ready` (skips stale `-deprecated`/`-new` duplicates). Ask the user
+which database to target if it's ambiguous.
 
 ## Core loop
 
@@ -73,6 +74,8 @@ Interpreting plans and iterating: [references/plan-analysis.md](references/plan-
   id). `exec` returns no rows.
   `joe.sh` is text-only; for JSON use the raw CLI with `--json` and poll
   `postgresai joe result <id> --json` (exit 1 and `"status":"pending"` while running).
+- **Clone creation can fail** with an infra error (`failed to create a Database Lab clone`).
+  Report it; don't retry in a loop. Switch target only if another database can answer the question.
 - Explicit clones (`postgresai dblab clone create|list|status|reset|destroy`) are rarely
   needed. Never pass `--protected`; destroy yours if your role allows it (it needs Admin or
   AllFeaturesUser), otherwise let auto-deletion handle it.
