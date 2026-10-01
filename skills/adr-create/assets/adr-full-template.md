@@ -16,7 +16,7 @@ informed: []
 
 - [Driver 1]
 - [Driver 2]
-- [Driver 4]
+- [Driver 3]
 
 ## Considered Options
 

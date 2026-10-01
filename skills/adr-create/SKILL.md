@@ -106,7 +106,7 @@ code, get reviewed in MRs, and have git history). The full starter is in
 
 ## Status lifecycle
 
-`proposed → accepted → [deprecated | superseded by ADR-NNNN]`. These are the
+`proposed → accepted → [deprecated | superseded by ADR-NNNN]`; or `proposed → rejected`. These are the
 **only** valid `status:` values. Full detail:
 [references/status-lifecycle.md](references/status-lifecycle.md).
 
@@ -114,6 +114,7 @@ code, get reviewed in MRs, and have git history). The full starter is in
 |---|---|---|
 | `proposed` | Under discussion | First drafted, before agreement |
 | `accepted` | In effect (immutable) | Team agrees via MR merge/review |
+| `rejected` | Considered but not adopted | Decision explicitly declined |
 | `deprecated` | No longer relevant | Feature removed / constraint gone |
 | `superseded` | Replaced by a newer ADR | New ADR written with a different decision |
 
