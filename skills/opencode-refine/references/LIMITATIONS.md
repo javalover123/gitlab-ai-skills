@@ -36,12 +36,11 @@ an `ask` rule fails unless you pass `--auto`.
 
 ## Config File Locations
 
-`opencode` merges config from lowest to highest precedence:
-
-1. `~/.config/opencode/opencode.json` or `opencode.jsonc`
-2. `opencode.json(c)` in the working directory and its parent directories
-3. `.opencode/opencode.json(c)` in those same directories
-4. Inline config from `OPENCODE_CONFIG_CONTENT`
+`opencode` merges config from several sources. Settings in a config closer to
+the working directory override matching settings from the global
+`~/.config/opencode/opencode.json`. See the
+[OpenCode config docs](https://opencode.ai/v2/docs/config/) for the full
+precedence rules, including environment variables and managed settings.
 
 List the sources that apply to a directory:
 
