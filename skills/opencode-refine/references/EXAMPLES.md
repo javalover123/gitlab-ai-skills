@@ -83,7 +83,7 @@ to inspect the resolved permissions.
 Use `--continue` to build context across multiple runs:
 
 ```bash
-opencode run --standalone "I am working in directory $TMPDIR/myproject. Run git init there."
+opencode run --standalone "I am working in directory ${TMPDIR:-/tmp}/myproject. Run git init there."
 opencode run --standalone --continue 'now create a README.md and commit it'
 opencode run --standalone --continue 'run git log and show me what happened'
 ```
