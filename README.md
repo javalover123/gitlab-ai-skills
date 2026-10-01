@@ -74,7 +74,7 @@ Watch GitLab MR pipelines and react to state changes → [`SKILL.md`](skills/git
 
 #### gitlab-rails-fix
 
-End-to-end bug-fix workflow for a reported GitLab issue or work item: fetches it, researches the root cause, reproduces it with a failing spec, confirms it live, applies the minimal fix, verifies downstream, commits, and opens an MR. Use whenever asked to fix a reported GitLab bug end-to-end, from issue to open MR, in a gitlab-org/gitlab (or similarly structured Rails) checkout. → [`SKILL.md`](skills/gitlab-rails-fix/SKILL.md)
+End-to-end bug-fix workflow for a reported GitLab issue or work item: fetches it, researches the root cause, reproduces it with a failing spec, confirms it live, applies the minimal fix, verifies downstream, commits, and opens an MR. Use when asked to fix a reported GitLab bug end-to-end, from issue to open MR, in a gitlab-org/gitlab (or similarly structured Rails) checkout. → [`SKILL.md`](skills/gitlab-rails-fix/SKILL.md)
 
 #### gitlab-stacked-mrs
 

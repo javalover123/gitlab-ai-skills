@@ -1,6 +1,6 @@
 ---
 name: gitlab-rails-fix
-description: "End-to-end bug-fix workflow for a reported GitLab issue or work item: fetches it, researches the root cause, reproduces it with a failing spec, confirms it live, applies the minimal fix, verifies downstream, commits, and opens an MR. Use whenever asked to fix a reported GitLab bug end-to-end, from issue to open MR, in a gitlab-org/gitlab (or similarly structured Rails) checkout."
+description: "End-to-end bug-fix workflow for a reported GitLab issue or work item: fetches it, researches the root cause, reproduces it with a failing spec, confirms it live, applies the minimal fix, verifies downstream, commits, and opens an MR. Use when asked to fix a reported GitLab bug end-to-end, from issue to open MR, in a gitlab-org/gitlab (or similarly structured Rails) checkout."
 version: 1.0.0
 category: Development Workflow
 license: MIT
@@ -11,7 +11,7 @@ metadata:
   workflow: gitlab
 ---
 
-# GitLab Fix
+# GitLab Rails Fix
 
 fetch → research → reproduce → fix → verify → commit → MR, for one GitLab
 issue or work-item URL. Append `--e2e` to also drive a live before/after
