@@ -22,10 +22,13 @@ run-in-tmux-pane 'claude -p "Hello, how are you?"'
 
 - Use `$TMPDIR` for helper scripts and temporary files.
 - Do not hardcode `/tmp` or guess a machine-specific temp directory.
+- Expand temporary paths in the calling shell. The pane's login shell can set a
+  different `$TMPDIR` from the agent's shell.
 - Clean up temporary scripts after the command completes.
 
 ```bash
-run-in-tmux-pane 'python3 "$TMPDIR/my-script.py"'
+# Outer double quotes: the calling shell expands $TMPDIR before the pane starts
+run-in-tmux-pane "python3 '$TMPDIR/my-script.py'"
 rm -f "$TMPDIR/my-script.py"
 ```
 

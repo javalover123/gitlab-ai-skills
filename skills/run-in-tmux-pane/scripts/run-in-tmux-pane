@@ -38,11 +38,18 @@ _timeout=${TMUX_PANE_TIMEOUT:-300}
 
 tmpfile=$(mktemp)
 pane_id=""
+_sentinel="SKILL_EXIT_${RANDOM}_${RANDOM}"
 # Called indirectly by the EXIT trap below.
 # shellcheck disable=SC2329
 cleanup() {
   # Kill the pane if the script is interrupted/terminated so a long-running
   # command (e.g. a git push) cannot keep running detached in the background.
+  # If a signal interrupted `tmux split-window` before it returned the pane ID,
+  # find the pane by the sentinel embedded in its start command.
+  if [[ -z "${pane_id}" ]]; then
+    pane_id=$(tmux list-panes -a -F '#{pane_id} #{pane_start_command}' 2>/dev/null |
+      awk -v s="${_sentinel}" 'index($0, s) { print $1; exit }') || true
+  fi
   [[ -n "${pane_id}" ]] && tmux kill-pane -t "${pane_id}" 2>/dev/null || true
   rm -f "$tmpfile" "${tmpfile}.out"
 }
@@ -50,8 +57,6 @@ trap cleanup EXIT
 # Exit on signals so the EXIT trap cleans up instead of resuming the poll loop.
 trap 'exit 130' INT
 trap 'exit 143' TERM
-
-_sentinel="SKILL_EXIT_${RANDOM}_${RANDOM}"
 
 if [[ $# -eq 1 ]]; then
   cmd="$1"
