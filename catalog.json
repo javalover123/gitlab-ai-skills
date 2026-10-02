@@ -169,6 +169,14 @@
       "path": "skills/mr-guided-review/SKILL.md"
     },
     {
+      "name": "mr-label",
+      "description": "Apply the correct GitLab MR type/subtype labels and evidence-based milestone when creating or updating a merge request. Use when opening or updating an MR.",
+      "category": "Development Workflow",
+      "license": "MIT",
+      "compatibility": "",
+      "path": "skills/mr-label/SKILL.md"
+    },
+    {
       "name": "mr-review",
       "description": "Review a GitLab merge request - read diffs, analyze changes, present findings, and optionally post comments on the MR",
       "category": "Development Workflow",
@@ -199,6 +207,14 @@
       "license": "MIT",
       "compatibility": "opencode",
       "path": "skills/playwright-cli/SKILL.md"
+    },
+    {
+      "name": "postgresai",
+      "description": "Run EXPLAIN / EXPLAIN ANALYZE, test indexes, and measure query cost on PostgresAI Database Lab thin clones with the PostgresAI CLI (postgresai, pgai, Joe). Use when asked to explain or optimize a query, check a plan at production scale, try an index on realistic data, or prepare a GitLab database review.",
+      "category": "Database",
+      "license": "MIT",
+      "compatibility": "",
+      "path": "skills/postgresai/SKILL.md"
     },
     {
       "name": "prep-review",

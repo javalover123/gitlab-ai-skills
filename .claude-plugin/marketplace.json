@@ -92,12 +92,20 @@
       "source": "./.claude-plugin/plugins/mr-guided-review"
     },
     {
+      "name": "mr-label",
+      "source": "./.claude-plugin/plugins/mr-label"
+    },
+    {
       "name": "mr-review",
       "source": "./.claude-plugin/plugins/mr-review"
     },
     {
       "name": "natural-writing-style",
       "source": "./.claude-plugin/plugins/natural-writing-style"
+    },
+    {
+      "name": "postgresai",
+      "source": "./.claude-plugin/plugins/postgresai"
     },
     {
       "name": "prep-review",
