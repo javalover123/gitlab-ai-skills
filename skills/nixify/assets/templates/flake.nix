@@ -46,6 +46,12 @@
           inherit system;
           overlays = [
             inputs.rust-overlay.overlays.default
+            # nix2container ships no overlay of its own; expose its package
+            # at the top level so pkgs/app-image/package.nix's callPackage
+            # can resolve the `nix2container` argument from pkgs.
+            (_final: _prev: {
+              nix2container = inputs.nix2container.packages.${system}.nix2container;
+            })
             self.overlays.default
           ];
         };
@@ -94,7 +100,10 @@
         in
         (self.packages.${system} or { })
         // {
-          # integration = pkgs.callPackage ./checks/integration.nix { inherit (self.packages.${system}) myapp; };
+          # integration = pkgs.callPackage ./checks/integration.nix {
+          #   inherit (self.packages.${system}) myapp;
+          #   inherit (pkgs.testers) runNixOSTest; # not a top-level pkgs attribute
+          # };
         }
       );
 

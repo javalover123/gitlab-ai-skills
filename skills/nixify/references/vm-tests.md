@@ -34,11 +34,17 @@ runNixOSTest {
 }
 ```
 
-Wire it in:
+Wire it in. `runNixOSTest` lives at `pkgs.testers.runNixOSTest`, not as a
+top-level `pkgs` attribute, so `callPackage`'s auto-wiring can't resolve it
+from the function argument name alone — pass it explicitly, the same way as
+`myapp`:
 
 ```nix
 checks.${system}.integration =
-  pkgs.callPackage ./checks/myapp-integration.nix { inherit (self.packages.${system}) myapp; };
+  pkgs.callPackage ./checks/myapp-integration.nix {
+    inherit (self.packages.${system}) myapp;
+    inherit (pkgs.testers) runNixOSTest;
+  };
 ```
 
 ### Test-driver Python API (most-used)
