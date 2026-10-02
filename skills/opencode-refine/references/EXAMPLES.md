@@ -10,7 +10,7 @@ The prompt should be specific enough to trigger the exact behavior you want to
 verify. Think of it as a test case.
 
 ```bash
-# Bad: too vague, so the agent may ask a clarifying question (which hangs)
+# Bad: too vague, so the agent may ask a clarifying question that goes unanswered
 opencode run --standalone 'do something with files'
 
 # Good: exercises the specific behavior and is self-contained
@@ -97,14 +97,14 @@ opencode run --standalone --continue 'run git log and show me what happened'
 opencode run --standalone --format json 'what is 2+2?' |
   jq -r 'select(.type == "text") | .part.text'
 
-# Get token usage from a run
-opencode run --standalone --format json 'run date' |
-  jq -c 'select(.type == "step_finish") | .part.tokens'
-
 # Capture the session ID for continuation
 SESSION_ID=$(opencode run --standalone --format json 'set up scenario X' |
   jq -r 'select(.sessionID) | .sessionID' | head -n 1)
 opencode run --standalone --session "$SESSION_ID" 'now test variation Y'
+
+# Get token usage for the session. The stream often omits `step_finish` for the
+# final step, so read the totals from the stored session instead.
+opencode session export "$SESSION_ID" | jq -c '.info.tokens'
 ```
 
 ## Attach Files

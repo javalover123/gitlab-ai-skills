@@ -2,23 +2,24 @@
 
 ## `question` Tool in Non-Interactive Runs
 
-If the agent calls the `question` tool during `opencode run`, the process can
-hang waiting for input instead of auto-rejecting.
+On OpenCode 2, `opencode run` cancels any question the agent asks. The `question`
+tool call fails with an error saying the run cannot ask the user, and the agent
+continues without an answer. The run does not hang, but the agent may guess or
+stop short of the behavior you meant to test.
 
-**Symptom:** `opencode run` takes unusually long and never exits.
+**Symptom:** a `question` tool call with an error status in `--format json`
+output, or a response that asks you something.
 
-**Workaround:** Write prompts that don't require clarification. If you must
-handle this, wrap calls with a timeout:
+**Workaround:** Write prompts that don't require clarification.
+
+On OpenCode 1.x, the process can hang waiting for input instead. Wrap calls with
+a timeout:
 
 ```bash
-timeout 30 opencode run --standalone 'your prompt' || echo "Timed out: agent may have tried to ask a question"
+timeout 30 opencode run 'your prompt' || echo "Timed out: agent may have tried to ask a question"
 ```
 
-On macOS, install coreutils (`brew install coreutils`) and use `gtimeout`:
-
-```bash
-gtimeout 30 opencode run --standalone 'your prompt' || echo "Timed out: agent may have tried to ask a question"
-```
+On macOS, install coreutils (`brew install coreutils`) and use `gtimeout`.
 
 ## Permissions Depend on `opencode.json`
 
