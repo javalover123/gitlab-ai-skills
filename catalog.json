@@ -234,7 +234,7 @@
     },
     {
       "name": "run-in-tmux-pane",
-      "description": "Run commands in a temporary tmux pane with full interactive zsh environment (login shell, shims, PATH, aliases, TTY).",
+      "description": "Use for commands that require an interactive shell, a TTY, or shell-only functions. Run them in a temporary tmux pane with the full zsh environment. Use the shell tool directly for ordinary non-interactive commands.",
       "category": "Shell & Environment",
       "license": "MIT",
       "compatibility": "",
