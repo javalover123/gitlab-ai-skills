@@ -13,7 +13,7 @@ The linker is often the bottleneck. Switching from GNU `ld` to a modern parallel
 | GNU `ld` (BFD) | 1× (baseline) | Linux | Single-threaded, slowest |
 | `gold` | ~2–3× | Linux | Google's parallel linker |
 | `lld` (LLVM) | ~10× | Linux/Win/macOS | Being rolled out as default on x86_64-linux |
-| `mold` | ~15–20× | Linux | Fastest available |
+| `mold` | ~15–20× on Linux, smaller on macOS | Linux/macOS | Fastest on Linux; works on macOS via Homebrew but the system linker is already fast there |
 
 **Config in `.cargo/config.toml`:**
 ```toml

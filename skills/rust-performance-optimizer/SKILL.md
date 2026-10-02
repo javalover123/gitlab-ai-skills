@@ -97,7 +97,7 @@ Route to the relevant reference based on your diagnosis:
 |---------|-----------|---------------|
 | Slow build | [build-optimization.md](references/build-optimization.md) | Linker + profiles |
 | High runtime memory | [runtime-memory.md](references/runtime-memory.md) | Allocator + Cow + arenas |
-| Binary size | [profiling-tools.md](references/profiling-tools.md) | LTO + strip + cargo-bloat |
+| Binary size | [build-optimization.md](references/build-optimization.md) for LTO, [profiling-tools.md](references/profiling-tools.md) for strip + cargo-bloat | LTO + strip + cargo-bloat |
 | Slow tests | [test-optimization.md](references/test-optimization.md) | nextest + structure |
 | Too many deps | [dependency-optimization.md](references/dependency-optimization.md) | Feature flags + machete |
 | Slow CI | [environment-config.md](references/environment-config.md) | Cache + nextest + no incremental |
