@@ -8,12 +8,20 @@
   },
   "plugins": [
     {
+      "name": "adr-review",
+      "source": "./.claude-plugin/plugins/adr-review"
+    },
+    {
       "name": "authoring-skills",
       "source": "./.claude-plugin/plugins/authoring-skills"
     },
     {
       "name": "bug-burndown",
       "source": "./.claude-plugin/plugins/bug-burndown"
+    },
+    {
+      "name": "bugfix",
+      "source": "./.claude-plugin/plugins/bugfix"
     },
     {
       "name": "commit-messages",
@@ -64,6 +72,14 @@
       "source": "./.claude-plugin/plugins/human-review"
     },
     {
+      "name": "mcp-creator",
+      "source": "./.claude-plugin/plugins/mcp-creator"
+    },
+    {
+      "name": "mcp-review",
+      "source": "./.claude-plugin/plugins/mcp-review"
+    },
+    {
       "name": "mr-adversarial-review",
       "source": "./.claude-plugin/plugins/mr-adversarial-review"
     },
@@ -72,8 +88,20 @@
       "source": "./.claude-plugin/plugins/mr-guided-review"
     },
     {
+      "name": "mr-label",
+      "source": "./.claude-plugin/plugins/mr-label"
+    },
+    {
       "name": "mr-review",
       "source": "./.claude-plugin/plugins/mr-review"
+    },
+    {
+      "name": "natural-writing-style",
+      "source": "./.claude-plugin/plugins/natural-writing-style"
+    },
+    {
+      "name": "postgresai",
+      "source": "./.claude-plugin/plugins/postgresai"
     },
     {
       "name": "prep-review",
@@ -90,6 +118,10 @@
     {
       "name": "run-in-tmux-pane",
       "source": "./.claude-plugin/plugins/run-in-tmux-pane"
+    },
+    {
+      "name": "rust-compile-memory",
+      "source": "./.claude-plugin/plugins/rust-compile-memory"
     },
     {
       "name": "rust-performance-optimizer",

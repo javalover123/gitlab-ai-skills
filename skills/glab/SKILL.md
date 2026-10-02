@@ -1,7 +1,7 @@
 ---
 name: glab
 description: GitLab workflow automation using the glab CLI. Use when the user asks to create, update, close, label, or comment on a GitLab issue, merge request, work item, or epic; to post a note, review comment, or discussion reply; to call the GitLab REST or GraphQL API through "glab api"; to inspect or retry pipelines and jobs; or to configure glab auth against gitlab.com, a self-managed instance, or a local GDK. Read it before any glab write operation, because several field flags fail silently - they exit 0 while posting the wrong content.
-version: 1.12.3
+version: 1.13.1
 category: Development Workflow
 license: MIT
 metadata:
@@ -228,6 +228,23 @@ Full flag list (Claude Code injects this automatically; other agents should run 
 **Note:** `glab mr list` lists open MRs by default and has no `--state` or `--status` flag —
 use `--all`, `--merged`, or `--closed` to change the state filter.
 
+## CI/CD Pipelines
+
+`glab ci status` selects the newest pipeline for a branch (`-b`, default: the
+current branch), but can fall back to an MR pipeline. `glab ci get` addresses one
+pipeline (`-p <id>`) or an MR head pipeline (`--merge-request <iid>`). Use the
+latter when reporting on an MR.
+
+- **Set `GLAB_NO_PROMPT=1`.** When stdin, stdout and stderr are all TTYs,
+  `glab ci status` can end in a `Choose an action` menu with a `Retry` action.
+  `--wait` also turns it off.
+- **`-F json` and `glab ci get` exit 0 on a failed pipeline.** Read
+  `.pipeline.status` (`ci status`) or `.status` (`ci get`). Only `ci status` text
+  and `--compact` exit 1 on failure, and exit 1 can also mean no pipeline found.
+
+Branch fallback, exit codes, JSON shapes, job filters and live flag lists:
+**[references/ci-pipelines.md](references/ci-pipelines.md)**
+
 ## Search
 
 For full search examples (instance / group / project, scope table, pagination): **[references/search.md](references/search.md)**
@@ -262,7 +279,7 @@ The sections above cover the common workflows. These are the non-obvious traps a
 API quirks that are easy to get wrong and not discoverable from `glab <cmd> --help`:
 
 1. **Read context first** — `glab issue view` / `glab mr view` before implementing; check `.gitlab/issue_templates/` and `.gitlab/merge_request_templates/` for templates
-2. **`--jq` works on subcommands, not on `glab api`** — `glab issue list`/`glab mr list`/`glab ci list` accept a global `--jq` flag (filters JSON output); `glab api` does **not** — pipe its output through `| jq '...'` instead
+2. **`--jq` works on subcommands, not on `glab api`** — `glab issue list`/`glab mr list`/`glab ci list` accept a global `--jq` flag, but only together with `-F json` (without it: `Using --jq requires --output=json (got "text").`); `glab api` has no `--jq` at all — pipe its output through `| jq '...'` instead
 3. **No `--body` flag** — glab uses `--description`, not `--body` (which is a `gh` flag); they are not interchangeable
 4. **Work items use the issues API** — `/work_items/<iid>` URLs → `projects/.../issues/<iid>`; the `/work_items/` REST endpoint is a 404
 5. **Epic comments need GraphQL** — REST `/notes` GET+POST both → 404 (still true on GitLab 19.1); pass `body`/`noteableId` as GraphQL variables, never string-interpolate. See [references/epic-comments.md](references/epic-comments.md)
@@ -279,6 +296,7 @@ API quirks that are easy to get wrong and not discoverable from `glab <cmd> --he
 16. **Second same-family remote misroutes `mr create`** — with a `security` mirror alongside `origin`, non-interactive `mr create` (no TTY) silently picks the fork as the head. Fix once per checkout: `git config remote.origin.glab-resolved-head head`; per-command fallback: `-H <owner/repo>` (`-R` does not fix it). See the "Creating Merge Requests" section.
 17. **`glab api` note body:** file → `-F "body=@file"`; prose with backticks/`$` → write it literally to a file first. Inline text → `-f`; literal `@here see above` → `-f "body=@here see above"` (never a file). Nested JSON → `--input file -H "Content-Type: application/json"`. Repair: `--method PUT -F "body=@file"`, not `DELETE`. Failures are silent (exit 0, HTTP 201); verify what landed with `| jq '.body | length'`. Details: [references/mr-review.md](references/mr-review.md#5-glab-api-field-flags--f-vs--f).
 18. **Always use full URLs in note/comment bodies** (e.g. `https://gitlab.com/org/project/-/issues/123`) instead of short references (`#123`). This applies to issues, merge requests, epics, and so on. Short refs resolve against project context and render as literal text on group-level items (epics, group work items); full URLs expand everywhere.
+19. **`glab ci status` can prompt and hide a red pipeline** — set `GLAB_NO_PROMPT=1` to disable the menu when all three streams are TTYs; `-F json` and `glab ci get` exit 0 even for a failed pipeline. See [references/ci-pipelines.md](references/ci-pipelines.md)
 
 ## Contributing Improvements
 

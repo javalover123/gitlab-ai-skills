@@ -1,6 +1,14 @@
 {
   "skills": [
     {
+      "name": "adr-review",
+      "description": "Reviews Architecture Decision Records for quality, completeness, and consistency. Identifies undocumented decisions by analyzing code, specs, and threat models. Backfills missing ADRs for past decisions, validates cross-references, and checks the decision log for staleness or contradictions. Use when auditing ADRs, finding missing decisions, reviewing ADR quality, checking for undocumented architecture choices, or when spec-review or threat-model-review flags missing ADRs. Triggers: review ADR, audit decisions, missing ADRs, ADR quality, backfill ADRs, decision log, undocumented decisions.",
+      "category": "Documentation",
+      "license": "MIT",
+      "compatibility": "opencode",
+      "path": "skills/adr-review/SKILL.md"
+    },
+    {
       "name": "authoring-skills",
       "description": "Author a new agent skill or improve an existing one - write the SKILL.md frontmatter and description, structure the body, and fix skills that under- or over-trigger. Use when asked to create/write a skill, make a SKILL.md, improve/refactor a skill, or fix a skill's description.",
       "category": "Meta / Authoring",
@@ -15,6 +23,14 @@
       "license": "MIT",
       "compatibility": "opencode",
       "path": "skills/bug-burndown/SKILL.md"
+    },
+    {
+      "name": "bugfix",
+      "description": "Drives a rigorous, evidence-gated bug fix or regression investigation from first report to Definition-of-Done. When invoked without a specific target, proactively scans logs, code, docs, git history, and issue trackers to discover bug candidates autonomously. User-given direction (bug report, issue ref, log path, class of bugs) takes priority. Enforces reproducer-first testing, root-cause fixes, a three-way diff between desired/documented/implemented behaviour, mandatory delegation to companion doc skills, and a hostile adversarial review before any done claim. Use when fixing bugs, investigating regressions, chasing spec/ADR/threat-model drift, or running a routine bug-hunting pass, especially for changes touching auth, crypto, supply chain, concurrency, persistence, or any trust boundary.",
+      "category": "Development Workflow",
+      "license": "MIT",
+      "compatibility": "opencode",
+      "path": "skills/bugfix/SKILL.md"
     },
     {
       "name": "commit-messages",
@@ -113,6 +129,22 @@
       "path": "skills/human-review/SKILL.md"
     },
     {
+      "name": "mcp-creator",
+      "description": "Guides building production-quality MCP servers in Rust using the rmcp crate. Covers protocol design, tool implementation, testing, security hardening, and AI-tool integration. Use when building an MCP server, creating MCP tools, implementing MCP in Rust, adding tools/resources/prompts to an MCP server, or starting a new MCP project.",
+      "category": "Development Workflow",
+      "license": "MIT",
+      "compatibility": "opencode",
+      "path": "skills/mcp-creator/SKILL.md"
+    },
+    {
+      "name": "mcp-review",
+      "description": "Reviews and improves existing MCP server implementations for protocol compliance, tool quality, Rust best practices, security, and testing coverage. Lists available MCP servers for selection when none specified. Use when reviewing an MCP server, auditing MCP tool quality, checking protocol compliance, improving MCP server code, or when the user mentions MCP review, MCP audit, or MCP server quality.",
+      "category": "Development Workflow",
+      "license": "MIT",
+      "compatibility": "opencode",
+      "path": "skills/mcp-review/SKILL.md"
+    },
+    {
       "name": "mr-adversarial-review",
       "description": "Use when running a critical, skeptical pass over a GitLab MR \u2014 either as the author before requesting human review, or as a reviewer wanting a structured first cut \u2014 produces a severity-bucketed findings report (High / Medium / Low / Done well) and posts it as a single comment on the MR.",
       "category": "Development Workflow",
@@ -129,12 +161,28 @@
       "path": "skills/mr-guided-review/SKILL.md"
     },
     {
+      "name": "mr-label",
+      "description": "Apply the correct GitLab MR type/subtype labels and evidence-based milestone when creating or updating a merge request. Use when opening or updating an MR.",
+      "category": "Development Workflow",
+      "license": "MIT",
+      "compatibility": "",
+      "path": "skills/mr-label/SKILL.md"
+    },
+    {
       "name": "mr-review",
       "description": "Review a GitLab merge request - read diffs, analyze changes, present findings, and optionally post comments on the MR",
       "category": "Development Workflow",
       "license": "MIT",
       "compatibility": "",
       "path": "skills/mr-review/SKILL.md"
+    },
+    {
+      "name": "natural-writing-style",
+      "description": "Enforces team writing style guidelines across all written output. Apply whenever writing, editing, or reviewing code comments, docstrings, documentation, README files, MR/PR descriptions, commit messages, issue descriptions, changelogs, technical specifications, API docs, inline comments, or any other text-based output. Also apply when reviewing existing text for style compliance. Triggers on all writing, documentation, review, and communication tasks.",
+      "category": "Meta / Authoring",
+      "license": "MIT",
+      "compatibility": "opencode",
+      "path": "skills/natural-writing-style/SKILL.md"
     },
     {
       "name": "opencode-refine",
@@ -151,6 +199,14 @@
       "license": "MIT",
       "compatibility": "opencode",
       "path": "skills/playwright-cli/SKILL.md"
+    },
+    {
+      "name": "postgresai",
+      "description": "Run EXPLAIN / EXPLAIN ANALYZE, test indexes, and measure query cost on PostgresAI Database Lab thin clones with the PostgresAI CLI (postgresai, pgai, Joe). Use when asked to explain or optimize a query, check a plan at production scale, try an index on realistic data, or prepare a GitLab database review.",
+      "category": "Database",
+      "license": "MIT",
+      "compatibility": "",
+      "path": "skills/postgresai/SKILL.md"
     },
     {
       "name": "prep-review",
@@ -183,6 +239,14 @@
       "license": "MIT",
       "compatibility": "",
       "path": "skills/run-in-tmux-pane/SKILL.md"
+    },
+    {
+      "name": "rust-compile-memory",
+      "description": "Profiles Rust compilation memory usage with rustc nightly and measureme tools, identifies high-memory patterns (monomorphization, large types, LLVM bottlenecks), and refactors code to reduce compilation RSS. Use when Rust builds trigger the OOM killer or consume excessive memory. Triggers: compilation memory, rustc OOM, reduce compile memory, profile compilation.",
+      "category": "Development Workflow",
+      "license": "MIT",
+      "compatibility": "opencode",
+      "path": "skills/rust-compile-memory/SKILL.md"
     },
     {
       "name": "rust-performance-optimizer",
@@ -233,12 +297,28 @@
       "path": "skills/stack-changes/SKILL.md"
     },
     {
+      "name": "story-creator",
+      "description": "Creates formal E2E user stories with BDD acceptance criteria, EARS constraints, and INVEST compliance through interactive user prompting. Use when creating new feature stories, documenting agent behaviors, writing acceptance criteria for multi-agent systems, or starting a new feature that needs behavioral verification coverage. Triggers: write user story, create story, BDD story, acceptance criteria, feature story, E2E behavior, agent story, INVEST story, Gherkin story.",
+      "category": "Documentation",
+      "license": "MIT",
+      "compatibility": "opencode",
+      "path": "skills/story-creator/SKILL.md"
+    },
+    {
       "name": "story-reviewer",
       "description": "Reviews E2E user stories for INVEST compliance, Gherkin correctness, EARS constraint coverage, and test derivation quality. Produces a structured verdict with per-dimension scores, specific issues, and actionable feedback. Use when validating a story before sprint planning, reviewing stories created by story-creator or an AI generator, or auditing story quality in a PR. Triggers: review story, validate story, story quality, BDD review, acceptance criteria review, story audit, story feedback, INVEST check.",
       "category": "Documentation",
       "license": "MIT",
       "compatibility": "opencode",
       "path": "skills/story-reviewer/SKILL.md"
+    },
+    {
+      "name": "threat-model-review",
+      "description": "Reviews threat models for completeness, accuracy, and alignment with current implementation. Identifies drift between threat model and code, uncovered attack surfaces, missing STRIDE categories, incorrect risk scores, and unlinked mitigations. Creates threat models when none exist. Use when auditing a threat model, checking security coverage, finding unmodeled threats, validating risk scores, or when implementation has changed since the threat model was written. Triggers: review threat model, audit threats, threat model drift, security coverage, unmodeled threats, validate risk, threat model gaps.",
+      "category": "Documentation",
+      "license": "MIT",
+      "compatibility": "opencode",
+      "path": "skills/threat-model-review/SKILL.md"
     },
     {
       "name": "video-takeaways",
