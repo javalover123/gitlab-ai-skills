@@ -1,6 +1,6 @@
 # run-in-tmux-pane
 
-An [opencode](https://opencode.ai) skill that runs commands in a temporary tmux
+An agent skill that runs commands in a temporary tmux
 pane with the user's full interactive zsh environment, captures the output, and
 returns it to the agent.
 
@@ -35,6 +35,8 @@ transparently.
 4. Polls until the pane exits, then returns the output with ANSI escapes stripped
 5. Truncates successful output to 20 lines; returns full output on failure
 6. Exits with the command's original exit code
+7. Kills the pane if the helper times out or receives `SIGINT` or `SIGTERM`, so
+   the command does not keep running in the background
 
 ## Requirements
 
@@ -61,8 +63,8 @@ run-in-tmux-pane mise doctor
 run-in-tmux-pane 'claude -p "Explain this error"'
 ```
 
-See [SKILL.md](SKILL.md) for the full quoting rules and agent-facing
-documentation.
+See [SKILL.md](SKILL.md) for agent-facing documentation, and
+[the usage reference](references/USAGE.md) for the full quoting rules.
 
 ## Configuration
 
@@ -70,7 +72,7 @@ documentation.
 |---|---|---|
 | `TMUX_PANE_LINGER` | `3` | Seconds to keep the tmux pane visible after the command finishes. Set to `0` to close immediately. |
 | `TMUX_PANE_TAIL_LINES` | `20` | Number of trailing lines to keep when truncating successful output. |
-| `TMUX_PANE_TIMEOUT` | `120` | Maximum seconds to wait for the command to finish before killing the pane (exits with code 124). |
+| `TMUX_PANE_TIMEOUT` | `300` | Maximum seconds to wait for the command to finish before killing the pane (exits with code 124). Versions before 2.0.0 read this value as milliseconds. |
 
 ## Security considerations
 
@@ -85,8 +87,8 @@ run. Grant access only to specific commands rather than a blanket allow:
 ```json
 {
   "bash": {
-    "run-in-tmux-pane gpsup": "allow",
-    "run-in-tmux-pane fgdku": "allow",
+    "run-in-tmux-pane mise doctor": "allow",
+    "run-in-tmux-pane gdk update": "allow",
     "run-in-tmux-pane *": "deny"
   }
 }
