@@ -6,31 +6,30 @@ into one; the ones that try to do too much straddle several and confuse the
 agent.* Use this list to (a) sanity-check that your idea is one job, and (b)
 spot gaps in the skill library.
 
-Where possible, each category points at a real skill **in this repository** (in
-backticks, e.g. `glab`) so you can open it and copy the shape. Names from
-Anthropic's post that don't exist here are clearly labelled "Post example" — treat
-those as illustrations, not files to open.
+Each category gives an example shape. "Post example" names come from Anthropic's
+post; skills named as `gitlab-org/ai/skills` skills exist in that repository
+only — treat all as illustrations, not files you can assume are installed.
 
 ## The nine categories
 
 ### 1. Library & API reference
 Explains how to correctly use a library, CLI, or SDK — often a folder of
 reference snippets plus a list of gotchas.
-- In this repo: **`glab`** (every common `glab` sub-command + the backtick-
-  escaping footgun), **`glab-glql`** (the GLQL query language + examples).
+- Shape: a CLI-reference skill (every common sub-command plus gotchas), e.g. the
+  `glab` skill in `gitlab-org/ai/skills`; or a query-language skill with examples.
 
 ### 2. Product verification
 Describes how to test/verify that code works, usually paired with a browser,
 tmux, or other external driver. *Anthropic: verification skills had the most
 measurable impact on output quality — worth an engineer-week to make excellent.*
-- In this repo: **`playwright-cli`** (drive a headless browser, assert state),
-  **`run-in-tmux-pane`** (interactive CLI/TTY testing).
+- Shape: drive a headless browser and assert state, or test an interactive CLI
+  in a TTY (e.g. `playwright-cli`, `run-in-tmux-pane` in `gitlab-org/ai/skills`).
 
 ### 3. Data fetching & analysis
 Connects to data/monitoring stacks: credentials, dashboard IDs, canonical table
 maps, common query workflows.
-- In this repo: **`gitlab-clickhouse`** and **`gitlab-psql`** (connect to the
-  data stores, canonical schemas, query patterns). Post examples: `funnel-query`,
+- Shape: connect to a data store with canonical schemas and query patterns (e.g.
+  `gitlab-clickhouse`, `gitlab-psql` in `gitlab-org/ai/skills`). Post examples: `funnel-query`,
   `grafana`.
 
 ### 4. Business process & team automation
@@ -48,15 +47,15 @@ captured purely in code.
 ### 6. Code quality & review
 Enforces org code quality / reviews code; may use deterministic scripts and run
 from hooks or CI.
-- In this repo: **`mr-review`** and **`mr-adversarial-review`** (review a diff
-  against a rubric; spawn a fresh-eyes critique). Post examples:
+- Shape: review a diff against a rubric, or spawn a fresh-eyes critique (e.g.
+  `mr-review`, `mr-adversarial-review` in `gitlab-org/ai/skills`). Post examples:
   `adversarial-review`, `code-style`.
 
 ### 7. CI/CD & deployment
 Fetches, pushes, and deploys code; may reference data-fetching skills.
-- In this repo: **`gitlab-babysit-mr`** (monitor pipeline → retry flaky → light
-  fixes → report), **`gitlab-pipeline-watch`**, **`pushify`** (drive pre-push
-  hooks to green).
+- Shape: monitor a pipeline → retry flaky jobs → light fixes → report, or drive
+  pre-push hooks to green (e.g. `gitlab-babysit-mr`, `pushify` in
+  `gitlab-org/ai/skills`).
 
 ### 8. Runbooks
 Take a symptom (alert, error signature, Slack thread), walk a multi-tool

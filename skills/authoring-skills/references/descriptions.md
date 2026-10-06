@@ -26,7 +26,7 @@ description never fires.
   names, jargon. Vague ("Helps with documents"), trigger-less ("Creates
   sophisticated documentation systems"), and implementation-only ("Implements
   the Project entity model") descriptions all fail.
-- Quote values containing colons (repo rule; invalid YAML otherwise).
+- Quote values containing colons (invalid YAML otherwise).
 
 ## The four properties of a good description
 

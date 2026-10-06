@@ -1,7 +1,7 @@
 ---
 name: authoring-skills
 description: Author a new agent skill or improve an existing one - write the SKILL.md frontmatter and description, structure the body, and fix skills that under- or over-trigger. Use when asked to create/write a skill, make a SKILL.md, improve/refactor a skill, or fix a skill's description.
-version: 0.4.1
+version: 0.5.0
 license: MIT
 category: Meta / Authoring
 compatibility: opencode
@@ -13,9 +13,9 @@ metadata:
 # Authoring Skills
 
 Write or improve a skill so it triggers reliably and earns its place in context.
-Grounded in Anthropic's published skill guidance and this repo's conventions;
-where they disagree, the repo's `AGENTS.md` wins. A skill is a **folder**:
-`SKILL.md` plus optional `references/`, `scripts/`, `assets/`.
+Grounded in Anthropic's skill guidance; the target project's conventions win.
+A skill is a **folder**: `SKILL.md` plus optional `references/`, `scripts/`,
+`assets/`. For gitlab-org/ai/skills: [references/gitlab-skills-repo.md](references/gitlab-skills-repo.md).
 
 ## When to use
 
@@ -73,8 +73,8 @@ heuristics where many approaches work
 
 ## Step 4 — Progressive disclosure: inline vs bundled
 
-Keep `SKILL.md` to always-needed essentials (repo: <100 lines target, 150 hard
-ceiling — stricter than Anthropic's 500). Push depth into files loaded on demand:
+Keep `SKILL.md` to always-needed essentials (Anthropic: <500 lines; shorter is
+better). Push depth into files loaded on demand:
 
 - **`references/<topic>.md`** when a section serves only a sub-case or the body
   nears the length budget. Heading useful only to some invocations → reference;

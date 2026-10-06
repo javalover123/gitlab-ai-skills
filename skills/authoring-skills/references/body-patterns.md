@@ -92,5 +92,5 @@ When an agent loads the skill but ignores rules, the usual causes are:
 - Name files by content (`finance-metrics.md`, not `doc2.md`); group by domain
   (`references/finance.md`, `references/sales.md`) so the agent loads only what
   the request needs.
-- Size: Anthropic suggests under 500 lines / ~5,000 words; this repo's budget
-  (<100 target, 150 ceiling) is stricter and wins.
+- Size: Anthropic suggests under 500 lines / ~5,000 words; shorter is better, and a
+  target project's own budget wins.

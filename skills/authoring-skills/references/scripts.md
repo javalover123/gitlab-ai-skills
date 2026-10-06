@@ -1,8 +1,10 @@
 # Scripts, tools, and dependencies
 
 Applies to anything under `scripts/` and to skills that drive CLIs or MCP tools.
-For this repo's shell rules (`set -Eeuo pipefail`, shellcheck, tests) see the
-root `AGENTS.md`.
+Follow the target project's shell conventions if any. Baseline for bash helpers:
+start with `set -Eeuo pipefail`; pass untrusted input as a field value, not
+interpolated into a command string; never `[ -f glob* ]` (`[ ]` doesn't glob; use
+a `for` loop or `compgen -G`); run `shellcheck`.
 
 ## When to ship a script
 
