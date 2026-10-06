@@ -1,7 +1,7 @@
 ---
 name: authoring-skills
 description: Author a new agent skill or improve an existing one - write the SKILL.md frontmatter and description, structure the body, and fix skills that under- or over-trigger. Use when asked to create/write a skill, make a SKILL.md, improve/refactor a skill, or fix a skill's description.
-version: 0.4.0
+version: 0.4.1
 license: MIT
 category: Meta / Authoring
 compatibility: opencode
@@ -12,14 +12,10 @@ metadata:
 
 # Authoring Skills
 
-A workflow for writing or improving a skill so it triggers reliably and earns
-its place in context. Grounded in
-Anthropic's "Lessons from building Claude Code: how we use skills" (Jun 2026),
-Anthropic's skill-authoring best practices and "Complete Guide to Building
-Skills for Claude", and the conventions of well-written skills in this repo.
-Where the sources and this repo's `AGENTS.md` disagree, the repo wins.
-
-A skill is a **folder**: `SKILL.md` plus optional `references/`, `scripts/`, `assets/`.
+Write or improve a skill so it triggers reliably and earns its place in context.
+Grounded in Anthropic's published skill guidance and this repo's conventions;
+where they disagree, the repo's `AGENTS.md` wins. A skill is a **folder**:
+`SKILL.md` plus optional `references/`, `scripts/`, `assets/`.
 
 ## When to use
 
@@ -40,13 +36,9 @@ Not for one-offs (write a note) or things the model already does well.
 
 The agent scans every skill's `description` to decide "is there a skill for this
 request?" It is **not a summary — it is a description of *when to trigger*.**
-Lead with the literal phrases a user would type, enumerate situations, add a
-boundary clause ("do not use for…") if a sibling could match, third-person
-present. Say both **what** it does and **when** to use it; stay under 1,024
-characters; no `<`/`>` (the text is injected into the system prompt).
-
-Litmus test: read *only* the description and predict which prompts fire it.
-Patterns, before/after examples, and the full test:
+Open with what the skill does in the verbs users type, then `Use when…` with the
+situations; add a "do not use for…" boundary if a sibling could match. Hard
+limits (length, point of view, characters) and worked before/after examples:
 [references/descriptions.md](references/descriptions.md).
 
 ## Step 2 — Choose the body shape
@@ -70,17 +62,14 @@ heuristics where many approaches work
    concrete "X is actually Y" facts over generic advice.
 3. **Don't railroad.** Give facts and constraints, not a rigid transcript, unless
    order matters (destructive/safety steps).
-4. **Be concrete and decisive.** Give one default plus an escape hatch rather
-   than a menu of options; show input/output examples; use one term per concept;
-   keep critical rules near the top and replace vague words ("validate
-   properly") with checkable ones. More in
+4. **Be concrete and decisive.** One default plus an escape hatch, not a menu;
+   input/output examples; one term per concept; critical rules near the top;
+   checkable wording instead of "validate properly". Details:
    [references/body-patterns.md](references/body-patterns.md).
-5. **Store scripts; let the agent compose.** Ship helpers for boilerplate, state
-   whether to *run* or *read* each one, and list dependencies. Reference them by
-   path relative to the skill root. Script design:
-   [references/scripts.md](references/scripts.md).
-6. End with an **Agent Guidelines / Rules** list if there are many discrete
-   do/don't facts.
+5. **Store scripts; let the agent compose.** Ship helpers for boilerplate, say
+   whether to *run* or *read* each one, list dependencies, use paths relative to
+   the skill root. Script design: [references/scripts.md](references/scripts.md).
+6. Many discrete do/don't facts? End with an **Agent Guidelines** list.
 
 ## Step 4 — Progressive disclosure: inline vs bundled
 
@@ -88,60 +77,57 @@ Keep `SKILL.md` to always-needed essentials (repo: <100 lines target, 150 hard
 ceiling — stricter than Anthropic's 500). Push depth into files loaded on demand:
 
 - **`references/<topic>.md`** when a section serves only a sub-case or the body
-  nears the length budget.
-- **`scripts/`** for any deterministic step. **`assets/`** for output templates.
-- Link every reference **directly from `SKILL.md`** (one level deep; nested
-  links get partially read), give files descriptive names, and add a contents
-  list to any reference over ~100 lines.
-- No `README.md` inside a skill folder; the file must be named exactly `SKILL.md`.
-
-Heading useful only to some invocations → `references/`; every time → inline.
+  nears the length budget. Heading useful only to some invocations → reference;
+  every time → inline.
+- **`scripts/`** for deterministic steps; **`assets/`** for output templates.
+- Link every reference directly from `SKILL.md`; layout rules (one level deep,
+  contents lists, file naming) are in
+  [references/body-patterns.md](references/body-patterns.md#file-layout).
 
 ## Step 5 — Frontmatter
 
-Required: `name` (kebab-case, equals the directory name, ≤64 chars, no
-"claude"/"anthropic"), `description`, `version` (semver, bumped on every
-change), `license`. Optional: `compatibility`, `metadata.*`. Field reference and
-linting checklist: [references/frontmatter.md](references/frontmatter.md).
-
-Skeleton to copy: [assets/SKILL.template.md](assets/SKILL.template.md).
+Required: `name` (kebab-case, equals the directory name), `description`,
+`version` (semver, bumped on every change), `license`. Optional:
+`compatibility`, `metadata.*`. Field limits and linting checklist:
+[references/frontmatter.md](references/frontmatter.md). Skeleton to copy:
+[assets/SKILL.template.md](assets/SKILL.template.md).
 
 ## Step 6 — Verify before shipping
 
-1. **Trigger test:** write 3–5 prompts that should fire the skill (obvious *and*
-   paraphrased) and 2–3 that should not; read only the `description` and
-   predict; adjust until correct. Quick probe: ask the agent "when would you use
-   the `<name>` skill?" — it will paraphrase the description back.
-2. **Cold-read test:** would an agent with no prior context follow the body
+Test the skill, not just the text, with any harness or by hand
+([references/testing.md](references/testing.md): metrics, symptom-to-fix table).
+
+1. **Trigger test:** prompts that should fire it (obvious *and* paraphrased) and
+   prompts that should not; predict from the `description` alone, adjust.
+2. **Cold-read test:** could an agent with no prior context follow the body
    without guessing at paths or commands? Resolve every relative path.
-3. **Baseline test:** run a representative task with and without the skill;
-   write only what closes the observed gap. Methodology, success metrics, and
-   multi-model checks: [references/testing.md](references/testing.md).
+3. **Real-task test:** run representative tasks with and without the skill;
+   write only what closes the observed gap; fix what the agent actually got wrong.
 4. **Contributing Improvements:** end with a `## Contributing Improvements`
    section, add if missing ([template](references/contributing-improvements.md)).
 
-`opencode-refine` drives the first two tests with `opencode run`.
-
 ## Improving an existing skill
 
-Diagnose the symptom, then make the smallest fix:
+Diagnose the symptom, make the smallest fix, and capture the failure as a
+gotcha so it can't recur:
 
-- **Under-triggers** → description missing trigger phrases; add the literal words.
-- **Over-triggers** → description too broad / overlaps a sibling; add a boundary.
-- **Fires but underperforms** → missing gotcha, or railroading; add the failure
-  to the gotchas section, loosen over-specific steps. If rules are ignored, they
-  are likely buried, vague, or too verbose — move them up, make them checkable,
-  or enforce them with a script.
-- **Too long / slow to load** → move sub-case sections into `references/`.
-
-Always capture the failure as a gotcha so it can't recur.
+- **Under-triggers** → add the literal trigger phrases to the description.
+- **Over-triggers** → add a "do not use for…" boundary.
+- **Fires but underperforms** → missing gotcha or railroading; if rules are
+  ignored, move them up, make them checkable, or enforce with a script.
+- **Too long** → move sub-case sections into `references/`.
 
 ## Anti-patterns
 
-Stating the obvious; straddling categories; description-as-summary; railroading;
-premature `references/`; boilerplate in prose instead of a script; time-sensitive
-prose (keep the current method, park legacy in a collapsed "old patterns" block);
-baked-in environment specifics (paths, IDs) instead of config + ask-once.
+- **Stating the obvious** — restating model defaults costs context, adds nothing.
+- **Straddling categories** — one skill, one job.
+- **Description-as-summary** — omits trigger words; the skill never fires.
+- **Railroading** — a rigid transcript breaks when reality differs.
+- **Premature `references/`** — don't split before the skill is big enough.
+- **Boilerplate in prose** — ship a script instead.
+- **Time-sensitive prose** — keep the current method; park legacy behaviour in a
+  collapsed "old patterns" block.
+- **Environment specifics** (paths, IDs) baked in — use config and ask once.
 
 ## Contributing Improvements
 

@@ -17,9 +17,9 @@ description never fires.
 ## Hard constraints
 
 - Say both **what** the skill does and **when** to use it.
-- Non-empty, **at most 1,024 characters**, no XML angle brackets (`<`, `>`) —
-  the text is injected into the system prompt, so markup could inject
-  instructions.
+- Non-empty, **at most 1,024 characters**. Avoid XML angle brackets (`<`, `>`)
+  *(Anthropic's frontmatter rule; the text is injected into the system prompt,
+  so markup could inject instructions)*.
 - **Third person.** "Processes Excel files…", not "I can help you…" or "You can
   use this to…" — mixed point of view hurts discovery.
 - Include the concrete terms users say: task verbs, file types/extensions, tool
@@ -123,8 +123,8 @@ A user asking "fill out this signup form and screenshot the result" won't match
    - Misses on should-fire prompts → add the missing literal trigger phrases.
    - Hits on should-not prompts → add/tighten a boundary clause.
 4. Include *paraphrased* should-fire prompts, not just ones that echo the
-   description. Cheap probe in a live session: ask the agent "when would you
-   use the `<name>` skill?" and compare its answer with your intent.
+   description. Cheap probe in a live session: ask the agent when it would use
+   the skill and compare its answer with your intent.
 5. Re-run until predictions are correct. (This mirrors the post's finding that
    verification rigour pays off most — apply it to the description itself.)
 

@@ -1,18 +1,8 @@
 # Testing and iterating on a skill
 
-Lightweight, tool-agnostic methodology distilled from Anthropic's testing
-guidance. Anthropic's own docs note there is no built-in eval runner: build the
-smallest harness that gives you signal (`opencode run`, `claude -p`, a manual
-transcript).
-
-## Contents
-
-- Evaluation-first loop
-- Three kinds of test
-- Success metrics
-- Iterate with two agents
-- Read the signals
-- Models
+Tool-agnostic methodology distilled from Anthropic's testing guidance. What to
+test matters; how you run it does not. Use whatever gives you signal: a scripted
+non-interactive agent run, an eval framework, or a manual transcript.
 
 ## Evaluation-first loop
 
@@ -30,7 +20,7 @@ approach into the skill; widen to more cases afterwards.
 ## Three kinds of test
 
 - **Triggering:** fires on obvious requests and on paraphrases; stays silent on
-  unrelated ones. Debug probe: ask "when would you use the `<name>` skill?" and
+  unrelated ones. Debug probe: ask the agent when it would use the skill and
   read back the description it quotes.
 - **Functional:** correct outputs, tool calls succeed, error paths and edge
   cases behave.
@@ -51,7 +41,8 @@ Rough targets, not precise thresholds:
 Use one agent session to author/refine the skill and a fresh session with the
 skill loaded to do real work. Bring observed failures back verbatim ("it forgot
 to filter test accounts") and adjust prominence, wording, or structure. Repeat
-on real tasks, not synthetic ones. `opencode-refine` automates this in opencode.
+on real tasks, not synthetic ones. Automate the loop if you can, but a manual
+run-observe-edit cycle is enough.
 
 ## Read the signals
 
@@ -59,7 +50,7 @@ on real tasks, not synthetic ones. `opencode-refine` automates this in opencode.
 |---|---|
 | Never loads / users invoke manually | Add literal trigger phrases, file types, jargon to `description` |
 | Loads for unrelated requests | Add "do not use for…" boundary, narrow scope |
-| Loads but rules ignored | See *Making rules stick* in `body-patterns.md` |
+| Loads but rules ignored, or steps skipped | See *Making rules stick* in `body-patterns.md`; a script beats prose for checks that must not be skipped |
 | Agent reads files in odd order | Structure isn't intuitive; make links explicit |
 | Agent never opens a bundled file | Unneeded or poorly signalled; delete or link better |
 | Agent re-reads the same reference | Move that content into `SKILL.md` |
@@ -69,5 +60,4 @@ on real tasks, not synthetic ones. `opencode-refine` automates this in opencode.
 
 Skills add to a model, so behaviour varies by model. If the skill will be used
 across tiers, spot-check small, mid, and large models: small ones need enough
-guidance, large ones should not be over-explained to. Adding "take your time,
-don't skip validation" to the *user prompt* works better than in the skill.
+guidance, large ones should not be over-explained to.

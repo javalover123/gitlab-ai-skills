@@ -1,6 +1,6 @@
 ---
 name: my-skill-name                 # kebab-case; MUST match the skill folder name
-description: "REPLACE: what the skill does, then when to use it. Lead with the verbs/phrases a user would type, enumerate situations, add a 'do not use for' boundary if a sibling could match. Third person, under 1024 chars, no angle brackets. See references/descriptions.md."
+description: "REPLACE: open with what the skill does in the verbs users type, then 'Use when' plus situations, add a 'do not use for' boundary if a sibling could match. Third person, under 1024 chars, no angle brackets. See references/descriptions.md."
 version: 0.1.0                       # required; bump when anything in the skill changes
 license: MIT                         # required
 compatibility: opencode              # optional

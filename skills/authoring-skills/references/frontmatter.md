@@ -41,8 +41,8 @@ allowed-tools: Bash(my-tool:*)
 - **Convention:** **kebab-case**, and it **matches the skill's folder name**
   (`gitlab-babysit-mr/` → `name: gitlab-babysit-mr`). Well-written skills
   follow this.
-- No spaces, no uppercase, no underscores. At most 64 characters, no XML tags,
-  and no reserved words (`claude`, `anthropic`).
+- No spaces, no uppercase, no underscores. At most 64 characters. *(Anthropic upload validation:
+  also no XML tags and no reserved words `claude`/`anthropic`.)*
 - Anthropic's docs suggest gerund names (`processing-pdfs`); this repo prefers
   `<domain>-<noun>` / short names without a redundant verb (see root
   `AGENTS.md`), which Anthropic lists as acceptable. Avoid vague names
@@ -54,8 +54,8 @@ allowed-tools: Bash(my-tool:*)
   trigger*, not a summary.
 - **Convention:** third-person present; lead with trigger verbs/phrases;
   enumerate situations; add a boundary clause if a sibling skill could also
-  match. Max 1,024 characters, no `<`/`>`. Length varies from one line (`write-large-file`, `commit-messages`)
-  to a packed multi-sentence trigger surface (`playwright-cli`, `pushify`,
+  match. Hard limits are in `references/descriptions.md`. Length varies from
+  one line (`write-large-file`, `commit-messages`) to a packed multi-sentence trigger surface (`playwright-cli`, `pushify`,
   `stack-changes`) — longer is fine when the skill legitimately covers many
   phrasings.
 - See **`references/descriptions.md`** for patterns, worked before/after
@@ -79,7 +79,8 @@ allowed-tools: Bash(my-tool:*)
   1–500 chars) and as the place to flag skills that rely on one platform's
   features. **Observed:** `opencode` on
   skills that set it (`glab`, `playwright-cli`, `gitlab-babysit-mr`, …). Some
-  skills omit it. Use `opencode` here.
+  skills omit it. Repo convention for now is `opencode`; a follow-up may revisit
+  it, since the source treats it as environment requirements.
 
 ### `category`
 - **What:** free-text bucket for human browsing (not the 9-type taxonomy in
@@ -120,8 +121,8 @@ omit the rest.
 - [ ] `name` is kebab-case and equals the folder name.
 - [ ] `description` is present and **trigger-shaped** (passes the
       `references/descriptions.md` litmus test), third-person present.
-- [ ] `description` states what *and* when, is ≤1,024 chars, and has no `<`/`>`.
-- [ ] Folder holds `SKILL.md` (exact case) and no `README.md`.
+- [ ] `description` meets the hard constraints in `references/descriptions.md`.
+- [ ] Entry file is named exactly `SKILL.md`.
 - [ ] YAML is valid (the block is fenced by `---` on its own lines; no tabs).
 - [ ] No secrets, tokens, or environment-specific absolute paths in frontmatter.
 - [ ] `version` bumped if behaviour changed.

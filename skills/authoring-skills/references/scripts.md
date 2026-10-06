@@ -4,15 +4,6 @@ Applies to anything under `scripts/` and to skills that drive CLIs or MCP tools.
 For this repo's shell rules (`set -Eeuo pipefail`, shellcheck, tests) see the
 root `AGENTS.md`.
 
-## Contents
-
-- When to ship a script
-- Run or read?
-- Solve, don't defer
-- Justify constants
-- Verifiable output
-- Dependencies and tools
-
 ## When to ship a script
 
 Ship one when a step is deterministic, error-prone to regenerate, or checked
@@ -54,7 +45,8 @@ a vision-capable agent inspect layout.
 - Never assume a package or CLI is installed: name it and give the install
   command, or say how to detect it.
 - Some runtimes have no network or package installation *(Claude API sandbox)*;
-  note such requirements in `compatibility`.
+  state such requirements in a body "Prerequisites" line (the repo's current
+  `compatibility` convention is in `frontmatter.md`).
 - Reference MCP tools by fully qualified name, `ServerName:tool_name`
   *(Claude-specific syntax)*; in other agents use that agent's naming. Unqualified
   names fail when several servers are connected.
