@@ -12,4 +12,9 @@
 #   source_ref      Branch/tag/ref to track
 #   mode            How the sync job applies changes: "mr" (open an MR) or
 #                   "direct" (commit straight to the default branch)
-skills: {}
+skills:
+  postgresai:
+    source_project: gitlab-org/gitlab
+    source_path: .claude/skills/postgresai
+    source_ref: master
+    mode: mr
