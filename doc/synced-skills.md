@@ -26,6 +26,17 @@ Two pieces enforce the model:
 2. **Edit guard** (`guard-synced-skills` CI job, merge requests) — fails any MR
    that edits a synced skill directly, pointing the author at the SSoT.
 
+## Current synced skills
+
+| Skill | Source of truth |
+|---|---|
+| `postgresai` | `gitlab-org/gitlab`, `.agents/skills/postgresai` (`master`) |
+
+Fix these upstream, not here. The whole skill directory is mirrored, including
+`scripts/` and `tests/`. Generated per-channel files (for example the Claude
+Code `plugin.json`) live outside `skills/<name>/`, so the sync does not delete
+them.
+
 ## The sync job
 
 `scripts/sync_external_skills.py` does the content mirroring (no git/MR side
