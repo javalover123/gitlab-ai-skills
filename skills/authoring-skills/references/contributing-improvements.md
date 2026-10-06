@@ -1,6 +1,6 @@
 # Contributing Improvements section
 
-Every skill authored or updated with `authoring-skills` should end with a
+A skill that has a source repository should end with a
 `## Contributing Improvements` section that tells future agents where to send
 fixes. Add it if missing; keep (and re-check) it when updating one.
 

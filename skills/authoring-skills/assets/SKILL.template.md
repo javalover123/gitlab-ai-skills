@@ -1,9 +1,9 @@
 ---
 name: my-skill-name                 # kebab-case; MUST match the skill folder name
 description: "REPLACE: open with what the skill does in the verbs users type, then 'Use when' plus situations, add a 'do not use for' boundary if a sibling could match. Third person, under 1024 chars, no angle brackets. See references/descriptions.md."
-version: 0.1.0                       # required; bump when anything in the skill changes
-license: MIT                         # required
-compatibility: opencode              # optional
+version: 0.1.0                       # if the project requires it; bump on change
+license: MIT                         # if the project requires it
+# compatibility: <runtime or environment requirements>   # optional; omit if none
 category: Development Workflow       # optional; reuse an existing label if one fits
 # argument-hint: <thing the skill takes>   # only if invoked with a positional arg
 # allowed-tools: Bash(my-tool:*)           # only to constrain tool access
@@ -35,7 +35,7 @@ metadata:                            # optional; add what aids discovery
 <!-- ===================================================================== -->
 
 <!-- ---------- ARCHETYPE A: INLINE TECHNIQUE (<~80 lines, no subfolders) ----------
-     For a single self-contained procedure. Example shape: write-large-file.
+     For a single self-contained procedure. Example shape (gitlab-org/ai/skills): write-large-file.
 
 ## Gotchas
 
@@ -54,7 +54,7 @@ metadata:                            # optional; add what aids discovery
 -->
 
 <!-- ---------- ARCHETYPE B: PHASE / REFERENCE-TABLE WORKFLOW ----------
-     For a multi-step process where each step has depth. Example: gitlab-babysit-mr.
+     For a multi-step process where each step has depth. Example (gitlab-org/ai/skills): gitlab-babysit-mr.
      Keep the table inline; push each phase's detail into references/.
 
 ## Overview
@@ -78,7 +78,7 @@ metadata:                            # optional; add what aids discovery
 -->
 
 <!-- ---------- ARCHETYPE C: DEEP REFERENCE + GUARDRAILS ----------
-     For a tool/API with many footguns, budgets, caveats. Example: glab.
+     For a tool/API with many footguns, budgets, caveats. Example (gitlab-org/ai/skills): glab.
 
 ## Discovery / Usage
 
@@ -103,7 +103,7 @@ metadata:                            # optional; add what aids discovery
 ## Agent Guidelines
 
 <!-- Optional but common: a scannable numbered do/don't contract the agent can
-     re-check. Used by glab, gitlab-babysit-mr. -->
+     re-check. Used by glab, gitlab-babysit-mr (gitlab-org/ai/skills). -->
 1. <guideline>
 2. <guideline>
 

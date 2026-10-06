@@ -7,8 +7,8 @@ agent.* Use this list to (a) sanity-check that your idea is one job, and (b)
 spot gaps in the skill library.
 
 Each category gives an example shape. "Post example" names come from Anthropic's
-post; skills named as `gitlab-org/ai/skills` skills exist in that repository
-only — treat all as illustrations, not files you can assume are installed.
+*Lessons from building Claude Code: how we use skills*; skills named as
+`gitlab-org/ai/skills` skills exist in that repository only — treat all as illustrations, not files you can assume are installed.
 
 ## The nine categories
 
@@ -62,7 +62,7 @@ Take a symptom (alert, error signature, Slack thread), walk a multi-tool
 investigation, produce a structured report.
 - Post examples: `<service>-debugging`, `oncall-runner`, `log-correlator`.
   (A pipeline-babysitting skill's failure-diagnosis phase, e.g.
-  `gitlab-babysit-mr`, is a close cousin.)
+  `gitlab-babysit-mr` in `gitlab-org/ai/skills`, is a close cousin.)
 
 ### 9. Infrastructure operations
 Routine maintenance / operational procedures, sometimes destructive — benefit

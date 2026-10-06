@@ -47,8 +47,9 @@ a vision-capable agent inspect layout.
 - Never assume a package or CLI is installed: name it and give the install
   command, or say how to detect it.
 - Some runtimes have no network or package installation *(Claude API sandbox)*;
-  state such requirements in a body "Prerequisites" line (the repo's current
-  `compatibility` convention is in `frontmatter.md`).
+  state such requirements in a body "Prerequisites" line (see `compatibility` in
+  [frontmatter.md](frontmatter.md); gitlab-org/ai/skills convention in
+  [gitlab-skills-repo.md](gitlab-skills-repo.md)).
 - Reference MCP tools by fully qualified name, `ServerName:tool_name`
   *(Claude-specific syntax)*; in other agents use that agent's naming. Unqualified
   names fail when several servers are connected.

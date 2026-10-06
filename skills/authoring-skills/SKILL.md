@@ -1,7 +1,7 @@
 ---
 name: authoring-skills
 description: Author a new agent skill or improve an existing one - write the SKILL.md frontmatter and description, structure the body, and fix skills that under- or over-trigger. Use when asked to create/write a skill, make a SKILL.md, improve/refactor a skill, or fix a skill's description.
-version: 0.5.0
+version: 0.5.1
 license: MIT
 category: Meta / Authoring
 compatibility: opencode
@@ -45,7 +45,7 @@ limits (length, point of view, characters) and worked before/after examples:
 
 Pick the smallest archetype that fits; grow it later:
 
-| Archetype | Use for | Example |
+| Archetype | Use for | Example (gitlab-org/ai/skills) |
 |---|---|---|
 | **Inline technique** (<80 lines) | One self-contained procedure | `write-large-file` |
 | **Phase / reference-table workflow** | Multi-step process, each step with depth | `gitlab-babysit-mr` |
@@ -86,11 +86,11 @@ better). Push depth into files loaded on demand:
 
 ## Step 5 — Frontmatter
 
-Required: `name` (kebab-case, equals the directory name), `description`,
-`version` (semver, bumped on every change), `license`. Optional:
-`compatibility`, `metadata.*`. Field limits and linting checklist:
-[references/frontmatter.md](references/frontmatter.md). Skeleton to copy:
-[assets/SKILL.template.md](assets/SKILL.template.md).
+Required: `name` (kebab-case, equals the directory name), `description`. Many
+projects also require `version`, `license`; follow the target project
+(gitlab-org/ai/skills: `references/gitlab-skills-repo.md`). Optional:
+`compatibility`, `metadata.*`. Details: [references/frontmatter.md](references/frontmatter.md);
+skeleton: [assets/SKILL.template.md](assets/SKILL.template.md).
 
 ## Step 6 — Verify before shipping
 
@@ -103,8 +103,8 @@ Test the skill, not just the text, with any harness or by hand
    without guessing at paths or commands? Resolve every relative path.
 3. **Real-task test:** run representative tasks with and without the skill;
    write only what closes the observed gap; fix what the agent actually got wrong.
-4. **Contributing Improvements:** end with a `## Contributing Improvements`
-   section, add if missing ([template](references/contributing-improvements.md)).
+4. **Contributing Improvements:** if the skill has a source repo, end with a
+   `## Contributing Improvements` section ([template](references/contributing-improvements.md)).
 
 ## Improving an existing skill
 

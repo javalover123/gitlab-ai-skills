@@ -2,14 +2,16 @@
 
 Every `SKILL.md` opens with a YAML frontmatter block delimited by `---`. Anthropic's
 spec requires only `name` and `description`; many projects also require
-`version` and `license`. The rest are conventional metadata. (Rules specific to
-`gitlab-org/ai/skills`: [gitlab-skills-repo.md](gitlab-skills-repo.md).) Of the four, `name` and `description` are the ones
-Anthropic's post calls out as load-bearing for discovery: `name` identifies the
-skill, `description` is the trigger the model scans.
+`version` and `license`; follow the target project. The rest are conventional
+metadata. (Rules specific to `gitlab-org/ai/skills`:
+[gitlab-skills-repo.md](gitlab-skills-repo.md).) `name` and `description` are
+load-bearing for discovery, per Anthropic's *Lessons from building Claude Code:
+how we use skills*: `name` identifies the skill, `description` is the trigger
+the model scans.
 
 ## Contents
 
-- Required fields
+- Core and commonly required fields
 - Optional fields (conventional)
 - Linting checklist
 
@@ -17,9 +19,9 @@ skill, `description` is the trigger the model scans.
 ---
 name: my-skill
 description: <trigger-shaped sentence — see references/descriptions.md>
-version: 1.0.0
-license: MIT
-compatibility: opencode
+version: 1.0.0            # if the project requires it
+license: MIT              # if the project requires it
+# compatibility: <runtime or environment requirements; omit if none>
 category: Development Workflow
 argument-hint: <thing the skill takes>
 metadata:
@@ -31,7 +33,7 @@ allowed-tools: Bash(my-tool:*)
 ---
 ```
 
-## Required fields
+## Core and commonly required fields
 
 ### `name` (required)
 - **What:** the skill's identifier; the value the `skill` tool is invoked with.
@@ -55,12 +57,12 @@ allowed-tools: Bash(my-tool:*)
 - See **`references/descriptions.md`** for patterns, worked before/after
   examples, and the litmus test.
 
-### `version` (required)
+### `version` (commonly required)
 - **What:** semver string (`X.Y.Z`) for the skill.
 - **Convention:** start a new skill at `0.1.0` or `1.0.0`; bump it on every
   change to any file under the skill directory (some projects enforce this in CI).
 
-### `license` (required)
+### `license` (commonly required)
 - **What:** SPDX license identifier. **Common:** `MIT`.
 
 ## Optional fields (conventional)
