@@ -1,11 +1,8 @@
 ---
 name: my-skill-name                 # kebab-case; MUST match the skill folder name
-description: <one trigger-shaped sentence — lead with the verbs/phrases a user
-  would type, enumerate the situations it covers, add a "do not use for…"
-  boundary if a sibling skill could also match. Third-person present. See
-  references/descriptions.md.>
-version: 0.1.0                       # optional; bump when behaviour changes
-license: MIT                         # optional
+description: "REPLACE: what the skill does, then when to use it. Lead with the verbs/phrases a user would type, enumerate situations, add a 'do not use for' boundary if a sibling could match. Third person, under 1024 chars, no angle brackets. See references/descriptions.md."
+version: 0.1.0                       # required; bump when anything in the skill changes
+license: MIT                         # required
 compatibility: opencode              # optional
 category: Development Workflow       # optional; reuse an existing label if one fits
 # argument-hint: <thing the skill takes>   # only if invoked with a positional arg

@@ -7,6 +7,15 @@ conventional metadata. Of the four, `name` and `description` are the ones
 Anthropic's post calls out as load-bearing for discovery: `name` identifies the
 skill, `description` is the trigger the model scans.
 
+## Contents
+
+- Required fields
+- Optional fields (conventional)
+- Linting checklist
+
+Anthropic's spec only requires `name` and `description`; the extra required
+fields here are this repo's CI rules.
+
 ```yaml
 ---
 name: my-skill
@@ -32,7 +41,12 @@ allowed-tools: Bash(my-tool:*)
 - **Convention:** **kebab-case**, and it **matches the skill's folder name**
   (`gitlab-babysit-mr/` → `name: gitlab-babysit-mr`). Well-written skills
   follow this.
-- No spaces, no uppercase, no underscores.
+- No spaces, no uppercase, no underscores. At most 64 characters, no XML tags,
+  and no reserved words (`claude`, `anthropic`).
+- Anthropic's docs suggest gerund names (`processing-pdfs`); this repo prefers
+  `<domain>-<noun>` / short names without a redundant verb (see root
+  `AGENTS.md`), which Anthropic lists as acceptable. Avoid vague names
+  (`helper`, `utils`, `tools`) and inconsistent patterns across a collection.
 
 ### `description` (required)
 - **What:** the single most important field — the model scans every skill's
@@ -40,7 +54,7 @@ allowed-tools: Bash(my-tool:*)
   trigger*, not a summary.
 - **Convention:** third-person present; lead with trigger verbs/phrases;
   enumerate situations; add a boundary clause if a sibling skill could also
-  match. Length varies from one line (`write-large-file`, `commit-messages`)
+  match. Max 1,024 characters, no `<`/`>`. Length varies from one line (`write-large-file`, `commit-messages`)
   to a packed multi-sentence trigger surface (`playwright-cli`, `pushify`,
   `stack-changes`) — longer is fine when the skill legitimately covers many
   phrasings.
@@ -60,7 +74,10 @@ allowed-tools: Bash(my-tool:*)
 ## Optional fields (conventional)
 
 ### `compatibility`
-- **What:** the agent runtime the skill targets. **Observed:** `opencode` on
+- **What:** the agent runtime the skill targets. Anthropic's guide describes it
+  as environment requirements (product, system packages, network access;
+  1–500 chars) and as the place to flag skills that rely on one platform's
+  features. **Observed:** `opencode` on
   skills that set it (`glab`, `playwright-cli`, `gitlab-babysit-mr`, …). Some
   skills omit it. Use `opencode` here.
 
@@ -103,6 +120,8 @@ omit the rest.
 - [ ] `name` is kebab-case and equals the folder name.
 - [ ] `description` is present and **trigger-shaped** (passes the
       `references/descriptions.md` litmus test), third-person present.
+- [ ] `description` states what *and* when, is ≤1,024 chars, and has no `<`/`>`.
+- [ ] Folder holds `SKILL.md` (exact case) and no `README.md`.
 - [ ] YAML is valid (the block is fenced by `---` on its own lines; no tabs).
 - [ ] No secrets, tokens, or environment-specific absolute paths in frontmatter.
 - [ ] `version` bumped if behaviour changed.
