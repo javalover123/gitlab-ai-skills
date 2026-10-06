@@ -15,6 +15,6 @@
 skills:
   postgresai:
     source_project: gitlab-org/gitlab
-    source_path: .agents/skills/postgresai
+    source_path: .claude/skills/postgresai
     source_ref: master
     mode: mr
