@@ -1,7 +1,7 @@
 ---
 name: postgresai
 description: "Run EXPLAIN / EXPLAIN ANALYZE, test indexes, and measure query cost on PostgresAI Database Lab thin clones with the PostgresAI CLI (postgresai, pgai, Joe). Use when asked to explain or optimize a query, check a plan at production scale, try an index on realistic data, or prepare a GitLab database review."
-version: 1.0.1
+version: 1.0.2
 license: MIT
 category: Database
 ---
@@ -69,6 +69,9 @@ Plans and iterating: [references/plan-analysis.md](references/plan-analysis.md).
 - **Clone creation can fail** (`failed to create a Database Lab clone`). Stop using that target
   for the session (`explain`/`reset` fail the same way), report it, don't retry in a loop. Switch
   target only if another database can answer the question.
+- **Linking plans:** the CLI gives no console URL or session ID (`command_id` is not a console
+  command number). Take the link from console session history; see
+  [Linking plans](references/db-review-flow.md#linking-plans).
 - JSON output and explicit clones: [references/advanced.md](references/advanced.md).
 
 ## Safety rules
