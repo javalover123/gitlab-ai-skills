@@ -14,36 +14,40 @@ Maps to GitLab's [database review guidelines](https://docs.gitlab.com/developmen
    against the [migration guidelines](https://docs.gitlab.com/development/migration_style_guide/)
    (concurrent index creation, naming, need). Time limits for queries and migrations are in the
    database review docs above.
-5. **Write up in the MR**: for each query, the SQL, a plan link, and timing/buffers
-   (see [Linking plans](#linking-plans)). Replace real values with placeholders; no production data.
+5. **Write up in the MR**: for each query, the SQL, the sanitized plan inline (placeholders, not real
+   IDs), and timing/buffers. Console links are an optional extra, see [Linking plans](#linking-plans).
+   No production data.
 6. Request the review with that evidence attached.
 
 ## Linking plans
 
-The CLI doesn't return a console URL. `joe <cmd> --json` has `command_id`, `plan_text`, `plan_execution_*`,
-`stats` and no session ID. Text output prints `command <id>`, also without a session. `joe_sessions` and
-`joe_session_commands` are `permission denied` for CLI API keys, so the CLI can't build the link for you.
+**CLI runs can't be linked automatically today.** `joe <cmd> --json` returns `command_id`, `plan_text`,
+`plan_execution_*`, `stats`, but no session ID and no console command number or URL. The CLI `command_id`
+doesn't work in a console URL (`.../sessions/<session>/commands/<command_id>` returns 404), and
+`joe_sessions` / `joe_session_commands` are `permission denied` for CLI API keys.
 
-Console URL format:
+Inline sanitized plans stay the primary MR evidence. A console link is an optional extra for people with
+Database Lab access; the page shows the raw query with production IDs, so community contributors most likely
+can't open it. Keep the sanitized summary in the MR either way.
 
-```text
-https://console.postgres.ai/gitlab/projects/<alias>/sessions/<session>/commands/<command>
-```
+Manual recipe (verified on `gitlab-production-ci`):
 
-Recipe that works:
+1. Get the numeric session ID from an error string. Either shape works:
+   ``Session: `61473` `` (use `61473`) or ``Session: `webui-i61418` `` (use `61418`, drop `webui-`).
+2. Open `https://console.postgres.ai/gitlab/projects/<alias>/sessions/<session>` (`<alias>` as in
+   `postgresai projects`, such as `gitlab-production-ci`). It opens with the command history.
+3. Pick each run from the history by hand: match the query text (for example a root namespace ID in the SQL
+   against your local log). Cold and warm runs share the same SQL, so compare the `Limit` `actual time`.
+4. Copy the command URL, `.../sessions/<session>/commands/<console command number>`. A URL copied this way
+   works. The console command number isn't exposed by the CLI or API.
 
-1. Open the console session history for the project (`<alias>` as in `postgresai projects`, such as
-   `gitlab-production-main`). The CLI shares sessions with the console.
-2. Find your command in the session and copy its URL. The command number there is the one to use.
-3. Put that URL in the MR next to the sanitized summary.
+Unverified:
 
-- **Unconfirmed:** whether the CLI's `command_id` (for example 511294) resolves under `/commands/<id>`. The
-  numbers are far from console command numbers (hundreds of thousands apart), which suggests separate
-  sequences. Don't build URLs from `command_id` unless someone confirms it in a logged-in browser. Unauthenticated
-  requests can't tell: the console returns its HTML shell with 200 for any path.
-- A session ID can appear in an error string (``Session: `61473` ``). It identifies the session only, not a command.
-- **Who can open it:** console pages show the raw query with production IDs and need Database Lab access, which
-  community contributors usually lack. Keep the sanitized summary (timings, buffers, plan shape) in the MR next
-  to the link.
-- **Not a sanitized alternative by default:** pasting into explain.depesz.com or explain.dalibo.com creates a public
-  object. Sanitize first and get the human's OK before posting.
+- The session URL built from a plain ID on `gitlab-production-main` (`61473`): matches an existing console
+  link, but nobody has opened one built this way.
+- Whether other GitLab team members can open a link from someone else's session.
+- Whether `joe reset` keeps the same session, so that all runs stay in one history.
+- Pasting into explain.depesz.com or explain.dalibo.com creates a public object: sanitize first and get the
+  human's OK.
+
+Upstream gap: the CLI's `--json` output should include `session_id` and the console command ID or URL.
