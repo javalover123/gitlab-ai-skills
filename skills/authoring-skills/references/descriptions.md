@@ -7,6 +7,27 @@ the skill.** Write it for the model, not for humans. This is the single
 highest-leverage field in a skill: a great body behind a summary-style
 description never fires.
 
+## Contents
+
+- Hard constraints
+- The four properties of a good description
+- Worked before / after
+- The litmus / trigger test
+
+## Hard constraints
+
+- Say both **what** the skill does and **when** to use it.
+- Non-empty, **at most 1,024 characters**. Avoid XML angle brackets (`<`, `>`)
+  *(Anthropic's frontmatter rule; the text is injected into the system prompt,
+  so markup could inject instructions)*.
+- **Third person.** "Processes Excel files…", not "I can help you…" or "You can
+  use this to…" — mixed point of view hurts discovery.
+- Include the concrete terms users say: task verbs, file types/extensions, tool
+  names, jargon. Vague ("Helps with documents"), trigger-less ("Creates
+  sophisticated documentation systems"), and implementation-only ("Implements
+  the Project entity model") descriptions all fail.
+- Quote values containing colons (invalid YAML otherwise).
+
 ## The four properties of a good description
 
 ### 1. Lead with the trigger surface
@@ -101,7 +122,10 @@ A user asking "fill out this signup form and screenshot the result" won't match
    it before touching the body.
    - Misses on should-fire prompts → add the missing literal trigger phrases.
    - Hits on should-not prompts → add/tighten a boundary clause.
-4. Re-run until predictions are correct. (This mirrors the post's finding that
+4. Include *paraphrased* should-fire prompts, not just ones that echo the
+   description. Cheap probe in a live session: ask the agent when it would use
+   the skill and compare its answer with your intent.
+5. Re-run until predictions are correct. (This mirrors the post's finding that
    verification rigour pays off most — apply it to the description itself.)
 
 > Rule of thumb: if you can't predict which prompts fire it by reading only the
