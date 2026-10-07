@@ -291,6 +291,12 @@ class TestQuotedScalars(unittest.TestCase):
         fields = _parse('description: "ends\\\\"\n')
         self.assertEqual(fields["description"], "ends\\")
 
+    def test_malformed_hex_escapes_kept_literally(self):
+        for raw in ("\\u12", "\\u1_23", "\\x+1", "\\u 123"):
+            with self.subTest(raw=raw):
+                fields = _parse('description: "%s"\n' % raw)
+                self.assertEqual(fields["description"], raw)
+
     def test_single_quoted_doubled_quote(self):
         fields = _parse("description: 'it''s fine'\n")
         self.assertEqual(fields["description"], "it's fine")
@@ -314,7 +320,9 @@ class TestParityWithPyYaml(unittest.TestCase):
         import glob
 
         root = os.path.join(SCRIPTS_DIR, "..", "skills", "*", "SKILL.md")
-        for path in sorted(glob.glob(root)):
+        paths = sorted(glob.glob(root))
+        self.assertTrue(paths)
+        for path in paths:
             raw = extract_raw_frontmatter(path)
             if raw is None:
                 continue

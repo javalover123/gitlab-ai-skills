@@ -1,7 +1,13 @@
 """Shared YAML frontmatter parser for SKILL.md files.
 
 Extracts top-level key-value pairs from ``---``-delimited YAML frontmatter.
-Supports simple scalars and YAML multi-line scalars (``>``, ``>-``, ``|``, ``|-``).
+Supports simple scalars, single-line quoted scalars (double-quoted escapes and
+single-quoted ``''`` are decoded, like YAML) and YAML multi-line scalars
+(``>``, ``>-``, ``|``, ``|-``).
+
+Valid YAML that is NOT supported and yields wrong values without an error:
+trailing comments after a quoted value (``"foo" # c``) and quoted scalars
+spanning several lines. CI's strict parse and the PyYAML parity test catch these.
 Nested keys (indented under a mapping parent) are intentionally skipped.
 """
 
@@ -33,6 +39,8 @@ def extract_raw_frontmatter(skill_file):
     return None
 
 
+import string
+
 _SIMPLE_ESCAPES = {
     "0": "\0", "a": "\a", "b": "\b", "t": "\t", "\t": "\t", "n": "\n",
     "v": "\v", "f": "\f", "r": "\r", "e": "\x1b", " ": " ", '"': '"',
@@ -55,12 +63,15 @@ def _decode_double_quoted(body):
         esc = body[i + 1]
         if esc in _HEX_ESCAPES:
             digits = body[i + 2 : i + 2 + _HEX_ESCAPES[esc]]
-            try:
-                out.append(chr(int(digits, 16)))
-                i += 2 + len(digits)
-                continue
-            except (ValueError, OverflowError):
-                pass
+            if len(digits) == _HEX_ESCAPES[esc] and all(
+                c in string.hexdigits for c in digits
+            ):
+                try:
+                    out.append(chr(int(digits, 16)))
+                    i += 2 + len(digits)
+                    continue
+                except (ValueError, OverflowError):
+                    pass
         elif esc in _SIMPLE_ESCAPES:
             out.append(_SIMPLE_ESCAPES[esc])
             i += 2
