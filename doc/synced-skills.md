@@ -21,10 +21,21 @@ skills:
 
 Two pieces enforce the model:
 
-1. **Inbound sync** (`sync-skills` CI job, scheduled) — pulls the upstream copy
+1. **Inbound sync** (`sync-skills` CI job, scheduled or run manually) — pulls the upstream copy
    in and opens an MR.
 2. **Edit guard** (`guard-synced-skills` CI job, merge requests) — fails any MR
    that edits a synced skill directly, pointing the author at the SSoT.
+
+## Current synced skills
+
+| Skill | Source of truth |
+|---|---|
+| `postgresai` | `gitlab-org/gitlab`, `.claude/skills/postgresai` (`master`) |
+
+Fix these upstream, not here. The whole skill directory is mirrored, including
+`scripts/` and `tests/`. Generated per-channel files (for example the Claude
+Code `plugin.json`) live outside `skills/<name>/`, so the sync does not delete
+them.
 
 ## The sync job
 
@@ -79,7 +90,7 @@ attributable to a bot and the guard can recognize them.
 | Property | Value |
 |---|---|
 | Token name | `skills-sync-bot` |
-| Token id | `24341787` |
+| Token id | `24341801` |
 | Bot user | `project_80188013_bot_03b2e04f243ae78d02a9f6169e37eb65` |
 | Scope | `api` |
 | Role | Developer (`access_level=30`) |
@@ -124,7 +135,7 @@ Rotate (before expiry) and update the CI variable in one shot:
 
 ```sh
 NEWTOKEN="$(glab api -X POST \
-  'projects/gitlab-org%2Fai%2Fskills/access_tokens/24341787/rotate' \
+  'projects/gitlab-org%2Fai%2Fskills/access_tokens/24341801/rotate' \
   -H 'Content-Type: application/json' --input - <<<'{"expires_at":"YYYY-MM-DD"}' \
   | jq -r '.token')"
 

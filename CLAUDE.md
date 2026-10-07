@@ -137,7 +137,7 @@ Some skills are **synced in** from another repository — their source of truth
 - **Don't edit them here.** The `guard-synced-skills` MR-pipeline job fails any
   MR that touches a synced skill's directory. Fix the skill at its source
   (`source_project` / `source_path` in the manifest) instead.
-- A scheduled pipeline (`SCHEDULE_TYPE=sync_skills`) runs
+- The `sync-skills` job (scheduled with `SCHEDULE_TYPE=sync_skills`, or run manually) runs
   `scripts/sync_external_skills.py`, mirrors the upstream copy (including
   deletions), runs `lefthook run auto-fix`, and opens an MR as the sync bot.
 - The version comes from upstream — no manual bump for synced skills.

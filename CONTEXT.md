@@ -52,7 +52,7 @@ _Avoid_: util, tool, command.
 
 **Synced Skill**:
 A Skill whose source of truth (SSoT) lives in another repository, listed in
-`synced-skills.yml`. This repo is the destination: a scheduled pipeline pulls
-the canonical copy in and opens an MR, while an MR-pipeline guard blocks direct
+`synced-skills.yml`. This repo is the destination: the `sync-skills` job (scheduled or run
+manually) pulls the canonical copy in and opens an MR, while an MR-pipeline guard blocks direct
 edits here. Distinct from a locally-authored Skill, which is edited in place.
 _Avoid_: mirror, import, vendored skill.
