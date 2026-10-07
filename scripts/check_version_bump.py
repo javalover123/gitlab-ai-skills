@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 """Checks that skill versions are bumped when skill files change.
 
-Compares the current branch against the base branch (origin/main or
-CI_MERGE_REQUEST_DIFF_BASE_SHA) and fails if any skill has file changes
+Changed files are scoped to the MR's own changes (merge-base, or HEAD^1 in
+merged-results pipelines). Versions are compared against the current target
+branch tip so a version already taken there must be bumped past. Exits 2 if
+the baseline cannot be read. Fails if any skill has file changes
 without a corresponding version bump in SKILL.md frontmatter.
 
 Generated files (.claude-plugin/) are excluded from the diff check since
@@ -36,40 +38,81 @@ def log_debug(message):
         print(f"DEBUG: {message}", file=sys.stderr)
 
 
-def get_base_ref():
-    """Determine the base ref to diff against.
-
-    In CI merge request pipelines, uses CI_MERGE_REQUEST_DIFF_BASE_SHA.
-    Otherwise falls back to origin/main (for lefthook pre-push).
-    """
-    ci_base = os.environ.get("CI_MERGE_REQUEST_DIFF_BASE_SHA")
-    if ci_base:
-        log_debug(f"Using CI base ref: {ci_base}")
-        return ci_base
-
-    # Fallback: origin/main for local development (lefthook pre-push)
-    default_branch = os.environ.get("CI_DEFAULT_BRANCH", "main")
-    base_ref = f"origin/{default_branch}"
-    log_debug(f"Using local base ref: {base_ref}")
-    return base_ref
+class BaselineError(Exception):
+    """A git ref needed for the comparison could not be read."""
 
 
-def get_changed_files(base_ref):
-    """Get list of files changed between base_ref and HEAD."""
+def run_git(*args):
+    """Run git in the repo root and return stdout; raise BaselineError on failure."""
     try:
         result = subprocess.run(
-            ["git", "diff", "--name-only", base_ref, "HEAD"],
+            ["git", *args],
             capture_output=True,
             text=True,
             cwd=REPO_ROOT,
             check=True,
         )
-        files = [f for f in result.stdout.strip().split("\n") if f]
-        log_debug(f"Changed files: {files}")
-        return files
     except subprocess.CalledProcessError as e:
-        log_debug(f"git diff failed: {e.stderr}")
-        return []
+        raise BaselineError(f"git {' '.join(args)} failed: {e.stderr.strip()}") from e
+    return result.stdout
+
+
+def ref_exists(ref):
+    try:
+        run_git("rev-parse", "--verify", "--quiet", f"{ref}^{{commit}}")
+        return True
+    except BaselineError:
+        return False
+
+
+def get_baselines():
+    """Return (diff_args, version_ref).
+
+    diff_args are the `git diff --name-only` revision arguments that scope the
+    changed files to the MR's own changes. version_ref is the ref whose skill
+    versions the new version must exceed: the current target-branch tip where
+    available, so a version already taken on the target must be bumped past.
+
+    - Merged-results pipelines: HEAD is a merge commit, so HEAD^1 (the target
+      tip) is the baseline for both. A merge-base would attribute target drift
+      to the MR.
+    - Detached MR pipelines: files come from the MR merge-base
+      (CI_MERGE_REQUEST_DIFF_BASE_SHA); versions from origin/<default> when
+      fetched, else the merge-base.
+    - Local runs: three-dot diff against origin/<default>.
+    """
+    default_branch = os.environ.get("CI_DEFAULT_BRANCH", "main")
+    target_tip = f"origin/{default_branch}"
+
+    if os.environ.get("CI_MERGE_REQUEST_EVENT_TYPE") == "merged_result":
+        base = os.environ.get("CI_MERGE_REQUEST_TARGET_BRANCH_SHA") or "HEAD^1"
+        log_debug(f"Merged-results pipeline, baseline: {base}")
+        return [base, "HEAD"], base
+
+    diff_base = os.environ.get("CI_MERGE_REQUEST_DIFF_BASE_SHA")
+    if diff_base:
+        if ref_exists(target_tip):
+            version_ref = target_tip
+        else:
+            version_ref = diff_base
+            print(
+                f"WARNING: {target_tip} not available; version collision "
+                "detection against the target branch is off.",
+                file=sys.stderr,
+            )
+        log_debug(f"Detached MR pipeline, diff base: {diff_base}, versions: {version_ref}")
+        return [diff_base, "HEAD"], version_ref
+
+    log_debug(f"Local run, baseline: {target_tip}")
+    return [f"{target_tip}...HEAD"], target_tip
+
+
+def get_changed_files(diff_args):
+    """Get files changed per diff_args. Raises BaselineError if git fails."""
+    output = run_git("diff", "--name-only", *diff_args)
+    files = [f for f in output.strip().split("\n") if f]
+    log_debug(f"Changed files: {files}")
+    return files
 
 
 def get_changed_skills(changed_files):
@@ -108,15 +151,8 @@ def get_version_at_ref(skill_name, ref):
     """
     skill_md_path = f"skills/{skill_name}/SKILL.md"
     try:
-        result = subprocess.run(
-            ["git", "show", f"{ref}:{skill_md_path}"],
-            capture_output=True,
-            text=True,
-            cwd=REPO_ROOT,
-            check=True,
-        )
-        content = result.stdout
-    except subprocess.CalledProcessError:
+        content = run_git("show", f"{ref}:{skill_md_path}")
+    except BaselineError:
         log_debug(f"Could not read {skill_md_path} at {ref} (new skill?)")
         return None
 
@@ -135,6 +171,11 @@ def get_version_at_ref(skill_name, ref):
             return version
 
     return None
+
+
+def merge_base_version(skill_name, diff_args):
+    """Version at the MR's own diff baseline (differs from the target tip on collisions)."""
+    return get_version_at_ref(skill_name, diff_args[0].split("...")[0])
 
 
 def parse_current_version(skill_name):
@@ -184,8 +225,12 @@ def is_version_bumped(old_version, new_version):
 def main():
     is_ci_mode = "--ci" in sys.argv
 
-    base_ref = get_base_ref()
-    changed_files = get_changed_files(base_ref)
+    try:
+        diff_args, base_ref = get_baselines()
+        changed_files = get_changed_files(diff_args)
+    except BaselineError as e:
+        print(f"ERROR: cannot compute baseline: {e}", file=sys.stderr)
+        sys.exit(2)
 
     if not changed_files:
         print("No changed files detected.")
@@ -216,7 +261,14 @@ def main():
         else:
             has_errors = True
             changed_list = "\n".join(f"        - {f}" for f in files)
-            if old_version == new_version:
+            if old_version == new_version and merge_base_version(
+                skill_name, diff_args
+            ) not in (None, new_version):
+                print(
+                    f"FAIL: {skill_name} — version {new_version} is already on "
+                    f"the target branch; bump past it:\n{changed_list}"
+                )
+            elif old_version == new_version:
                 print(
                     f"FAIL: {skill_name} — version unchanged at {old_version} "
                     f"but {len(files)} file(s) changed:\n{changed_list}"
