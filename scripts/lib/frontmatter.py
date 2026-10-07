@@ -7,9 +7,12 @@ single-quoted ``''`` are decoded, like YAML) and YAML multi-line scalars
 
 Valid YAML that is NOT supported and yields wrong values without an error:
 trailing comments after a quoted value (``"foo" # c``) and quoted scalars
-spanning several lines. CI's strict parse and the PyYAML parity test catch these.
+spanning several lines. Only the PyYAML parity test (run in CI) catches these.
+
 Nested keys (indented under a mapping parent) are intentionally skipped.
 """
+
+import string
 
 
 def _read_lines(skill_file):
@@ -38,8 +41,6 @@ def extract_raw_frontmatter(skill_file):
     # Reached EOF without a closing ``---``.
     return None
 
-
-import string
 
 _SIMPLE_ESCAPES = {
     "0": "\0", "a": "\a", "b": "\b", "t": "\t", "\t": "\t", "n": "\n",
