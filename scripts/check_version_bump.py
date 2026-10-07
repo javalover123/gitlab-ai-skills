@@ -91,7 +91,15 @@ def get_baselines():
 
     diff_base = os.environ.get("CI_MERGE_REQUEST_DIFF_BASE_SHA")
     if diff_base:
-        version_ref = target_tip if ref_exists(target_tip) else diff_base
+        if ref_exists(target_tip):
+            version_ref = target_tip
+        else:
+            version_ref = diff_base
+            print(
+                f"WARNING: {target_tip} not available; version collision "
+                "detection against the target branch is off.",
+                file=sys.stderr,
+            )
         log_debug(f"Detached MR pipeline, diff base: {diff_base}, versions: {version_ref}")
         return [diff_base, "HEAD"], version_ref
 
@@ -165,6 +173,11 @@ def get_version_at_ref(skill_name, ref):
     return None
 
 
+def merge_base_version(skill_name, diff_args):
+    """Version at the MR's own diff baseline (differs from the target tip on collisions)."""
+    return get_version_at_ref(skill_name, diff_args[0].split("...")[0])
+
+
 def parse_current_version(skill_name):
     """Read the current version from the working tree SKILL.md."""
     skill_file = os.path.join(REPO_ROOT, "skills", skill_name, "SKILL.md")
@@ -214,10 +227,6 @@ def main():
 
     try:
         diff_args, base_ref = get_baselines()
-        if not ref_exists(base_ref):
-            raise BaselineError(
-                f"baseline ref {base_ref} is not available (shallow clone?)"
-            )
         changed_files = get_changed_files(diff_args)
     except BaselineError as e:
         print(f"ERROR: cannot compute baseline: {e}", file=sys.stderr)
@@ -252,7 +261,14 @@ def main():
         else:
             has_errors = True
             changed_list = "\n".join(f"        - {f}" for f in files)
-            if old_version == new_version:
+            if old_version == new_version and merge_base_version(
+                skill_name, diff_args
+            ) not in (None, new_version):
+                print(
+                    f"FAIL: {skill_name} — version {new_version} is already on "
+                    f"the target branch; bump past it:\n{changed_list}"
+                )
+            elif old_version == new_version:
                 print(
                     f"FAIL: {skill_name} — version unchanged at {old_version} "
                     f"but {len(files)} file(s) changed:\n{changed_list}"
