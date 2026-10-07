@@ -270,5 +270,71 @@ class TestParseFrontmatterBackcompat(unittest.TestCase):
             os.unlink(path)
 
 
+def _parse(front_lines):
+    path = _write_temp("---\n" + front_lines + "---\n")
+    try:
+        return parse_frontmatter(path)
+    finally:
+        os.unlink(path)
+
+
+class TestQuotedScalars(unittest.TestCase):
+    def test_double_quoted_escaped_quotes(self):
+        fields = _parse('description: "Use \\"glab api\\" here"\n')
+        self.assertEqual(fields["description"], 'Use "glab api" here')
+
+    def test_double_quoted_backslash_and_escapes(self):
+        fields = _parse('description: "a\\\\b\\tc\\u00e9"\n')
+        self.assertEqual(fields["description"], "a\\b\tc\u00e9")
+
+    def test_double_quoted_trailing_escaped_backslash(self):
+        fields = _parse('description: "ends\\\\"\n')
+        self.assertEqual(fields["description"], "ends\\")
+
+    def test_malformed_hex_escapes_kept_literally(self):
+        for raw in ("\\u12", "\\u1_23", "\\x+1", "\\u 123"):
+            with self.subTest(raw=raw):
+                fields = _parse('description: "%s"\n' % raw)
+                self.assertEqual(fields["description"], raw)
+
+    def test_single_quoted_doubled_quote(self):
+        fields = _parse("description: 'it''s fine'\n")
+        self.assertEqual(fields["description"], "it's fine")
+
+    def test_single_quoted_keeps_backslashes(self):
+        fields = _parse("description: 'a\\nb'\n")
+        self.assertEqual(fields["description"], "a\\nb")
+
+    def test_unquoted_value_keeps_edge_quotes(self):
+        fields = _parse('description: foo "bar"\n')
+        self.assertEqual(fields["description"], 'foo "bar"')
+
+    def test_unquoted_value_with_leading_quote_char(self):
+        fields = _parse('description: "bar" baz\n')
+        self.assertEqual(fields["description"], '"bar" baz')
+
+
+@unittest.skipUnless(HAS_YAML, "PyYAML not installed")
+class TestParityWithPyYaml(unittest.TestCase):
+    def test_all_skills_match_safe_load(self):
+        import glob
+
+        root = os.path.join(SCRIPTS_DIR, "..", "skills", "*", "SKILL.md")
+        paths = sorted(glob.glob(root))
+        self.assertTrue(paths)
+        for path in paths:
+            raw = extract_raw_frontmatter(path)
+            if raw is None:
+                continue
+            loaded = yaml.safe_load(raw)
+            parsed = parse_frontmatter(path)
+            for key, expected in loaded.items():
+                if not isinstance(expected, str) or key not in parsed:
+                    continue
+                with self.subTest(path=path, key=key):
+                    # Folded/literal scalars differ only in trailing newline.
+                    self.assertEqual(parsed[key], expected.rstrip("\n"))
+
+
 if __name__ == "__main__":
     unittest.main()
