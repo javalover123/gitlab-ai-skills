@@ -140,6 +140,8 @@ check-version-bump:
   before_script:
     - apk add --no-cache git
     - git fetch origin $CI_DEFAULT_BRANCH --depth=1
+    # Merge-base and merged-results target tip must be present for the diff.
+    - git fetch origin $CI_MERGE_REQUEST_DIFF_BASE_SHA $CI_MERGE_REQUEST_TARGET_BRANCH_SHA --depth=1 || true
   script:
     - python3 scripts/check_version_bump.py --ci --debug
 
