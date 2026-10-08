@@ -120,6 +120,10 @@
       "source": "./.claude-plugin/plugins/pushify"
     },
     {
+      "name": "refactor",
+      "source": "./.claude-plugin/plugins/refactor"
+    },
+    {
       "name": "run-in-tmux-pane",
       "source": "./.claude-plugin/plugins/run-in-tmux-pane"
     },

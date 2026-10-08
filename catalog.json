@@ -241,6 +241,14 @@
       "path": "skills/pushify/SKILL.md"
     },
     {
+      "name": "refactor",
+      "description": "Performs codebase review and systematic refactoring for code quality, reliability, maintainability, and test coverage across Go, Rust, Python, C, and Nix. Use when running quality improvement passes, reviewing code for anti-patterns, cleaning up technical debt, improving test coverage, or when the user mentions refactor, code quality, or review-code.",
+      "category": "Development Workflow",
+      "license": "MIT",
+      "compatibility": "opencode",
+      "path": "skills/refactor/SKILL.md"
+    },
+    {
       "name": "run-in-tmux-pane",
       "description": "Use for commands that require an interactive shell, a TTY, or shell-only functions. Run them in a temporary tmux pane with the full zsh environment. Use the shell tool directly for ordinary non-interactive commands.",
       "category": "Shell & Environment",
