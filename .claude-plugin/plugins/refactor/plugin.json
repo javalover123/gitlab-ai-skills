@@ -1,0 +1,10 @@
+{
+  "name": "refactor",
+  "description": "Performs codebase review and systematic refactoring for code quality, reliability, maintainability, and test coverage across Go, Rust, Python, C, and Nix. Use when running quality improvement passes, reviewing code for anti-patterns, cleaning up technical debt, improving test coverage, or when the user mentions refactor, code quality, or review-code.",
+  "version": "1.0.1",
+  "author": {
+    "name": "GitLab"
+  },
+  "license": "MIT",
+  "skills": "./"
+}
