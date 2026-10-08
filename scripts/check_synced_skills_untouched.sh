@@ -56,8 +56,11 @@ if [[ ${#guarded[@]} -eq 0 ]]; then
   exit 0
 fi
 
-# Determine the merge base to diff against.
-BASE="${CI_MERGE_REQUEST_DIFF_BASE_SHA:-}"
+# Determine the commit to diff against. Prefer the target branch tip: in
+# merged-results and merge-train pipelines HEAD already contains target commits
+# made after the MR's diff base (e.g. a scheduled sync), and diffing from the
+# older diff base would blame the MR for them. `...` takes the merge base.
+BASE="${CI_MERGE_REQUEST_TARGET_BRANCH_SHA:-${CI_MERGE_REQUEST_DIFF_BASE_SHA:-}}"
 if [[ -z "$BASE" ]]; then
   TARGET="${CI_MERGE_REQUEST_TARGET_BRANCH_NAME:-${CI_DEFAULT_BRANCH:-main}}"
   git fetch --depth=50 origin "$TARGET" >/dev/null 2>&1 || true
