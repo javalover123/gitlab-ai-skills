@@ -16,6 +16,8 @@ to this repo's `skills/<name>/` layout and its AGENTS.md conventions:
      ("utilize", "leverage", "robust", "comprehensive", "seamless", "delve",
      "holistic", "synergy", "cutting-edge", "endeavor") plus a few classic
      filler phrases. Makes the existing written convention enforceable.
+     A line ending in `<!-- voice-ok -->` is skipped, for prose that has to
+     quote the banned words (e.g. a table of words to avoid).
 
 Per the repo decision, only broken links fail CI; structure and voice are
 warn-only (like `validate_skill_length.py`) so they surface offenders without
@@ -61,6 +63,11 @@ TEACHING_PREFIXES = (
     "never use", "never say", "avoid", "don't use", "do not use", "banned",
     "blocklist", "blocklisted", "bad:", "wrong:", "anti-pattern",
 )
+
+# A line carrying this marker is skipped by the voice check. Use it where a
+# banned word has to appear on purpose and the teaching-prefix rule does not
+# catch it, such as a table row listing the word and its replacement.
+VOICE_OK_MARKER = "<!-- voice-ok -->"
 
 LINK_RE = re.compile(r"\[([^\]]*)\]\(([^)]+)\)")
 
@@ -164,7 +171,7 @@ def check_voice(md_file):
         re.IGNORECASE,
     )
     for line_no, line in prose_lines(text):
-        if is_teaching_line(line):
+        if is_teaching_line(line) or VOICE_OK_MARKER in line:
             continue
         # Strip inline code spans first, matching check_structure/check_links,
         # so a banned word quoted in backticks (e.g. `utilize`) isn't flagged.

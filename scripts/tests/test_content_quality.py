@@ -89,6 +89,13 @@ class TestVoice(unittest.TestCase):
         with TempSkill("This paragraph mentions `utilize` in a snippet.\n") as s:
             self.assertEqual(vcq.check_voice(s.skill_md), [])
 
+    def test_voice_ok_marker_skips_line(self):
+        body = "| leverage | use | <!-- voice-ok -->\nWe leverage the cache.\n"
+        with TempSkill(body) as s:
+            warns = vcq.check_voice(s.skill_md)
+            self.assertEqual(len(warns), 1)
+            self.assertTrue(warns[0].startswith("line 2:"))
+
 
 class TestStructure(unittest.TestCase):
     def test_use_when_cue_satisfies(self):
