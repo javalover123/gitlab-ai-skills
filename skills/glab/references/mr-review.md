@@ -300,7 +300,7 @@ missing**. One hole: `@-` reads **stdin**, and with nothing piped sends `{"body"
 Non-UTF-8 bytes become U+FFFD under **both** flags (Go's JSON encoder) — neither is verbatim for
 binary content.
 
-### Nested JSON needs `--input`
+### Nested JSON: pass a JSON value or use `--input`
 
 Bracketed names like `position[new_line]` are rejected before sending. Pass the object as a JSON
 value (`-F 'position={...}'`) or the whole body with `--input`. `--input` without `-H "Content-Type: application/json"`
