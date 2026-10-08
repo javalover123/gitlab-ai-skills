@@ -1,18 +1,16 @@
 # MR Review — Notes, Code Suggestions, Discussions
 
-**Default to `glab mr note` for every MR-comment operation** — read, write, reply, resolve.
-The raw `glab api .../discussions` and `glab api .../draft_notes` paths exist only for two
-specific cases:
+**Default to `glab mr note` for every MR-comment operation** — read, write, reply, resolve,
+and batch drafts. The raw `glab api` paths exist only for these cases:
 
-1. **Draft-note housekeeping** (Section 3) — listing or deleting pending drafts, or batching
-   on glab older than 1.119.0. On 1.119.0+ create and publish drafts with
-   `glab mr note create --draft` and `glab mr note publish` instead.
+1. **Listing, editing or deleting pending drafts** (Section 3) — `glab mr note` has no
+   subcommand for any of them.
 2. **Raw discussion JSON / position metadata** (Section 4) — when you need fields that
    `glab mr note list -F json` doesn't surface (e.g. full position diff refs).
 
 If your task is "list / post / reply / resolve a single MR comment", use Section 1. **Do not
-reach for `glab api` for these operations** — it produces brittle, gotcha-laden code (see
-Section 3 caveats) when a one-liner suffices.
+reach for `glab api` for these operations** — it produces brittle, gotcha-laden code when a
+one-liner suffices.
 
 Always check existing discussions before posting — earlier threads may already be resolved or
 outdated.
@@ -108,6 +106,7 @@ If a prefix matches multiple discussions, `glab` errors out with the ambiguous m
 
 - `--line` and `--old-line` **require `--file`**, and **cannot be used together**.
 - `--file`, `--reply`, and `--unique` are **mutually exclusive**.
+- `--draft` cannot be combined with `--unique`, `--internal`, or `--resolvable=false`.
 - All `create` subcommands accept the MR IID as a positional argument; omit it to auto-detect
   from the current branch.
 
@@ -174,10 +173,8 @@ broader patterns.
 
 ## 3. Draft notes (batched reviews)
 
-### Native drafts (glab 1.119.0+)
-
-On glab 1.119.0+, batch natively. Each comment becomes a pending draft, and `publish` posts
-them as one review event (one notification):
+Each comment becomes a pending draft, and `publish` posts them as one review event (one
+notification):
 
 ```bash
 glab mr note create <iid> --draft --file path/to/file --line 42 -m "$(cat "$MSG")"
@@ -185,147 +182,48 @@ glab mr note create <iid> --draft --file path/to/file --old-line 7 -m "$(cat "$M
 glab mr note publish <iid> -m "Summary of the review" --yes
 ```
 
-- `--draft` combines with `--file`, `--line`, `--old-line` and `--reply`, but not with `--unique`.
-- `publish` sends **all** of your pending drafts on the MR, so check for leftovers first
-  (`GET .../draft_notes` below).
-- `publish --reviewer-state reviewed|requested_changes` also sets your review state.
+- `--draft` combines with `--file`, `--line`, `--old-line` **or** `--reply` (`--reply` and
+  `--file` are still mutually exclusive). It does not combine with `--unique`, `--internal`,
+  or `--resolvable=false`.
+- Draft reply: `glab mr note create <iid> --draft --reply abc12345 -m "..."`.
+- Each `--draft` call prints the new draft's ID.
+- **Always pass `--yes` to `publish`** — without a TTY it fails instead of prompting.
+- `publish` sends **all** of your pending drafts on the MR, so list leftovers first (below).
+- `publish --reviewer-state reviewed|requested_changes` also sets your review state. It records
+  no approval (use `glab mr approve`). On your own MR, GitLab ignores it unless you are also
+  listed as a reviewer; glab warns when that happens, so treat the warning as "state not set".
 
 For any single comment, prefer `glab mr note create` above.
 
-### Raw `glab api` fallback (older glab, or to list or delete drafts)
+### List, edit or delete pending drafts (raw API)
 
-The rest of this section covers the raw `draft_notes` API. Use it only on glab older than
-1.119.0, or to list or delete pending drafts, which have no `glab mr note` subcommand.
-
-### Fetching MR data
-
-The `/diffs` endpoint returns full diff content for every file. Use `jq` to filter
-client-side. Add `unidiff=true` (GitLab 16.5+) for standard unified-diff format, which is
-easier to parse programmatically.
+These operations have no native subcommand. `glab mr note delete` and `glab mr note update`
+only work on published notes, not on draft IDs. Drafts are per-user: you only see and change
+your own.
 
 ```bash
-# Just the changed file paths
-glab api --method GET "projects/<project_id>/merge_requests/<mr_iid>/diffs?per_page=100" \
-  | jq '.[].new_path'
-
-# Diff for a specific file (unified format)
-glab api --method GET "projects/<project_id>/merge_requests/<mr_iid>/diffs?unidiff=true&per_page=100" \
-  | jq '.[] | select(.new_path == "path/to/file.rb") | .diff'
-
-# Page through large responses
-glab api --method GET "projects/<project_id>/merge_requests/<mr_iid>/diffs?per_page=20&page=2"
-
-# MR metadata
-glab api --method GET "projects/<project_id>/merge_requests/<mr_iid>"
-```
-
-### MR version SHAs
-
-Inline draft notes require three SHAs from the latest version. Always fetch fresh — cached
-SHAs from a previous version may be rejected.
-
-```bash
-# ⚠️ API returns base_commit_sha / head_commit_sha / start_commit_sha
-# but the position object expects base_sha / head_sha / start_sha — jq renames here
-glab api --method GET "projects/<project_id>/merge_requests/<mr_iid>/versions" \
-  | jq '.[0] | {base_sha: .base_commit_sha, head_sha: .head_commit_sha, start_sha: .start_commit_sha}'
-```
-
-### General draft note (not inline)
-
-Use `-f` flags — no position object needed:
-
-```bash
-glab api --method POST \
-  "projects/<project_id>/merge_requests/<mr_iid>/draft_notes" \
-  -f note="Your summary comment here"
-```
-
-### Inline draft note
-
-**⚠️ Do NOT use `-f` flags for inline draft notes** — `-f` builds flat JSON keys, not nested
-objects (see Gotchas at the end of this file for the full explanation).
-
-Write the nested JSON body to a `/tmp/` file using a single-quoted
-`<< 'EOF'` heredoc, then pass it with `--input`. This prevents the shell
-from interpolating backticks and `$` that commonly appear in review
-comment bodies:
-
-```bash
-cat > /tmp/draft.json << 'DRAFT'
-{
-  "note": "your comment here",
-  "position": {
-    "position_type": "text",
-    "base_sha": "BASE_SHA",
-    "head_sha": "HEAD_SHA",
-    "start_sha": "START_SHA",
-    "old_path": "path/to/file.rb",
-    "new_path": "path/to/file.rb",
-    "new_line": 42
-  }
-}
-DRAFT
-glab api --method POST \
-  "projects/<project_id>/merge_requests/<mr_iid>/draft_notes" \
-  -H "Content-Type: application/json" --input /tmp/draft.json
-```
-
-**Do NOT use `<(...)` process substitution** — it is not available in
-plain `sh`. Do NOT pipe inline JSON with `echo '...' | --input -` when
-the note body may contain backticks or `$` — those are interpreted
-before the heredoc is written.
-
-### Position object — line type rules
-
-| Diff prefix       | Use                              | Omit       |
-|-------------------|----------------------------------|------------|
-| `+` (added line)  | `new_line`                       | `old_line` |
-| `-` (removed line)| `old_line`                       | `new_line` |
-| ` ` (context line)| both `old_line` and `new_line`   | —          |
-
-Line numbers come from the diff hunk headers (`@@ -old_start,count +new_start,count @@`), not
-from the source file's absolute line numbers. Count down from `old_start` / `new_start` to
-your target. Lines prefixed with `-` advance `old_line`, `+` advances `new_line`, context
-lines advance both.
-
-For renames (`renamed_file: true`): use the `old_path` and `new_path` from the diff object
-directly — they will differ. For most files: copy `new_path` into both `old_path` and
-`new_path`.
-
-### Verify before publishing
-
-Always verify that notes you intended as inline actually attached to the
-diff — a dropped position is silent (HTTP 201, valid IDs, but the note
-appears as a general comment). **Run this before `bulk_publish`** — once
-drafts are published, the `draft_notes` endpoint returns an empty array
-and this check produces no output.
-
-```bash
+# List. Once published, this returns an empty array. A draft with .position == null is a
+# general note or a reply; drafts on removed lines (--old-line) have old_line set and new_line null.
 glab api --method GET --paginate \
   "projects/<project_id>/merge_requests/<mr_iid>/draft_notes" \
-  | jq '.[] | {id, new_line: .position.new_line, note: .note[0:40]}'
+  | jq '.[] | {id, path: .position.new_path, new_line: .position.new_line, old_line: .position.old_line, reply_to: .discussion_id, note: .note[0:40]}'
+
+# Edit the text of one draft (or delete and recreate it with glab mr note create --draft)
+glab api --method PUT \
+  "projects/<project_id>/merge_requests/<mr_iid>/draft_notes/<draft_id>" \
+  -F "note=@$MSG"
+
+# Delete one draft
+glab api --method DELETE \
+  "projects/<project_id>/merge_requests/<mr_iid>/draft_notes/<draft_id>"
 ```
-
-Intentional general notes (no `position`) also show `new_line: null` —
-use the `note` preview to distinguish. A `null` on a note you meant to
-be inline means the position was dropped (see Gotchas below).
-
-### Bulk publish
-
-After verifying, publish all draft notes as one review event:
-
-```bash
-glab api --method POST \
-  "projects/<project_id>/merge_requests/<mr_iid>/draft_notes/bulk_publish"
-```
-
-This sends a single notification to MR participants with all your
-comments grouped together.
 
 ---
 
 ## 4. Discussions via `glab api` (last-resort fallback)
+
+MR diffs: `glab mr diff <iid> --raw` for the whole diff. For the changed paths or one file:
+`glab api "projects/<project_id>/merge_requests/<mr_iid>/diffs?unidiff=true&per_page=100" | jq '.[] | select(.new_path == "path/to/file") | .diff'`.
 
 **Use Section 1 (`glab mr note`) for any read / reply / resolve.** This section exists only
 for the narrow case where you need fields that `glab mr note list -F json` does not surface
@@ -342,17 +240,6 @@ glab api --method GET "projects/<project_id>/merge_requests/<mr_iid>/discussions
 glab api --method GET "projects/<project_id>/merge_requests/<mr_iid>/discussions?per_page=100" \
   | jq '.[] | {id, resolved: .notes[0].resolved, body: .notes[0].body}'
 ```
-
-### Reply via the API (draft-mode reply, no position needed)
-
-```bash
-glab api --method POST \
-  "projects/<project_id>/merge_requests/<mr_iid>/draft_notes" \
-  -f note="your reply" \
-  -f in_reply_to_discussion_id="DISCUSSION_ID"
-```
-
-For non-batched replies, prefer `glab mr note create --reply <id>`.
 
 ### Resolve / reopen via the API
 
@@ -376,7 +263,6 @@ For non-batched flows, prefer `glab mr note resolve|reopen <id>`.
 
 Evidence for item 17. To probe any assumption in ~30s, set `GLAB_DEBUG_HTTP=1` and `POST` to a
 nonexistent issue IID: it prints the serialized request body and guarantees nothing lands.
-Verified on **glab 1.110.0 (1797d215)**, re-confirmed on **1.112.0**.
 
 ### `-F`/`--field` converts its inline value; `-f`/`--raw-field` never does
 
@@ -384,6 +270,7 @@ Verified on **glab 1.110.0 (1797d215)**, re-confirmed on **1.112.0**.
 |---|---|
 | JSON literal `true`/`false`/`null` | `{"body":true}` — not a string |
 | integer `123`, `007` | `123`, `7` (leading zeros dropped; **only** integers — `12.5`, `1e3`, `" true"` stay strings) |
+| value starting with `{` or `[` | parsed as JSON (an object/array); invalid JSON fails loudly, e.g. `-F 'body=[WIP] fix'` |
 | leading `@`, e.g. `@note.md` | the contents of `note.md` |
 | `:repo`/`:namespace`/`:branch`/`:fullpath` | substituted **anywhere in the value** (substring match; they're Ruby symbols too) |
 
@@ -413,10 +300,10 @@ missing**. One hole: `@-` reads **stdin**, and with nothing piped sends `{"body"
 Non-UTF-8 bytes become U+FFFD under **both** flags (Go's JSON encoder) — neither is verbatim for
 binary content.
 
-### Nested JSON needs `--input`
+### Nested JSON: pass a JSON value or use `--input`
 
-Neither flag builds nested objects (see the `draft_notes` gotcha below for the bracket-key
-symptom and `new_line: null` detection). `--input` without `-H "Content-Type: application/json"`
+Bracketed names like `position[new_line]` are rejected before sending. Pass the object as a JSON
+value (`-F 'position={...}'`) or the whole body with `--input`. `--input` without `-H "Content-Type: application/json"`
 returns **HTTP 415**. Write the JSON with a single-quoted `<< 'EOF'` heredoc so backticks and `$`
 in review bodies are not interpolated.
 
@@ -424,7 +311,7 @@ in review bodies are not interpolated.
 
 ### `glab mr note`
 
-- **EXPERIMENTAL flag** — `glab mr note *` is marked experimental in v1.94.0+. Stable enough
+- **EXPERIMENTAL flag** — `glab mr note *` is marked experimental. Stable enough
   for our workflows; watch upstream changelogs for flag changes.
 - **`resolve`/`reopen` arg order is `<mr-iid> <discussion-id>`** — the `--help` USAGE line
   reads `<discussion-id> [<id>]` which is misleading. The EXAMPLES line is correct
@@ -433,28 +320,14 @@ in review bodies are not interpolated.
   `if . == null then [] else . end` before iterating / counting.
 - **Ambiguous prefix** — `glab mr note resolve abc12345` errors if more than one discussion
   matches the prefix. Use a longer prefix or the full ID.
-- **Flag exclusivity** — `--file`, `--reply`, and `--unique` cannot be combined. To
+- **Flag exclusivity** — `--file`, `--reply`, and `--unique` cannot be combined, and `--draft`
+  rejects `--unique`, `--internal`, and `--resolvable=false`. To
   idempotently post a diff comment, list existing notes first and check before creating.
 - **Auto-detection failure** — if the current branch has no open MR (or is detached), pass
   the MR IID as a positional argument.
 
-### `glab api .../draft_notes` (fallback)
+### `glab api .../draft_notes` (list / edit / delete only)
 
-- **Field flags for inline notes → silently broken** — `-f`/`--raw-field` builds a flat JSON
-  body, so `-f "position[new_line]=72"` serializes as the literal key
-  `{"position[new_line]":"72"}` instead of a nested `position` object. The API ignores the
-  unknown flat key (HTTP 201, real IDs) and creates a *general* note — only `new_line: null`
-  reveals it. `-F`/`--field` is a **different flag** and does not help here: it flattens the
-  same way (`{"position[new_line]":72}` — type-inferred, still a literal key). Build a real
-  nested JSON body and pipe via `--input -` with `-H "Content-Type: application/json"`.
-- **HTTP 415 on piped JSON** — `glab api --input -` does not set `Content-Type` automatically;
-  omitting `-H "Content-Type: application/json"` returns HTTP 415 (Unsupported Media Type).
-  Always include the header when piping a JSON body.
-- **No process substitution** — `<(...)` is bash-only; write JSON to `/tmp/` for multi-line
-  bodies.
-- **SHA field name mismatch** — API returns `base_commit_sha` etc.; the position object
-  expects `base_sha` etc. — always apply the jq rename.
-- **SHAs expire** — always fetch `/versions` fresh.
-- **Line numbers are diff-relative** — count from hunk headers, not from the raw file.
-- **Draft notes are per-user** — `bulk_publish` publishes YOUR drafts; it won't publish
-  drafts belonging to other users.
+- **Draft notes are per-user** — you can only list, edit, delete, or publish YOUR drafts.
+- **Create drafts with `glab mr note create --draft`, not the API** — it builds and validates
+  the position (version SHAs, line type) against the latest diff.
