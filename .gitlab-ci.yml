@@ -78,6 +78,7 @@ lint-shell:
     - apk add --no-cache shellcheck bash
   script:
     - scripts/lint_shell.sh
+    - scripts/lint_bash_portability.sh
 
 # Runs the test suites skills ship next to their helper scripts
 # (skills/*/tests/test_*.sh). They stub out anything networked, so no

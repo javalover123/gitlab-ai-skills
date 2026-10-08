@@ -113,6 +113,15 @@ here, since the Docker images are Linux): check on a Mac when in doubt.
   it (verified); BSD xargs accepts `-r` and already skips empty input.
 - `cp --parents` and `find -printf` are GNU extensions; use POSIX flags.
 
+### Enforcement
+
+`scripts/lint_bash_portability.sh` (run by `bin/ci-checks`, lefthook and CI)
+flags the traps above, plus the BSD/GNU flags listed (`sed -i`, `date -d`,
+`readlink -f`, `grep -P`, `stat -c`, `mktemp --suffix`, `find -printf`,
+`cp --parents`), in `skills/**/*.sh`. It is line-based: comment lines are
+skipped, and synced skills are excluded. For a use that is guarded (say, behind
+a version check), append `# portability-ok` to that line to opt out.
+
 ### Other script types
 
 - **POSIX `sh`** (`#!/bin/sh`): no arrays, `[[ ]]`, `local` guarantees, or
