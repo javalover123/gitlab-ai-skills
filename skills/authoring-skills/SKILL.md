@@ -1,7 +1,7 @@
 ---
 name: authoring-skills
 description: Author a new agent skill or improve an existing one - write the SKILL.md frontmatter and description, structure the body, and fix skills that under- or over-trigger. Use when asked to create/write a skill, make a SKILL.md, improve/refactor a skill, or fix a skill's description.
-version: 0.5.1
+version: 0.6.0
 license: MIT
 category: Meta / Authoring
 compatibility: opencode
@@ -68,7 +68,8 @@ heuristics where many approaches work
    [references/body-patterns.md](references/body-patterns.md).
 5. **Store scripts; let the agent compose.** Ship helpers for boilerplate, say
    whether to *run* or *read* each one, list dependencies, use paths relative to
-   the skill root. Script design: [references/scripts.md](references/scripts.md).
+   the skill root. Script design and Linux/macOS portability (bash 3.2, BSD tools):
+   [references/scripts.md](references/scripts.md).
 6. Many discrete do/don't facts? End with an **Agent Guidelines** list.
 
 ## Step 4 — Progressive disclosure: inline vs bundled
