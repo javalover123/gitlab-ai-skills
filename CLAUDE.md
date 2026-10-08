@@ -83,7 +83,10 @@ the [Claude Code docs](https://code.claude.com/docs/en/skills#inject-dynamic-con
 
 *Enforced:* `scripts/lint_shell.sh` runs `shellcheck` over every script under
 `skills/` in CI (catches the glob-test footgun as `SC2144`, unquoted
-expansions, and more).
+expansions, and more). `scripts/lint_bash_portability.sh` flags bash 4+ and
+GNU-only constructs (`BASHPID`, `mapfile`, `declare -A`, `sed -i` without a
+suffix, `date -d`, `grep -P`, …) in the same scripts, skipping comment lines
+and synced skills. Opt a guarded line out with a trailing `# portability-ok`.
 
 ### Skill test suites (`skills/**/tests/test_*.sh`)
 
@@ -163,6 +166,7 @@ Some skills are **synced in** from another repository — their source of truth
 | `validate_skill_length.py` | SKILL.md length (warn-only: <100 target, 150 cap) |
 | `validate_content_quality.py` | Broken relative links (**hard fail**); missing "When to Use"/"Use when"/"Triggers" cue, stray TODO/FIXME, and AGENTS.md-banned voice words (warn-only)² |
 | `lint_shell.sh` (shellcheck) | Bash footguns in `skills/**/*.sh` |
+| `lint_bash_portability.sh` | Bash 4+/GNU-only constructs in `skills/**/*.sh` (not synced skills) |
 | `run_skill_tests.sh` | Skill-shipped suites (`skills/**/tests/test_*.sh`) pass |
 | `check_version_bump.py` | `version` bumped when a skill changes |
 | `update_skills_list.py` / `update_toc.py` / `generate_catalog.py` / `update_claudecode_readme.py` | Generated README/catalog/manifests are in sync |

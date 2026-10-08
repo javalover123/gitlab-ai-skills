@@ -113,6 +113,11 @@ here, since the Docker images are Linux): check on a Mac when in doubt.
   it (verified); BSD xargs accepts `-r` and already skips empty input.
 - `cp --parents` and `find -printf` are GNU extensions; use POSIX flags.
 
+### Enforcement
+
+If the target repo ships a portability lint, run it. For gitlab-org/ai/skills
+see [gitlab-skills-repo.md](gitlab-skills-repo.md).
+
 ### Other script types
 
 - **POSIX `sh`** (`#!/bin/sh`): no arrays, `[[ ]]`, `local` guarantees, or
