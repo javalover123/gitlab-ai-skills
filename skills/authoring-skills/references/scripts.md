@@ -72,7 +72,7 @@ Checked against `bash:3.2` and `bash:5` Docker images:
 
 | Don't use | Bash 3.2 does | Use instead |
 |---|---|---|
-| `$BASHPID` (4.0+) | Unset: fatal under `set -u` (`BASHPID: unbound variable`) | `$$` for the main shell PID. `${BASHPID:-$$}` avoids the crash, but on 3.2 it is always the main PID, so it can't tell a subshell from the main shell: don't build traps (e.g. an `ERR` dedupe guard) on it; accept duplicate messages. Dropping `-E` also stops the `ERR` trap firing inside functions, and `set -Eeuo pipefail` is the baseline |
+| `$BASHPID` (4.0+) | Unset: fatal under `set -u` (`BASHPID: unbound variable`) | `$$` (main shell PID). `${BASHPID:-$$}` avoids the crash but is always the main PID on 3.2, so don't build an `ERR` dedupe guard on it: accept duplicate `ERR` messages and keep `-E` (baseline `set -Eeuo pipefail`) so `ERR` still fires inside functions |
 | `declare -A` (4.0+) | Prints `invalid option` and returns 2. Under `set -e` the script stops there; without it, `m[key]=...` silently treats `m` as an indexed array (every string key is index 0) | Parallel arrays, or a `case` lookup |
 | `mapfile` / `readarray` (4.0+) | `command not found` | `while IFS= read -r line; do arr+=("$line"); done < <(cmd)` |
 | `${v,,}` / `${v^^}` (4.0+) | `bad substitution` | `tr '[:upper:]' '[:lower:]'` |
