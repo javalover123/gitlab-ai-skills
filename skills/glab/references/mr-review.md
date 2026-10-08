@@ -3,8 +3,8 @@
 **Default to `glab mr note` for every MR-comment operation** — read, write, reply, resolve,
 and batch drafts. The raw `glab api` paths exist only for these cases:
 
-1. **Listing or deleting pending drafts** (Section 3) — `glab mr note` has no subcommand
-   for either.
+1. **Listing, editing or deleting pending drafts** (Section 3) — `glab mr note` has no
+   subcommand for any of them.
 2. **Raw discussion JSON / position metadata** (Section 4) — when you need fields that
    `glab mr note list -F json` doesn't surface (e.g. full position diff refs).
 
@@ -203,7 +203,7 @@ your own.
 
 ```bash
 # List. Once published, this returns an empty array. A draft with .position == null is a
-# general note or a reply; --old-line drafts have old_line set and new_line null.
+# general note or a reply; drafts on removed lines (--old-line) have old_line set and new_line null.
 glab api --method GET --paginate \
   "projects/<project_id>/merge_requests/<mr_iid>/draft_notes" \
   | jq '.[] | {id, path: .position.new_path, new_line: .position.new_line, old_line: .position.old_line, reply_to: .discussion_id, note: .note[0:40]}'
@@ -270,6 +270,7 @@ nonexistent issue IID: it prints the serialized request body and guarantees noth
 |---|---|
 | JSON literal `true`/`false`/`null` | `{"body":true}` — not a string |
 | integer `123`, `007` | `123`, `7` (leading zeros dropped; **only** integers — `12.5`, `1e3`, `" true"` stay strings) |
+| value starting with `{` or `[` | parsed as JSON (an object/array); invalid JSON fails loudly, e.g. `-F 'body=[WIP] fix'` |
 | leading `@`, e.g. `@note.md` | the contents of `note.md` |
 | `:repo`/`:namespace`/`:branch`/`:fullpath` | substituted **anywhere in the value** (substring match; they're Ruby symbols too) |
 
@@ -301,8 +302,8 @@ binary content.
 
 ### Nested JSON needs `--input`
 
-Neither flag builds nested objects (a bracket key like `position[new_line]` is sent as a literal
-flat key and the API silently drops it). `--input` without `-H "Content-Type: application/json"`
+Bracketed names like `position[new_line]` are rejected before sending. Pass the object as a JSON
+value (`-F 'position={...}'`) or the whole body with `--input`. `--input` without `-H "Content-Type: application/json"`
 returns **HTTP 415**. Write the JSON with a single-quoted `<< 'EOF'` heredoc so backticks and `$`
 in review bodies are not interpolated.
 
@@ -325,9 +326,8 @@ in review bodies are not interpolated.
 - **Auto-detection failure** — if the current branch has no open MR (or is detached), pass
   the MR IID as a positional argument.
 
-### `glab api .../draft_notes` (list / delete only)
+### `glab api .../draft_notes` (list / edit / delete only)
 
-- **Draft notes are per-user** — you can only list, delete, or publish YOUR drafts.
+- **Draft notes are per-user** — you can only list, edit, delete, or publish YOUR drafts.
 - **Create drafts with `glab mr note create --draft`, not the API** — it builds and validates
-  the position against the latest diff. With `-f`/`-F` the nested `position` object is lost and
-  an "inline" draft silently becomes a general one (HTTP 201).
+  the position (version SHAs, line type) against the latest diff.
