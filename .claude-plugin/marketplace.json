@@ -68,6 +68,10 @@
       "source": "./.claude-plugin/plugins/handoff"
     },
     {
+      "name": "harness-builder",
+      "source": "./.claude-plugin/plugins/harness-builder"
+    },
+    {
       "name": "human-review",
       "source": "./.claude-plugin/plugins/human-review"
     },

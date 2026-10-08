@@ -1,0 +1,31 @@
+{
+  "meta": {
+    "name": "opencode-serve",
+    "version": "0.1.0",
+    "description": "Least-privilege sandbox for a headless `opencode serve` instance driven by a harness. Replaces the claude-code profile/network-profile for opencode. No TUI assumptions.",
+    "author": "harness-builder"
+  },
+  "extends": "default",
+  "groups": {
+    "include": [
+      "nix_runtime",
+      "opencode_linux",
+      "git_config"
+    ]
+  },
+  "workdir": {
+    "access": "readwrite"
+  },
+  "filesystem": {
+    "allow": [
+      "$HOME/.config/opencode",
+      "$HOME/.local/share/opencode",
+      "$HOME/.local/state/opencode",
+      "$HOME/.cache/opencode",
+      "$HOME/.opencode"
+    ]
+  },
+  "network": {
+    "network_profile": null
+  }
+}
