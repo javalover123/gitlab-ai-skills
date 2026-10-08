@@ -78,6 +78,8 @@ the [Claude Code docs](https://code.claude.com/docs/en/skills#inject-dynamic-con
   rejects it ("Could not coerce value 2332 to String").
 - Never use `[ -f glob* ]` — `[ ]` does not glob-expand, so it silently never
   matches. Use a `for` loop or `compgen -G`.
+- Target bash 3.2 (macOS) and BSD tools: no `$BASHPID`, `mapfile`, `declare -A`.
+  See `skills/authoring-skills/references/scripts.md`.
 
 *Enforced:* `scripts/lint_shell.sh` runs `shellcheck` over every script under
 `skills/` in CI (catches the glob-test footgun as `SC2144`, unquoted
