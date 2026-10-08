@@ -1,0 +1,10 @@
+{
+  "name": "gitlab-adr",
+  "description": "Use when asked to write, draft, propose, or revise an Architecture Decision Record (ADR) in a design-doc repository (a repo with a decisions/ directory and an ADR template), or when asked to compare architecture options and recommend one for a deciding reader. Also use when an existing draft ADR overlaps a new decision and needs narrowing.",
+  "version": "1.0.0",
+  "author": {
+    "name": "GitLab"
+  },
+  "license": "MIT",
+  "skills": "./"
+}

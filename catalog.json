@@ -41,6 +41,14 @@
       "path": "skills/commit-messages/SKILL.md"
     },
     {
+      "name": "gitlab-adr",
+      "description": "Use when asked to write, draft, propose, or revise an Architecture Decision Record (ADR) in a design-doc repository (a repo with a decisions/ directory and an ADR template), or when asked to compare architecture options and recommend one for a deciding reader. Also use when an existing draft ADR overlaps a new decision and needs narrowing.",
+      "category": "Development Workflow",
+      "license": "MIT",
+      "compatibility": "opencode",
+      "path": "skills/gitlab-adr/SKILL.md"
+    },
+    {
       "name": "gitlab-agent-plan",
       "description": "Read or write a GitLab work item's Workplan / Agent Plan widget \u2014 the AI work plan property \u2014 via GraphQL. Use when asked to get/show/pull or attach/set/update a work item's workplan or agent plan, as opposed to its description or comments.",
       "category": "Development Workflow",
