@@ -20,6 +20,11 @@ is checked out, its root `AGENTS.md` is authoritative over this summary.
   not interpolated into a command string; for GraphQL `String` variables use
   `-f`/`--raw-field` (`-F` turns integer-like values into numbers); never
   `[ -f glob* ]` (use a `for` loop or `compgen -G`); run `shellcheck`.
+  `scripts/lint_bash_portability.sh` (in `bin/ci-checks`, lefthook and CI) also
+  flags bash 4+ and GNU-only constructs in `skills/**/*.sh`: the traps in
+  [scripts.md](scripts.md) except the empty-array expansion, which needs a
+  runtime test. It skips comment lines and synced skills; append
+  `# portability-ok` to a guarded line to opt it out.
 - **Tests:** optional `skills/<name>/tests/test_*.sh`; no arguments, no network or
   credentials (stub CLIs via `PATH`), non-zero exit on failure.
 - **Synced skills:** skills listed in the repo's `synced-skills.yml` are edited

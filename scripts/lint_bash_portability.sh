@@ -3,7 +3,8 @@
 # working on macOS (bash 3.2, BSD userland). The rules mirror the traps table
 # and "BSD vs GNU tools" list in
 # skills/authoring-skills/references/scripts.md; add a rule only when that
-# document backs it.
+# document backs it. The empty-array expansion trap can't be found line by
+# line and needs a runtime test.
 #
 # Scope: skills/**/*.sh, minus skills synced in from elsewhere
 # (synced-skills.yml; fix those at their source). The repo's own scripts/ are
@@ -31,13 +32,15 @@ if [ -f synced-skills.yml ]; then
   ' synced-skills.yml)"
 fi
 
+newline="
+"
 files=()
 while IFS= read -r -d '' f; do
   skill="${f#skills/}"
   skill="${skill%%/*}"
-  if [ -n "$synced" ] && printf '%s\n' "$synced" | grep -qxF -- "$skill"; then
-    continue
-  fi
+  case "$newline$synced$newline" in
+    *"$newline$skill$newline"*) continue ;;
+  esac
   files+=("$f")
 done < <(find skills -name '*.sh' -type f -print0 2>/dev/null | sort -z)
 
@@ -53,14 +56,17 @@ findings="$(awk '
     w = "(^|[^A-Za-z0-9_])"
     rule(w "BASHPID", "$BASHPID is bash 4+ (use $$)")
     rule("(^|[;&|({[:space:]])(mapfile|readarray)([[:space:]]|$)", "mapfile/readarray is bash 4+ (use a while read loop)")
-    rule("(declare|typeset|local|readonly)[[:space:]]+-[A-Za-z]*A", "associative arrays are bash 4+ (use parallel arrays or case)")
+    rule("(declare|typeset|local|readonly)([[:space:]]+-[A-Za-z]+)*[[:space:]]+-[A-Za-z]*A", "associative arrays are bash 4+ (use parallel arrays or case)")
     rule("[$][{][A-Za-z_][A-Za-z_0-9]*(,,|\\^\\^)", "${v,,} / ${v^^} is bash 4+ (use tr)")
     rule("[$][{][A-Za-z_][A-Za-z_0-9]*\\[-[0-9]+\\]", "negative array index is bash 4.3+ (use ${a[${#a[@]}-1]})")
     rule("[$][{][A-Za-z_][A-Za-z_0-9]*@Q", "${v@Q} is bash 4.4+ (use printf %q)")
-    rule("printf[[:space:]]+(-v[[:space:]]+[A-Za-z_0-9]+[[:space:]]+)?[\"'"'"']%[(]", "printf %(..)T is bash 4.2+ (use date)")
+    rule("printf[[:space:]].*%[(][^)]*[)]T", "printf %(..)T is bash 4.2+ (use date)")
     rule(w "wait[[:space:]]+-[A-Za-z]*n", "wait -n is bash 4.3+ (wait on each PID)")
     rule(w "EPOCHSECONDS", "$EPOCHSECONDS is bash 5+ (use date +%s)")
-    rule(w "sed[[:space:]]+(-[A-Za-z]+[[:space:]]+)*-i([[:space:]]|$)", "sed -i needs a suffix on BSD (use -i.bak and remove it)")
+    rule(w "sed([[:space:]]+[^[:space:]|;&]+)*[[:space:]]+(-[A-Za-z]*i([^A-Za-z0-9._-]|$)|--in-place([[:space:]=]|$))", "sed -i without an attached suffix differs between GNU and BSD (use -i.bak and remove it)")
+    rule("[|]&", "|& is bash 4+ (use 2>&1 |)")
+    rule("&>>", "&>> is bash 4+ (use >> f 2>&1)")
+    rule(";;?&([[:space:]]|$)", ";& / ;;& in case is bash 4+ (duplicate the bodies)")
     rule(w "date[[:space:]]+(-[A-Za-z]+[[:space:]]+)*(-d|--date)([[:space:]=]|$)", "date -d is GNU only (BSD uses -v)")
     rule(w "readlink[[:space:]]+(-[A-Za-z]+[[:space:]]+)*-[A-Za-z]*f", "readlink -f is missing on older macOS")
     rule(w "grep[[:space:]]+(-[A-Za-z]+[[:space:]]+)*-[A-Za-z]*P", "grep -P is unavailable on macOS (use grep -E)")
@@ -74,7 +80,7 @@ findings="$(awk '
   /#[[:space:]]*portability-ok/ { next }
   {
     for (i = 1; i <= n; i++)
-      if ($0 ~ res[i]) { printf "%s:%d: %s\n", FILENAME, FNR, msgs[i]; bad = 1 }
+      if ($0 ~ res[i]) { printf "%s:%d: %s\n", FILENAME, FNR, msgs[i] }
   }
 ' "${files[@]}")"
 

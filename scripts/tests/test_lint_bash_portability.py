@@ -7,29 +7,40 @@ import unittest
 
 SCRIPT = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "lint_bash_portability.sh")
 
-# One offending line per rule.
+# (offending line, expected message fragment); one case per rule or spelling.
 VIOLATIONS = {
-    "BASHPID": 'echo "$BASHPID"',
-    "mapfile": "mapfile -t lines < f",
-    "readarray": "readarray -t lines < f",
-    "declare -A": "declare -A m",
-    "local -A": "local -A m",
-    "lowercase": 'x="${v,,}"',
-    "uppercase": 'x="${v^^}"',
-    "negative index": 'x="${a[-1]}"',
-    "@Q": 'x="${v@Q}"',
-    "printf time": "printf '%(%s)T\\n' -1",
-    "wait -n": "wait -n",
-    "EPOCHSECONDS": 'now="$EPOCHSECONDS"',
-    "sed -i": "sed -i 's/a/b/' f",
-    "sed -i empty suffix": "sed -i '' 's/a/b/' f",
-    "date -d": "date -d '1 day ago' +%s",
-    "readlink -f": 'p="$(readlink -f "$0")"',
-    "grep -P": "grep -P '\\d+' f",
-    "stat -c": "stat -c %s f",
-    "mktemp --suffix": "mktemp --suffix=.x",
-    "find -printf": "find . -printf '%p\\n'",
-    "cp --parents": "cp --parents a b",
+    "BASHPID": ('echo "$BASHPID"', "$BASHPID"),
+    "mapfile": ("mapfile -t lines < f", "mapfile/readarray"),
+    "readarray": ("readarray -t lines < f", "mapfile/readarray"),
+    "declare -A": ("declare -A m", "associative"),
+    "declare -g -A": ("declare -g -A m", "associative"),
+    "local -r -A": ("local -r -A m", "associative"),
+    "local -A": ("local -A m", "associative"),
+    "lowercase": ('x="${v,,}"', "${v,,}"),
+    "uppercase": ('x="${v^^}"', "${v,,}"),
+    "negative index": ('x="${a[-1]}"', "negative array index"),
+    "@Q": ('x="${v@Q}"', "${v@Q}"),
+    "printf time": ("printf '%(%s)T\\n' -1", "printf %(..)T"),
+    "printf time mid-format": ("printf '[%(%F)T]\\n' -1", "printf %(..)T"),
+    "wait -n": ("wait -n", "wait -n"),
+    "EPOCHSECONDS": ('now="$EPOCHSECONDS"', "$EPOCHSECONDS"),
+    "sed -i": ("sed -i 's/a/b/' f", "sed -i"),
+    "sed -i empty suffix": ("sed -i '' 's/a/b/' f", "sed -i"),
+    "sed -Ei": ("sed -Ei 's/a/b/' f", "sed -i"),
+    "sed -e expr -i": ("sed -e 's/a/b/' -i f", "sed -i"),
+    "sed -i quoted empty": ("sed -i'' 's/a/b/' f", "sed -i"),
+    "sed --in-place": ("sed --in-place 's/a/b/' f", "sed -i"),
+    "pipe stderr": ("cmd |& tee log", "|& is"),
+    "append both": ("cmd &>> log", "&>> is"),
+    "case fallthrough": ("  a) echo a ;&", ";& / ;;&"),
+    "case continue-test": ("  a) echo a ;;&", ";& / ;;&"),
+    "date -d": ("date -d '1 day ago' +%s", "date -d"),
+    "readlink -f": ('p="$(readlink -f "$0")"', "readlink -f"),
+    "grep -P": ("grep -P '\\d+' f", "grep -P"),
+    "stat -c": ("stat -c %s f", "stat -c"),
+    "mktemp --suffix": ("mktemp --suffix=.x", "mktemp --suffix"),
+    "find -printf": ("find . -printf '%p\\n'", "find -printf"),
+    "cp --parents": ("cp --parents a b", "cp --parents"),
 }
 
 CLEAN = [
@@ -39,6 +50,10 @@ CLEAN = [
     "wc -c < f",
     'x="${a[${#a[@]}-1]}"',
     "echo mapfiles and mywait -n",
+    "sed -n 's/a/b/p' f",
+    "sed -E 's/a/b/' f",
+    "cmd 2>&1 | tee log",
+    "  a) echo a ;;",
 ]
 
 
@@ -59,12 +74,13 @@ class LintBashPortabilityTest(unittest.TestCase):
         return subprocess.run(["bash", SCRIPT], env=env, capture_output=True, text=True)
 
     def test_each_rule_fires_with_file_and_line(self):
-        for name, line in VIOLATIONS.items():
+        for name, (line, message) in VIOLATIONS.items():
             with self.subTest(rule=name):
                 self.write("skills/demo/scripts/a.sh", line)
                 result = self.run_lint()
                 self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
                 self.assertIn("skills/demo/scripts/a.sh:2:", result.stdout)
+                self.assertIn(message, result.stdout)
 
     def test_portable_code_passes(self):
         self.write("skills/demo/scripts/a.sh", *CLEAN)

@@ -115,12 +115,8 @@ here, since the Docker images are Linux): check on a Mac when in doubt.
 
 ### Enforcement
 
-`scripts/lint_bash_portability.sh` (run by `bin/ci-checks`, lefthook and CI)
-flags the traps above, plus the BSD/GNU flags listed (`sed -i`, `date -d`,
-`readlink -f`, `grep -P`, `stat -c`, `mktemp --suffix`, `find -printf`,
-`cp --parents`), in `skills/**/*.sh`. It is line-based: comment lines are
-skipped, and synced skills are excluded. For a use that is guarded (say, behind
-a version check), append `# portability-ok` to that line to opt out.
+If the target repo ships a portability lint, run it. For gitlab-org/ai/skills
+see [gitlab-skills-repo.md](gitlab-skills-repo.md).
 
 ### Other script types
 
