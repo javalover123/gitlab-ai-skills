@@ -97,7 +97,8 @@ class GuardSyncedSkillsTest(unittest.TestCase):
                 self.assertEqual(result.returncode, 1)
                 self.assertIn("CI_MERGE_REQUEST_DIFF_BASE_SHA", result.stdout)
 
-    def test_merge_train_ignores_target_and_earlier_train_commits(self):
+    def test_merge_train_shape_with_unrelated_edits_passes(self):
+        """HEAD = target (with a synced-skill commit) + a merged car editing an ordinary skill + this MR; passes."""
         git(self.dir, "checkout", "-q", "-b", "prev")
         commit_file(self.dir, "skills/own/prev.md")
         git(self.dir, "checkout", "-q", "main")
