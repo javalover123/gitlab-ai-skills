@@ -185,6 +185,7 @@ glab mr note publish <iid> -m "Summary of the review" --yes
 - `--draft` combines with `--file`, `--line`, `--old-line` **or** `--reply` (`--reply` and
   `--file` are still mutually exclusive). It does not combine with `--unique`, `--internal`,
   or `--resolvable=false`.
+- Draft reply: `glab mr note create <iid> --draft --reply abc12345 -m "..."`.
 - Each `--draft` call prints the new draft's ID.
 - **Always pass `--yes` to `publish`** — without a TTY it fails instead of prompting.
 - `publish` sends **all** of your pending drafts on the MR, so list leftovers first (below).
@@ -194,17 +195,23 @@ glab mr note publish <iid> -m "Summary of the review" --yes
 
 For any single comment, prefer `glab mr note create` above.
 
-### List or delete pending drafts (raw API)
+### List, edit or delete pending drafts (raw API)
 
-These two operations have no `glab mr note` subcommand. Drafts are per-user: you only see
-and delete your own.
+These operations have no native subcommand. `glab mr note delete` and `glab mr note update`
+only work on published notes, not on draft IDs. Drafts are per-user: you only see and change
+your own.
 
 ```bash
-# List — also the check that inline drafts attached (new_line: null on an inline draft means
-# the position was dropped). Once published, this returns an empty array.
+# List. Once published, this returns an empty array. A draft with .position == null is a
+# general note or a reply; --old-line drafts have old_line set and new_line null.
 glab api --method GET --paginate \
   "projects/<project_id>/merge_requests/<mr_iid>/draft_notes" \
-  | jq '.[] | {id, new_line: .position.new_line, note: .note[0:40]}'
+  | jq '.[] | {id, path: .position.new_path, new_line: .position.new_line, old_line: .position.old_line, reply_to: .discussion_id, note: .note[0:40]}'
+
+# Edit the text of one draft (or delete and recreate it with glab mr note create --draft)
+glab api --method PUT \
+  "projects/<project_id>/merge_requests/<mr_iid>/draft_notes/<draft_id>" \
+  -F "note=@$MSG"
 
 # Delete one draft
 glab api --method DELETE \
@@ -214,6 +221,9 @@ glab api --method DELETE \
 ---
 
 ## 4. Discussions via `glab api` (last-resort fallback)
+
+MR diffs: `glab mr diff <iid> --raw` for the whole diff. For the changed paths or one file:
+`glab api "projects/<project_id>/merge_requests/<mr_iid>/diffs?unidiff=true&per_page=100" | jq '.[] | select(.new_path == "path/to/file") | .diff'`.
 
 **Use Section 1 (`glab mr note`) for any read / reply / resolve.** This section exists only
 for the narrow case where you need fields that `glab mr note list -F json` does not surface
@@ -230,16 +240,6 @@ glab api --method GET "projects/<project_id>/merge_requests/<mr_iid>/discussions
 glab api --method GET "projects/<project_id>/merge_requests/<mr_iid>/discussions?per_page=100" \
   | jq '.[] | {id, resolved: .notes[0].resolved, body: .notes[0].body}'
 ```
-
-### Reply in draft mode
-
-Use the native flag — no API call needed:
-
-```bash
-glab mr note create <iid> --draft --reply abc12345 -m "your reply"
-```
-
-For a reply that is published immediately, drop `--draft`.
 
 ### Resolve / reopen via the API
 
@@ -263,7 +263,6 @@ For non-batched flows, prefer `glab mr note resolve|reopen <id>`.
 
 Evidence for item 17. To probe any assumption in ~30s, set `GLAB_DEBUG_HTTP=1` and `POST` to a
 nonexistent issue IID: it prints the serialized request body and guarantees nothing lands.
-Verified on **glab 1.110.0 (1797d215)**, re-confirmed on **1.112.0**.
 
 ### `-F`/`--field` converts its inline value; `-f`/`--raw-field` never does
 
@@ -311,7 +310,7 @@ in review bodies are not interpolated.
 
 ### `glab mr note`
 
-- **EXPERIMENTAL flag** — `glab mr note *` is marked experimental in v1.94.0+. Stable enough
+- **EXPERIMENTAL flag** — `glab mr note *` is marked experimental. Stable enough
   for our workflows; watch upstream changelogs for flag changes.
 - **`resolve`/`reopen` arg order is `<mr-iid> <discussion-id>`** — the `--help` USAGE line
   reads `<discussion-id> [<id>]` which is misleading. The EXAMPLES line is correct
@@ -329,6 +328,6 @@ in review bodies are not interpolated.
 ### `glab api .../draft_notes` (list / delete only)
 
 - **Draft notes are per-user** — you can only list, delete, or publish YOUR drafts.
-- **Never create drafts through the API** — `-f`/`-F` cannot build the nested `position`
-  object, so an "inline" draft silently becomes a general one (HTTP 201, `new_line: null`).
-  Use `glab mr note create --draft`.
+- **Create drafts with `glab mr note create --draft`, not the API** — it builds and validates
+  the position against the latest diff. With `-f`/`-F` the nested `position` object is lost and
+  an "inline" draft silently becomes a general one (HTTP 201).

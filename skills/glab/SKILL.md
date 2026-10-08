@@ -188,7 +188,7 @@ Full details, GraphQL alternative, group-level work items, and the agent plan (W
 
 ## MR Review
 
-Since `glab` v1.94.0, `glab mr note` handles every common MR-comment shape (list, general, diff-line, reply, resolve/reopen) without raw `glab api` calls or hand-built `position` objects. Prefer it for any single-comment workflow. The MR IID is a **positional** argument (not `--mr`); omit it to auto-detect from the current branch.
+`glab mr note` handles every common MR-comment shape (list, general, diff-line, reply, resolve/reopen) without raw `glab api` calls or hand-built `position` objects. Prefer it for any single-comment workflow. The MR IID is a **positional** argument (not `--mr`); omit it to auto-detect from the current branch.
 
 ```bash
 # ✅ Use glab mr note for read/write/reply/resolve — single command per operation
@@ -208,9 +208,9 @@ agents should run it):
 
 !`glab mr note --help`
 
-For **batched draft reviews** (several inline comments published together as one review), add `--draft` to each `glab mr note create` call, then run `glab mr note publish <iid> --yes` (`--yes` is required without a TTY). `--draft` doesn't combine with `--unique`, `--internal`, or `--resolvable=false`, and `publish` sends **all** your pending drafts on the MR. Raw `glab api .../draft_notes` is only for listing or deleting pending drafts, which have no `glab mr note` subcommand.
+For **batched draft reviews** (several inline comments published together as one review), add `--draft` to each `glab mr note create` call, then run `glab mr note publish <iid> --yes` (`--yes` is required without a TTY). `--draft` doesn't combine with `--unique`, `--internal`, or `--resolvable=false`, and `publish` sends **all** your pending drafts on the MR. Raw `glab api .../draft_notes` is only for listing, editing or deleting pending drafts; `glab mr note delete`/`update` don't work on drafts.
 
-Full reference (all flags, code suggestions, batched drafts, position objects): **[references/mr-review.md](references/mr-review.md)**
+Full reference (all flags, code suggestions, batched drafts): **[references/mr-review.md](references/mr-review.md)**
 
 ## Issue Links, Epics, and Nested Groups
 
