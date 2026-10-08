@@ -124,6 +124,10 @@
       "source": "./.claude-plugin/plugins/rust-compile-memory"
     },
     {
+      "name": "rust-performance-optimizer",
+      "source": "./.claude-plugin/plugins/rust-performance-optimizer"
+    },
+    {
       "name": "rust-unsafe-ffi-review",
       "source": "./.claude-plugin/plugins/rust-unsafe-ffi-review"
     },

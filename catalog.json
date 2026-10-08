@@ -249,6 +249,14 @@
       "path": "skills/rust-compile-memory/SKILL.md"
     },
     {
+      "name": "rust-performance-optimizer",
+      "description": "Analyzes and tunes Rust project performance across build speed, runtime memory, binary size, and test throughput. Applies Cargo profile tuning, linker selection, dependency auditing, profiling, and workspace restructuring to fix bottlenecks. Use when Rust builds are slow, binaries are too large, memory is high at runtime, or CI times are painful. Triggers: \"slow rust build\", \"binary size\", \"reduce memory\", \"rust profiling\", \"cargo timing\", \"cargo flamegraph\", \"nextest\", \"dependency audit\".",
+      "category": "Development Workflow",
+      "license": "MIT",
+      "compatibility": "opencode",
+      "path": "skills/rust-performance-optimizer/SKILL.md"
+    },
+    {
       "name": "rust-unsafe-ffi-review",
       "description": "Reviews Rust unsafe code and FFI bindings for memory safety and soundness issues. Use when auditing unsafe blocks, FFI interfaces, or preparing Rust code for security-critical use.",
       "category": "Testing",
