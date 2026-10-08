@@ -28,10 +28,6 @@
       "source": "./.claude-plugin/plugins/commit-messages"
     },
     {
-      "name": "data-retention-policy",
-      "source": "./.claude-plugin/plugins/data-retention-policy"
-    },
-    {
       "name": "gitlab-agent-plan",
       "source": "./.claude-plugin/plugins/gitlab-agent-plan"
     },
@@ -42,6 +38,10 @@
     {
       "name": "gitlab-clickhouse",
       "source": "./.claude-plugin/plugins/gitlab-clickhouse"
+    },
+    {
+      "name": "gitlab-data-retention-policy",
+      "source": "./.claude-plugin/plugins/gitlab-data-retention-policy"
     },
     {
       "name": "gitlab-mr-description",
