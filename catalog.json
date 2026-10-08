@@ -41,6 +41,14 @@
       "path": "skills/commit-messages/SKILL.md"
     },
     {
+      "name": "data-retention-policy",
+      "description": "Guide a GitLab engineer through declaring a data retention policy (`db/docs/data_retention/<table>.yml`) for one table from their team's retention tracking issue: pick the table, walk the decision tree, create the justification work item and the yml, and open the MR. Use when asked for a data retention policy, a retention yml, or the next table of a retention tracking issue.",
+      "category": "Database",
+      "license": "MIT",
+      "compatibility": "opencode",
+      "path": "skills/data-retention-policy/SKILL.md"
+    },
+    {
       "name": "gitlab-agent-plan",
       "description": "Read or write a GitLab work item's Workplan / Agent Plan widget \u2014 the AI work plan property \u2014 via GraphQL. Use when asked to get/show/pull or attach/set/update a work item's workplan or agent plan, as opposed to its description or comments.",
       "category": "Development Workflow",

@@ -1,0 +1,10 @@
+{
+  "name": "data-retention-policy",
+  "description": "Guide a GitLab engineer through declaring a data retention policy (`db/docs/data_retention/<table>.yml`) for one table from their team's retention tracking issue: pick the table, walk the decision tree, create the justification work item and the yml, and open the MR. Use when asked for a data retention policy, a retention yml, or the next table of a retention tracking issue.",
+  "version": "1.0.0",
+  "author": {
+    "name": "GitLab"
+  },
+  "license": "MIT",
+  "skills": "./"
+}
