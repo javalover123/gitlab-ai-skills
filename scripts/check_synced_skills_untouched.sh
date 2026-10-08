@@ -60,13 +60,23 @@ fi
 # merged-results and merge-train pipelines HEAD already contains target commits
 # made after the MR's diff base (e.g. a scheduled sync), and diffing from the
 # older diff base would blame the MR for them. `...` takes the merge base.
-BASE="${CI_MERGE_REQUEST_TARGET_BRANCH_SHA:-${CI_MERGE_REQUEST_DIFF_BASE_SHA:-}}"
+BASE=""
+BASE_SOURCE=""
+if [[ -n "${CI_MERGE_REQUEST_TARGET_BRANCH_SHA:-}" ]]; then
+  BASE="$CI_MERGE_REQUEST_TARGET_BRANCH_SHA"
+  BASE_SOURCE="CI_MERGE_REQUEST_TARGET_BRANCH_SHA"
+elif [[ -n "${CI_MERGE_REQUEST_DIFF_BASE_SHA:-}" ]]; then
+  BASE="$CI_MERGE_REQUEST_DIFF_BASE_SHA"
+  BASE_SOURCE="CI_MERGE_REQUEST_DIFF_BASE_SHA"
+fi
 if [[ -z "$BASE" ]]; then
   TARGET="${CI_MERGE_REQUEST_TARGET_BRANCH_NAME:-${CI_DEFAULT_BRANCH:-main}}"
   git fetch --depth=50 origin "$TARGET" >/dev/null 2>&1 || true
   BASE="$(git merge-base "origin/$TARGET" HEAD 2>/dev/null || echo "origin/$TARGET")"
+  BASE_SOURCE="merge-base fallback"
 fi
 
+echo "Diffing against $BASE ($BASE_SOURCE)"
 changed_files="$(git diff --name-only "$BASE"...HEAD)"
 
 violations=()
