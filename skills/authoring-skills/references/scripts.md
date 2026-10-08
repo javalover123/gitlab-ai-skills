@@ -72,13 +72,14 @@ Checked against `bash:3.2` and `bash:5` Docker images:
 
 | Don't use | Bash 3.2 does | Use instead |
 |---|---|---|
-| `$BASHPID` (4.0+) | Unset: fatal under `set -u` (`BASHPID: unbound variable`) | `$$` for the main shell PID. `${BASHPID:-$$}` avoids the crash, but on 3.2 it is always the main PID, so it can't tell a subshell from the main shell: don't build traps (e.g. an `ERR` dedupe guard) on it; accept duplicate messages or drop `-E` |
+| `$BASHPID` (4.0+) | Unset: fatal under `set -u` (`BASHPID: unbound variable`) | `$$` for the main shell PID. `${BASHPID:-$$}` avoids the crash, but on 3.2 it is always the main PID, so it can't tell a subshell from the main shell: don't build traps (e.g. an `ERR` dedupe guard) on it; accept duplicate messages. Dropping `-E` also stops the `ERR` trap firing inside functions, and `set -Eeuo pipefail` is the baseline |
 | `declare -A` (4.0+) | Prints `invalid option` and returns 2. Under `set -e` the script stops there; without it, `m[key]=...` silently treats `m` as an indexed array (every string key is index 0) | Parallel arrays, or a `case` lookup |
 | `mapfile` / `readarray` (4.0+) | `command not found` | `while IFS= read -r line; do arr+=("$line"); done < <(cmd)` |
 | `${v,,}` / `${v^^}` (4.0+) | `bad substitution` | `tr '[:upper:]' '[:lower:]'` |
 | `wait -n` (4.3+) | `invalid option` | `wait` on each PID, or poll with `kill -0` |
 | `${a[-1]}` (not in 3.2) | `bad array subscript`, expands empty | `${a[${#a[@]}-1]}` |
-| `\|&`, `&>>`, `;&` in `case`, `printf '%(%s)T'` (4.0+) | Syntax error or `invalid format character` | `2>&1 \|`, `>> f 2>&1`, `;;` with duplicated bodies, `date +%s` |
+| `\|&`, `&>>`, `;&` in `case` (4.0+) | Syntax error | `2>&1 \|`, `>> f 2>&1`, `;;` with duplicated bodies |
+| `printf '%(%s)T'` (4.2+) | `invalid format character` (also on 4.0 and 4.1) | `date +%s` |
 | `${v@Q}` (4.4+) | `bad substitution` (also on 4.3) | `printf '%q' "$v"` |
 | `$EPOCHSECONDS` (5.0+) | Unset: fatal under `set -u` (also on 4.3 and 4.4) | `date +%s` |
 | `"${arr[@]}"` on an empty array under `set -u` (fixed in 4.4) | `arr[@]: unbound variable` | `${arr[@]+"${arr[@]}"}`, or check `${#arr[@]}` first |
@@ -96,10 +97,11 @@ here, since the Docker images are Linux): check on a Mac when in doubt.
   works on both.
 - `date -d '1 day ago'`: GNU only. BSD uses `date -v-1d`. Avoid date arithmetic
   in shell; use `python3` or accept epoch seconds from the caller.
-- `readlink -f`: missing on older macOS; current macOS documents it, but check the minimum
-  version you need. For the
-  script's directory use `script_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)`;
-  it does not follow a symlinked script.
+- `readlink -f`: missing on older macOS; current macOS documents it, but check
+  the minimum version you need. For the script's directory use
+  `script_dir=$(CDPATH= cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)`
+  (empty `CDPATH` stops `cd` printing the path); it does not follow a symlinked
+  script.
 - `grep -P`: not available on macOS grep (and busybox). Use `grep -E`.
 - `stat`: flags differ (`-c` vs `-f`). Avoid; use `wc -c < file` for size, but BSD `wc` pads the
   number with spaces: compare with `-eq` or normalise with `$(( $(wc -c < f) ))`.
