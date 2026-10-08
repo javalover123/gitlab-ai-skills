@@ -172,7 +172,9 @@ broader patterns.
 
 ---
 
-## 3. Draft notes via `glab api` (batched reviews)
+## 3. Draft notes (batched reviews)
+
+### Native drafts (glab 1.119.0+)
 
 On glab 1.119.0+, batch natively. Each comment becomes a pending draft, and `publish` posts
 them as one review event (one notification):
@@ -188,8 +190,12 @@ glab mr note publish <iid> -m "Summary of the review" --yes
   (`GET .../draft_notes` below).
 - `publish --reviewer-state reviewed|requested_changes` also sets your review state.
 
-Use the raw `glab api` path below only on older glab, or to list or delete pending drafts.
 For any single comment, prefer `glab mr note create` above.
+
+### Raw `glab api` fallback (older glab, or to list or delete drafts)
+
+The rest of this section covers the raw `draft_notes` API. Use it only on glab older than
+1.119.0, or to list or delete pending drafts, which have no `glab mr note` subcommand.
 
 ### Fetching MR data
 
