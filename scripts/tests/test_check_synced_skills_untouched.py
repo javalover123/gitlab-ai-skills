@@ -11,7 +11,9 @@ MANIFEST = "skills:\n  synced:\n    source_project: x/y\n"
 
 
 def git(cwd, *args):
-    env = dict(os.environ, GIT_AUTHOR_NAME="t", GIT_AUTHOR_EMAIL="t@t", GIT_COMMITTER_NAME="t", GIT_COMMITTER_EMAIL="t@t")
+    # Hooks export GIT_DIR and friends; drop them so we never touch the outer repo.
+    outer = {k: v for k, v in os.environ.items() if not k.startswith("GIT_")}
+    env = dict(outer, GIT_AUTHOR_NAME="t", GIT_AUTHOR_EMAIL="t@t", GIT_COMMITTER_NAME="t", GIT_COMMITTER_EMAIL="t@t")
     return subprocess.run(["git", *args], cwd=cwd, env=env, check=True, capture_output=True, text=True).stdout.strip()
 
 
@@ -37,7 +39,7 @@ class GuardSyncedSkillsTest(unittest.TestCase):
         self.base = commit_file(self.dir, "skills/own/SKILL.md")
 
     def run_guard(self, **env):
-        clean = {k: v for k, v in os.environ.items() if not k.startswith(("CI_", "GITLAB_"))}
+        clean = {k: v for k, v in os.environ.items() if not k.startswith(("CI_", "GITLAB_", "GIT_"))}
         clean.update(env)
         return subprocess.run(["bash", os.path.join(self.dir, "scripts", SCRIPT.rsplit("/", 1)[1])],
                               cwd=self.dir, env=clean, capture_output=True, text=True)
