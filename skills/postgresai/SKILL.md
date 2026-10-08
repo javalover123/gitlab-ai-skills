@@ -1,7 +1,7 @@
 ---
 name: postgresai
 description: "Run EXPLAIN / EXPLAIN ANALYZE, test indexes, and measure query cost on PostgresAI Database Lab thin clones with the PostgresAI CLI (postgresai, pgai, Joe). Use when asked to explain or optimize a query, check a plan at production scale, try an index on realistic data, or prepare a GitLab database review."
-version: 1.0.1
+version: 1.0.3
 license: MIT
 category: Database
 ---
@@ -93,7 +93,8 @@ Flags change between releases; check the installed CLI:
 
 ## Contributing Improvements
 
-This skill is maintained in [`gitlab-org/ai/skills`](https://gitlab.com/gitlab-org/ai/skills).
+This skill is maintained in [`gitlab-org/gitlab`](https://gitlab.com/gitlab-org/gitlab) at
+`.claude/skills/postgresai/`.
 If you discover that any guidance here is **inaccurate or outdated** (e.g. a command that no
 longer works, a wrong flag, CLI output drift that breaks `scripts/joe.sh`), confirm with the
-user and open an MR against that repository with the fix. Keep changes focused — one fix per MR.
+user and open an MR against `gitlab-org/gitlab` with the fix. Keep changes focused — one fix per MR.
