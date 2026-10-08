@@ -4,9 +4,9 @@
 The raw `glab api .../discussions` and `glab api .../draft_notes` paths exist only for two
 specific cases:
 
-1. **Batched draft reviews** (Section 3) — multiple inline comments published together via
-   `bulk_publish`. `glab mr note` has no draft mode yet, so this is the one workflow where
-   the raw API is still required.
+1. **Draft-note housekeeping** (Section 3) — listing or deleting pending drafts, or batching
+   on glab older than 1.119.0. On 1.119.0+ create and publish drafts with
+   `glab mr note create --draft` and `glab mr note publish` instead.
 2. **Raw discussion JSON / position metadata** (Section 4) — when you need fields that
    `glab mr note list -F json` doesn't surface (e.g. full position diff refs).
 
@@ -172,11 +172,30 @@ broader patterns.
 
 ---
 
-## 3. Draft notes via `glab api` (batched reviews)
+## 3. Draft notes (batched reviews)
 
-Use this path **only** when you need to batch multiple inline comments and publish them
-together as a single review event (one notification, all comments grouped). For any single
-comment, prefer `glab mr note create` above.
+### Native drafts (glab 1.119.0+)
+
+On glab 1.119.0+, batch natively. Each comment becomes a pending draft, and `publish` posts
+them as one review event (one notification):
+
+```bash
+glab mr note create <iid> --draft --file path/to/file --line 42 -m "$(cat "$MSG")"
+glab mr note create <iid> --draft --file path/to/file --old-line 7 -m "$(cat "$MSG2")"
+glab mr note publish <iid> -m "Summary of the review" --yes
+```
+
+- `--draft` combines with `--file`, `--line`, `--old-line` and `--reply`, but not with `--unique`.
+- `publish` sends **all** of your pending drafts on the MR, so check for leftovers first
+  (`GET .../draft_notes` below).
+- `publish --reviewer-state reviewed|requested_changes` also sets your review state.
+
+For any single comment, prefer `glab mr note create` above.
+
+### Raw `glab api` fallback (older glab, or to list or delete drafts)
+
+The rest of this section covers the raw `draft_notes` API. Use it only on glab older than
+1.119.0, or to list or delete pending drafts, which have no `glab mr note` subcommand.
 
 ### Fetching MR data
 
