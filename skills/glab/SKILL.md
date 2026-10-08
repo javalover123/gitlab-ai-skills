@@ -1,7 +1,7 @@
 ---
 name: glab
 description: "GitLab CLI (glab) workflow automation for GitLab repositories, merge requests, issues, CI/CD pipelines, and APIs. Use when interacting with GitLab via the glab CLI, when given a GitLab URL (such as an MR or issue), or when asked to: view, diff, checkout, review, create, update, label, or comment on merge requests (MRs); post a note, review comment, or reply to discussions; view, search, create, close, or update issues, work items, or epics; inspect pipeline status, stream or view CI logs and traces (glab ci trace), or retry jobs; call the GitLab REST or GraphQL API through \"glab api\"; or configure glab auth against gitlab.com, a self-managed instance, or a local GDK. Read this skill before any glab write operation, because several field flags fail silently - they exit 0 while posting the wrong content. Triggers: glab, glab CLI, GitLab CLI, GitLab URL, MR diff, view MR, review MR, issue view, CI trace, job logs."
-version: 1.13.2
+version: 1.13.3
 category: Development Workflow
 license: MIT
 metadata:
@@ -208,7 +208,7 @@ agents should run it):
 
 !`glab mr note --help`
 
-Fall back to raw `glab api .../draft_notes` only for **batched draft reviews** (multiple inline comments published together via `bulk_publish`) — `glab mr note` has no draft mode.
+For **batched draft reviews** (several inline comments published together as one review), add `--draft` to each `glab mr note create` call, then run `glab mr note publish <iid>` (glab 1.119.0+). `--draft` doesn't combine with `--unique`, and `publish` sends **all** your pending drafts on the MR. Fall back to raw `glab api .../draft_notes` + `bulk_publish` only on older glab, or to list or delete pending drafts, which have no `glab mr note` subcommand.
 
 Full reference (all flags, code suggestions, drafts/batch fallback, position objects): **[references/mr-review.md](references/mr-review.md)**
 
