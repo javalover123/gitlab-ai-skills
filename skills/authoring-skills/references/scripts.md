@@ -72,12 +72,15 @@ Checked against `bash:3.2` and `bash:5` Docker images:
 
 | Don't use | Bash 3.2 does | Use instead |
 |---|---|---|
-| `$BASHPID` (4.0+) | Unset: fatal under `set -u` (`BASHPID: unbound variable`) | `$$`, or `${BASHPID:-$$}` when you need the subshell PID |
-| `declare -A` (4.0+) | Prints `invalid option` but exits 0, so the script carries on broken | Parallel arrays, or a `case` lookup |
+| `$BASHPID` (4.0+) | Unset: fatal under `set -u` (`BASHPID: unbound variable`) | `$$` for the main shell PID. `${BASHPID:-$$}` avoids the crash, but on 3.2 it is always the main PID, so it can't tell a subshell from the main shell: don't build traps (e.g. an `ERR` dedupe guard) on it; accept duplicate messages or drop `-E` |
+| `declare -A` (4.0+) | Prints `invalid option` and returns 2. Under `set -e` the script stops there; without it, `m[key]=...` silently treats `m` as an indexed array (every string key is index 0) | Parallel arrays, or a `case` lookup |
 | `mapfile` / `readarray` (4.0+) | `command not found` | `while IFS= read -r line; do arr+=("$line"); done < <(cmd)` |
 | `${v,,}` / `${v^^}` (4.0+) | `bad substitution` | `tr '[:upper:]' '[:lower:]'` |
 | `wait -n` (4.3+) | `invalid option` | `wait` on each PID, or poll with `kill -0` |
-| `${a[-1]}`, `\|&`, `&>>`, `;&` in `case`, `${v@Q}`, `printf '%(%s)T'`, `$EPOCHSECONDS` | Syntax error or wrong result | `${a[${#a[@]}-1]}`, `2>&1 \|`, `>> f 2>&1`, `date +%s` |
+| `${a[-1]}` (not in 3.2) | `bad array subscript`, expands empty | `${a[${#a[@]}-1]}` |
+| `\|&`, `&>>`, `;&` in `case`, `printf '%(%s)T'` (4.0+) | Syntax error or `invalid format character` | `2>&1 \|`, `>> f 2>&1`, `;;` with duplicated bodies, `date +%s` |
+| `${v@Q}` (4.4+) | `bad substitution` (also on 4.3) | `printf '%q' "$v"` |
+| `$EPOCHSECONDS` (5.0+) | Unset: fatal under `set -u` (also on 4.3 and 4.4) | `date +%s` |
 | `"${arr[@]}"` on an empty array under `set -u` (fixed in 4.4) | `arr[@]: unbound variable` | `${arr[@]+"${arr[@]}"}`, or check `${#arr[@]}` first |
 
 The empty-array failure also reproduces on bash 4.3, so it can bite Linux
@@ -93,16 +96,20 @@ here, since the Docker images are Linux): check on a Mac when in doubt.
   works on both.
 - `date -d '1 day ago'`: GNU only. BSD uses `date -v-1d`. Avoid date arithmetic
   in shell; use `python3` or accept epoch seconds from the caller.
-- `readlink -f`: missing on older macOS (added in 12.3). Use
-  `cd "$(dirname "$0")" && pwd` for the script's directory.
+- `readlink -f`: missing on older macOS; current macOS documents it, but check the minimum
+  version you need. For the
+  script's directory use `script_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)`;
+  it does not follow a symlinked script.
 - `grep -P`: not available on macOS grep (and busybox). Use `grep -E`.
-- `stat`: flags differ (`-c` vs `-f`). Avoid; use `wc -c < file` for size.
+- `stat`: flags differ (`-c` vs `-f`). Avoid; use `wc -c < file` for size, but BSD `wc` pads the
+  number with spaces: compare with `-eq` or normalise with `$(( $(wc -c < f) ))`.
 - `mktemp`: `mktemp -d` works on both; GNU-only options such as `--suffix` do not.
   Pass an explicit template: `mktemp "${TMPDIR:-/tmp}/name.XXXXXX"`.
 - `timeout` (and `gtimeout`) is not installed on macOS by default. Detect it
   with `command -v` and fall back, or document the dependency.
-- `xargs -r`, `sort -V`, `cp --parents`, `find -printf` are GNU extensions.
-  Prefer POSIX flags.
+- `xargs -r`: keep it. GNU xargs runs the command once on empty input without
+  it (verified); BSD xargs accepts `-r` and already skips empty input.
+- `cp --parents` and `find -printf` are GNU extensions; use POSIX flags.
 
 ### Other script types
 
