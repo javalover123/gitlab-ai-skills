@@ -121,6 +121,14 @@
       "path": "skills/handoff/SKILL.md"
     },
     {
+      "name": "harness-builder",
+      "description": "Scaffolds project-specific harness crates or modules that drive a project through its natural interface, observe and instrument the output, and triage it against documented requirements (stories, ADRs, specs, threat-model items) to schedule and burn down implementation gaps and defects in a continuous loop. Generates a runtime quality harness, an implementation genesis harness, or both, and can audit an existing harness up to standard. Use when asked to build a harness, scaffold project genesis, drive X and fix what breaks, loop until clean, build a closed-loop harness, or burn down bugs agentically.",
+      "category": "Development Workflow",
+      "license": "MIT",
+      "compatibility": "opencode",
+      "path": "skills/harness-builder/SKILL.md"
+    },
+    {
       "name": "human-review",
       "description": "Interactively resolves items that iteratotron and bug-burndown have escalated to needs_human or requires_human_review status. Reads the active session queues, reconstructs each item's context from linked specs/ADRs/threat-model entries plus the current gap analysis, drafts 2-4 candidate resolutions consistent with the in-flight scope, and runs an interview per item. Records each decision and re-queues actionable items so the parent skill re-engages. Scans all sessions by default, including the bug-burndown sessions a harness-builder runtime harness spawns per iteration. Use when iteratotron or bug-burndown has parked items for human input, when a harness loop won't converge because of parked needs_human items, or to clear the human review queue between sessions.",
       "category": "Agent Tooling",
