@@ -192,7 +192,9 @@ echo
 echo "== preflight =="
 mkdir -p "$work/nobin"
 rc=0
-PATH="$work/nobin:/usr/bin:/bin" bash "$script" grp/proj 7 >"$work/o" 2>"$work/e" || rc=$?
+# PATH holds only the empty nobin dir, so a glab installed in /usr/bin or /bin
+# is not found. Run bash by its full path ($BASH) since PATH cannot find it.
+PATH="$work/nobin" "$BASH" "$script" grp/proj 7 >"$work/o" 2>"$work/e" || rc=$?
 check "glab missing: exit 1" 1 "$rc"
 has   "glab missing message" 'error: glab not found on PATH' "$work/e"
 
