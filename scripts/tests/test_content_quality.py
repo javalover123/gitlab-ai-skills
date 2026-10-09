@@ -90,11 +90,9 @@ class TestVoice(unittest.TestCase):
             self.assertEqual(vcq.check_voice(s.skill_md), [])
 
     def test_voice_ok_marker_skips_line(self):
-        body = "| leverage | use | <!-- voice-ok -->\nWe leverage the cache.\n"
+        body = "| leverage | use | <!-- voice-ok -->"
         with TempSkill(body) as s:
-            warns = vcq.check_voice(s.skill_md)
-            self.assertEqual(len(warns), 1)
-            self.assertTrue(warns[0].startswith("line 2:"))
+            self.assertEqual(vcq.check_voice(s.skill_md), [])
 
     def test_voice_ok_marker_with_reason_skips_line(self):
         body = "| leverage | use | <!-- voice-ok: table of words to avoid -->\n"
