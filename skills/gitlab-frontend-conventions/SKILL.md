@@ -14,8 +14,8 @@ metadata:
 
 A rulebook for Vue, Apollo, Jest and utility code in `gitlab-org/gitlab`,
 distilled from 100+ review comments by one frontend maintainer ("the reviewer"
-in the references) across 20+ MRs, mostly Orbit and AI Catalog work. Each rule
-cites its source MR and note. Where this conflicts with the official
+in the references) across 20+ MRs, mostly Orbit and AI Catalog work. Nearly every
+rule cites its source MR and note. Where this conflicts with the official
 `doc/development/fe_guide/` and `testing_guide/` docs, the official docs win.
 Detection counts and helper names are a snapshot (2026-04-23); re-run the
 heuristics before trusting them.
@@ -57,7 +57,9 @@ softened.
 ## How to apply
 
 1. Run the [detection heuristics](references/detection-heuristics.md) on the
-   changed files (append their paths to each `rg` command). Verify an anti-pattern really exists before "fixing" it.
+   changed files: add the changed paths to each `rg` command (in #10, before
+   the `|`; in #17, in place of `spec ee/spec`). Verify an anti-pattern really
+   exists before "fixing" it.
 2. Work through the [checklist](references/checklist.md) in order of impact;
    it points to the detailed rule (`§3.1` style IDs) for each fix.
 3. Treat **softened** rules as non-blocking.

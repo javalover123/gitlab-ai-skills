@@ -32,7 +32,8 @@ before trusting — the monolith drifts fast.
 
 ## Commands
 
-Append the changed file paths to each command to scope it to your MR. Numbers match the table above.
+Add the changed file paths to each command to scope it to your MR (in #10,
+before the `|`; in #17, in place of `spec ee/spec`). Numbers match the table above.
 
 ```sh
 # 1
