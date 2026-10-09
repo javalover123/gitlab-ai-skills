@@ -1,5 +1,19 @@
 # §1. Vue component authoring
 
+## Contents
+
+- §1.1 Static values live in `$options`, not `computed` or `data`
+- §1.2 Emit events in `kebab-case`, never colon-prefixed
+- §1.3 Absolute positioning is a last resort
+- §1.4 Split fat components by null-guard count
+- §1.5 Don't wrap setters in no-op guards — the caller decides
+- §1.6 Data-driven templates, not copy-pasted markup
+- §1.7 Split v-if / v-else-if into `<template>` groups when same boolean gates several siblings
+- §1.8 `has*` vs `show*` — name capability vs visibility correctly
+- §1.9 Remove unused computeds entirely; don't leave scaffolding
+- §1.10 Interactive controls must have real behavior
+- §1.11 Event-listener arg guards belong at the emit site, not at every listener
+
 ## §1.1 Static values live in `$options`, not `computed` or `data`
 
 **Rule.** Only use `computed` for values whose result depends on reactive

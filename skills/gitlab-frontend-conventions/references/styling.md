@@ -1,5 +1,11 @@
 # §2. Pajamas, Tailwind, and styling
 
+## Contents
+
+- §2.1 Prefer Tailwind utilities; scoped styles are (almost) banned
+- §2.2 Library overrides live in `page_bundles/` or `framework/`, not scoped
+- §2.3 Enum strings for tabs/modes, never numeric indices
+
 ## §2.1 Prefer Tailwind utilities; scoped styles are (almost) banned
 
 **Confidence:** hard.

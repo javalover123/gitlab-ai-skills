@@ -1,5 +1,37 @@
 # §6. Tests (Jest + VTU + Apollo + MSW)
 
+## Contents
+
+- §6.1 Never hard-set Apollo-owned data in tests
+- §6.2 Mock GraphQL handlers, not `vue-apollo` or wrapper utilities
+- §6.3 Don't `mockClear` in `beforeEach` — Jest auto-clears
+- §6.4 Don't repeat describe-block context in `it` names
+- §6.5 Describe-nesting: `describe('when X')` + terse `it`
+- §6.6 Setup in `beforeEach`, not in `it`
+- §6.7 Default handler at describe level, override in nested
+- §6.8 Mount helper assigns internally; no destructuring in callers
+- §6.9 No snapshots (except data viz)
+- §6.10 Integration tests assert native DOM, never `wrapper.vm`
+- §6.11 Don't assert router internals in integration tests
+- §6.12 Mount the SPA root, not a leaf page, for integration tests
+- §6.13 Trigger native DOM events, not `.vm.$emit`
+- §6.14 `waitFor` over `nextTick` (MSW direction)
+- §6.15 Golden-path integration vs passive-feedback unit split
+- §6.16 Integration tests: use the real app router via `assignRouter` + `fullMount`
+- §6.17 Assert mock was NOT called before the action
+- §6.18 Include the FF name verbatim in FF-gated describe strings
+- §6.19 `toBe` for primitives, `toEqual` for objects/arrays
+- §6.20 Don't pass `null` explicitly for optional args
+- §6.21 Assertion helpers take a full state hash, no hidden defaults
+- §6.22 Name test helpers for literal assertion, not metaphor
+- §6.23 ESLint overrides for specs scope to `*_spec.js` only
+- §6.24 Spread shared metadata objects, don't replace
+- §6.25 Test via user-visible behavior, not `wrapper.vm` internals (even in unit specs)
+- §6.26 Test the negative/no-match branch of parsers explicitly
+- §6.27 Define reusable finder helpers at the top of the spec file
+- §6.28 Assert on handler mocks, not `$apollo.mutate` spies
+- §6.29 Assertion helpers validate their inputs eagerly
+
 ## §6.1 Never hard-set Apollo-owned data in tests
 
 **Rule.** If a field comes from Apollo, drive it via mocked handlers. Do

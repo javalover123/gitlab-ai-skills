@@ -1,5 +1,18 @@
 # §7. Types / null handling
 
+## Contents
+
+- §7.1 Don't pepper optional chaining across a component
+- §7.2 Signal nullability at the real boundary, not the parent
+- §7.3 Match the null check to the shape of the value — `!= null` covers `undefined` too
+- §8.1 Backend widget shape is the source of truth; no FE FF + permission combos
+- §8.2 EE→CE separation via `ee_component` alias, never move CE→EE
+- §8.3 Route/tab mappings as lookup tables, not `if/else` ladders
+- §9.1 Scope data names to their component unless the name will cross boundaries
+- §9.2 No "what" comments
+- §10.1 Import translation helpers from `~/locale`
+- §10.2 Inline vs `$options.i18n` copy — pick one per component
+
 ## §7.1 Don't pepper optional chaining across a component
 
 **Rule.** `?.` is for values that are genuinely nullable at runtime. If

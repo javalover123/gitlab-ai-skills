@@ -17,7 +17,6 @@ Reusable agent skills for GitLab projects. Skills are structured prompt files th
     - [Agent Tooling](#agent-tooling)
     - [Research & Notes](#research--notes)
     - [Documentation](#documentation)
-    - [GitLab / Frontend](#gitlab--frontend)
     - [Meta / Authoring](#meta--authoring)
     - [Other](#other)
   - [Installing Skills](#installing-skills)
@@ -64,6 +63,10 @@ Read or write a GitLab work item's Workplan / Agent Plan widget — the AI work 
 #### gitlab-babysit-mr
 
 Monitor a GitLab MR's pipeline until green. Classifies failures (flaky, master-broken, lint, coverage, real), retries jobs where appropriate, makes light-touch auto-fixes, and posts findings as an MR comment. → [`SKILL.md`](skills/gitlab-babysit-mr/SKILL.md)
+
+#### gitlab-frontend-conventions
+
+Review and clean up frontend code in the GitLab monolith (Vue, Apollo, Jest/VTU/MSW, JS utilities) against rules distilled from real merge request reviews, fixing typical AI-generated slop such as scoped styles, imperative Apollo queries, reactive constants, hand-set Apollo data in specs, and defensive optional chaining. Use when writing or reviewing code under app/assets/javascripts, ee/app/assets/javascripts, spec/frontend or ee/spec/frontend, or when asked to unslop, lint the Vue, or prep a frontend MR for review. Not for MR sequencing, review workflow, or backend code. → [`SKILL.md`](skills/gitlab-frontend-conventions/SKILL.md)
 
 #### gitlab-mr-description
 
@@ -220,12 +223,6 @@ Reviews E2E user stories for INVEST compliance, Gherkin correctness, EARS constr
 #### threat-model-review
 
 Reviews threat models for completeness, accuracy, and alignment with current implementation. Identifies drift between threat model and code, uncovered attack surfaces, missing STRIDE categories, incorrect risk scores, and unlinked mitigations. Creates threat models when none exist. Use when auditing a threat model, checking security coverage, finding unmodeled threats, validating risk scores, or when implementation has changed since the threat model was written. Triggers: review threat model, audit threats, threat model drift, security coverage, unmodeled threats, validate risk, threat model gaps. → [`SKILL.md`](skills/threat-model-review/SKILL.md)
-
-### GitLab / Frontend
-
-#### gitlab-frontend-conventions
-
-Review and clean up frontend code in the GitLab monolith (Vue, Apollo, Jest/VTU/MSW, JS utilities) against rules distilled from real merge request reviews, fixing typical AI-generated slop such as scoped styles, imperative Apollo queries, reactive constants, hand-set Apollo data in specs, and defensive optional chaining. Use when writing or reviewing code under app/assets/javascripts, ee/app/assets/javascripts, spec/frontend or ee/spec/frontend, or when asked to unslop, lint the Vue, or prep a frontend MR for review. → [`SKILL.md`](skills/gitlab-frontend-conventions/SKILL.md)
 
 ### Meta / Authoring
 

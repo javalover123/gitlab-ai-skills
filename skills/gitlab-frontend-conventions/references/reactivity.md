@@ -1,5 +1,17 @@
 # §4. Reactivity / side effects
 
+## Contents
+
+- §4.1 Side effects go in watchers
+- §4.2 Watchers fire only on change — drop `newVal !== oldVal` guards inside
+- §4.3 Move DOM toggles to `utils/dom_utils`
+- §4.4 Route through the declarative Vue pipeline
+- §4.5 Separate parse and execute
+- §4.6 Don't split a single value across `data` and parse-on-demand
+- §4.7 Silent error swallowing belongs in the helper, not every caller
+- §4.8 Name mutator methods as mutators — no `check*` that also `this.X =`
+- §4.9 Don't ignore error branches silently; surface them
+
 ## §4.1 Side effects go in watchers
 
 **Rule.** If a state flag triggers a persistent side effect (cookie, local

@@ -1,5 +1,22 @@
 # §5. Data transformation / utilities
 
+## Contents
+
+- §5.1 Sane defaults over early returns
+- §5.2 `forEach` is for side effects, not transformations
+- §5.3 Avoid double defaults
+- §5.4 Break large utility files into single-responsibility helpers
+- §5.5 Animation/tick loops should be thin dispatchers
+- §5.6 Split data preparation from side effects (CSV / download case)
+- §5.7 Hard `typeof` checks at utility entry points
+- §5.8 JSDoc every exported factory with pipeline context
+- §5.9 Inline minor variants, factor only differing values
+- §5.10 String composition: `[parts].filter(Boolean).join(' ')`
+- §5.11 Find vs Get — array vs object convention
+- §5.12 Presentational components don't consume domain context; wrap
+- §5.13 Extract unreadable inline helper calls into named computeds
+- §5.14 Name inline numeric literals as module-scope constants
+
 ## §5.1 Sane defaults over early returns
 
 **Rule.** `(x || []).map(...)` beats `if (!x || x.length === 0) return []`.
@@ -106,7 +123,7 @@ Same pattern applied in !229375: `computeFlatLayout` split into
 `clearConnectionGroups` + `makeEdgeKey` + `createEdgeLine` +
 `createDirectionalArrow` + `buildConnection`.
 
-**Note.** the reviewer's !229375 note 3204025050: "all of the code examples to
+**Note.** The reviewer's !229375 note 3204025050: "all of the code examples to
 break the code smaller is AI made, so to be taken with some grain of salt,
 it was more so that I could give quick examples to illustrate what we
 could do, but feel free to diverge." — take the decomposition *boundaries*
@@ -444,5 +461,5 @@ for (let i = 0; i < D3_SIMULATION_TICKS; i += 1) simulation.tick();
 - `0`, `1`, `-1`, and `0.5` at the identity-math level (`* 0.5` to halve)
   are fine; tuning factors that happen to be `0.5` are not.
 
-**Related.** the reviewer applies this pattern inside every decomposition in §5.4.
+**Related.** The reviewer applies this pattern inside every decomposition in §5.4.
 This rule pulls it out so the ask is visible on its own.

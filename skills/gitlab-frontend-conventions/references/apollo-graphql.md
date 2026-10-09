@@ -1,5 +1,14 @@
 # §3. Apollo + GraphQL
 
+## Contents
+
+- §3.1 Use smart queries, not imperative `this.$apollo.query()`
+- §3.2 `update()` reshapes; `result()` runs side effects only
+- §3.3 One `apollo:` entry per logical query
+- §3.4 Loading: use `$apollo.queries.X.loading`, not a hand-rolled flag
+- §3.5 `@client` state → tests drive via mutators or `cache.writeQuery`, not `setData`
+- §3.6 Defer REST→GraphQL migration; use a client directive + fragment when payload bites
+
 ## §3.1 Use smart queries, not imperative `this.$apollo.query()`
 
 **Rule.** Declare every server query as a component `apollo: { key: {...} }`
@@ -177,7 +186,7 @@ setPanelTitle(title);
 // so cache.writeQuery would not reach the component under test.
 await wrapper.vm.$apollo.queries.panelTitleState.refetch();
 ```
-(the reviewer acknowledged this in !226946 note 3175303162.)
+(The reviewer acknowledged this in !226946 note 3175303162.)
 
 ## §3.6 Defer REST→GraphQL migration; use a client directive + fragment when payload bites
 
