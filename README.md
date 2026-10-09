@@ -17,6 +17,7 @@ Reusable agent skills for GitLab projects. Skills are structured prompt files th
     - [Agent Tooling](#agent-tooling)
     - [Research & Notes](#research--notes)
     - [Documentation](#documentation)
+    - [GitLab / Frontend](#gitlab--frontend)
     - [Meta / Authoring](#meta--authoring)
     - [Other](#other)
   - [Installing Skills](#installing-skills)
@@ -220,6 +221,12 @@ Reviews E2E user stories for INVEST compliance, Gherkin correctness, EARS constr
 
 Reviews threat models for completeness, accuracy, and alignment with current implementation. Identifies drift between threat model and code, uncovered attack surfaces, missing STRIDE categories, incorrect risk scores, and unlinked mitigations. Creates threat models when none exist. Use when auditing a threat model, checking security coverage, finding unmodeled threats, validating risk scores, or when implementation has changed since the threat model was written. Triggers: review threat model, audit threats, threat model drift, security coverage, unmodeled threats, validate risk, threat model gaps. → [`SKILL.md`](skills/threat-model-review/SKILL.md)
 
+### GitLab / Frontend
+
+#### gitlab-frontend-conventions
+
+Review and clean up frontend code in the GitLab monolith (Vue, Apollo, Jest/VTU/MSW, JS utilities) against rules distilled from real merge request reviews, fixing typical AI-generated slop such as scoped styles, imperative Apollo queries, reactive constants, hand-set Apollo data in specs, and defensive optional chaining. Use when writing or reviewing code under app/assets/javascripts, ee/app/assets/javascripts, spec/frontend or ee/spec/frontend, or when asked to unslop, lint the Vue, or prep a frontend MR for review. → [`SKILL.md`](skills/gitlab-frontend-conventions/SKILL.md)
+
 ### Meta / Authoring
 
 #### authoring-skills
@@ -339,6 +346,7 @@ This repo ships as a [Claude Code plugin marketplace](https://code.claude.com/do
 | [`gitlab-agent-plan`](.claude-plugin/plugins/gitlab-agent-plan) | [`gitlab-agent-plan`](skills/gitlab-agent-plan/SKILL.md) | Read or write a GitLab work item's Workplan / Agent Plan widget — the AI work plan property — via GraphQL. Use when asked to get/show/pull or attach/set/update a work item's workplan or agent plan, as opposed to its description or comments. | 0.1.1 |
 | [`gitlab-babysit-mr`](.claude-plugin/plugins/gitlab-babysit-mr) | [`gitlab-babysit-mr`](skills/gitlab-babysit-mr/SKILL.md) | Monitor a GitLab MR's pipeline until green. Classifies failures (flaky, master-broken, lint, coverage, real), retries jobs where appropriate, makes light-touch auto-fixes, and posts findings as an MR comment. | 0.12.2 |
 | [`gitlab-clickhouse`](.claude-plugin/plugins/gitlab-clickhouse) | [`gitlab-clickhouse`](skills/gitlab-clickhouse/SKILL.md) | Inspect GitLab local ClickHouse tables, schemas, ingestion paths, and data patterns. Use for CH table questions, DESCRIBE TABLE, schema and source-of-truth checks under db/click_house, ingestion debugging, and investigating aggregates, distributions, outliers, or anomalous ClickHouse data in a GitLab GDK environment. | 1.0.1 |
+| [`gitlab-frontend-conventions`](.claude-plugin/plugins/gitlab-frontend-conventions) | [`gitlab-frontend-conventions`](skills/gitlab-frontend-conventions/SKILL.md) | Review and clean up frontend code in the GitLab monolith (Vue, Apollo, Jest/VTU/MSW, JS utilities) against rules distilled from real merge request reviews, fixing typical AI-generated slop such as scoped styles, imperative Apollo queries, reactive constants, hand-set Apollo data in specs, and defensive optional chaining. Use when writing or reviewing code under app/assets/javascripts, ee/app/assets/javascripts, spec/frontend or ee/spec/frontend, or when asked to unslop, lint the Vue, or prep a frontend MR for review. | 1.0.0 |
 | [`gitlab-mr-description`](.claude-plugin/plugins/gitlab-mr-description) | [`gitlab-mr-description`](skills/gitlab-mr-description/SKILL.md) | Write or update a GitLab MR description. Reads the branch diff, drafts structured markdown using GitLab's standard sections, and applies conventions for feature flags, database queries, and local testing matrices. Use when opening a new MR or refreshing an existing description. | 1.1.0 |
 | [`gitlab-pipeline-watch`](.claude-plugin/plugins/gitlab-pipeline-watch) | [`gitlab-pipeline-watch`](skills/gitlab-pipeline-watch/SKILL.md) | Watch GitLab MR pipelines and react to state changes | 1.0.2 |
 | [`gitlab-psql`](.claude-plugin/plugins/gitlab-psql) | [`gitlab-psql`](skills/gitlab-psql/SKILL.md) | Inspect GitLab GDK PostgreSQL test and development databases with gdk psql. Use for Postgres schema checks, table and index inspection, read-only SQL queries, migration verification, and investigating GitLab application data in local test or development databases. | 1.0.1 |

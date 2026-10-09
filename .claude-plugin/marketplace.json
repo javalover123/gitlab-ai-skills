@@ -40,6 +40,10 @@
       "source": "./.claude-plugin/plugins/gitlab-clickhouse"
     },
     {
+      "name": "gitlab-frontend-conventions",
+      "source": "./.claude-plugin/plugins/gitlab-frontend-conventions"
+    },
+    {
       "name": "gitlab-mr-description",
       "source": "./.claude-plugin/plugins/gitlab-mr-description"
     },
