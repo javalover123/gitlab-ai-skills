@@ -1,7 +1,7 @@
 ---
 name: gitlab-agent-plan
 description: "Read or write a GitLab work item's Workplan / Agent Plan widget — the AI work plan property — via GraphQL. Use when asked to get/show/pull or attach/set/update a work item's workplan or agent plan, as opposed to its description or comments."
-version: 0.1.0
+version: 0.1.1
 license: MIT
 category: Development Workflow
 compatibility: opencode
