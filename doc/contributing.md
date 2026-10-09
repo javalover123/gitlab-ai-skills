@@ -60,7 +60,9 @@ verifies that the `version` field is incremented whenever files under
 `skills/<name>/` change. The `validate-content-quality` job fails on any broken
 relative link in a `SKILL.md` or its `references/*.md`, and warns (without
 blocking) on a missing "When to Use"/"Use when"/"Triggers" cue, stray
-`TODO`/`FIXME` in prose, or AGENTS.md-banned voice words. See
+`TODO`/`FIXME` in prose, or AGENTS.md-banned voice words. To keep a banned
+word on purpose (for example in a table of words to avoid), end the line with
+`<!-- voice-ok -->`, or `<!-- voice-ok: reason -->` to say why. See
 [`AGENTS.md`](../AGENTS.md) for the full list of conventions and their enforcing
 checks (skill length, shell-script linting, `AGENTS.md`/`CLAUDE.md` sync).
 
