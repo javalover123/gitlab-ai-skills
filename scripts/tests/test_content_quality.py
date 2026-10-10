@@ -89,6 +89,35 @@ class TestVoice(unittest.TestCase):
         with TempSkill("This paragraph mentions `utilize` in a snippet.\n") as s:
             self.assertEqual(vcq.check_voice(s.skill_md), [])
 
+    def test_voice_ok_marker_skips_line(self):
+        body = "| leverage | use | <!-- voice-ok -->"
+        with TempSkill(body) as s:
+            self.assertEqual(vcq.check_voice(s.skill_md), [])
+
+    def test_voice_ok_marker_with_reason_skips_line(self):
+        body = "| leverage | use | <!-- voice-ok: table of words to avoid -->\n"
+        with TempSkill(body) as s:
+            self.assertEqual(vcq.check_voice(s.skill_md), [])
+
+    def test_voice_ok_marker_alone_does_not_skip_next_line(self):
+        body = "<!-- voice-ok -->\nWe leverage the cache.\n"
+        with TempSkill(body) as s:
+            warns = vcq.check_voice(s.skill_md)
+            self.assertEqual(len(warns), 1)
+            self.assertTrue(warns[0].startswith("line 2:"))
+
+    def test_voice_ok_marker_after_banned_line_does_not_skip_it(self):
+        body = "We leverage the cache.\n<!-- voice-ok -->\n"
+        with TempSkill(body) as s:
+            warns = vcq.check_voice(s.skill_md)
+            self.assertEqual(len(warns), 1)
+            self.assertTrue(warns[0].startswith("line 1:"))
+
+    def test_other_html_comment_does_not_skip_line(self):
+        body = "We leverage the cache. <!-- voice -->\n"
+        with TempSkill(body) as s:
+            self.assertEqual(len(vcq.check_voice(s.skill_md)), 1)
+
 
 class TestStructure(unittest.TestCase):
     def test_use_when_cue_satisfies(self):
