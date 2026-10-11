@@ -5,7 +5,7 @@ Post all reports inside a **single resolved discussion** so they stay collapsed 
 ## First report: Create resolved discussion, then reply with report
 
 Use `-R "$PROJECT_PATH"` on every call (the MR is addressed by `$MR_IID`).
-Flags verified against `glab mr note create|list|resolve --help`.
+Requires glab 1.94 or newer (`mr note list`/`resolve`, `create --reply`). `resolve` takes the MR first and the discussion ID last, despite what its `--help` USAGE line shows.
 
 **Step 1**: Create a small discussion, look up its ID, and immediately resolve it.
 
@@ -18,9 +18,11 @@ glab mr note create "$MR_IID" -R "$PROJECT_PATH" -m "$PLACEHOLDER"
 DISCUSSION_ID=$(glab mr note list "$MR_IID" -R "$PROJECT_PATH" -F json |
   jq -r --arg body "$PLACEHOLDER" \
     '[(. // [])[] | select(.notes[0].body == $body)] | last | .id')
+[ -n "$DISCUSSION_ID" ] && [ "$DISCUSSION_ID" != null ] ||
+  { echo "placeholder discussion not found" >&2; exit 1; }
 
 # Resolve so it's collapsed (accepts the full ID or an 8+ char prefix)
-glab mr note resolve "$DISCUSSION_ID" "$MR_IID" -R "$PROJECT_PATH"
+glab mr note resolve "$MR_IID" "$DISCUSSION_ID" -R "$PROJECT_PATH"
 ```
 
 **Step 2**: Post the actual report as a reply, then re-resolve the discussion (GitLab unresolves a discussion when a new reply is added).
@@ -61,7 +63,7 @@ COMMENT
 )"
 
 # Re-resolve the discussion (replying unresolves it)
-glab mr note resolve "$DISCUSSION_ID" "$MR_IID" -R "$PROJECT_PATH"
+glab mr note resolve "$MR_IID" "$DISCUSSION_ID" -R "$PROJECT_PATH"
 ```
 
 ## Subsequent reports: Reply to existing discussion
@@ -70,7 +72,7 @@ glab mr note resolve "$DISCUSSION_ID" "$MR_IID" -R "$PROJECT_PATH"
 glab mr note create "$MR_IID" -R "$PROJECT_PATH" --reply "$DISCUSSION_ID" -m "<report body>"
 
 # Re-resolve the discussion (replying unresolves it)
-glab mr note resolve "$DISCUSSION_ID" "$MR_IID" -R "$PROJECT_PATH"
+glab mr note resolve "$MR_IID" "$DISCUSSION_ID" -R "$PROJECT_PATH"
 ```
 
 Store `DISCUSSION_ID` across action rounds so all updates form a single thread.
