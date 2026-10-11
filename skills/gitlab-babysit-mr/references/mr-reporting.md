@@ -25,7 +25,7 @@ DISCUSSION_ID=$(glab mr note list "$MR_IID" -R "$PROJECT_PATH" -F json |
 glab mr note resolve "$MR_IID" "$DISCUSSION_ID" -R "$PROJECT_PATH"
 ```
 
-**Step 2**: Post the actual report as a reply, then re-resolve the discussion (GitLab unresolves a discussion when a new reply is added).
+**Step 2**: Post the actual report as a reply, then re-resolve the discussion (a reply to a resolved discussion leaves it resolved; re-resolving restores the state if someone unresolved it meanwhile).
 
 ```bash
 glab mr note create "$MR_IID" -R "$PROJECT_PATH" --reply "$DISCUSSION_ID" -m "$(cat <<'COMMENT'
@@ -62,7 +62,7 @@ _Waiting for pipeline to finish before next check._
 COMMENT
 )"
 
-# Re-resolve the discussion (replying unresolves it)
+# Re-resolve the discussion (replies leave it resolved; this restores the state if someone unresolved it)
 glab mr note resolve "$MR_IID" "$DISCUSSION_ID" -R "$PROJECT_PATH"
 ```
 
@@ -71,7 +71,7 @@ glab mr note resolve "$MR_IID" "$DISCUSSION_ID" -R "$PROJECT_PATH"
 ```bash
 glab mr note create "$MR_IID" -R "$PROJECT_PATH" --reply "$DISCUSSION_ID" -m "<report body>"
 
-# Re-resolve the discussion (replying unresolves it)
+# Re-resolve the discussion (replies leave it resolved; this restores the state if someone unresolved it)
 glab mr note resolve "$MR_IID" "$DISCUSSION_ID" -R "$PROJECT_PATH"
 ```
 
