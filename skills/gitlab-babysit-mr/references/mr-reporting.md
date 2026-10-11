@@ -5,7 +5,7 @@ Post all reports inside a **single resolved discussion** so they stay collapsed 
 ## First report: Create resolved discussion, then reply with report
 
 Use `-R "$PROJECT_PATH"` on every call (the MR is addressed by `$MR_IID`).
-Requires glab 1.94 or newer (`mr note list`/`resolve`, `create --reply`). `resolve` takes the MR first and the discussion ID last, despite what its `--help` USAGE line shows.
+Requires glab 1.101 or newer (`mr note list`/`resolve`, `create --reply`, `--resolvable`; the Duo note in lint-fix-delegation.md needs the same). `resolve` takes the MR first and the discussion ID last, despite what its `--help` USAGE line shows.
 
 **Step 1**: Create a small discussion, look up its ID, and immediately resolve it.
 
