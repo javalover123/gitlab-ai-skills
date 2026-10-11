@@ -30,9 +30,7 @@ EOF
 # Append the instruction (already shell-safe in a variable)
 printf '%s' "$DUO_INSTRUCTION" >> "$DUO_MSG"
 
-glab api "projects/${PROJECT_ENCODED}/merge_requests/${MR_IID}/notes" \
-  --method POST \
-  --raw-field "body=$(cat "$DUO_MSG")"
+glab mr note create "$MR_IID" -R "$PROJECT_PATH" --resolvable=false < "$DUO_MSG"
 rm -f "$DUO_MSG"
 ```
 
