@@ -3,7 +3,7 @@
 **Repo:** https://gitlab.com/gitlab-org/quality/sitespeed-runway
 **Self-service docs:** https://gitlab.com/gitlab-org/quality/sitespeed-runway/-/blob/main/docs/self-service.md
 **Web UI:** https://sitespeed.runway.gitlab.net/
-**Existing test configurations:** https://gitlab.com/gitlab-org/quality/sitespeed-runway/-/tree/main/tests
+**CI integration examples:** https://gitlab.com/gitlab-org/quality/sitespeed-runway/-/blob/main/docs/ci-integration.md
 
 Sitespeed Runway is a hosted sitespeed.io service for measuring frontend
 performance (FCP, LCP, TBT, CLS, SpeedIndex). It provides a Web UI for
