@@ -773,6 +773,21 @@ def is_verification_only_turn(tool_counts: Dict[str, int]) -> bool:
     return has_verify
 
 
+def compute_must_block(gaps: List[str], forbidden_matches: list, verification_only: bool) -> Tuple[bool, bool]:
+    """Decide whether the Stop hook must block, and why.
+
+    Returns (must_block, verification_only_with_gaps). A verification-only
+    turn (tests/lint/build with no Edit/Write/MultiEdit) is only a
+    stopping-bias tell while gaps remain to work on instead; with zero
+    gaps it's the legitimate final validation checkpoint the skill's
+    "Verification Budget" guidance recommends, not a reason to force a
+    pointless edit just to get past this hook.
+    """
+    verification_only_with_gaps = verification_only and bool(gaps)
+    must_block = bool(gaps) or bool(forbidden_matches) or verification_only_with_gaps
+    return must_block, verification_only_with_gaps
+
+
 # ============================================================================
 # Language Detection and Gap Checking
 # ============================================================================
@@ -2636,7 +2651,9 @@ def main():
     verification_only = is_verification_only_turn(tool_counts)
 
     # Make decision based on gaps AND behavioural flags.
-    must_block = bool(gaps) or bool(forbidden_matches) or verification_only
+    must_block, verification_only_with_gaps = compute_must_block(
+        gaps, forbidden_matches, verification_only
+    )
 
     if must_block:
         sections = []
@@ -2667,7 +2684,7 @@ def main():
             ]
             sections.append("\n".join(lines))
 
-        if verification_only:
+        if verification_only_with_gaps:
             name_counts = ", ".join(f"{n}×{c}" for n, c in sorted(tool_counts.items()))
             sections.append(
                 "BEHAVIOURAL BLOCK — verification-only turn detected.\n\n"

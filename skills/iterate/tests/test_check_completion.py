@@ -73,6 +73,49 @@ class ShouldSkipTest(unittest.TestCase):
         self.assertFalse(cc.should_skip({}))
 
 
+class MustBlockTest(unittest.TestCase):
+    """Fix: a verification-only turn with zero gaps remaining is the
+    legitimate final validation checkpoint, not a stopping-bias tell —
+    it must not force a block (which would require a pointless edit
+    just to get past the hook).
+    """
+
+    def test_verification_only_with_no_gaps_does_not_block(self):
+        must_block, with_gaps = cc.compute_must_block(
+            gaps=[], forbidden_matches=[], verification_only=True
+        )
+        self.assertFalse(must_block)
+        self.assertFalse(with_gaps)
+
+    def test_verification_only_with_gaps_blocks(self):
+        must_block, with_gaps = cc.compute_must_block(
+            gaps=["P1: something"], forbidden_matches=[], verification_only=True
+        )
+        self.assertTrue(must_block)
+        self.assertTrue(with_gaps)
+
+    def test_gaps_alone_block_regardless_of_verification_only(self):
+        must_block, with_gaps = cc.compute_must_block(
+            gaps=["P1: something"], forbidden_matches=[], verification_only=False
+        )
+        self.assertTrue(must_block)
+        self.assertFalse(with_gaps)
+
+    def test_forbidden_matches_alone_block(self):
+        must_block, with_gaps = cc.compute_must_block(
+            gaps=[], forbidden_matches=[("deferred", "ctx")], verification_only=False
+        )
+        self.assertTrue(must_block)
+        self.assertFalse(with_gaps)
+
+    def test_nothing_blocks_on_clean_turn(self):
+        must_block, with_gaps = cc.compute_must_block(
+            gaps=[], forbidden_matches=[], verification_only=False
+        )
+        self.assertFalse(must_block)
+        self.assertFalse(with_gaps)
+
+
 class RunCommandTimeoutTest(unittest.TestCase):
     """Fix: an explicitly-passed timeout is never overridden by the
     generic config.timeouts fallback, which keyed on cmd[0] ("cargo")
