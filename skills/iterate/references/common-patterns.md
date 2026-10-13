@@ -1,5 +1,15 @@
 # Common Iteration Patterns
 
+## Verification Budget
+
+Verification tools (test runners, linters, full builds) cost time and tokens; spend them deliberately, not reflexively.
+
+- **During the inner loop:** run narrow, targeted invocations scoped to what you just changed — a single test file, `cargo check` instead of a full `cargo test`, a lint pass on the one module you touched. Confirm the specific fix works before moving to the next gap.
+- **At validation checkpoints:** run the full suite (all tests, full lint, full build) to confirm nothing else regressed, before updating the iteration log or declaring the project complete.
+- **Never verify without changing code in the same turn.** A turn that only runs tests/lint/build with no accompanying `Edit`/`Write`/`MultiEdit` call is a read-only pass, not an iteration — `check-completion.py`'s Stop hook blocks on this (the "verification-only turn" check) and expects you to pick a gap and make a concrete change instead.
+
+This is the rule `check-completion.py` and `SKILL.md` both refer to as the "verification budget."
+
 ## Security-First Iteration
 
 When you're drowning in security debt, tackle it first — before anything else. Run security-specific tools (cargo-audit, gosec, bandit), fix every vulnerability you find, then add tests so they can't creep back in. Document your security assumptions and threat model so you don't forget why you made certain choices.

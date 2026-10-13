@@ -54,7 +54,11 @@ Create an iteration log at `.iterate/iteration-log.md` (preferred — keeps log 
 - Test coverage: 67% → 84%
 - Clippy warnings: 7 → 0
 - All quality gates: PASS
+
+**LOOP COMPLETE.**
 ```
+
+The final line matters: `session-start-handover.py` scans the log's last line for a literal "complete" sentinel to decide whether a new session should resume the loop. Without one, a genuinely finished project still gets a resume directive on its next session start. End the log with a line like `**LOOP COMPLETE.**` once every gate passes — not partway through, and not alongside words like "deferred" or "pending" on that same line, which keep the loop flagged as in-flight even next to "complete".
 
 ## Tips
 

@@ -164,6 +164,22 @@ class IterateConfig:
             # Don't fail the hook if config is malformed, just log it
             sys.stderr.write(f"Warning: Failed to load .iterate.json: {e}\n")
 
+    @staticmethod
+    def _path_matches(path_str: str, pattern: str) -> bool:
+        """
+        Match `pattern` against `path_str` as a full path segment, not a
+        bare substring. A substring check (e.g. "/vendor" in path_str)
+        would also match "vendor-extra/", "thirdvendor/", etc. — any
+        directory name that merely starts or ends with the pattern.
+        """
+        pattern = pattern.rstrip("/")
+        return (
+            path_str == pattern
+            or path_str.startswith(pattern + "/")
+            or path_str.endswith(f"/{pattern}")
+            or f"/{pattern}/" in path_str
+        )
+
     def should_check_path(self, path: str) -> bool:
         """
         Check if a path passes include/exclude filters.
@@ -193,14 +209,14 @@ class IterateConfig:
         # If exclude paths specified and this matches any, skip
         if self.exclude_paths:
             for exclude in self.exclude_paths:
-                if path_str.startswith(exclude) or f"/{exclude}" in path_str or path_str == exclude.rstrip("/"):
+                if self._path_matches(path_str, exclude):
                     return False
 
         # If include paths specified and this doesn't match any, skip
         if self.include_paths:
             matches_include = False
             for include in self.include_paths:
-                if path_str.startswith(include) or f"/{include}" in path_str or path_str == include.rstrip("/"):
+                if self._path_matches(path_str, include):
                     matches_include = True
                     break
             if not matches_include:
@@ -351,8 +367,12 @@ def tmux_send_iterate_fallback() -> None:
 
     C-u clears any pending text first so repeated Stop hooks don't stack
     duplicate /iterate strings.
+
+    Opt-in only (ITERATE_ENABLE_SEND_KEYS=1): typing into the user's pane
+    is an undocumented side effect of a Stop hook, and the typed text can
+    land mid-turn and stack up or interrupt what the user is typing.
     """
-    if os.environ.get("ITERATE_DISABLE_SEND_KEYS") == "1":
+    if os.environ.get("ITERATE_ENABLE_SEND_KEYS") != "1":
         return
     pane = os.environ.get("TMUX_PANE", "")
     if not pane:
@@ -383,14 +403,12 @@ def hook_state_dir(skill_name: str) -> Path:
     Prefers `<project>/.iterate/hooks/<skill_name>/` so log writes don't
     touch `.claude/` (which triggers per-write permission prompts and
     breaks the iterate loop). Falls back to `/tmp/claude-code-hooks/`
-    only when no project root is discoverable — the hook still records
+    only when that directory isn't writable (read-only checkout,
+    container with project mounted ro, …) — the hook still records
     something rather than silently dropping data.
     """
     project_root = os.environ.get("CLAUDE_PROJECT_DIR") or os.getcwd()
-    if project_root:
-        path = Path(project_root) / ".iterate" / "hooks" / skill_name
-    else:
-        path = Path(tempfile.gettempdir()) / "claude-code-hooks" / skill_name
+    path = Path(project_root) / ".iterate" / "hooks" / skill_name
     try:
         path.mkdir(parents=True, exist_ok=True)
     except OSError:
@@ -429,11 +447,15 @@ def log_hook(skill_name: str, hook_input: Dict[str, Any], output: Dict[str, Any]
 
 
 def should_skip(hook_input: Dict[str, Any]) -> bool:
-    """Check if we should skip iteration (subagent, background, or stop hook active)."""
-    # Check if stop hook already triggered
-    if hook_input.get("stop_hook_active", False):
-        return True
+    """Check if we should skip iteration (subagent or background task).
 
+    Deliberately does NOT skip on `stop_hook_active` (set by Claude Code on
+    the stop that follows a block): since every subsequent stop attempt
+    while gaps remain also carries this flag, skipping on it approves the
+    very next stop unconditionally, ending the loop after exactly one
+    block regardless of how many gaps are left — the opposite of this
+    skill's "block until every gate passes" design.
+    """
     # Check if this is a subagent
     if hook_input.get("parent_task_id") or hook_input.get("agent_type") or hook_input.get("is_subagent", False):
         return True
@@ -1237,15 +1259,18 @@ def check_security_comprehensive(language: Set[str], nix_cmd: Optional[str], con
             if lines:
                 gaps.append(f"P0: {len(lines)} unsafe blocks found — review with /rust-unsafe-ffi-review")
 
-        # Check for common security anti-patterns
+        # Check for common security anti-patterns. -F (fixed-string) avoids
+        # the parens being parsed as BRE group syntax, which made every one
+        # of these grep calls fail with "Unmatched ( or \(" and silently
+        # skip the check (run_command treats a non-zero exit as failure).
         patterns = [
-            ("unwrap\\(", "unwrap() calls that can panic"),
-            ("expect\\(", "expect() calls that can panic"),
-            ("panic!\\(", "panic calls terminate the program and indicate a lack of graceful error handling"),
-            (".clone\\(", "excessive cloning (potential DoS)"),
+            ("unwrap(", "unwrap() calls that can panic"),
+            ("expect(", "expect() calls that can panic"),
+            ("panic!(", "panic calls terminate the program and indicate a lack of graceful error handling"),
+            (".clone(", "excessive cloning (potential DoS)"),
         ]
         for pattern, description in patterns:
-            cmd = ["grep", "-r", pattern, "--include=*.rs"] + exclude_args + ["src/"]
+            cmd = ["grep", "-r", "-F", pattern, "--include=*.rs"] + exclude_args + ["src/"]
             success, output = run_command(cmd, nix_cmd)
             if success and output.strip():
                 lines = output.strip().split("\n")
@@ -1261,8 +1286,11 @@ def check_security_comprehensive(language: Set[str], nix_cmd: Optional[str], con
         # Check for banned functions
         banned_functions = ["strcpy", "strcat", "sprintf", "gets", "scanf"]
         for func in banned_functions:
-            # add \( suffix to grep to catch functions, not just these bare words
-            cmd = ["grep", "-r", "-w", "{}\\(".format(func), "--include=*.c"] + exclude_args + ["."]
+            # -F (fixed-string) suffix to catch functions, not just these
+            # bare words, without the trailing "(" being parsed as BRE
+            # group syntax (which made this fail with "Unmatched ( or \(").
+            # -w no longer applies with -F, so match the call form directly.
+            cmd = ["grep", "-r", "-F", "{}(".format(func), "--include=*.c"] + exclude_args + ["."]
             success, output = run_command(cmd, nix_cmd)
             if success and output.strip():
                 gaps.append(f"P0: Banned function {func}() found — use safe alternatives")
@@ -1276,7 +1304,7 @@ def check_security_comprehensive(language: Set[str], nix_cmd: Optional[str], con
     return gaps
 
 
-def run_command(cmd: List[str], nix_shell_cmd: Optional[str] = None, check: bool = False, timeout: int = 120, config: Optional[IterateConfig] = None, cwd: Optional[str] = None) -> Tuple[bool, str]:
+def run_command(cmd: List[str], nix_shell_cmd: Optional[str] = None, check: bool = False, timeout: Optional[int] = None, config: Optional[IterateConfig] = None, cwd: Optional[str] = None) -> Tuple[bool, str]:
     """
     Run a command and return (success, output), wrapped in Nix shell if needed.
 
@@ -1286,18 +1314,20 @@ def run_command(cmd: List[str], nix_shell_cmd: Optional[str] = None, check: bool
     that don't indicate command failure. Trust the return code first, parse output
     only when extracting specific data (coverage %, error details).
 
-    Timeout can be overridden by config for specific commands.
+    `timeout=None` (the default) means the caller has no specific requirement;
+    in that case `config.timeouts["default"]` is used if set, else 120s.
+    Callers that care about a per-command timeout should resolve it
+    themselves from `config.timeouts` (keyed by compound names like
+    "cargo_test" — `cmd[0]` alone, e.g. "cargo", never matches those) and
+    pass the result as `timeout=`. An explicitly passed `timeout` is never
+    overridden here, including when it happens to equal 120.
 
     Debug mode: Set ITERATE_DEBUG=1 environment variable to log raw output.
     """
-    # Use configured timeout if available
-    if config and config.timeouts:
-        # Try to match command-specific timeout
-        cmd_name = cmd[0] if cmd else "default"
-        if cmd_name in config.timeouts:
-            timeout = config.timeouts[cmd_name]
-        elif "default" in config.timeouts:
-            timeout = config.timeouts.get("default", timeout)
+    if timeout is None:
+        # No specific timeout requested: fall back to the configured
+        # project-wide default, else 120s.
+        timeout = (config.timeouts.get("default", 120) if config and config.timeouts else 120)
 
     debug_mode = os.getenv("ITERATE_DEBUG") == "1"
 
@@ -2132,8 +2162,17 @@ def check_adr_implementation_gaps(config: IterateConfig) -> List[str]:
         if impl_section:
             impl_text = impl_section.group(1)
 
-            # Extract file paths mentioned (e.g., `crates/donbiki-notify/src/desktop.rs`)
-            file_refs = re.findall(r"`(crates/[^`]+\.rs)`", impl_text)
+            # Extract file paths mentioned (e.g., `crates/donbiki-notify/src/desktop.rs`,
+            # `internal/foo/bar.go`, `scripts/check.py`). Matches any
+            # backtick-quoted relative path ending in a source extension
+            # for one of this skill's supported languages — not just
+            # Rust's `crates/` convention, which silently skipped this
+            # check entirely for Go/Python/JS/Nix/C projects.
+            file_refs = re.findall(
+                r"`([A-Za-z0-9_][A-Za-z0-9_\-./]*\."
+                r"(?:rs|go|py|rb|c|h|cc|cpp|hpp|js|jsx|ts|tsx|nix|sh))`",
+                impl_text,
+            )
             for file_ref in file_refs:
                 full_path = project_root / file_ref
                 if not full_path.exists():
@@ -2507,8 +2546,11 @@ def main():
             task_list = ", ".join(minutes_remaining) if minutes_remaining else ", ".join(still_running)
             instructions.append(f"Background tasks still running: {task_list}")
             instructions.append("Wait 60 seconds, then re-run /{} to check task status again".format(SKILL_NAME))
-            instructions.append("Once background tasks are finish, rerun /{} in the main conversation\n".format(SKILL_NAME))
-            instructions.append("threat to continue iterating on implementation gaps until all gaps are closed\n")
+            instructions.append(
+                "Once background tasks are finished, rerun /{} in the main "
+                "conversation, then continue iterating on implementation "
+                "gaps until all gaps are closed".format(SKILL_NAME)
+            )
 
         if instructions:
             reason = "\n\n".join(instructions)
@@ -2519,8 +2561,8 @@ def main():
     # No background tasks (or all completed) - clean up tracking and check for gaps
     cleanup_task_tracking(SKILL_NAME, background_tasks)
 
-    # Load configuration
-    config = IterateConfig()
+    # `config` was already loaded above (and used for skip_in_background);
+    # reuse it instead of re-parsing .iterate.json from scratch.
 
     # Detect Nix environment
     uses_nix, nix_shell_cmd = detect_nix_environment()

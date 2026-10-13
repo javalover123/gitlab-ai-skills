@@ -67,13 +67,13 @@ def sanitize_pane(pane: str) -> str:
 
 
 def project_state_dir() -> Path:
-    """Project-local `.iterate/` directory for rotation/handover state."""
+    """Project-local `.iterate/` directory for rotation/handover state.
+
+    Falls back to `/tmp/claude-rotation-state/` when that directory isn't
+    writable.
+    """
     project_root = os.environ.get("CLAUDE_PROJECT_DIR") or os.getcwd()
-    if project_root:
-        path = Path(project_root) / ".iterate"
-    else:
-        import tempfile
-        path = Path(tempfile.gettempdir()) / "claude-rotation-state"
+    path = Path(project_root) / ".iterate"
     try:
         path.mkdir(parents=True, exist_ok=True)
     except OSError:
@@ -179,7 +179,7 @@ def inspect_iteration_log(path: Path) -> Optional[Tuple[str, bool]]:
         re.search(p, last, re.IGNORECASE) for p in DEFERRAL_SENTINEL_PATTERNS
     )
 
-    loop_in_flight = not is_complete
+    loop_in_flight = (not is_complete) or has_deferral
     return summary, loop_in_flight
 
 

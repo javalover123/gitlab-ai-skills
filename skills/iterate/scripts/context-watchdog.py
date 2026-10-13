@@ -10,8 +10,11 @@ Mechanism:
      cache_creation to get effective context size.
   2. If usage exceeds threshold (default 70% of window), write a handover
      marker to /tmp/claude-rotation-<user>-<pane>.md, detach rotator.sh
-     which will tmux send-keys `/clear` into the pane, and return a
-     PreToolUse deny decision so the about-to-run tool does not execute.
+     (if present — see scripts/ in this skill) which will tmux send-keys
+     `/clear` into the pane, and return a PreToolUse deny decision so the
+     about-to-run tool does not execute. If rotator.sh isn't present, the
+     handover is still written but the tool is allowed through instead of
+     denied, since nothing would ever send `/clear` to unstick it.
   3. Otherwise exit silently with no output (allow the tool).
 
 Configuration (via env vars):
@@ -73,15 +76,12 @@ ROTATOR = SCRIPT_DIR / "rotator.sh"
 def project_state_dir() -> Path:
     """Project-local `.iterate/` directory for rotation/handover state.
 
-    Falls back to `/tmp/claude-rotation-state/` when no project root is
-    discoverable (e.g. running outside a tmux/Claude Code session) — the
-    watchdog has to keep working even outside its primary use case.
+    Falls back to `/tmp/claude-rotation-state/` when that directory isn't
+    writable — the watchdog has to keep working even outside its primary
+    use case.
     """
     project_root = os.environ.get("CLAUDE_PROJECT_DIR") or os.getcwd()
-    if project_root:
-        path = Path(project_root) / ".iterate"
-    else:
-        path = Path(tempfile.gettempdir()) / "claude-rotation-state"
+    path = Path(project_root) / ".iterate"
     try:
         path.mkdir(parents=True, exist_ok=True)
     except OSError:
@@ -260,15 +260,20 @@ def write_handover(pane: str, used: int, window: int, session_id: str) -> Path:
     return path
 
 
-def spawn_rotator(pane: str, handover: Path) -> None:
+def spawn_rotator(pane: str, handover: Path) -> bool:
     """Detach rotator.sh so it survives this hook exiting.
 
     Passes the project root as the third arg so the rotator's own
     diagnostic log lands in `<project>/.iterate/logs/rotator.log`
     instead of `/tmp/`.
+
+    Returns whether the rotator was actually spawned. The caller must not
+    deny tool calls on a rotation it never started — nothing else ever
+    sends `/clear`, so a denial with no rotator running would stall the
+    session with every tool call denied forever.
     """
     if not ROTATOR.exists():
-        return
+        return False
     project_dir = os.environ.get("CLAUDE_PROJECT_DIR") or os.getcwd() or ""
     try:
         subprocess.Popen(
@@ -279,8 +284,10 @@ def spawn_rotator(pane: str, handover: Path) -> None:
             start_new_session=True,
             close_fds=True,
         )
+        return True
     except Exception as exc:
         fail_silent(exc)
+        return False
 
 
 def deny(reason: str) -> None:
@@ -344,9 +351,17 @@ def main() -> None:
     session_id = hook_input.get("session_id", "")
     try:
         path = write_handover(pane, used, window, session_id)
-        spawn_rotator(pane, path)
+        rotator_spawned = spawn_rotator(pane, path)
     except Exception as exc:
         fail_silent(exc)
+        return
+
+    if not rotator_spawned:
+        # rotator.sh isn't present (or failed to launch): nothing will
+        # ever send /clear, so denying here would stall the session with
+        # every tool call denied forever. Allow the tool through instead;
+        # the agent keeps running against the now-tight context budget
+        # rather than getting stuck.
         return
 
     deny(
