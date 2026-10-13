@@ -137,6 +137,14 @@
       "path": "skills/human-review/SKILL.md"
     },
     {
+      "name": "iterate",
+      "description": "Brings projects to 100% completion through iterative cycles \u2014 implementing missing features, fixing security/correctness gaps, and refining code until all specs, ADRs, and threat model requirements are met. Runs gap analysis, prioritizes by security/correctness/quality/coverage, and auto-iterates until nothing remains. Use when completing an incomplete project, implementing remaining features from specs, addressing technical debt, or reaching production readiness. Triggers: iterate, bring to completion, implement remaining features, production readiness, gap analysis, address all gaps, complete project, iterative development.",
+      "category": "Development Workflow",
+      "license": "MIT",
+      "compatibility": "opencode",
+      "path": "skills/iterate/SKILL.md"
+    },
+    {
       "name": "mcp-creator",
       "description": "Guides building production-quality MCP servers in Rust using the rmcp crate. Covers protocol design, tool implementation, testing, security hardening, and AI-tool integration. Use when building an MCP server, creating MCP tools, implementing MCP in Rust, adding tools/resources/prompts to an MCP server, or starting a new MCP project.",
       "category": "Development Workflow",
