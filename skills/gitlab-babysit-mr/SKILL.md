@@ -1,7 +1,7 @@
 ---
 name: gitlab-babysit-mr
-description: Monitor a GitLab MR's pipeline until green. Classifies failures (flaky, master-broken, lint, coverage, real), retries jobs where appropriate, makes light-touch auto-fixes, and posts findings as an MR comment. For someone else's approved auto-merge MR that must not be changed, use gitlab-retry-until-merged instead.
-version: 0.12.6
+description: Monitor a GitLab MR's pipeline until green. Classifies failures (flaky, master-broken, lint, coverage, real), retries jobs where appropriate, pushes light-touch auto-fix commits to the MR branch, and posts findings as an MR comment. Use when asked to babysit an MR, fix its CI, or get it green, and pushing to its branch is fine. If the MR must not be changed (someone else's, or one you approved for auto-merge), use gitlab-retry-until-merged; to only watch, use gitlab-pipeline-watch.
+version: 0.13.0
 category: Development Workflow
 license: MIT
 compatibility: opencode
@@ -17,7 +17,8 @@ Nurse a GitLab MR's pipeline to green by classifying failures, retrying flaky/br
 
 ## Dependencies
 
-- **Bundled scripts** — `scripts/` directory (pipeline_status.sh, job_log_tail.sh, search_known_issues.sh)
+- **`gitlab-pipeline-watch` skill** — the shared MR watcher (`watch_mr.py`), snapshot (`mr_state.py`), and job log tail (`job_log_tail.py`). Load it first. `$WATCH` in the references is the directory holding its `SKILL.md`; set it in every shell command (variables don't persist). If the skill won't load or `$WATCH/scripts/watch_mr.py` is missing, stop and ask the user to install it.
+- **Bundled script** — `scripts/search_known_issues.sh`
 
 ## Main Loop (max 5 action rounds)
 
@@ -49,7 +50,7 @@ Each phase has detailed instructions in a reference file. Load on demand.
 | Phase | Summary | Reference |
 |-------|---------|-----------|
 | **0** | Resolve MR from argument or current branch | [references/mr-resolution.md](references/mr-resolution.md) |
-| **1** | Poll every 60s for blocking job failures or a terminal pipeline | [references/pipeline-watching.md](references/pipeline-watching.md) |
+| **1** | Watch with `$WATCH/scripts/watch_mr.py` for blocking job failures or a terminal pipeline | [references/pipeline-watching.md](references/pipeline-watching.md) |
 | **2–3** | Fetch job logs, classify failures, search known issues | [references/job-analysis.md](references/job-analysis.md) |
 | **4** | Retry flaky jobs, retry pipelines, delegate lint to Duo Developer | [references/failure-actions.md](references/failure-actions.md) |
 | **5** | Post report in a resolved discussion thread (collapsed by default) | [references/mr-reporting.md](references/mr-reporting.md) |

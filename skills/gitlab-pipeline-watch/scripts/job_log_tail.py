@@ -41,6 +41,8 @@ def main():
     parser.add_argument("job_id", type=int)
     parser.add_argument("lines", nargs="?", type=int, default=150)
     args = parser.parse_args()
+    if args.lines < 1:
+        parser.error("lines must be >= 1")
 
     base = f"projects/{args.project_encoded}/jobs/{args.job_id}"
     try:

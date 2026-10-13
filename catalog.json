@@ -50,7 +50,7 @@
     },
     {
       "name": "gitlab-babysit-mr",
-      "description": "Monitor a GitLab MR's pipeline until green. Classifies failures (flaky, master-broken, lint, coverage, real), retries jobs where appropriate, makes light-touch auto-fixes, and posts findings as an MR comment. For someone else's approved auto-merge MR that must not be changed, use gitlab-retry-until-merged instead.",
+      "description": "Monitor a GitLab MR's pipeline until green. Classifies failures (flaky, master-broken, lint, coverage, real), retries jobs where appropriate, pushes light-touch auto-fix commits to the MR branch, and posts findings as an MR comment. Use when asked to babysit an MR, fix its CI, or get it green, and pushing to its branch is fine. If the MR must not be changed (someone else's, or one you approved for auto-merge), use gitlab-retry-until-merged; to only watch, use gitlab-pipeline-watch.",
       "category": "Development Workflow",
       "license": "MIT",
       "compatibility": "opencode",
@@ -74,7 +74,7 @@
     },
     {
       "name": "gitlab-pipeline-watch",
-      "description": "Watch GitLab MR pipelines and react to state changes",
+      "description": "Watch GitLab MR pipelines and return when their state changes. Watches one MR at the job level (returns as soon as a blocking job fails, a push lands, auto-merge is canceled, or the MR merges) or many MRs for finished pipelines, merges, and new MRs. Also snapshots an MR's merge and pipeline state and tails CI job logs. Use when asked to watch, wait on, or poll an MR or its pipeline; also the shared watcher that gitlab-babysit-mr and gitlab-retry-until-merged load. Read-only; to act on failures use gitlab-babysit-mr (MRs you may push to) or gitlab-retry-until-merged (MRs you must not change).",
       "category": "Development Workflow",
       "license": "MIT",
       "compatibility": "",
@@ -90,7 +90,7 @@
     },
     {
       "name": "gitlab-retry-until-merged",
-      "description": "Shepherd someone else's approved GitLab MR that is set to auto-merge (merge when pipeline succeeds) until it merges, without touching its code. Watches the pipeline, retries failures unrelated to the MR, waits out GitLab.com incidents and broken master before retrying, and alerts you on MR-caused failures or after 3 retries. Never commits, pushes, or rebases. Use when asked to retry until merged, keep an approved MR's pipeline going, or get an auto-merge MR over the line. For your own MR, where fixes may be pushed, use gitlab-babysit-mr instead.",
+      "description": "Shepherd someone else's approved GitLab MR that is set to auto-merge (merge when pipeline succeeds) until it merges, without touching its code. Watches the pipeline, retries failures unrelated to the MR, waits out GitLab.com incidents and broken master before retrying, and alerts the user on MR-caused failures or after 3 retries. Never commits, pushes, or rebases. Use when asked to retry until merged, keep a teammate's approved MR's pipeline going without changing its code, or get an auto-merge (MWPS) MR over the line. For your own MR, where fixes may be pushed, use gitlab-babysit-mr instead.",
       "category": "Development Workflow",
       "license": "MIT",
       "compatibility": "opencode",

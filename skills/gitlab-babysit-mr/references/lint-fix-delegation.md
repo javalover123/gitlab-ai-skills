@@ -52,7 +52,7 @@ Run `bundle exec rubocop --autocorrect` on the affected files.
 
 ## Step 3: Wait for Duo Developer to push a fix commit
 
-Before posting the comment, remember the current `pipeline_id` from Phase 1 as `PREV_PIPELINE_ID` so a fast Duo push is not missed. After posting, set `NEW_PIPELINE_DEADLINE` to now + 15 minutes and return to the [Phase 1 poll](pipeline-watching.md). The poll ignores the old pipeline, detects the new ID, then resumes blocking-failure checks on the new run. If it exits with `NO_NEW_PIPELINE`, use the local auto-fix fallback in Step 5.
+Before posting the comment, remember the current `pipeline.id` from Phase 1 as `PREV_PIPELINE_ID` so a fast Duo push is not missed. After posting, set `NEW_PIPELINE_DEADLINE` to now + 15 minutes and return to the [Phase 1 watch](pipeline-watching.md). The watch (`--newer-than PREV_PIPELINE_ID`) ignores the old pipeline, waits for a newer one, then resumes blocking-failure checks on the new run. If it exits with `NO_NEW_PIPELINE`, use the local auto-fix fallback in Step 5.
 
 ## Step 4: Handle incomplete fixes
 
@@ -111,7 +111,7 @@ fi
 if ! git diff --quiet; then
   git add -u
   git commit -m "fix: auto-correct lint violations"
-  PREV_PIPELINE_ID=$(bash scripts/pipeline_status.sh --blocking-only "$MR_URL" | jq -r '.pipeline_id // empty')
+  PREV_PIPELINE_ID=$(python3 "$WATCH/scripts/mr_state.py" "$MR_URL" | jq -r '.pipeline.id // empty')
   git push
   # Set NEW_PIPELINE_DEADLINE to now + 15 minutes before returning to Phase 1.
 fi

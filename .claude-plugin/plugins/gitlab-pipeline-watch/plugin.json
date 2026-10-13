@@ -1,7 +1,7 @@
 {
   "name": "gitlab-pipeline-watch",
-  "description": "Watch GitLab MR pipelines and react to state changes",
-  "version": "1.0.2",
+  "description": "Watch GitLab MR pipelines and return when their state changes. Watches one MR at the job level (returns as soon as a blocking job fails, a push lands, auto-merge is canceled, or the MR merges) or many MRs for finished pipelines, merges, and new MRs. Also snapshots an MR's merge and pipeline state and tails CI job logs. Use when asked to watch, wait on, or poll an MR or its pipeline; also the shared watcher that gitlab-babysit-mr and gitlab-retry-until-merged load. Read-only; to act on failures use gitlab-babysit-mr (MRs you may push to) or gitlab-retry-until-merged (MRs you must not change).",
+  "version": "1.1.0",
   "author": {
     "name": "GitLab"
   },

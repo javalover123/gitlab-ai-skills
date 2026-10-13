@@ -1,6 +1,6 @@
 ---
 name: gitlab-retry-until-merged
-description: Shepherd someone else's approved GitLab MR that is set to auto-merge (merge when pipeline succeeds) until it merges, without touching its code. Watches the pipeline, retries failures unrelated to the MR, waits out GitLab.com incidents and broken master before retrying, and alerts you on MR-caused failures or after 3 retries. Never commits, pushes, or rebases. Use when asked to retry until merged, keep an approved MR's pipeline going, or get an auto-merge MR over the line. For your own MR, where fixes may be pushed, use gitlab-babysit-mr instead.
+description: Shepherd someone else's approved GitLab MR that is set to auto-merge (merge when pipeline succeeds) until it merges, without touching its code. Watches the pipeline, retries failures unrelated to the MR, waits out GitLab.com incidents and broken master before retrying, and alerts the user on MR-caused failures or after 3 retries. Never commits, pushes, or rebases. Use when asked to retry until merged, keep a teammate's approved MR's pipeline going without changing its code, or get an auto-merge (MWPS) MR over the line. For your own MR, where fixes may be pushed, use gitlab-babysit-mr instead.
 version: 0.1.0
 category: Development Workflow
 license: MIT
@@ -41,6 +41,16 @@ If the only way to green needs any of these, **stop and alert the user**.
 - You approved an MR, set it to auto-merge, and want CI flakes retried until it lands.
 - **Not** for your own MR where pushing fixes is fine: use `gitlab-babysit-mr`.
 
+## Scripts and the `gitlab-pipeline-watch` dependency
+
+Watching, MR snapshots, and job logs come from the **`gitlab-pipeline-watch`**
+skill. Load it first. `$WATCH` below is the directory holding its `SKILL.md`; set
+it in every shell command (variables don't persist). If the skill won't load or
+`$WATCH/scripts/watch_mr.py` is missing, stop and ask the user to install it. This skill adds two scripts (`python3`,
+stdlib only, JSON out): `scripts/incident_status.py [--hours N]` and
+`scripts/retry.py --expect-sha <sha> <mr-url> pipeline <id> | new-pipeline`,
+the only one that writes.
+
 ## Main loop
 
 ```pseudocode
@@ -48,7 +58,7 @@ Phase 0: Resolve MR → preflight (open, auto_merge true) → record EXPECT_SHA
 RETRIES_USED = 0, MAX_RETRIES = 3, SEEN = []   # SEEN: triaged failed job IDs
 
 loop:
-    Phase 1: event = watch_mr.py --expect-sha EXPECT_SHA --seen SEEN
+    Phase 1: event = $WATCH/scripts/watch_mr.py --expect-sha EXPECT_SHA --auto-merge --seen SEEN
     MERGED                           → report success, exit
     TIMEOUT                          → not a failure; watch again
     API_ERROR                        → check incidents; watch again (alert after 30 min)
@@ -74,16 +84,6 @@ loop:
 | **3** | Check GitLab.com incident signals and wait them out | [references/incident-waiting.md](references/incident-waiting.md) |
 | **4** | Pick the retry (same pipeline vs new pipeline), spend the budget | [references/retrying.md](references/retrying.md) |
 | **5** | Alert the user: what failed, why, what they can do | [references/alerting.md](references/alerting.md) |
-
-## Scripts
-
-Run with `python3` from the skill directory (stdlib only). Each prints JSON; only `retry.py` writes.
-
-- `scripts/mr_state.py [--files] <mr-url>`: MR + latest pipeline + blocking failures
-- `scripts/watch_mr.py --expect-sha <sha> [--seen IDS] [--grace N] [--mr-only] <mr-url>`: block until an event
-- `scripts/job_log_tail.py <project-encoded> <job-id> [lines]`: cleaned log tail
-- `scripts/incident_status.py [--hours N]`: status page, production and master-broken incidents
-- `scripts/retry.py --expect-sha <sha> <mr-url> pipeline <id> | new-pipeline`
 
 ## Rules
 

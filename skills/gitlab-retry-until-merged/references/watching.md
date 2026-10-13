@@ -7,7 +7,7 @@ belongs to someone else and is unlikely to be checked out. If no URL was
 given, ask for one.
 
 ```bash
-STATE=$(python3 scripts/mr_state.py --files "$MR_URL")
+STATE=$(python3 "$WATCH/scripts/mr_state.py" --files "$MR_URL")   # $WATCH: the gitlab-pipeline-watch skill
 ```
 
 Check before watching anything:
@@ -28,11 +28,14 @@ watching.
 ## Phase 1: Watch
 
 ```bash
-python3 scripts/watch_mr.py --expect-sha "$EXPECT_SHA" --seen "$SEEN" "$MR_URL"
+python3 "$WATCH/scripts/watch_mr.py" --expect-sha "$EXPECT_SHA" --auto-merge --seen "$SEEN" "$MR_URL"
 ```
 
-It polls every 60 seconds and returns after about 8 minutes, so one call
-fits a 10-minute tool limit. If your agent can run longer blocking commands,
+`--expect-sha` stops on a push and `--auto-merge` stops if auto-merge is
+canceled, and keeps waiting through green until the MR merges. The full flag and
+event list is in `gitlab-pipeline-watch`'s `references/watch-mr.md`. It polls
+every 60 seconds and returns after about 8 minutes, so one call fits a
+10-minute tool limit. If your agent can run longer blocking commands,
 raise `--timeout`. `SEEN` is a comma-separated list of failed job and bridge
 IDs already triaged.
 

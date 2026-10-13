@@ -7,7 +7,7 @@ or is a merge train pipeline. On exit 3, don't work around it: alert with the
 `reason` it printed.
 
 Any other non-zero exit (usually 1) means the API call failed, and the write
-may or may not have happened. Run `mr_state.py`:
+may or may not have happened. Run `$WATCH/scripts/mr_state.py`:
 - If the pipeline is running again, or a new pipeline appeared, the retry went
   through. Count it.
 - Otherwise it didn't. Don't count it; treat it like `API_ERROR` (check

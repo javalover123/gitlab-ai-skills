@@ -12,18 +12,48 @@ Before writing, re-reads the MR and refuses (exit 3, nothing written) unless:
     - the MR is still open,
     - auto-merge is still set,
     - the MR head SHA still equals --expect-sha (nobody pushed since triage),
-    - for `pipeline`: the pipeline belongs to this MR and is not a merge train
-      pipeline (GitLab cannot retry those; the MR has to be re-added).
+    - for `pipeline`: the pipeline belongs to this MR (its ref is the MR's
+      refs/merge-requests/<iid>/{head,merge}, or its source branch when the MR
+      isn't from a fork) and is not
+      a merge train pipeline (GitLab cannot retry those; the MR has to be
+      re-added).
 
 Exit codes: 0 retried, 1 API error (the write may or may not have happened),
 2 usage error, 3 precondition failed (no write).
 Prints JSON describing what was done, or why it was refused.
+
+Self-contained on purpose: the skill's only write path reads in one file.
 """
 
 import argparse
+import json
+import re
+import subprocess
 import sys
+import urllib.parse
 
-from glab_helpers import GlabError, api_path, emit, fail, glab_json, parse_mr_url
+MR_URL_RE = re.compile(r"^https://gitlab\.com/(?P<project>.+?)/-/merge_requests/(?P<iid>\d+)")
+
+
+class GlabError(RuntimeError):
+    """A `glab api` call failed or returned something that isn't JSON."""
+
+
+def glab(path, method="GET"):
+    """One `glab api` call, parsed as JSON. Times out after 30 seconds."""
+    cmd = ["glab", "api", "--hostname", "gitlab.com"] + (["--method", method] if method != "GET" else []) + [path]
+    try:
+        proc = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True,
+                              timeout=30)
+        if proc.returncode != 0:
+            raise GlabError(f"glab api {method} {path} failed ({proc.returncode}): {proc.stderr.strip()}")
+        return json.loads(proc.stdout)
+    except (subprocess.TimeoutExpired, OSError, ValueError) as exc:
+        raise GlabError(f"glab api {method} {path} failed: {exc}") from exc
+
+
+def emit(obj):
+    print(json.dumps(obj, indent=2))
 
 
 def refuse(reason):
@@ -41,14 +71,14 @@ def main():
 
     if (args.mode == "pipeline") != (args.pipeline_id is not None):
         parser.error("`pipeline` needs a pipeline ID; `new-pipeline` takes none")
-    try:
-        _, encoded, iid = parse_mr_url(args.mr_url)
-    except ValueError as exc:
-        parser.error(str(exc))
+    match = MR_URL_RE.match(args.mr_url)
+    if not match:
+        parser.error(f"not a gitlab.com merge request URL: {args.mr_url}")
+    encoded, iid = urllib.parse.quote(match.group("project"), safe=""), match.group("iid")
 
     try:
         # --- Preconditions (read-only) ---------------------------------------
-        mr = glab_json(f"projects/{encoded}/merge_requests/{iid}")
+        mr = glab(f"projects/{encoded}/merge_requests/{iid}")
         if mr.get("state") != "opened":
             refuse(f"MR is {mr.get('state')}, not open")
         if mr.get("merge_when_pipeline_succeeds") is not True:
@@ -57,21 +87,23 @@ def main():
             refuse(f"MR head moved from {args.expect_sha} to {mr.get('sha')}: new commits need review")
 
         if args.mode == "pipeline":
-            pipelines = glab_json(api_path(f"projects/{encoded}/merge_requests/{iid}/pipelines", per_page=100),
-                                  paginate=True)
-            ref = next((p.get("ref") for p in pipelines if p.get("id") == args.pipeline_id), None)
-            if ref is None:
-                refuse(f"pipeline {args.pipeline_id} is not a pipeline of this MR")
-            if ref.endswith("/train"):
+            ref = glab(f"projects/{encoded}/pipelines/{args.pipeline_id}").get("ref") or ""
+            if ref == f"refs/merge-requests/{iid}/train":
                 refuse(f"pipeline {args.pipeline_id} is a merge train pipeline and cannot be retried")
+            mr_refs = {f"refs/merge-requests/{iid}/head", f"refs/merge-requests/{iid}/merge"}
+            if mr.get("source_project_id") == mr.get("target_project_id") and mr.get("source_branch"):
+                mr_refs.add(mr["source_branch"])  # a fork's branch pipelines live in the fork
+            if ref not in mr_refs:
+                refuse(f"pipeline {args.pipeline_id} is not a pipeline of this MR")
 
         # --- Write -----------------------------------------------------------
         if args.mode == "pipeline":
-            result = glab_json(f"projects/{encoded}/pipelines/{args.pipeline_id}/retry", method="POST")
+            result = glab(f"projects/{encoded}/pipelines/{args.pipeline_id}/retry", method="POST")
         else:
-            result = glab_json(f"projects/{encoded}/merge_requests/{iid}/pipelines", method="POST")
+            result = glab(f"projects/{encoded}/merge_requests/{iid}/pipelines", method="POST")
     except GlabError as exc:
-        fail(str(exc))
+        print(f"Error: {exc}", file=sys.stderr)
+        sys.exit(1)
 
     emit({
         "retried": True,

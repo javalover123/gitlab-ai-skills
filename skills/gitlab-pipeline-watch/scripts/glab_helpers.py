@@ -1,8 +1,11 @@
-"""Shared helpers for the gitlab-retry-until-merged scripts.
+"""Shared `glab api` helpers for the gitlab-pipeline-watch scripts.
 
 Standard library only (Python 3.7+). Every GitLab call goes through the
 authenticated `glab api` CLI; query parameters are encoded into the path, so
-no `-f`/`-F` field flags are ever passed.
+no `-f`/`-F` field flags are ever passed. Calls are pinned to gitlab.com (the
+only host the MR URLs are parsed for), so running from a checkout of another
+GitLab host can't redirect them. Each call times out after GLAB_TIMEOUT
+seconds so a hung request can't stall a watcher.
 """
 
 import json
@@ -10,6 +13,8 @@ import re
 import subprocess
 import sys
 import urllib.parse
+
+GLAB_TIMEOUT = 30
 
 MR_URL_RE = re.compile(r"^https://gitlab\.com/(?P<project>.+?)/-/merge_requests/(?P<iid>\d+)")
 
@@ -47,13 +52,19 @@ def _json_documents(text):
 
 
 def glab_text(path, method="GET", paginate=False):
-    cmd = ["glab", "api"]
+    cmd = ["glab", "api", "--hostname", "gitlab.com"]
     if method != "GET":
         cmd += ["--method", method]
     if paginate:
         cmd.append("--paginate")
     cmd.append(path)
-    proc = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
+    try:
+        proc = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True,
+                              timeout=GLAB_TIMEOUT)
+    except subprocess.TimeoutExpired as exc:
+        raise GlabError(f"glab api {method} {path} timed out after {GLAB_TIMEOUT}s") from exc
+    except OSError as exc:
+        raise GlabError(f"could not run glab: {exc}") from exc
     if proc.returncode != 0:
         raise GlabError(f"glab api {method} {path} failed ({proc.returncode}): {proc.stderr.strip()}")
     return proc.stdout

@@ -1,13 +1,13 @@
 # Phase 2: Failure Triage
 
 Classify each blocking failure (`failed_jobs` and `failed_bridges` from
-`mr_state.py`). The goal is one question: **could the MR's changes have caused
+`mr_state.py`, in the watcher's output). The goal is one question: **could the MR's changes have caused
 this?** If yes, or if you can't rule it out, don't retry.
 
 ## Gather evidence
 
 ```bash
-python3 scripts/job_log_tail.py "<project_encoded>" "<job_id>" 150   # project_encoded from mr_state.py
+python3 "$WATCH/scripts/job_log_tail.py" "<project_encoded>" "<job_id>" 150   # project_encoded from mr_state.py
 ```
 
 - **Bridges** (`failed_bridges`): the real failure is in the downstream

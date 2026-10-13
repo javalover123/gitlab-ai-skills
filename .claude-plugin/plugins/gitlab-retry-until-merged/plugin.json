@@ -1,6 +1,6 @@
 {
   "name": "gitlab-retry-until-merged",
-  "description": "Shepherd someone else's approved GitLab MR that is set to auto-merge (merge when pipeline succeeds) until it merges, without touching its code. Watches the pipeline, retries failures unrelated to the MR, waits out GitLab.com incidents and broken master before retrying, and alerts you on MR-caused failures or after 3 retries. Never commits, pushes, or rebases. Use when asked to retry until merged, keep an approved MR's pipeline going, or get an auto-merge MR over the line. For your own MR, where fixes may be pushed, use gitlab-babysit-mr instead.",
+  "description": "Shepherd someone else's approved GitLab MR that is set to auto-merge (merge when pipeline succeeds) until it merges, without touching its code. Watches the pipeline, retries failures unrelated to the MR, waits out GitLab.com incidents and broken master before retrying, and alerts the user on MR-caused failures or after 3 retries. Never commits, pushes, or rebases. Use when asked to retry until merged, keep a teammate's approved MR's pipeline going without changing its code, or get an auto-merge (MWPS) MR over the line. For your own MR, where fixes may be pushed, use gitlab-babysit-mr instead.",
   "version": "0.1.0",
   "author": {
     "name": "GitLab"

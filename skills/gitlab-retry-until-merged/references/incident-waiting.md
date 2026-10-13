@@ -33,7 +33,7 @@ return `TIMEOUT` after about 8 minutes unless the MR itself changes:
 ```pseudocode
 WAIT_START = now, MIN_WAIT = 15 min, MAX_WAIT = 2 h   # defaults; the user may change them
 loop:
-    event = watch_mr.py --expect-sha EXPECT_SHA --mr-only MR_URL
+    event = $WATCH/scripts/watch_mr.py --expect-sha EXPECT_SHA --auto-merge --mr-only MR_URL
     if event == API_ERROR: expected during an incident, so keep waiting
     elif event != TIMEOUT: handle it per watching.md (usually alert and stop)
     signals = incident_status.py

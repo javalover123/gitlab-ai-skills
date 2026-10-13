@@ -2,6 +2,8 @@
 
 Post all reports inside a **single resolved discussion** so they stay collapsed and out of the way.
 
+`<sha>` in the template is the MR head `sha` from the watcher output, not `pipeline.sha`: merged-results pipelines run on a temporary merge commit.
+
 ## First report: Create resolved discussion, then reply with report
 
 Use `-R "$PROJECT_PATH"` on every call (the MR is addressed by `$MR_IID`).
@@ -31,7 +33,7 @@ glab mr note resolve "$MR_IID" "$DISCUSSION_ID" -R "$PROJECT_PATH"
 glab mr note create "$MR_IID" -R "$PROJECT_PATH" --reply "$DISCUSSION_ID" -m "$(cat <<'COMMENT'
 ## Pipeline Babysitter Report
 
-**Pipeline**: <pipeline_url> | **Status**: <pipeline_status> | **Commit**: `<pipeline_sha>`
+**Pipeline**: <pipeline.web_url> | **Status**: <pipeline.status> | **Commit**: `<sha>`
 **Action round**: 1 of 5
 
 ### Failed Jobs

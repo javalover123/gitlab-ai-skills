@@ -21,9 +21,9 @@ import argparse
 import datetime
 import json
 import os
+import subprocess
+import urllib.parse
 import urllib.request
-
-from glab_helpers import GlabError, api_path, emit, glab_json
 
 # status.gitlab.com is a Status.io page; this is its public page ID.
 STATUS_PAGE_ID = "5b36dc6502d06804c08349f7"
@@ -31,6 +31,27 @@ STATUS_URL = f"https://status.gitlab.com/1.0/status/{STATUS_PAGE_ID}"
 INCIDENT_URL = f"https://status.gitlab.com/pages/incident/{STATUS_PAGE_ID}/"
 PRODUCTION_PROJECT = "gitlab-com%2Fgl-infra%2Fproduction"
 MASTER_BROKEN_PROJECT = "gitlab-org%2Fquality%2Fengineering-productivity%2Fmaster-broken-incidents"
+
+
+class GlabError(RuntimeError):
+    """A `glab api` call failed or returned something that isn't JSON."""
+
+
+def glab(path, method="GET"):
+    """One `glab api` call, parsed as JSON. Times out after 30 seconds."""
+    cmd = ["glab", "api", "--hostname", "gitlab.com"] + (["--method", method] if method != "GET" else []) + [path]
+    try:
+        proc = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True,
+                              timeout=30)
+        if proc.returncode != 0:
+            raise GlabError(f"glab api {method} {path} failed ({proc.returncode}): {proc.stderr.strip()}")
+        return json.loads(proc.stdout)
+    except (subprocess.TimeoutExpired, OSError, ValueError) as exc:
+        raise GlabError(f"glab api {method} {path} failed: {exc}") from exc
+
+
+def issues(project, **params):
+    return glab(f"projects/{project}/issues?{urllib.parse.urlencode(params)}")
 
 
 def iso(moment):
@@ -63,12 +84,11 @@ def status_page():
 def production_incidents(all_severities):
     """Active production incidents (infrastructure-wide problems)."""
     try:
-        issues = glab_json(api_path(f"projects/{PRODUCTION_PROJECT}/issues", state="opened",
-                                    labels="incident,Incident::Active", per_page=50))
+        found = issues(PRODUCTION_PROJECT, state="opened", labels="incident,Incident::Active", per_page=50)
     except GlabError:
         return {"error": "could not fetch production incidents"}
     incidents = []
-    for issue in issues:
+    for issue in found:
         labels = issue.get("labels") or []
         severity = next((l.split("::", 1)[1] for l in labels if l.startswith("severity::")), "unknown")
         if not all_severities and severity not in ("1", "2"):
@@ -87,8 +107,7 @@ def production_incidents(all_severities):
 def master_broken_incidents(since):
     """Recent master-broken incidents (default branch broken for everyone)."""
     try:
-        issues = glab_json(api_path(f"projects/{MASTER_BROKEN_PROJECT}/issues", state="opened",
-                                    created_after=since, per_page=50))
+        found = issues(MASTER_BROKEN_PROJECT, state="opened", created_after=since, per_page=50)
     except GlabError:
         return {"error": "could not fetch master-broken incidents"}
     return [
@@ -99,7 +118,7 @@ def master_broken_incidents(since):
             "created_at": issue.get("created_at"),
             "web_url": issue.get("web_url"),
         }
-        for issue in issues
+        for issue in found
     ]
 
 
@@ -113,13 +132,13 @@ def main():
 
     now = datetime.datetime.now(datetime.timezone.utc).replace(microsecond=0)
     since = iso(now - datetime.timedelta(hours=args.hours))
-    emit({
+    print(json.dumps({
         "checked_at": iso(now),
         "status_page": status_page(),
         "production_incidents": production_incidents(args.all_severities),
         "master_broken_since": since,
         "master_broken_incidents": master_broken_incidents(since),
-    })
+    }, indent=2))
 
 
 if __name__ == "__main__":

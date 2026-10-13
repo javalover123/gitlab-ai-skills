@@ -6,6 +6,9 @@ call, so a case can assert that a refused retry never reached a POST. The
 property that matters most: retry.py writes nothing unless every
 precondition holds. The status page is served from a file:// URL.
 
+The watcher, MR snapshot, and log tail belong to the gitlab-pipeline-watch
+skill and are tested there.
+
 Run: python3 skills/gitlab-retry-until-merged/tests/test_scripts.py
 """
 
@@ -32,6 +35,9 @@ mock = os.environ["MOCK_DIR"]
 args = sys.argv[1:]
 method = args[args.index("--method") + 1] if "--method" in args else "GET"
 path = next(a for a in args if a.startswith("projects/"))
+if "--hostname" not in args or args[args.index("--hostname") + 1] != "gitlab.com":
+    sys.stderr.write("fake glab: call not pinned to --hostname gitlab.com\n")
+    sys.exit(9)
 with open(os.path.join(mock, "calls.log"), "a") as log:
     log.write(f"{method} {path}\n")
 if os.path.exists(os.path.join(mock, "api_down")):
@@ -44,6 +50,7 @@ rules = [
     (r"/merge_requests/\d+/pipelines$", "mr_pipelines"),
     (r"/merge_requests/\d+/diffs$", "diffs"),
     (r"/merge_requests/\d+$", "mr"),
+    (r"/pipelines/\d+$", "pipeline"),
     (r"/pipelines/\d+/jobs$", "jobs"),
     (r"/pipelines/\d+/trigger_jobs$", "bridges"),
     (r"/jobs/\d+/trace$", "trace"),
@@ -88,8 +95,10 @@ class ScriptTestCase(unittest.TestCase):
                             "target_branch": "master", "state": state, "sha": sha,
                             "merge_when_pipeline_succeeds": auto_merge, "merge_user": {"username": "me"},
                             "detailed_merge_status": "ci_still_running", "merge_error": None})
-        self.fixture("mr_pipelines", [{"id": 900, "status": status, "ref": ref, "sha": "merge999",
-                                       "web_url": "https://example.com/p/900", "source": "merge_request_event"}])
+        pipeline = {"id": 900, "status": status, "ref": ref, "sha": "merge999",
+                    "web_url": "https://example.com/p/900", "source": "merge_request_event"}
+        self.fixture("mr_pipelines", [pipeline])
+        self.fixture("pipeline", pipeline)
         self.fixture("retry_response", {"id": 900, "status": "running", "web_url": "https://example.com/p/900"})
         self.fixture("new_pipeline_response", {"id": 901, "status": "created", "web_url": "https://example.com/p/901"})
 
@@ -112,49 +121,6 @@ class ScriptTestCase(unittest.TestCase):
 
     def assertNothingWritten(self):
         self.assertEqual(self.posts(), [])
-
-
-class MrStateTest(ScriptTestCase):
-    def test_snapshot(self):
-        self.fixture("jobs", [job(1), job(2, retried=True), job(3, allow_failure=True, name="danger")])
-        self.fixture("bridges", [dict(job(7, name="e2e:trigger"), failure_reason="downstream_pipeline_failure",
-                                      downstream_pipeline={"id": 77, "project_id": 5, "web_url": "d77"})])
-        self.fixture("diffs", [{"new_path": "app/a.rb", "old_path": "app/a.rb"},
-                               {"new_path": "lib/new.rb", "old_path": "lib/old.rb"}])
-        out = self.json_of("mr_state.py", "--files", MR_URL)
-        self.assertEqual(out["project"], "grp/sub/proj")
-        self.assertEqual(out["project_encoded"], "grp%2Fsub%2Fproj")
-        self.assertEqual(out["pipeline"]["kind"], "merged_result")
-        self.assertEqual([j["id"] for j in out["failed_jobs"]], [1], "only current, blocking failed jobs")
-        self.assertEqual(out["failed_bridges"][0]["downstream_pipeline_id"], 77)
-        self.assertEqual(out["blocking_failure_count"], 2)
-        self.assertIs(out["auto_merge"], True)
-        self.assertEqual(out["target_branch"], "master")
-        self.assertEqual(out["changed_files"], ["app/a.rb", "lib/new.rb", "lib/old.rb"])
-        self.assertIn("GET projects/grp%2Fsub%2Fproj/pipelines/900/jobs?scope[]=failed&per_page=100", self.calls())
-        self.assertNothingWritten()
-
-    def test_paginated_pages_are_merged(self):
-        self.fixture("jobs", json.dumps([job(1)]) + "\n" + json.dumps([job(2)]))
-        out = self.json_of("mr_state.py", MR_URL)
-        self.assertEqual([j["id"] for j in out["failed_jobs"]], [1, 2])
-
-    def test_merge_train_kind(self):
-        self.mr(ref=TRAIN_REF)
-        self.assertEqual(self.json_of("mr_state.py", MR_URL)["pipeline"]["kind"], "merge_train")
-
-    def test_no_pipeline(self):
-        self.fixture("mr_pipelines", [])
-        self.assertIsNone(self.json_of("mr_state.py", MR_URL)["pipeline"])
-
-    def test_rejects_non_mr_url(self):
-        self.assertEqual(self.run_script("mr_state.py", "https://example.com/x").returncode, 2)
-
-    def test_api_failure_exits_nonzero(self):
-        self.fixture("api_down", "")
-        proc = self.run_script("mr_state.py", MR_URL)
-        self.assertEqual(proc.returncode, 1)
-        self.assertIn("503", proc.stderr)
 
 
 class RetryTest(ScriptTestCase):
@@ -193,7 +159,20 @@ class RetryTest(ScriptTestCase):
         self.assertRefused("merge train", "--expect-sha", SHA, MR_URL, "pipeline", "900")
 
     def test_refuses_pipeline_of_another_mr(self):
+        self.fixture("pipeline", {"id": 123, "ref": "refs/merge-requests/41/merge"})
         self.assertRefused("not a pipeline of this MR", "--expect-sha", SHA, MR_URL, "pipeline", "123")
+
+    def test_accepts_source_branch_pipeline(self):
+        mr = json.load(open(os.path.join(self.mock, "mr")))
+        self.fixture("mr", dict(mr, source_branch="feature", source_project_id=1, target_project_id=1))
+        self.fixture("pipeline", {"id": 900, "ref": "feature"})
+        self.assertIs(self.json_of("retry.py", "--expect-sha", SHA, MR_URL, "pipeline", "900")["retried"], True)
+
+    def test_refuses_same_named_branch_pipeline_for_fork_mr(self):
+        mr = json.load(open(os.path.join(self.mock, "mr")))
+        self.fixture("mr", dict(mr, source_branch="master", source_project_id=2, target_project_id=1))
+        self.fixture("pipeline", {"id": 900, "ref": "master"})
+        self.assertRefused("not a pipeline of this MR", "--expect-sha", SHA, MR_URL, "pipeline", "900")
 
     def test_usage_errors_write_nothing(self):
         for args in (
@@ -210,51 +189,6 @@ class RetryTest(ScriptTestCase):
     def test_api_failure_is_exit_1(self):
         self.fixture("api_down", "")
         self.assertEqual(self.run_script("retry.py", "--expect-sha", SHA, MR_URL, "new-pipeline").returncode, 1)
-
-
-class WatchTest(ScriptTestCase):
-    def event(self, *args):
-        return self.json_of("watch_mr.py", "--interval", "0", "--timeout", "0", *args, MR_URL)["event"]
-
-    def test_events(self):
-        cases = [
-            (dict(state="merged", auto_merge=False, status="success"), [], "MERGED"),
-            (dict(state="closed", auto_merge=False), [], "CLOSED"),
-            (dict(auto_merge=False, sha="bbbb2222", status="running"), [], "SHA_CHANGED"),
-            (dict(auto_merge=False, status="running"), [], "AUTO_MERGE_OFF"),
-            (dict(status="failed"), [], "PIPELINE_FAILED"),
-            (dict(status="canceled"), [], "PIPELINE_CANCELED"),
-            (dict(status="failed"), ["--grace", "60"], "TIMEOUT"),
-            (dict(status="success"), [], "TIMEOUT"),
-            (dict(status="failed"), ["--mr-only"], "TIMEOUT"),
-            (dict(sha="bbbb2222", status="failed"), ["--mr-only"], "SHA_CHANGED"),
-        ]
-        for mr, args, expected in cases:
-            with self.subTest(mr=mr, args=args):
-                self.mr(**mr)
-                self.assertEqual(self.event("--expect-sha", SHA, *args), expected)
-        self.assertNothingWritten()
-
-    def test_early_failure(self):
-        self.mr(status="running")
-        self.fixture("jobs", [job(5)])
-        self.assertEqual(self.event("--expect-sha", SHA), "NEW_FAILURE")
-        self.assertEqual(self.event("--expect-sha", SHA, "--seen", "4,5"), "TIMEOUT")
-
-    def test_no_pipeline(self):
-        self.fixture("mr_pipelines", [])
-        self.assertEqual(self.event("--expect-sha", SHA), "NO_PIPELINE")
-
-    def test_api_outage_is_an_event_not_a_crash(self):
-        self.fixture("api_down", "")
-        out = self.json_of("watch_mr.py", "--interval", "0", "--timeout", "0", "--expect-sha", SHA, MR_URL)
-        self.assertEqual(out["event"], "API_ERROR")
-        self.assertIn("503", out["api_error"])
-
-    def test_usage_errors(self):
-        self.assertEqual(self.run_script("watch_mr.py", MR_URL).returncode, 2)
-        self.assertEqual(self.run_script("watch_mr.py", MR_URL, "--expect-sha").returncode, 2)
-        self.assertEqual(self.run_script("watch_mr.py", "--expect-sha", SHA, "--grace", "-1", MR_URL).returncode, 2)
 
 
 class IncidentStatusTest(ScriptTestCase):
@@ -307,29 +241,6 @@ class IncidentStatusTest(ScriptTestCase):
 
     def test_bad_hours(self):
         self.assertEqual(self.run_script("incident_status.py", "--hours", "soon").returncode, 2)
-
-
-class JobLogTailTest(ScriptTestCase):
-    def test_cleans_timestamped_trace(self):
-        self.fixture("job", {"id": 5, "name": "rspec", "runner": {"description": "r1"}})
-        trace = (
-            "2026-09-24T17:23:52.844727Z 00O section_start:1790270633:step_script\r\x1b[0K"
-            "\x1b[0K\x1b[36;1mExecuting step_script\x1b[0;m\n"
-            "2026-09-24T17:23:52.851799Z 01O $ bundle exec rspec\n"
-            "2026-09-24T17:23:52.851800Z 01O \n"
-            "2026-09-24T17:23:53.692264Z 01O \x1b[31mFailure/Error: expect(x).to eq(1)\x1b[0m\r\n"
-            "2026-09-24T17:23:53.869094Z 00O section_end:1790270633:step_script\r\x1b[0K\n"
-            "2026-09-24T17:23:54.530118Z 00O+\x1b[31;1mERROR: Job failed: exit code 1\x1b[0;m\n"
-        )
-        self.fixture("trace", trace)
-
-        proc = self.run_script("job_log_tail.py", "grp%2Fproj", "5", "10")
-        self.assertEqual(proc.returncode, 0, proc.stderr)
-        log = proc.stdout.split("=== JOB LOG (last 10 lines) ===\n", 1)[1].splitlines()
-        self.assertEqual(log, ["Executing step_script", "$ bundle exec rspec",
-                               "Failure/Error: expect(x).to eq(1)", "ERROR: Job failed: exit code 1"])
-        self.assertIn('"runner": "r1"', proc.stdout)
-
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

@@ -6,8 +6,10 @@ This skill pushes fixes to the MR branch. For someone else's approved, set-to-au
 
 ## Dependencies
 
+- The [`gitlab-pipeline-watch`](../gitlab-pipeline-watch/SKILL.md) skill — provides the MR watcher, snapshot, and job-log scripts
 - [`glab`](https://gitlab.com/gitlab-org/cli) CLI — authenticated
 - [`jq`](https://jqlang.github.io/jq/)
+- Python 3.7+ (for the `gitlab-pipeline-watch` scripts)
 
 ## Opinionated defaults
 

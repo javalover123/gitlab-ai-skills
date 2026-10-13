@@ -1,34 +1,47 @@
 #!/usr/bin/env python3
-"""Block until an auto-merge MR needs attention, then print why.
+"""Block until one MR's pipeline or merge state needs attention, then print why.
+
+Unlike pipeline-watch.py (many MRs, terminal pipeline transitions only), this
+watches a single MR at the job level: it returns as soon as a blocking job
+fails, even while the rest of the pipeline is still running.
 
 Usage:
-    python3 scripts/watch_mr.py --expect-sha <sha> [options] <mr-url>
+    python3 scripts/watch_mr.py [options] <mr-url>
 
 Options:
-    --expect-sha SHA   MR head SHA recorded at preflight (required)
+    --expect-sha SHA   Emit SHA_CHANGED if the MR head moves off SHA. Omit it
+                       when you push to the MR yourself.
+    --auto-merge       The MR is set to auto-merge: emit AUTO_MERGE_OFF if that
+                       is canceled, and on a green pipeline keep waiting for
+                       MERGED instead of emitting PIPELINE_SUCCESS.
+    --newer-than ID    Ignore pipelines with an ID <= ID (use after a push).
+                       Emit NO_NEW_PIPELINE instead of TIMEOUT if none appears.
     --seen IDS         Comma-separated failed job/bridge IDs already triaged
     --grace N          Ignore a terminal pipeline status for the first N seconds
                        (use after a retry, while the retried pipeline may still
                        read as failed). Default 0.
     --mr-only          Ignore the pipeline entirely; watch only the MR itself
-                       (merge, close, push, auto-merge). For waiting out an
-                       incident while the pipeline sits failed.
+                       (merge, close, push, auto-merge), e.g. while waiting out
+                       an incident with the pipeline sitting failed.
     --interval N       Seconds between polls (default 60)
     --timeout N        Give up after N seconds and emit TIMEOUT (default 480,
                        leaving headroom under a 10-minute tool-call limit).
                        Always polls once.
 
 Prints the final mr_state.py snapshot plus an "event" field, one of:
-    MERGED          the MR merged; done
-    CLOSED          the MR was closed without merging
-    SHA_CHANGED     new commits were pushed; the approval premise is gone
-    AUTO_MERGE_OFF  auto-merge was canceled (by a person, or a merge train drop)
-    NEW_FAILURE     a blocking job failed while the pipeline is still running
+    MERGED            the MR merged
+    CLOSED            the MR was closed without merging
+    SHA_CHANGED       (--expect-sha) new commits were pushed
+    AUTO_MERGE_OFF    (--auto-merge) auto-merge was canceled, by a person or a
+                      merge train drop
+    NEW_FAILURE       a blocking job failed while the pipeline is still running
+    PIPELINE_SUCCESS  pipeline green (not emitted with --auto-merge)
     PIPELINE_FAILED / PIPELINE_CANCELED / PIPELINE_SKIPPED / PIPELINE_MANUAL
-    NO_PIPELINE     the MR has no pipeline
-    API_ERROR       3 polls in a row failed (GitLab API erroring or
-                    unreachable); carries the last good snapshot, if any
-    TIMEOUT         nothing actionable yet; not a failure, just run again
+    NO_PIPELINE       the MR has no pipeline
+    NO_NEW_PIPELINE   (--newer-than) no newer pipeline appeared in time
+    API_ERROR         3 polls in a row failed (GitLab API erroring or
+                      unreachable); carries the last good snapshot, if any
+    TIMEOUT           nothing actionable yet; not a failure, just run again
 
 Never writes anything.
 """
@@ -40,7 +53,7 @@ import time
 from glab_helpers import GlabError, emit, parse_mr_url
 from mr_state import mr_state
 
-TERMINAL = {"failed", "canceled", "skipped", "manual"}
+TERMINAL = {"success", "failed", "canceled", "skipped", "manual"}
 
 
 def non_negative_int(value):
@@ -54,36 +67,45 @@ def id_list(value):
     return {int(part) for part in value.split(",") if part.strip()}
 
 
-def classify(state, expect_sha, seen, mr_only, in_grace):
+def classify(state, args, in_grace):
     """Return the event for one snapshot, or None to keep polling."""
     if state["state"] == "merged":
         return "MERGED"
     if state["state"] == "closed":
         return "CLOSED"
-    if state["sha"] != expect_sha:
+    if args.expect_sha and state["sha"] != args.expect_sha:
         return "SHA_CHANGED"
-    if not state["auto_merge"]:
+    if args.auto_merge and not state["auto_merge"]:
         return "AUTO_MERGE_OFF"
-    if mr_only:
+    if args.mr_only:
         return None
 
     pipeline = state["pipeline"]
+    if args.newer_than is not None and (pipeline is None or pipeline["id"] <= args.newer_than):
+        return None  # still waiting for the pipeline a push should create
     if pipeline is None:
         return "NO_PIPELINE"
     status = pipeline["status"]
+    if status == "success" and args.auto_merge:
+        return None  # auto-merge acts on success; wait for MERGED or TIMEOUT
     if status in TERMINAL:
         return None if in_grace else f"PIPELINE_{status.upper()}"
-    if status == "success":
-        return None  # auto-merge acts on success; wait for MERGED or TIMEOUT
     failures = state["failed_jobs"] + state["failed_bridges"]
-    if any(item["id"] not in seen for item in failures):
+    if any(item["id"] not in args.seen for item in failures):
         return "NEW_FAILURE"
     return None
 
 
+def waiting_for_new_pipeline(state, args):
+    pipeline = state.get("pipeline")
+    return args.newer_than is not None and (pipeline is None or pipeline["id"] <= args.newer_than)
+
+
 def main():
-    parser = argparse.ArgumentParser(description="Block until an auto-merge MR needs attention.")
-    parser.add_argument("--expect-sha", required=True)
+    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument("--expect-sha")
+    parser.add_argument("--auto-merge", action="store_true")
+    parser.add_argument("--newer-than", type=int)
     parser.add_argument("--seen", type=id_list, default=set())
     parser.add_argument("--grace", type=non_negative_int, default=0)
     parser.add_argument("--mr-only", action="store_true")
@@ -117,12 +139,13 @@ def main():
                 return
         else:
             api_failures, state = 0, poll
-            event = classify(state, args.expect_sha, args.seen, args.mr_only, elapsed < args.grace)
+            event = classify(state, args, elapsed < args.grace)
             if event:
                 emit(dict(state, event=event))
                 return
             if out_of_time:
-                emit(dict(state, event="TIMEOUT"))
+                event = "NO_NEW_PIPELINE" if waiting_for_new_pipeline(state, args) else "TIMEOUT"
+                emit(dict(state, event=event))
                 return
 
         sys.stdout.flush()

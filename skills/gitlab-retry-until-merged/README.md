@@ -6,6 +6,7 @@ Use [`gitlab-babysit-mr`](../gitlab-babysit-mr/README.md) instead for your own M
 
 ## Dependencies
 
+- The [`gitlab-pipeline-watch`](../gitlab-pipeline-watch/SKILL.md) skill, which provides the MR watcher, snapshot, and job-log scripts
 - [`glab`](https://gitlab.com/gitlab-org/cli) CLI, authenticated
 - Python 3.7+ (standard library only)
 
