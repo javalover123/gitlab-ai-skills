@@ -25,6 +25,7 @@ SCRIPTS = os.path.join(HERE, "..", "scripts")
 
 MR_URL = "https://gitlab.com/grp/sub/proj/-/merge_requests/42"
 SHA = "aaaa1111"
+SELF_MANAGED_URL = "https://gitlab.example.com/grp/proj/-/merge_requests/42"
 MERGE_REF = "refs/merge-requests/42/merge"
 TRAIN_REF = "refs/merge-requests/42/train"
 
@@ -35,9 +36,9 @@ mock = os.environ["MOCK_DIR"]
 args = sys.argv[1:]
 method = args[args.index("--method") + 1] if "--method" in args else "GET"
 path = next(a for a in args if a.startswith("projects/"))
-if "--hostname" not in args or args[args.index("--hostname") + 1] != "gitlab.com":
-    sys.stderr.write("fake glab: call not pinned to --hostname gitlab.com\n")
-    sys.exit(9)
+host = args[args.index("--hostname") + 1] if "--hostname" in args else "-"
+with open(os.path.join(mock, "hosts.log"), "a") as log:
+    log.write(f"{host}\n")
 with open(os.path.join(mock, "calls.log"), "a") as log:
     log.write(f"{method} {path}\n")
 if os.path.exists(os.path.join(mock, "api_down")):
@@ -116,6 +117,11 @@ class ScriptTestCase(unittest.TestCase):
         path = os.path.join(self.mock, "calls.log")
         return open(path).read().splitlines() if os.path.exists(path) else []
 
+    def hosts(self):
+        """The --hostname of every glab call ("-" when none was passed)."""
+        path = os.path.join(self.mock, "hosts.log")
+        return set(open(path).read().split()) if os.path.exists(path) else set()
+
     def posts(self):
         return [c for c in self.calls() if c.startswith("POST ")]
 
@@ -128,6 +134,13 @@ class RetryTest(ScriptTestCase):
         out = self.json_of("retry.py", "--expect-sha", SHA, MR_URL, "pipeline", "900")
         self.assertIs(out["retried"], True)
         self.assertEqual(self.posts(), ["POST projects/grp%2Fsub%2Fproj/pipelines/900/retry"])
+        self.assertEqual(self.hosts(), {"gitlab.com"}, "every call goes to the URL's host")
+
+    def test_self_managed_url_writes_to_its_own_host(self):
+        out = self.json_of("retry.py", "--expect-sha", SHA, SELF_MANAGED_URL, "new-pipeline")
+        self.assertIs(out["retried"], True)
+        self.assertEqual(self.posts(), ["POST projects/grp%2Fproj/merge_requests/42/pipelines"])
+        self.assertEqual(self.hosts(), {"gitlab.example.com"})
 
     def test_new_pipeline(self):
         out = self.json_of("retry.py", "--expect-sha", SHA, MR_URL, "new-pipeline")
@@ -223,6 +236,7 @@ class IncidentStatusTest(ScriptTestCase):
                          ["master:broken", "master-broken::gitlab-com-overloaded"])
         mb_call = next(c for c in self.calls() if "master-broken-incidents" in c)
         self.assertIn("created_after=" + out["master_broken_since"].replace(":", "%3A"), mb_call)
+        self.assertEqual(self.hosts(), {"gitlab.com"}, "incident trackers only exist on gitlab.com")
         self.assertNothingWritten()
 
     def test_all_severities(self):

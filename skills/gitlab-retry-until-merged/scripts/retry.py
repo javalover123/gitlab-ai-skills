@@ -32,16 +32,20 @@ import subprocess
 import sys
 import urllib.parse
 
-MR_URL_RE = re.compile(r"^https://gitlab\.com/(?P<project>.+?)/-/merge_requests/(?P<iid>\d+)")
+MR_URL_RE = re.compile(r"^https?://(?P<host>[^/]+)/(?P<project>.+?)/-/merge_requests/(?P<iid>\d+)")
 
 
 class GlabError(RuntimeError):
     """A `glab api` call failed or returned something that isn't JSON."""
 
 
-def glab(path, method="GET"):
-    """One `glab api` call, parsed as JSON. Times out after 30 seconds."""
-    cmd = ["glab", "api", "--hostname", "gitlab.com"] + (["--method", method] if method != "GET" else []) + [path]
+def glab(path, host, method="GET"):
+    """One `glab api` call to `host`, parsed as JSON. Times out after 30 seconds.
+
+    The host comes from the MR URL, so running from a checkout of a different
+    GitLab instance can't send the write anywhere but the MR's own instance.
+    """
+    cmd = ["glab", "api", "--hostname", host] + (["--method", method] if method != "GET" else []) + [path]
     try:
         proc = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True,
                               timeout=30)
@@ -73,12 +77,13 @@ def main():
         parser.error("`pipeline` needs a pipeline ID; `new-pipeline` takes none")
     match = MR_URL_RE.match(args.mr_url)
     if not match:
-        parser.error(f"not a gitlab.com merge request URL: {args.mr_url}")
+        parser.error(f"not a GitLab merge request URL: {args.mr_url}")
+    host = match.group("host")
     encoded, iid = urllib.parse.quote(match.group("project"), safe=""), match.group("iid")
 
     try:
         # --- Preconditions (read-only) ---------------------------------------
-        mr = glab(f"projects/{encoded}/merge_requests/{iid}")
+        mr = glab(f"projects/{encoded}/merge_requests/{iid}", host)
         if mr.get("state") != "opened":
             refuse(f"MR is {mr.get('state')}, not open")
         if mr.get("merge_when_pipeline_succeeds") is not True:
@@ -87,7 +92,7 @@ def main():
             refuse(f"MR head moved from {args.expect_sha} to {mr.get('sha')}: new commits need review")
 
         if args.mode == "pipeline":
-            ref = glab(f"projects/{encoded}/pipelines/{args.pipeline_id}").get("ref") or ""
+            ref = glab(f"projects/{encoded}/pipelines/{args.pipeline_id}", host).get("ref") or ""
             if ref == f"refs/merge-requests/{iid}/train":
                 refuse(f"pipeline {args.pipeline_id} is a merge train pipeline and cannot be retried")
             mr_refs = {f"refs/merge-requests/{iid}/head", f"refs/merge-requests/{iid}/merge"}
@@ -98,9 +103,9 @@ def main():
 
         # --- Write -----------------------------------------------------------
         if args.mode == "pipeline":
-            result = glab(f"projects/{encoded}/pipelines/{args.pipeline_id}/retry", method="POST")
+            result = glab(f"projects/{encoded}/pipelines/{args.pipeline_id}/retry", host, method="POST")
         else:
-            result = glab(f"projects/{encoded}/merge_requests/{iid}/pipelines", method="POST")
+            result = glab(f"projects/{encoded}/merge_requests/{iid}/pipelines", host, method="POST")
     except GlabError as exc:
         print(f"Error: {exc}", file=sys.stderr)
         sys.exit(1)

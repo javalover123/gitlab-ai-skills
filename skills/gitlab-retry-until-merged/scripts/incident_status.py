@@ -38,7 +38,10 @@ class GlabError(RuntimeError):
 
 
 def glab(path, method="GET"):
-    """One `glab api` call, parsed as JSON. Times out after 30 seconds."""
+    """One `glab api` call to gitlab.com, parsed as JSON. Times out after 30 seconds.
+
+    Pinned to gitlab.com on purpose: these incident trackers only exist there.
+    """
     cmd = ["glab", "api", "--hostname", "gitlab.com"] + (["--method", method] if method != "GET" else []) + [path]
     try:
         proc = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True,

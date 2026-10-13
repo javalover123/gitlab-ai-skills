@@ -43,10 +43,15 @@ def non_negative_int(value):
     return ivalue
 
 
+# Set from --hostname in main(). None lets glab pick the host of the current git
+# checkout (or gitlab.com), so self-managed and GDK projects keep working.
+HOSTNAME = None
+
+
 def glab_api(path, debug=False):
     """Return parsed JSON from `glab api`, or None on any failure."""
     try:
-        return glab_json(path)
+        return glab_json(path, hostname=HOSTNAME)
     except GlabError as e:
         if debug:
             print(f"  [debug] glab_api({path}): {e}", file=sys.stderr)
@@ -113,6 +118,11 @@ def parse_args():
         help="include draft/WIP MRs when using --all (default: exclude drafts)",
     )
     parser.add_argument(
+        "--hostname",
+        default=None,
+        help="GitLab host to query (default: glab's, from the current git checkout or gitlab.com)",
+    )
+    parser.add_argument(
         "--debug",
         action="store_true",
         default=False,
@@ -161,7 +171,9 @@ def debug_log(msg, enabled):
 
 
 def main():
+    global HOSTNAME
     args = parse_args()
+    HOSTNAME = args.hostname
     project = args.project
     mr_iids = {str(iid) for iid in args.mrs}
     dbg = args.debug

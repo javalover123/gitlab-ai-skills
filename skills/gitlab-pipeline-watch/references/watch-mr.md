@@ -17,7 +17,7 @@ read-only. Every flag is documented in the script's docstring
 | `failed_bridges` | Failed trigger jobs; the real failure is in `downstream_pipeline_id` of `downstream_project_id`. |
 | `blocking_failure_count` | `len(failed_jobs) + len(failed_bridges)` |
 | `changed_files` | With `--files`: every old and new path the MR touches. |
-| `project`, `project_encoded`, `mr_iid` | For follow-up `glab api` calls. |
+| `host`, `project`, `project_encoded`, `mr_iid` | For follow-up calls: `glab api --hostname <host> "projects/<project_encoded>/…"`. `host` comes from the MR URL. |
 
 `pipeline.sha` is **not** the MR head: a merged-results pipeline runs on a
 temporary merge commit. Compare the MR's `sha`.
@@ -63,10 +63,11 @@ The output is the last snapshot plus `event`, so you rarely need a second
 ## Job logs
 
 ```bash
-python3 scripts/job_log_tail.py <project_encoded> <job_id> [lines]   # default 150
+python3 scripts/job_log_tail.py --hostname <host> <project_encoded> <job_id> [lines]   # default 150
 ```
 
-Prints job metadata as JSON, then the last N non-blank log lines with ANSI
+Pass the snapshot's `host` so the call can't follow a different checkout's
+instance. Prints job metadata as JSON, then the last N non-blank log lines with ANSI
 colors, timestamps, and section markers stripped.
 
 ## From another skill

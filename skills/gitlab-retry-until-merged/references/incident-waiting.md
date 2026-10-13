@@ -6,6 +6,11 @@ costs no retries.
 
 ## Signals
 
+These signals exist only for GitLab.com. For an MR on another instance,
+`incident_status.py` has nothing to report: treat load or infrastructure
+symptoms as TRANSIENT, and judge broken master from the target branch's own
+pipelines.
+
 ```bash
 python3 scripts/incident_status.py            # --hours N widens the master-broken window (default 12)
 ```

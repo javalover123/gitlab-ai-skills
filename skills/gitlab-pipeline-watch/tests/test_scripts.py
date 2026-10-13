@@ -20,6 +20,7 @@ SCRIPTS = os.path.join(HERE, "..", "scripts")
 
 MR_URL = "https://gitlab.com/grp/sub/proj/-/merge_requests/42"
 SHA = "aaaa1111"
+SELF_MANAGED_URL = "https://gitlab.example.com/grp/proj/-/merge_requests/42"
 MERGE_REF = "refs/merge-requests/42/merge"
 TRAIN_REF = "refs/merge-requests/42/train"
 
@@ -30,9 +31,9 @@ mock = os.environ["MOCK_DIR"]
 args = sys.argv[1:]
 method = args[args.index("--method") + 1] if "--method" in args else "GET"
 path = next(a for a in args if a.startswith("projects/"))
-if "--hostname" not in args or args[args.index("--hostname") + 1] != "gitlab.com":
-    sys.stderr.write("fake glab: call not pinned to --hostname gitlab.com\n")
-    sys.exit(9)
+host = args[args.index("--hostname") + 1] if "--hostname" in args else "-"
+with open(os.path.join(mock, "hosts.log"), "a") as log:
+    log.write(f"{host}\n")
 with open(os.path.join(mock, "calls.log"), "a") as log:
     log.write(f"{method} {path}\n")
 if os.path.exists(os.path.join(mock, "api_down")):
@@ -108,6 +109,11 @@ class ScriptTestCase(unittest.TestCase):
         path = os.path.join(self.mock, "calls.log")
         return open(path).read().splitlines() if os.path.exists(path) else []
 
+    def hosts(self):
+        """The --hostname of every glab call ("-" when none was passed)."""
+        path = os.path.join(self.mock, "hosts.log")
+        return set(open(path).read().split()) if os.path.exists(path) else set()
+
     def posts(self):
         return [c for c in self.calls() if c.startswith("POST ")]
 
@@ -133,7 +139,14 @@ class MrStateTest(ScriptTestCase):
         self.assertEqual(out["target_branch"], "master")
         self.assertEqual(out["changed_files"], ["app/a.rb", "lib/new.rb", "lib/old.rb"])
         self.assertIn("GET projects/grp%2Fsub%2Fproj/pipelines/900/jobs?scope[]=failed&per_page=100", self.calls())
+        self.assertEqual(out["host"], "gitlab.com")
+        self.assertEqual(self.hosts(), {"gitlab.com"}, "every call goes to the URL's host")
         self.assertNothingWritten()
+
+    def test_self_managed_url_queries_its_own_host(self):
+        out = self.json_of("mr_state.py", SELF_MANAGED_URL)
+        self.assertEqual((out["host"], out["project"]), ("gitlab.example.com", "grp/proj"))
+        self.assertEqual(self.hosts(), {"gitlab.example.com"})
 
     def test_paginated_pages_are_merged(self):
         self.fixture("jobs", json.dumps([job(1)]) + "\n" + json.dumps([job(2)]))
@@ -231,6 +244,27 @@ class JobLogTailTest(ScriptTestCase):
         self.assertEqual(log, ["Executing step_script", "$ bundle exec rspec",
                                "Failure/Error: expect(x).to eq(1)", "ERROR: Job failed: exit code 1"])
         self.assertIn('"runner": "r1"', proc.stdout)
+        self.assertEqual(self.hosts(), {"-"}, "no --hostname: glab picks the host")
+
+        proc = self.run_script("job_log_tail.py", "--hostname", "gdk.test:3000", "grp%2Fproj", "5")
+        self.assertEqual(proc.returncode, 0, proc.stderr)
+        self.assertIn("gdk.test:3000", self.hosts())
+
+
+class PipelineWatchTest(ScriptTestCase):
+    def watch(self, *args):
+        return self.run_script("pipeline-watch.py", "grp/proj", "--no-all", "--no-watch-new", "42",
+                               "--interval", "1", "--timeout", "1", *args)
+
+    def test_follows_glabs_host_by_default(self):
+        proc = self.watch()
+        self.assertEqual(proc.returncode, 0, proc.stderr)
+        self.assertEqual(self.hosts(), {"-"}, "self-managed and GDK projects need glab's own host choice")
+        self.assertNothingWritten()
+
+    def test_explicit_hostname(self):
+        self.assertEqual(self.watch("--hostname", "gitlab.example.com").returncode, 0)
+        self.assertEqual(self.hosts(), {"gitlab.example.com"})
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

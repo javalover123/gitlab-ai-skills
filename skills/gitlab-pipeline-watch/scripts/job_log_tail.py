@@ -2,7 +2,10 @@
 """Print a CI job's metadata and the cleaned tail of its log.
 
 Usage:
-    python3 scripts/job_log_tail.py <project-encoded> <job-id> [lines]
+    python3 scripts/job_log_tail.py [--hostname HOST] <project-encoded> <job-id> [lines]
+
+--hostname is the GitLab instance (mr_state.py reports it as `host`). Without
+it, glab uses the host of the current git checkout, or gitlab.com.
 
 Prints job metadata as JSON, then the last N (default 150) non-blank log
 lines with ANSI colors, GitLab section markers, and carriage returns removed.
@@ -37,6 +40,7 @@ def clean(trace):
 
 def main():
     parser = argparse.ArgumentParser(description="Show a CI job's metadata and log tail.")
+    parser.add_argument("--hostname", help="GitLab host (default: glab's, from the current checkout)")
     parser.add_argument("project_encoded")
     parser.add_argument("job_id", type=int)
     parser.add_argument("lines", nargs="?", type=int, default=150)
@@ -46,8 +50,8 @@ def main():
 
     base = f"projects/{args.project_encoded}/jobs/{args.job_id}"
     try:
-        job = glab_json(base)
-        trace = glab_text(f"{base}/trace")
+        job = glab_json(base, hostname=args.hostname)
+        trace = glab_text(f"{base}/trace", hostname=args.hostname)
     except GlabError as exc:
         fail(str(exc))
 

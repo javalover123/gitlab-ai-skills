@@ -15,7 +15,7 @@ Before posting the final blocked report, attempt root-cause diagnosis for any fa
 4. Summarize: what's broken, who owns it (if identifiable from issue), and whether a workaround exists
 
 ## UNKNOWN diagnosis
-1. Fetch more log context (increase to 300 lines): `python3 "$WATCH/scripts/job_log_tail.py" "<project_encoded>" "<job_id>" 300`
+1. Fetch more log context (increase to 300 lines): `python3 "$WATCH/scripts/job_log_tail.py" --hostname "<host>" "<project_encoded>" "<job_id>" 300`
 2. Re-attempt classification with the additional context
 3. If still unclassifiable: note the job URL and the most distinctive error line for manual inspection
 

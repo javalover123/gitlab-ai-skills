@@ -39,12 +39,16 @@ def blocking(items):
 
 
 def mr_state(mr_url, with_files=False):
-    project, encoded, iid = parse_mr_url(mr_url)
-    mr = glab_json(f"projects/{encoded}/merge_requests/{iid}")
+    host, project, encoded, iid = parse_mr_url(mr_url)
+
+    def get(path, paginate=False):
+        return glab_json(path, paginate=paginate, hostname=host)
+
+    mr = get(f"projects/{encoded}/merge_requests/{iid}")
 
     # The MR pipelines list, not head_pipeline: head_pipeline can be null while
     # GitLab is still checking mergeability.
-    pipelines = glab_json(api_path(f"projects/{encoded}/merge_requests/{iid}/pipelines", per_page=1))
+    pipelines = get(api_path(f"projects/{encoded}/merge_requests/{iid}/pipelines", per_page=1))
 
     pipeline, failed_jobs, failed_bridges = None, [], []
     if pipelines:
@@ -53,7 +57,7 @@ def mr_state(mr_url, with_files=False):
         pipeline["kind"] = pipeline_kind(latest.get("ref"))
         base = f"projects/{encoded}/pipelines/{latest['id']}"
 
-        jobs = glab_json(api_path(f"{base}/jobs", **{"scope[]": "failed", "per_page": 100}), paginate=True)
+        jobs = get(api_path(f"{base}/jobs", **{"scope[]": "failed", "per_page": 100}), paginate=True)
         failed_jobs = [
             {key: job.get(key) for key in ("id", "name", "stage", "failure_reason", "web_url")}
             for job in blocking(jobs)
@@ -62,8 +66,7 @@ def mr_state(mr_url, with_files=False):
         # Trigger jobs (bridges) for child/downstream pipelines. Their failures
         # hide inside the downstream pipeline, so surface where to look.
         # `trigger_jobs` replaces the `bridges` endpoint, deprecated in 19.2.
-        bridges = glab_json(api_path(f"{base}/trigger_jobs", **{"scope[]": "failed", "per_page": 100}),
-                            paginate=True)
+        bridges = get(api_path(f"{base}/trigger_jobs", **{"scope[]": "failed", "per_page": 100}), paginate=True)
         for bridge in blocking(bridges):
             downstream = bridge.get("downstream_pipeline") or {}
             failed_bridges.append({
@@ -77,6 +80,7 @@ def mr_state(mr_url, with_files=False):
             })
 
     state = {
+        "host": host,
         "project": project,
         "project_encoded": encoded,
         "mr_iid": iid,
@@ -98,7 +102,7 @@ def mr_state(mr_url, with_files=False):
     }
 
     if with_files:
-        diffs = glab_json(api_path(f"projects/{encoded}/merge_requests/{iid}/diffs", per_page=100), paginate=True)
+        diffs = get(api_path(f"projects/{encoded}/merge_requests/{iid}/diffs", per_page=100), paginate=True)
         paths = set()
         for diff in diffs:
             paths.update(p for p in (diff.get("new_path"), diff.get("old_path")) if p)

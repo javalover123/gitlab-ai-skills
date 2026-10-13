@@ -25,7 +25,7 @@ comments. Acting on an event is the caller's job.
 
 ## Prerequisites
 
-- `glab` CLI installed and authenticated (`glab auth status`)
+- `glab` CLI installed and authenticated (`glab auth status`) to the MR's GitLab instance. Scripts that take an MR URL query that URL's host; the others use glab's default (the current checkout's host, or gitlab.com) unless given `--hostname`.
 - Python 3.7+ (standard library only)
 
 ## Pick a watcher
@@ -46,8 +46,8 @@ Run with `python3` from this skill's directory. Each prints JSON except
 
 - `scripts/watch_mr.py [--expect-sha SHA] [--auto-merge] [--newer-than ID] [--seen IDS] [--grace N] [--mr-only] <mr-url>`
 - `scripts/mr_state.py [--files] <mr-url>`: one snapshot (MR, latest pipeline, blocking failures)
-- `scripts/job_log_tail.py <project_encoded> <job_id> [lines]`: cleaned log tail
-- `scripts/pipeline-watch.py <project> [mr ...] [--no-all] [--wait-for-push] …`
+- `scripts/job_log_tail.py [--hostname HOST] <project_encoded> <job_id> [lines]`: cleaned log tail
+- `scripts/pipeline-watch.py <project> [mr ...] [--no-all] [--wait-for-push] [--hostname HOST] …`
 - `scripts/glab_helpers.py`: the shared `glab api` wrapper the others import (not run directly)
 
 ## Quick start

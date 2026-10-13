@@ -108,6 +108,9 @@ Options:
   --wait-for-push            Ignore stale pipelines, wait for new pushes
   --interval N               Poll interval in seconds (default: 20)
   --timeout N                Exit after N seconds with no event (default: 1800)
+  --hostname HOST            GitLab host to query (default: glab's, from the current
+                             git checkout or gitlab.com; set it for self-managed/GDK
+                             projects when running elsewhere)
   --debug                    Print baseline IDs, state transitions, skip reasons
 ```
 

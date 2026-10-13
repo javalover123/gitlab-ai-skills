@@ -7,7 +7,7 @@ this?** If yes, or if you can't rule it out, don't retry.
 ## Gather evidence
 
 ```bash
-python3 "$WATCH/scripts/job_log_tail.py" "<project_encoded>" "<job_id>" 150   # project_encoded from mr_state.py
+python3 "$WATCH/scripts/job_log_tail.py" --hostname "<host>" "<project_encoded>" "<job_id>" 150   # host, project_encoded from the watcher output
 ```
 
 - **Bridges** (`failed_bridges`): the real failure is in the downstream

@@ -5,7 +5,7 @@
 For each entry in `failed_jobs` where `allow_failure != true`:
 
 ```bash
-python3 "$WATCH/scripts/job_log_tail.py" "<project_encoded>" "<job_id>" 150
+python3 "$WATCH/scripts/job_log_tail.py" --hostname "<host>" "<project_encoded>" "<job_id>" 150
 ```
 
 For each entry in `failed_bridges` (a failed trigger job), the real failure is in its downstream pipeline. List that pipeline's failed jobs, then tail their logs the same way, using the downstream project ID (URL-encode it if it's a path; a numeric ID works as is):

@@ -2,10 +2,11 @@
 
 Standard library only (Python 3.7+). Every GitLab call goes through the
 authenticated `glab api` CLI; query parameters are encoded into the path, so
-no `-f`/`-F` field flags are ever passed. Calls are pinned to gitlab.com (the
-only host the MR URLs are parsed for), so running from a checkout of another
-GitLab host can't redirect them. Each call times out after GLAB_TIMEOUT
-seconds so a hung request can't stall a watcher.
+no `-f`/`-F` field flags are ever passed. Calls made for an MR URL pass that
+URL's host as `--hostname`, so running from a checkout of a different GitLab
+instance can't send them to the wrong one. Without a hostname, glab uses the
+host of the current git checkout, or gitlab.com. Each call times out after
+GLAB_TIMEOUT seconds so a hung request can't stall a watcher.
 """
 
 import json
@@ -16,7 +17,7 @@ import urllib.parse
 
 GLAB_TIMEOUT = 30
 
-MR_URL_RE = re.compile(r"^https://gitlab\.com/(?P<project>.+?)/-/merge_requests/(?P<iid>\d+)")
+MR_URL_RE = re.compile(r"^https?://(?P<host>[^/]+)/(?P<project>.+?)/-/merge_requests/(?P<iid>\d+)")
 
 
 class GlabError(RuntimeError):
@@ -24,12 +25,12 @@ class GlabError(RuntimeError):
 
 
 def parse_mr_url(url):
-    """Return (project_path, project_encoded, mr_iid) for a gitlab.com MR URL."""
+    """Return (host, project_path, project_encoded, mr_iid) for a GitLab MR URL."""
     match = MR_URL_RE.match(url)
     if not match:
-        raise ValueError(f"not a gitlab.com merge request URL: {url}")
+        raise ValueError(f"not a GitLab merge request URL: {url}")
     project = match.group("project")
-    return project, urllib.parse.quote(project, safe=""), match.group("iid")
+    return match.group("host"), project, urllib.parse.quote(project, safe=""), match.group("iid")
 
 
 def api_path(path, **params):
@@ -51,8 +52,10 @@ def _json_documents(text):
     return docs
 
 
-def glab_text(path, method="GET", paginate=False):
-    cmd = ["glab", "api", "--hostname", "gitlab.com"]
+def glab_text(path, method="GET", paginate=False, hostname=None):
+    cmd = ["glab", "api"]
+    if hostname:
+        cmd += ["--hostname", hostname]
     if method != "GET":
         cmd += ["--method", method]
     if paginate:
@@ -70,9 +73,9 @@ def glab_text(path, method="GET", paginate=False):
     return proc.stdout
 
 
-def glab_json(path, method="GET", paginate=False):
+def glab_json(path, method="GET", paginate=False, hostname=None):
     """Call `glab api` and parse the result. Paginated arrays are merged."""
-    text = glab_text(path, method=method, paginate=paginate)
+    text = glab_text(path, method=method, paginate=paginate, hostname=hostname)
     try:
         docs = _json_documents(text)
     except ValueError as exc:
