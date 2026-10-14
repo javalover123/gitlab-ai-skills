@@ -8,6 +8,10 @@
   },
   "plugins": [
     {
+      "name": "adr-create",
+      "source": "./.claude-plugin/plugins/adr-create"
+    },
+    {
       "name": "adr-review",
       "source": "./.claude-plugin/plugins/adr-review"
     },
