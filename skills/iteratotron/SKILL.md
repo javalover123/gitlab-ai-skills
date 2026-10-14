@@ -1,7 +1,7 @@
 ---
 name: iteratotron
 description: "Drives a project through any stage of the implementation lifecycle — from documentation (or none) through partial implementation to verifiable completion. Wraps the iterate and bug-burndown skills via bounded parallel subagent dispatch in isolated git worktrees, with a Constitution Check, a per-language harness vector (unit/coverage/mutation, integration/contract, chaos/DST), adversarial completion review, a stop-bias-pattern catalogue, and an attestable done predicate. Auto-detects whether a project needs greenfield bootstrap, partial-implementation completion, or a completion-readiness sweep. Use for drive this to completion, no stubs no TODOs, ship-ready burndown, project genesis, doc-to-impl, spec-driven development, constitution check, burn down the gaps, or build the implementation harness."
-version: 1.0.1
+version: 1.0.2
 license: MIT
 category: Development Workflow
 compatibility: opencode

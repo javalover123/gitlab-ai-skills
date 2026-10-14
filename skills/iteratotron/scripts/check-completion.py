@@ -8,11 +8,12 @@ The queue is the deterministic completion oracle — Phase 5 populates it from
 the gap audit, and the orchestrator's job is to drain it.
 
 Reads `.iteratotron/CURRENT` to find the active session, then inspects
-`.iteratotron/<session-id>/scope_queue.jsonl` and `manifest.yaml`. If any
-scope is in a non-terminal status (queued / in_flight / re-evaluate /
-needs_rebase / introduced_regression), and the time budget hasn't expired,
-the hook returns a `decision: block` response telling Claude to keep
-dispatching.
+`.iteratotron/<session-id>/scope_queue.jsonl` and `state.json` (for
+`started_at` and `budgets.time_budget_seconds` — see
+references/state-schema.md). If any scope is in a non-terminal status
+(queued / in_flight / re-evaluate / needs_rebase / introduced_regression),
+and the time budget hasn't expired, the hook returns a `decision: block`
+response telling Claude to keep dispatching.
 
 Skipped when:
 - The active session is subagent context (parent_task_id present) — the
@@ -104,25 +105,41 @@ def load_session_state():
         # in progress. Treat as "no entries" so the caller can decide.
         queue_entries = []
     else:
-        queue_entries = []
-        for line in queue_path.read_text().splitlines():
+        # The file is append-only; per orchestration.md, an update for an
+        # existing scope writes a NEW line with the same `id` rather than
+        # rewriting in place, and "latest wins". Dedupe by `id` here,
+        # keeping the last occurrence, so a scope that went
+        # queued -> complete doesn't leave its stale `queued` line still
+        # counted as non-terminal work and block the hook forever.
+        latest_by_id = {}
+        for index, line in enumerate(queue_path.read_text().splitlines()):
             line = line.strip()
             if not line:
                 continue
             try:
-                queue_entries.append(json.loads(line))
+                entry = json.loads(line)
             except json.JSONDecodeError:
                 continue
+            # Entries without an `id` can't be deduped; key them uniquely
+            # by position so they're still counted individually.
+            latest_by_id[entry.get("id", f"__no_id_{index}")] = entry
+        queue_entries = list(latest_by_id.values())
 
-    manifest_path = session_dir / "manifest.yaml"
+    # references/state-schema.md defines `started_at` (top-level) and
+    # `budgets.time_budget_seconds` (nested) in state.json — there is no
+    # manifest.yaml anywhere in this skill. Reading the wrong file/keys
+    # meant this was always empty, so the time-budget exit never fired.
+    state_path = session_dir / "state.json"
     manifest = {}
-    if manifest_path.is_file():
-        # Minimal YAML parse — we only need a few flat keys.
-        for line in manifest_path.read_text().splitlines():
-            if ":" not in line:
-                continue
-            key, _, value = line.partition(":")
-            manifest[key.strip()] = value.strip().strip('"').strip("'")
+    if state_path.is_file():
+        try:
+            session_state = json.loads(state_path.read_text())
+        except json.JSONDecodeError:
+            session_state = {}
+        manifest["start_time"] = session_state.get("started_at")
+        manifest["time_budget_seconds"] = (session_state.get("budgets") or {}).get(
+            "time_budget_seconds"
+        )
 
     return session_dir, queue_entries, manifest
 
@@ -216,7 +233,7 @@ def main():
         f"adversarial review on its result, reconcile, then re-check. "
         f"The session ends only when every entry reaches a terminal status "
         f"(complete / blocked / needs_human / skipped) OR the time budget in "
-        f"manifest.yaml expires."
+        f"state.json's budgets.time_budget_seconds expires."
     )
 
     emit_and_exit({"decision": "block", "reason": reason})
