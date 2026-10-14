@@ -133,6 +133,24 @@ bridges Claude-style hooks onto opencode's event listener.
 *Tested:* `node .opencode/plugins/__tests__/skill-hooks.test.mjs` covers the
 session-gating logic without needing a live opencode server.
 
+### LLM evals (optional, promptfoo)
+
+Deterministic checks verify a skill is *well-formed*; **evals** verify it
+actually steers a model the way it claims to. A skill opts in by shipping
+`skills/<name>/tests/eval.yaml` (promptfoo format): the SKILL.md is fed as the
+prompt, a task is supplied, and assertions (`contains`, `not-contains`,
+`llm-rubric`) check the output. See `skills/commit-messages/tests/` and
+`skills/handoff/tests/` for worked examples.
+
+- **Run:** `scripts/run_evals.sh [<skill>...]` (or `npm run eval`). It runs
+  every `skills/*/tests/eval.yaml` by default, or the named skills.
+- **Needs `ANTHROPIC_API_KEY`.** The eval providers call the Anthropic API.
+  Without the key the runner exits 0 with a skip notice, so it never blocks a
+  pipeline that hasn't configured the CI/CD variable.
+- **CI job `skill-evals`** is `when: manual` and `allow_failure: true` — treat
+  results as signal, not a merge gate. Adding a `tests/eval.yaml` counts as a
+  skill change, so bump the skill `version`.
+
 ### Synced skills (source of truth elsewhere)
 
 Some skills are **synced in** from another repository — their source of truth
