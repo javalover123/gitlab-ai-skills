@@ -345,6 +345,14 @@
       "path": "skills/story-reviewer/SKILL.md"
     },
     {
+      "name": "threat-model-create",
+      "description": "Use when creating a new threat model, updating one after implementation changes, performing STRIDE analysis, scoring risk with DREAD, assessing attack surface, or when spec-create flags missing security analysis. Triggers: threat model, STRIDE, DREAD, security analysis, attack surface, identify threats, risk assessment.",
+      "category": "Documentation",
+      "license": "MIT",
+      "compatibility": "opencode",
+      "path": "skills/threat-model-create/SKILL.md"
+    },
+    {
       "name": "threat-model-review",
       "description": "Reviews threat models for completeness, accuracy, and alignment with current implementation. Identifies drift between threat model and code, uncovered attack surfaces, missing STRIDE categories, incorrect risk scores, and unlinked mitigations. Creates threat models when none exist. Use when auditing a threat model, checking security coverage, finding unmodeled threats, validating risk scores, or when implementation has changed since the threat model was written. Triggers: review threat model, audit threats, threat model drift, security coverage, unmodeled threats, validate risk, threat model gaps.",
       "category": "Documentation",
