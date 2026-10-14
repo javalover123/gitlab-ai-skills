@@ -1,0 +1,10 @@
+{
+  "name": "adr-create",
+  "description": "Creates and manages Architecture Decision Records using MADR 4.0.0 format with Nygard's immutability principles. Handles new ADRs, superseding existing ones, and retroactively documenting past decisions from code analysis. Links decisions to spec requirements and threat model entries. Use when documenting an architecture decision, choosing between technologies, recording why a design choice was made, or backfilling undocumented decisions. Triggers: create ADR, document decision, architecture decision, why did we choose, record decision, backfill ADR.",
+  "version": "1.0.1",
+  "author": {
+    "name": "GitLab"
+  },
+  "license": "MIT",
+  "skills": "./"
+}
