@@ -104,6 +104,10 @@
       "source": "./.claude-plugin/plugins/natural-writing-style"
     },
     {
+      "name": "nixify",
+      "source": "./.claude-plugin/plugins/nixify"
+    },
+    {
       "name": "postgresai",
       "source": "./.claude-plugin/plugins/postgresai"
     },
