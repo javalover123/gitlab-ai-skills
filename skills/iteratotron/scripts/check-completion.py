@@ -18,9 +18,12 @@ response telling Claude to keep dispatching.
 Skipped when:
 - The active session is subagent context (parent_task_id present) — the
   subagent runs `iterate`'s own hook, not the orchestrator's.
-- `stop_hook_active` is true (prevents infinite loops).
 - No `.iteratotron/CURRENT` exists (no active session).
 - The session time budget is exhausted (returns approve with a note).
+
+Deliberately NOT skipped on `stop_hook_active`: see should_skip()'s
+docstring for why treating it as a skip condition would end the
+orchestration loop after exactly one block.
 
 Configuration:
 - Terminal statuses (treated as "done"): complete, blocked, needs_human,
@@ -72,9 +75,17 @@ def emit_and_exit(output):
 
 
 def should_skip(hook_input):
-    """Skip when in subagent context or when a prior stop hook already fired."""
-    if hook_input.get("stop_hook_active"):
-        return True
+    """Skip when in subagent context (the iterate subagent runs its own
+    Stop hook, not the orchestrator's).
+
+    Deliberately does NOT skip on `stop_hook_active` (set by Claude Code
+    on the stop that follows a block): every subsequent orchestrator stop
+    attempt while the scope queue still has work also carries this flag,
+    so skipping on it would approve the very next stop unconditionally —
+    ending the orchestration loop after exactly one block regardless of
+    how much of the queue is still undrained. Same bug, same fix, as
+    iterate's check-completion.py should_skip().
+    """
     if (
         hook_input.get("parent_task_id")
         or hook_input.get("agent_type")

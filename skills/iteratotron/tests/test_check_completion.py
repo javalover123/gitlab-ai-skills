@@ -26,6 +26,29 @@ def _load(name: str, filename: str):
 cc = _load("iteratotron_check_completion", "check-completion.py")
 
 
+class ShouldSkipTest(unittest.TestCase):
+    """Fix: stop_hook_active must not cause an unconditional skip, or the
+    orchestration loop ends after exactly one block regardless of how
+    much of the scope queue is still undrained. Same bug and fix as
+    iterate's should_skip().
+    """
+
+    def test_stop_hook_active_alone_does_not_skip(self):
+        self.assertFalse(cc.should_skip({"stop_hook_active": True}))
+
+    def test_subagent_still_skips(self):
+        self.assertTrue(cc.should_skip({"is_subagent": True}))
+
+    def test_parent_task_id_still_skips(self):
+        self.assertTrue(cc.should_skip({"parent_task_id": "abc"}))
+
+    def test_agent_type_still_skips(self):
+        self.assertTrue(cc.should_skip({"agent_type": "something"}))
+
+    def test_plain_call_does_not_skip(self):
+        self.assertFalse(cc.should_skip({}))
+
+
 class SessionFixture(unittest.TestCase):
     """Base class that builds a `.iteratotron/<session>/` tree in a temp
     cwd and restores the real cwd on teardown.
