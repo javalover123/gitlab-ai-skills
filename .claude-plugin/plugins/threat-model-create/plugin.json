@@ -1,0 +1,10 @@
+{
+  "name": "threat-model-create",
+  "description": "Use when creating a new threat model, updating one after implementation changes, performing STRIDE analysis, scoring risk with DREAD, assessing attack surface, or when spec-create flags missing security analysis. Triggers: threat model, STRIDE, DREAD, security analysis, attack surface, identify threats, risk assessment.",
+  "version": "1.0.2",
+  "author": {
+    "name": "GitLab"
+  },
+  "license": "MIT",
+  "skills": "./"
+}

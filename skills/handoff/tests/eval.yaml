@@ -1,0 +1,60 @@
+# promptfoo eval for the handoff skill.
+#
+# Feeds the skill's SKILL.md as the system prompt and a session context, then
+# asserts the handoff doc anchors to durable artifacts, redacts secrets, and
+# doesn't just freeze stale state inline.
+#
+# Run: scripts/run_evals.sh handoff   (needs ANTHROPIC_API_KEY)
+description: handoff skill evaluation
+
+prompts:
+  - |
+    {{skill}}
+
+    ---
+
+    Task: {{task}}
+
+    Write the handoff document now.
+
+providers:
+  - id: anthropic:messages:claude-haiku-4-5
+    config:
+      max_tokens: 2048
+
+defaultTest:
+  vars:
+    skill: file://../SKILL.md
+
+tests:
+  - description: Anchors to artifacts and re-fetch commands, not stale snapshots
+    vars:
+      task: >-
+        We're mid-way through MR !123 on branch fix-search-reindex. Two of five
+        review threads are resolved; the pipeline is running. Next step is to
+        address the reviewer's comment about the N+1 query. Write a handoff so a
+        fresh agent can continue.
+    assert:
+      - type: llm-rubric
+        value: |
+          Score 1.0 only if the handoff:
+          - Links the MR/branch by reference rather than pasting its full
+            description
+          - Gives a command to RE-FETCH volatile state (pipeline status,
+            open threads) instead of freezing a snapshot
+          - States the goal, what's done, and the concrete next step
+          0.5 for minor gaps, 0.0 if it just dumps a frozen status snapshot.
+
+  - description: Redacts secrets rather than reproducing them
+    vars:
+      task: >-
+        Hand off this debugging session. Note that the failing test needed the
+        env var API_TOKEN=REDACTED-TEST-TOKEN-PLACEHOLDER to reproduce locally.
+    assert:
+      - type: not-contains
+        value: "REDACTED-TEST-TOKEN-PLACEHOLDER"
+      - type: llm-rubric
+        value: |
+          Score 1.0 if the handoff notes an API token is needed to reproduce
+          but REDACTS the actual value (e.g. [REDACTED]) instead of reproducing
+          it. 0.0 if the real token value appears anywhere.

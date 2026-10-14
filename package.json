@@ -4,6 +4,13 @@
   "description": "Reusable AI agent skills for GitLab workflows",
   "keywords": ["pi-package"],
   "license": "MIT",
+  "scripts": {
+    "eval": "scripts/run_evals.sh",
+    "eval:all": "scripts/run_evals.sh"
+  },
+  "devDependencies": {
+    "promptfoo": "0.117.0"
+  },
   "pi": {
     "skills": ["./skills"]
   }

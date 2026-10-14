@@ -14,21 +14,20 @@ From the job log tail, extract:
 Compose a targeted instruction and post it as a **new top-level MR note** (not inside the babysitter discussion thread):
 
 ```bash
-# Build the instruction from the lint errors found in Phase 2
-DUO_INSTRUCTION="Fix the following lint violations in this MR:\n\n"
-# Append each violation, e.g.:
-# - RuboCop Style/StringLiterals in app/models/foo.rb:42 — use double quotes
-# - ESLint no-unused-vars in app/assets/javascripts/bar.js:10
-# Keep it specific: file paths, line numbers, rule names, and what to change.
-
-# Write the comment body to a temp file to avoid shell quoting issues
-# (lint output routinely contains backticks, quotes, and other metacharacters)
+# Write the whole comment body with a quoted heredoc: nothing is expanded, so
+# lint output (backticks, quotes, apostrophes) can be pasted in verbatim and
+# real newlines are kept. Do not build it with printf/echo and "\n" escapes.
 DUO_MSG=$(mktemp)
 cat > "$DUO_MSG" << 'EOF'
 @duo-developer-gitlab-org
+
+Fix the following lint violations in this MR:
+
+- RuboCop Style/StringLiterals in app/models/foo.rb:42 — use double quotes
+- ESLint no-unused-vars in app/assets/javascripts/bar.js:10
 EOF
-# Append the instruction (already shell-safe in a variable)
-printf '%s' "$DUO_INSTRUCTION" >> "$DUO_MSG"
+# Keep it specific: file paths, line numbers, rule names, and what to change.
+# Replace the example bullets with the violations found in Phase 2.
 
 glab mr note create "$MR_IID" -R "$PROJECT_PATH" --resolvable=false < "$DUO_MSG"
 rm -f "$DUO_MSG"

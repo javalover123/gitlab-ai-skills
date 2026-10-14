@@ -1,6 +1,14 @@
 {
   "skills": [
     {
+      "name": "adr-create",
+      "description": "Creates and manages Architecture Decision Records using MADR 4.0.0 format with Nygard's immutability principles. Handles new ADRs, superseding existing ones, and retroactively documenting past decisions from code analysis. Links decisions to spec requirements and threat model entries. Use when documenting an architecture decision, choosing between technologies, recording why a design choice was made, or backfilling undocumented decisions. Triggers: create ADR, document decision, architecture decision, why did we choose, record decision, backfill ADR.",
+      "category": "Documentation",
+      "license": "MIT",
+      "compatibility": "opencode",
+      "path": "skills/adr-create/SKILL.md"
+    },
+    {
       "name": "adr-review",
       "description": "Reviews Architecture Decision Records for quality, completeness, and consistency. Identifies undocumented decisions by analyzing code, specs, and threat models. Backfills missing ADRs for past decisions, validates cross-references, and checks the decision log for staleness or contradictions. Use when auditing ADRs, finding missing decisions, reviewing ADR quality, checking for undocumented architecture choices, or when spec-review or threat-model-review flags missing ADRs. Triggers: review ADR, audit decisions, missing ADRs, ADR quality, backfill ADRs, decision log, undocumented decisions.",
       "category": "Documentation",
@@ -145,6 +153,14 @@
       "path": "skills/human-review/SKILL.md"
     },
     {
+      "name": "iterate",
+      "description": "Brings projects to 100% completion through iterative cycles \u2014 implementing missing features, fixing security/correctness gaps, and refining code until all specs, ADRs, and threat model requirements are met. Runs gap analysis, prioritizes by security/correctness/quality/coverage, and auto-iterates until nothing remains. Use when completing an incomplete project, implementing remaining features from specs, addressing technical debt, or reaching production readiness. Triggers: iterate, bring to completion, implement remaining features, production readiness, gap analysis, address all gaps, complete project, iterative development.",
+      "category": "Development Workflow",
+      "license": "MIT",
+      "compatibility": "opencode",
+      "path": "skills/iterate/SKILL.md"
+    },
+    {
       "name": "mcp-creator",
       "description": "Guides building production-quality MCP servers in Rust using the rmcp crate. Covers protocol design, tool implementation, testing, security hardening, and AI-tool integration. Use when building an MCP server, creating MCP tools, implementing MCP in Rust, adding tools/resources/prompts to an MCP server, or starting a new MCP project.",
       "category": "Development Workflow",
@@ -199,6 +215,14 @@
       "license": "MIT",
       "compatibility": "opencode",
       "path": "skills/natural-writing-style/SKILL.md"
+    },
+    {
+      "name": "nixify",
+      "description": "Analyze an existing codebase or a hand-rolled build system and generate maintainable, modular, ergonomic Nix build infrastructure for it \u2014 a thin flake.nix wiring up a lib/ + pkgs/ layout via callPackage, with scoped outputs, dev shells, nix2container images, and NixOS VM test checks \u2014 in a single reviewable MR that keeps the developer's native workflow (cargo, go, bundle, poetry/uv, npm/pnpm) working unchanged. Use when the user wants to Nixify, add a flake.nix, add reproducible or hermetic builds, set up nix develop / direnv, build containers or VM tests with Nix, or replace a Make/shell/Omnibus/Docker build system with Nix \u2014 even without saying Nix, if they describe reproducible builds, pinned toolchains, or a single-command dev environment for a Ruby, Go, Rust, Python, Node, or C/C++ project.",
+      "category": "Development Workflow",
+      "license": "MIT",
+      "compatibility": "opencode",
+      "path": "skills/nixify/SKILL.md"
     },
     {
       "name": "opencode-refine",
@@ -313,6 +337,14 @@
       "path": "skills/smart-rebase/SKILL.md"
     },
     {
+      "name": "spec-create",
+      "description": "Creates and updates implementation specifications using IEEE 830 structure, RFC 2119 requirement levels, EARS syntax, and Gherkin acceptance criteria. Produces traceable, testable specs with cross-references to ADRs and threat models. Use when writing a spec, creating a specification document, defining requirements, documenting acceptance criteria, or updating an existing spec to cover new functionality. Triggers: write spec, create specification, document requirements, define acceptance criteria, update spec, spec gaps.",
+      "category": "Documentation",
+      "license": "MIT",
+      "compatibility": "opencode",
+      "path": "skills/spec-create/SKILL.md"
+    },
+    {
       "name": "stack-changes",
       "description": "Splits a large local change (uncommitted or committed) into a stacked-MR chain. Use when the user asks to split an MR they find too big to review, wants stacked diffs, has sprawling AI-mode work to publish, or types /stack-changes.",
       "category": "Development Workflow",
@@ -335,6 +367,14 @@
       "license": "MIT",
       "compatibility": "opencode",
       "path": "skills/story-reviewer/SKILL.md"
+    },
+    {
+      "name": "threat-model-create",
+      "description": "Use when creating a new threat model, updating one after implementation changes, performing STRIDE analysis, scoring risk with DREAD, assessing attack surface, or when spec-create flags missing security analysis. Triggers: threat model, STRIDE, DREAD, security analysis, attack surface, identify threats, risk assessment.",
+      "category": "Documentation",
+      "license": "MIT",
+      "compatibility": "opencode",
+      "path": "skills/threat-model-create/SKILL.md"
     },
     {
       "name": "threat-model-review",

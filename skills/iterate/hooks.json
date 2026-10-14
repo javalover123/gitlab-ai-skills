@@ -1,0 +1,11 @@
+{
+  "SessionStart": [
+    { "command": "python3 scripts/session-start-handover.py", "timeout": 30 }
+  ],
+  "PreToolUse": [
+    { "command": "python3 scripts/context-watchdog.py", "timeout": 30 }
+  ],
+  "Stop": [
+    { "command": "python3 scripts/check-completion.py", "timeout": 300 }
+  ]
+}

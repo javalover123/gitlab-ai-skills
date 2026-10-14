@@ -8,6 +8,10 @@
   },
   "plugins": [
     {
+      "name": "adr-create",
+      "source": "./.claude-plugin/plugins/adr-create"
+    },
+    {
       "name": "adr-review",
       "source": "./.claude-plugin/plugins/adr-review"
     },
@@ -80,6 +84,10 @@
       "source": "./.claude-plugin/plugins/human-review"
     },
     {
+      "name": "iterate",
+      "source": "./.claude-plugin/plugins/iterate"
+    },
+    {
       "name": "mcp-creator",
       "source": "./.claude-plugin/plugins/mcp-creator"
     },
@@ -106,6 +114,10 @@
     {
       "name": "natural-writing-style",
       "source": "./.claude-plugin/plugins/natural-writing-style"
+    },
+    {
+      "name": "nixify",
+      "source": "./.claude-plugin/plugins/nixify"
     },
     {
       "name": "postgresai",
@@ -154,6 +166,10 @@
     {
       "name": "stack-changes",
       "source": "./.claude-plugin/plugins/stack-changes"
+    },
+    {
+      "name": "threat-model-create",
+      "source": "./.claude-plugin/plugins/threat-model-create"
     },
     {
       "name": "video-takeaways",
