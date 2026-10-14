@@ -329,6 +329,14 @@
       "path": "skills/smart-rebase/SKILL.md"
     },
     {
+      "name": "spec-create",
+      "description": "Creates and updates implementation specifications using IEEE 830 structure, RFC 2119 requirement levels, EARS syntax, and Gherkin acceptance criteria. Produces traceable, testable specs with cross-references to ADRs and threat models. Use when writing a spec, creating a specification document, defining requirements, documenting acceptance criteria, or updating an existing spec to cover new functionality. Triggers: write spec, create specification, document requirements, define acceptance criteria, update spec, spec gaps.",
+      "category": "Documentation",
+      "license": "MIT",
+      "compatibility": "opencode",
+      "path": "skills/spec-create/SKILL.md"
+    },
+    {
       "name": "stack-changes",
       "description": "Splits a large local change (uncommitted or committed) into a stacked-MR chain. Use when the user asks to split an MR they find too big to review, wants stacked diffs, has sprawling AI-mode work to publish, or types /stack-changes.",
       "category": "Development Workflow",
