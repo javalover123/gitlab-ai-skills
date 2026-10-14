@@ -329,6 +329,14 @@
       "path": "skills/smart-rebase/SKILL.md"
     },
     {
+      "name": "spec-review",
+      "description": "Reviews implementation specifications for completeness, correctness, and traceability. Identifies gaps between spec and implementation, missing requirements, broken cross-references to ADRs and threat models, and ambiguous or untestable requirements. Creates new specs when none exist. Use when reviewing a spec, auditing requirements coverage, checking spec quality, finding spec gaps, or when the codebase has drifted from its spec. Triggers: review spec, audit requirements, spec gaps, spec quality, requirements coverage, check specification, spec drift.",
+      "category": "Documentation",
+      "license": "MIT",
+      "compatibility": "opencode",
+      "path": "skills/spec-review/SKILL.md"
+    },
+    {
       "name": "stack-changes",
       "description": "Splits a large local change (uncommitted or committed) into a stacked-MR chain. Use when the user asks to split an MR they find too big to review, wants stacked diffs, has sprawling AI-mode work to publish, or types /stack-changes.",
       "category": "Development Workflow",
