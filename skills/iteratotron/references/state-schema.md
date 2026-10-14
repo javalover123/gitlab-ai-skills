@@ -226,6 +226,23 @@ Use SQLite WAL when the project is large enough that JSON parsing
 becomes a bottleneck. Genesis's default is JSON because most projects
 don't reach that point — a 10K-line state file is fine.
 
+## Active-session pointer
+
+Phase 1 writes `.iteratotron/CURRENT`, a plain-text file containing the
+session id, right after it creates `.iteratotron/<session-id>/`. This
+is how `scripts/check-completion.py`'s Stop hook (and anything else
+that needs "the currently active session" without being told the id
+explicitly) finds the right session directory. Keep it in sync if a
+session resumes under a different id.
+
+If `CURRENT` is ever missing or points at a directory that no longer
+exists, the hook falls back to the most recently modified directory
+under `.iteratotron/` matching the session-id shape
+(`YYYYMMDD-HHMMSS-xxxx`), so a session bootstrapped before this
+pointer existed, or a Phase 1 run that skipped writing it, doesn't
+silently disable the Stop hook. Always write `CURRENT` anyway — the
+fallback is a safety net, not a substitute.
+
 ## Resumability
 
 `/iteratotron resume:<session-id>` reads `.iteratotron/<session-id>/state.json`

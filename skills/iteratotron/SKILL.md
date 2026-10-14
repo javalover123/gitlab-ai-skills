@@ -1,7 +1,7 @@
 ---
 name: iteratotron
 description: "Drives a project through any stage of the implementation lifecycle — from documentation (or none) through partial implementation to verifiable completion. Wraps the iterate and bug-burndown skills via bounded parallel subagent dispatch in isolated git worktrees, with a Constitution Check, a per-language harness vector (unit/coverage/mutation, integration/contract, chaos/DST), adversarial completion review, a stop-bias-pattern catalogue, and an attestable done predicate. Auto-detects whether a project needs greenfield bootstrap, partial-implementation completion, or a completion-readiness sweep. Use for drive this to completion, no stubs no TODOs, ship-ready burndown, project genesis, doc-to-impl, spec-driven development, constitution check, burn down the gaps, or build the implementation harness."
-version: 1.0.3
+version: 1.0.4
 license: MIT
 category: Development Workflow
 compatibility: opencode
@@ -63,9 +63,13 @@ are the safeguard, not hesitation.
 
 ## The 8-phase pipeline
 
-1. **Setup + bootstrap** — session identity, baseline snapshot, mode detection,
-   harness-vector composition, and (genesis) idempotent doc bootstrap via
-   `all-aboard`. Verify `iterate`, `bug-burndown`, and capabilities.
+1. **Setup + bootstrap** — session identity (write `.iteratotron/CURRENT` with
+   the session id right after creating `.iteratotron/<session-id>/` — see
+   [references/state-schema.md](references/state-schema.md) "Active-session
+   pointer"; the Stop hook can't find the session without it), baseline
+   snapshot, mode detection, harness-vector composition, and (genesis)
+   idempotent doc bootstrap via `all-aboard`. Verify `iterate`, `bug-burndown`,
+   and capabilities.
 2. **Scope discovery** — decompose the project into independently-buildable
    scopes ([references/scope-discovery.md](references/scope-discovery.md)).
 3. **Gap audit (per scope)** — documentation-readiness gate, the four-kind gap

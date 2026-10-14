@@ -27,14 +27,18 @@ cc = _load("iteratotron_check_completion", "check-completion.py")
 
 
 class ShouldSkipTest(unittest.TestCase):
-    """Fix: stop_hook_active must not cause an unconditional skip, or the
-    orchestration loop ends after exactly one block regardless of how
-    much of the scope queue is still undrained. Same bug and fix as
-    iterate's should_skip().
+    """should_skip() per Claude Code's documented Stop hook semantics:
+    `stop_hook_active` is true only on a stop attempt with zero tool
+    calls since the last block (the same streak behind Claude Code's own
+    8-consecutive-continuation cap, which resets on every tool call) —
+    not "a block happened earlier in this session." Skipping on it is
+    therefore the narrow "agent ignored the block and tried to stop
+    again having done nothing" case, not a loop-ending bug. See
+    should_skip()'s own docstring for the full reasoning.
     """
 
-    def test_stop_hook_active_alone_does_not_skip(self):
-        self.assertFalse(cc.should_skip({"stop_hook_active": True}))
+    def test_stop_hook_active_does_skip(self):
+        self.assertTrue(cc.should_skip({"stop_hook_active": True}))
 
     def test_subagent_still_skips(self):
         self.assertTrue(cc.should_skip({"is_subagent": True}))
@@ -47,6 +51,62 @@ class ShouldSkipTest(unittest.TestCase):
 
     def test_plain_call_does_not_skip(self):
         self.assertFalse(cc.should_skip({}))
+
+
+class ActiveSessionFallbackTest(unittest.TestCase):
+    """Fix: nothing in this skill's docs or scripts ever writes
+    `.iteratotron/CURRENT`, so in a normal run load_session_state()
+    always returned None and the Stop hook approved every stop —
+    the whole completion-blocking mechanism never engaged. Documented
+    that Phase 1 writes it (state-schema.md "Active-session pointer"),
+    and made find_active_session_dir() fall back to the most recently
+    modified `.iteratotron/<session-id>/` directory so the hook still
+    works even if that step is skipped.
+    """
+
+    def setUp(self):
+        self._orig_cwd = os.getcwd()
+        self._tmpdir = tempfile.TemporaryDirectory()
+        self.root = Path(self._tmpdir.name)
+        (self.root / ".iteratotron").mkdir()
+        os.chdir(self.root)
+
+    def tearDown(self):
+        os.chdir(self._orig_cwd)
+        self._tmpdir.cleanup()
+
+    def make_session_dir(self, session_id, mtime_offset=0):
+        d = self.root / ".iteratotron" / session_id
+        d.mkdir()
+        if mtime_offset:
+            t = d.stat().st_mtime + mtime_offset
+            os.utime(d, (t, t))
+        return d
+
+    def test_no_current_falls_back_to_newest_session_dir(self):
+        older = self.make_session_dir("20260501-100000-aaaa", mtime_offset=-100)
+        newer = self.make_session_dir("20260502-100000-bbbb", mtime_offset=0)
+        found = cc.find_active_session_dir()
+        self.assertEqual(found.resolve(), newer.resolve())
+        self.assertNotEqual(found.resolve(), older.resolve())
+
+    def test_current_pointing_at_missing_dir_falls_back(self):
+        (self.root / ".iteratotron" / "CURRENT").write_text("does-not-exist")
+        real = self.make_session_dir("20260503-100000-cccc")
+        self.assertEqual(cc.find_active_session_dir().resolve(), real.resolve())
+
+    def test_no_current_and_no_session_dirs_returns_none(self):
+        self.assertIsNone(cc.find_active_session_dir())
+
+    def test_non_session_shaped_dirs_are_ignored_in_fallback(self):
+        (self.root / ".iteratotron" / "logs").mkdir()
+        self.assertIsNone(cc.find_active_session_dir())
+
+    def test_current_takes_priority_over_newer_fallback_candidate(self):
+        pointed = self.make_session_dir("20260501-100000-aaaa", mtime_offset=-100)
+        self.make_session_dir("20260502-100000-bbbb", mtime_offset=0)
+        (self.root / ".iteratotron" / "CURRENT").write_text("20260501-100000-aaaa")
+        self.assertEqual(cc.find_active_session_dir().resolve(), pointed.resolve())
 
 
 class SessionFixture(unittest.TestCase):

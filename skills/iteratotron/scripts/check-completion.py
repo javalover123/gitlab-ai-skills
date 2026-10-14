@@ -18,12 +18,10 @@ response telling Claude to keep dispatching.
 Skipped when:
 - The active session is subagent context (parent_task_id present) — the
   subagent runs `iterate`'s own hook, not the orchestrator's.
+- `stop_hook_active` signals a stop attempt with no tool call since the
+  last block — see should_skip()'s docstring for why that's safe.
 - No `.iteratotron/CURRENT` exists (no active session).
 - The session time budget is exhausted (returns approve with a note).
-
-Deliberately NOT skipped on `stop_hook_active`: see should_skip()'s
-docstring for why treating it as a skip condition would end the
-orchestration loop after exactly one block.
 
 Configuration:
 - Terminal statuses (treated as "done"): complete, blocked, needs_human,
@@ -40,6 +38,7 @@ Exit protocol per Claude Code hooks spec:
 
 import json
 import os
+import re
 import sys
 import time
 from datetime import datetime, timezone
@@ -75,17 +74,23 @@ def emit_and_exit(output):
 
 
 def should_skip(hook_input):
-    """Skip when in subagent context (the iterate subagent runs its own
-    Stop hook, not the orchestrator's).
+    """Skip when in subagent context, or when stop_hook_active signals the
+    agent tried to stop again with zero tool calls since the last block.
 
-    Deliberately does NOT skip on `stop_hook_active` (set by Claude Code
-    on the stop that follows a block): every subsequent orchestrator stop
-    attempt while the scope queue still has work also carries this flag,
-    so skipping on it would approve the very next stop unconditionally —
-    ending the orchestration loop after exactly one block regardless of
-    how much of the queue is still undrained. Same bug, same fix, as
-    iterate's check-completion.py should_skip().
+    Per Claude Code's hooks reference, `stop_hook_active` is true only on
+    a stop attempt that directly follows a block with no intervening tool
+    call; Claude Code's own consecutive-continuation counter (the one
+    behind its 8-attempt cap) resets on every tool call, and this flag
+    tracks the same streak. So in a healthy loop — block, agent edits a
+    file, agent tries to stop again — this flag is false on that next
+    attempt, and the hook runs its normal gap check. It's only true when
+    the agent ignored the block reason entirely and tried to stop again
+    having done nothing; re-blocking in that exact case can't change the
+    outcome, so approving is correct (Claude Code's own cap would force
+    the turn to end after 8 such attempts regardless).
     """
+    if hook_input.get("stop_hook_active"):
+        return True
     if (
         hook_input.get("parent_task_id")
         or hook_input.get("agent_type")
@@ -95,18 +100,44 @@ def should_skip(hook_input):
     return False
 
 
+SESSION_ID_RE = re.compile(r"^\d{8}-\d{6}-[0-9a-f]{4}$")
+
+
+def find_active_session_dir():
+    """Resolve the active session directory.
+
+    Prefers `.iteratotron/CURRENT` (a file containing the session id —
+    see references/state-schema.md "Active-session pointer"), since
+    that's the canonical, unambiguous source of truth Phase 1 writes.
+    Falls back to the most recently modified `.iteratotron/<session-id>/`
+    directory so the hook still engages even if that pointer was never
+    written (e.g. an older session bootstrapped before this convention,
+    or a step that skipped writing it) rather than silently approving
+    every stop because load_session_state() found nothing.
+    """
+    base = Path(".iteratotron")
+    current_file = base / "CURRENT"
+    if current_file.is_file():
+        session_id = current_file.read_text().strip()
+        if session_id:
+            session_dir = base / session_id
+            if session_dir.is_dir():
+                return session_dir
+
+    if not base.is_dir():
+        return None
+    candidates = [
+        d for d in base.iterdir() if d.is_dir() and SESSION_ID_RE.match(d.name)
+    ]
+    if not candidates:
+        return None
+    return max(candidates, key=lambda d: d.stat().st_mtime)
+
+
 def load_session_state():
     """Return (session_dir, queue_entries, manifest) or None if no active session."""
-    current_file = Path(".iteratotron/CURRENT")
-    if not current_file.is_file():
-        return None
-
-    session_id = current_file.read_text().strip()
-    if not session_id:
-        return None
-
-    session_dir = Path(f".iteratotron/{session_id}")
-    if not session_dir.is_dir():
+    session_dir = find_active_session_dir()
+    if session_dir is None:
         return None
 
     queue_path = session_dir / "scope_queue.jsonl"
