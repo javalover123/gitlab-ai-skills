@@ -40,9 +40,8 @@ lint config) win. This covers what the compiler and `clippy::all` mostly miss.
 
 - Closed set of strings or integers: `enum` with `FromStr`/`TryFrom`,
   `match` without a `_ =>` arm so new variants break the build.
-- Two values of the same primitive type that must not be mixed (ids,
-  units, paths vs names): a newtype.
-- Repeated literal: a named `const`, defined once.
+- Same-primitive values that must not be mixed (ids, units): a newtype.
+  Repeated literal: a named `const`, defined once.
 - Mode-selecting booleans: an enum. "May be absent": `Option<T>`, not a
   sentinel (`""`, `-1`).
 - Return owned types only when the callee creates the data; else borrow.
@@ -96,6 +95,6 @@ design patterns](https://rust-unofficial.github.io/patterns/). Attribution:
 ## Contributing Improvements
 
 This skill is maintained in [`gitlab-org/ai/skills`](https://gitlab.com/gitlab-org/ai/skills).
-If you discover that any guidance here is **inaccurate or outdated** (e.g. a
-lint that was renamed, a wrong API behavior), confirm with the user and open an
-MR against that repository with the fix. Keep changes focused — one fix per MR.
+If any guidance here is **inaccurate or outdated** (e.g. a renamed lint), confirm
+with the user and open an MR against that repository with the fix. Keep changes
+focused — one fix per MR.
