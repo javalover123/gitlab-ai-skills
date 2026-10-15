@@ -3,8 +3,8 @@
 **Default to `glab mr note` for every MR-comment operation** — read, write, reply, resolve,
 and batch drafts. The raw `glab api` paths exist only for these cases:
 
-1. **Listing, editing or deleting pending drafts** (Section 3) — `glab mr note` has no
-   subcommand for any of them.
+1. **Pending drafts on older glab** (Section 3) — only when `glab mr note draft` doesn't
+   exist (glab older than v1.122.0).
 2. **Raw discussion JSON / position metadata** (Section 4) — when you need fields that
    `glab mr note list -F json` doesn't surface (e.g. full position diff refs).
 
@@ -106,7 +106,7 @@ If a prefix matches multiple discussions, `glab` errors out with the ambiguous m
 
 - `--line` and `--old-line` **require `--file`**, and **cannot be used together**.
 - `--file`, `--reply`, and `--unique` are **mutually exclusive**.
-- `--draft` cannot be combined with `--unique`, `--internal`, or `--resolvable=false`.
+- Drafts are a separate command, `glab mr note draft create` (Section 3); `mr note create` has no `--draft` flag.
 - All `create` subcommands accept the MR IID as a positional argument; omit it to auto-detect
   from the current branch.
 
@@ -173,42 +173,57 @@ broader patterns.
 
 ## 3. Draft notes (batched reviews)
 
-Each comment becomes a pending draft, and `publish` posts them as one review event (one
-notification):
+`glab mr note draft` is **experimental** (help text: "might be unstable or removed at any
+time"). It needs glab v1.122.0 or newer: v1.119.0 to v1.121.0 had `mr note create --draft` and
+a top-level `mr note publish`, and v1.122.0 moved both under `mr note draft`. Older glab
+versions: see the raw-API fallback below. Each comment becomes a pending draft, and `publish`
+posts them as one review event (one notification):
 
 ```bash
-glab mr note create <iid> --draft --file path/to/file --line 42 -m "$(cat "$MSG")"
-glab mr note create <iid> --draft --file path/to/file --old-line 7 -m "$(cat "$MSG2")"
-glab mr note publish <iid> -m "Summary of the review" --yes
+glab mr note draft create <iid> --file path/to/file --line 42 -m "$(cat "$MSG")"
+glab mr note draft create <iid> --file path/to/file --old-line 7 -m "$(cat "$MSG2")"
+glab mr note draft publish <iid> -m "Summary of the review" --yes
 ```
 
-- `--draft` combines with `--file`, `--line`, `--old-line` **or** `--reply` (`--reply` and
-  `--file` are still mutually exclusive). It does not combine with `--unique`, `--internal`,
-  or `--resolvable=false`.
-- Draft reply: `glab mr note create <iid> --draft --reply abc12345 -m "..."`.
-- Each `--draft` call prints the new draft's ID.
-- **Always pass `--yes` to `publish`** — without a TTY it fails instead of prompting.
-- `publish` sends **all** of your pending drafts on the MR, so list leftovers first (below).
+Subcommands: `create`, `list`, `update <draft-id>`, `delete <draft-id>`, `publish`. Each takes
+an optional MR IID or branch (omit to use the current branch). `update` and `delete` take the
+MR IID first, then the draft ID: `glab mr note draft update 123 456 -m "..."`.
+
+- `--line` and `--old-line` **require `--file`**. `--file` and `--reply` are **mutually
+  exclusive**. `--line` also takes a range (`10:15`).
+- Draft reply: `glab mr note draft create <iid> --reply abc12345 -m "..."` (full discussion ID
+  or a unique prefix of 8+ characters).
+- `create` prints the new draft's ID; capture it with `id=$(glab mr note draft create ...)`.
+- `create`/`update` also accept `--attach <file>`.
+- **Always pass `--yes` to `publish`** (and `delete`) — without a TTY they fail instead of prompting.
+- `publish` sends **all** of your pending drafts on the MR, so list leftovers first.
 - `publish --reviewer-state reviewed|requested_changes` also sets your review state. It records
   no approval (use `glab mr approve`). On your own MR, GitLab ignores it unless you are also
   listed as a reviewer; glab warns when that happens, so treat the warning as "state not set".
+- Drafts are per-user: `list`, `update`, `delete` and `publish` only touch your own.
+
+```bash
+glab mr note draft list <iid> -F json | jq '.[].id'   # also: --file <path>, --jq
+glab mr note draft update <iid> <draft-id> -m "new text"
+glab mr note draft delete <iid> <draft-id> --yes
+```
 
 For any single comment, prefer `glab mr note create` above.
 
-### List, edit or delete pending drafts (raw API)
+### Fallback: raw API (glab without `mr note draft`)
 
-These operations have no native subcommand. `glab mr note delete` and `glab mr note update`
-only work on published notes, not on draft IDs. Drafts are per-user: you only see and change
-your own.
+Use only on glab older than v1.122.0, where `glab mr note delete`/`update` don't work on draft
+IDs and there is no list command. I could not pin which release added `draft list|update|delete`
+(the release notes don't name it), so if one of those is missing, use this too.
 
 ```bash
 # List. Once published, this returns an empty array. A draft with .position == null is a
-# general note or a reply; drafts on removed lines (--old-line) have old_line set and new_line null.
+# general note or a reply; drafts on removed lines have old_line set and new_line null.
 glab api --method GET --paginate \
   "projects/<project_id>/merge_requests/<mr_iid>/draft_notes" \
   | jq '.[] | {id, path: .position.new_path, new_line: .position.new_line, old_line: .position.old_line, reply_to: .discussion_id, note: .note[0:40]}'
 
-# Edit the text of one draft (or delete and recreate it with glab mr note create --draft)
+# Edit the text of one draft
 glab api --method PUT \
   "projects/<project_id>/merge_requests/<mr_iid>/draft_notes/<draft_id>" \
   -F "note=@$MSG"
@@ -216,6 +231,10 @@ glab api --method PUT \
 # Delete one draft
 glab api --method DELETE \
   "projects/<project_id>/merge_requests/<mr_iid>/draft_notes/<draft_id>"
+
+# Publish all of your drafts
+glab api --method POST \
+  "projects/<project_id>/merge_requests/<mr_iid>/draft_notes/bulk_publish"
 ```
 
 ---
@@ -320,14 +339,13 @@ in review bodies are not interpolated.
   `if . == null then [] else . end` before iterating / counting.
 - **Ambiguous prefix** — `glab mr note resolve abc12345` errors if more than one discussion
   matches the prefix. Use a longer prefix or the full ID.
-- **Flag exclusivity** — `--file`, `--reply`, and `--unique` cannot be combined, and `--draft`
-  rejects `--unique`, `--internal`, and `--resolvable=false`. To
+- **Flag exclusivity** — `--file`, `--reply`, and `--unique` cannot be combined, To
   idempotently post a diff comment, list existing notes first and check before creating.
 - **Auto-detection failure** — if the current branch has no open MR (or is detached), pass
   the MR IID as a positional argument.
 
-### `glab api .../draft_notes` (list / edit / delete only)
+### `glab api .../draft_notes` (fallback for old glab)
 
 - **Draft notes are per-user** — you can only list, edit, delete, or publish YOUR drafts.
-- **Create drafts with `glab mr note create --draft`, not the API** — it builds and validates
+- **Create drafts with `glab mr note draft create`, not the API** — it builds and validates
   the position (version SHAs, line type) against the latest diff.
