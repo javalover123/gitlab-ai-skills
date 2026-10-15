@@ -13,8 +13,14 @@ Guardrails:
   - Every note starts with `:robot: AI-generated docs review`.
   - Interactive mode (default) only previews; it posts with --yes. Auto mode
     (--mode auto or DOCS_REVIEW_MODE=auto) posts. --dry-run never writes.
-  - Only three writes exist: create a note, update our own summary note
-    (`<!-- docs-review:summary -->`), create a discussion.
+  - Five writes exist: create a note, update our own summary note
+    (`<!-- docs-review:summary -->`), create a discussion, and, on our own
+    threads that no person has replied to, add a reply and resolve them.
+  - With --applied (auto mode, after a writer step), fixed findings are listed
+    in the summary, never posted. Our open threads they fix, or whose line a
+    later commit changed and that this review no longer finds, get a short
+    reply and are resolved. A new finding that matches one of our open
+    threads is not posted again.
   - Inline comments carry `<!-- docs-review:fp=... -->`; a fingerprint already
     in any note, or in a resolved thread, is skipped.
   - Non-public references are withheld (lib/visibility.py, fail closed).
@@ -61,7 +67,10 @@ ALLOWED_WRITES = (
     ("POST", re.compile(r"^projects/[^/]+/merge_requests/\d+/notes$")),
     ("PUT", re.compile(r"^projects/[^/]+/merge_requests/\d+/notes/\d+$")),
     ("POST", re.compile(r"^projects/[^/]+/merge_requests/\d+/discussions$")),
+    ("POST", re.compile(r"^projects/[^/]+/merge_requests/\d+/discussions/([0-9a-f]+)/notes$")),
+    ("PUT", re.compile(r"^projects/[^/]+/merge_requests/\d+/discussions/([0-9a-f]+)$")),
 )
+MATCH_LINES = 10  # a new finding within this many lines of our open thread, same file and rule, is that thread
 QUICK_ACTION_RE = re.compile(r"^(\s*)/(?=[A-Za-z_])", re.M)
 MENTION_RE = re.compile(r"(?<![\w`@])@([A-Za-z0-9_][A-Za-z0-9_.\-/]*)")
 BOT_RE = re.compile(r"(^|[-_.])bot($|[-_.\d])|^project_\d+_bot|^group_\d+_bot|^ghost$", re.I)
@@ -136,18 +145,27 @@ def check_body(body):
 class SafeWriter(object):
     """Allowlisted writes only. In dry-run it records and never calls."""
 
-    def __init__(self, api, dry_run, vis=None):
+    def __init__(self, api, dry_run, vis=None, own_threads=()):
         self.api = api
         self.dry_run = dry_run
         self.vis = vis
+        self.own_threads = set(own_threads)  # discussions we may reply to or resolve
         self.redacted = 0
         self.planned = []
 
     def write(self, method, endpoint, body, label):
-        if not any(m == method and rx.match(endpoint) for m, rx in ALLOWED_WRITES):
+        match = next((rx.match(endpoint) for m, rx in ALLOWED_WRITES if m == method and rx.match(endpoint)), None)
+        if match is None:
             raise GuardrailError("write not allowed: {} {}".format(method, endpoint))
-        if set(body) - set(["body", "position"]):
-            raise GuardrailError("unexpected body keys: {}".format(sorted(set(body) - set(["body", "position"]))))
+        thread = match.group(1) if match.groups() else None
+        if thread is not None and thread not in self.own_threads:
+            raise GuardrailError("not our thread, or a person replied to it: {}".format(thread))
+        allowed = set(["resolved"]) if (method == "PUT" and thread) else set(["body", "position"])
+        if set(body) - allowed or (method == "PUT" and thread and body != {"resolved": True}):
+            raise GuardrailError("unexpected body keys: {}".format(sorted(set(body) - allowed) or body))
+        if "body" not in body:
+            self.planned.append({"method": method, "endpoint": endpoint, "body": body, "label": label})
+            return None if self.dry_run else self.api.write(method, endpoint, body)
         if self.vis is not None:
             # The last gate: no rendered text names a reference that is not
             # confirmed public, whatever field it came from.
@@ -204,6 +222,7 @@ class Context(object):
         self.positions_error = None  # set when no diff could be read for positions
         self.visibility = None
         self.project_path = None  # group/project, for same-project references
+        self.threads = []         # our inline threads: see load_context
 
 
 def sha_match(a, b):
@@ -313,6 +332,7 @@ def load_context(api, project, mr, dry_run, head_sha=None):
     for disc in discussions or []:
         notes = disc.get("notes") or []
         resolved = any(n.get("resolvable") and n.get("resolved") for n in notes)
+        record_thread(ctx, disc, notes, resolved)
         for n in notes:
             body = n.get("body") or ""
             if body.split("\n")[:2] == [PREFIX, SUMMARY_MARKER]:
@@ -333,6 +353,80 @@ def load_context(api, project, mr, dry_run, head_sha=None):
         summary_candidates.sort(key=lambda c: (c["created_at"], c["id"] or 0))
         ctx.summary_note = summary_candidates[0]
     return ctx
+
+
+ID_IN_BODY_RE = re.compile(r"\(`([a-z0-9][a-z0-9_-]*(?:\.[A-Za-z0-9_-]+)+)`\)")
+
+
+def record_thread(ctx, disc, notes, resolved):
+    """Our inline thread, for repeat matching and resolving: its fingerprints,
+    rule ids, place, whether a person replied, and whether a later commit
+    changed its line (GitLab's "changed this line" system note)."""
+    if not notes:
+        return
+    first = notes[0]
+    body = first.get("body") or ""
+    if not body.startswith(PREFIX) or SUMMARY_MARKER in body.split("\n")[:2]:
+        return
+    if ctx.me is not None and (first.get("author") or {}).get("username") != ctx.me:
+        return
+    m = FP_RE.search(body.rstrip())
+    if not m:
+        return
+    pos = first.get("position") or {}
+    human = any(not n.get("system") and (n.get("author") or {}).get("username") != ctx.me for n in notes[1:])
+    outdated = any(n.get("system") and "changed this line" in (n.get("body") or "") for n in notes[1:])
+    ctx.threads.append({"id": disc.get("id"), "fps": set(m.group(1).split(",")), "ids": ID_IN_BODY_RE.findall(body),
+                        "file": pos.get("new_path"), "line": pos.get("new_line"), "resolved": resolved,
+                        "human": human, "outdated": outdated,
+                        "message": " ".join(re.sub(r"<!--.*?-->|```.*?```", " ", body[len(PREFIX):], flags=re.S).split())[:400],
+                        "replied": [n.get("body") or "" for n in notes[1:] if not n.get("system")]})
+
+
+def thread_for(f, threads):
+    """Our thread about the same point: same fingerprint, or the same rule on
+    the same file within MATCH_LINES lines."""
+    fp, line = f.get("fingerprint"), f.get("line") or 0
+    for t in threads:
+        if fp and fp in t["fps"]:
+            return t
+    for t in threads:
+        if t["file"] == f.get("file") and f.get("id") in t["ids"] and t["line"] \
+                and abs(t["line"] - line) <= MATCH_LINES:
+            return t
+    return None
+
+
+def open_threads(ctx):
+    return [t for t in ctx.threads if not t["resolved"]]
+
+
+def resolve_fixed(ctx, writer, endpoint_base, findings, applied, head):
+    """Reply to and resolve our open threads that are fixed: an applied
+    finding matches them, or a later commit changed their line and this
+    review no longer finds them. A thread a person replied to stays open."""
+    done = []
+    applied_list = (applied or {}).get("applied") or []
+    for t in open_threads(ctx):
+        if t["human"] or thread_for_any(t, findings):
+            continue
+        hit = thread_for_any(t, applied_list)
+        if hit:
+            text = "Applied in {}.".format(head[:12])
+        elif t["outdated"]:
+            text = "Fixed in {}: a later commit changed this line, and this review no longer finds the problem.".format(
+                head[:12])
+        else:
+            continue
+        base = "{}/discussions/{}".format(endpoint_base, t["id"])
+        writer.write("POST", base + "/notes", {"body": PREFIX + "\n\n" + text}, "reply " + t["id"])
+        writer.write("PUT", base, {"resolved": True}, "resolve " + t["id"])
+        done.append(t["id"])
+    return done
+
+
+def thread_for_any(t, items):
+    return next((f for f in items if thread_for(f, [t]) is t), None)
 
 
 # ---------------------------------------------------------------- planning
@@ -573,8 +667,26 @@ def summary_only_sections(not_inline):
     return out
 
 
+MAX_APPLIED_LINES = 40
+
+
+def applied_section(applied):
+    """What the writer step fixed, collapsed: one line for each fix."""
+    items = (applied or {}).get("applied") or []
+    if not items:
+        return []
+    out = ["<details><summary>Applied automatically in {} ({})</summary>".format(
+        R.code(str(applied.get("head") or "")[:12]), len(items)), ""]
+    for a in items[:MAX_APPLIED_LINES]:
+        out.append("- `{}` in {}: {}".format(untrusted(a.get("id")), R.code(untrusted(
+            "{}:{}".format(a.get("file"), a.get("line")))), R.one_line(a.get("message"), untrusted)))
+    if len(items) > MAX_APPLIED_LINES:
+        out.append("- And {} more in the job report.".format(len(items) - MAX_APPLIED_LINES))
+    return out + ["", "</details>", ""]
+
+
 def summary_body(findings, posted, not_inline, skipped_dup, skipped_resolved, sme_lines, tier, tw_mention, head,
-                 notes=None, deferred=0, doc=None, first_time=False):
+                 notes=None, deferred=0, doc=None, first_time=False, applied=None):
     doc = doc or {}
     lines = [PREFIX, SUMMARY_MARKER, "", "## Docs review summary", ""]
     if first_time:
@@ -603,6 +715,7 @@ def summary_body(findings, posted, not_inline, skipped_dup, skipped_resolved, sm
         lines += ["- " + untrusted(n)]
     if notes:
         lines.append("")
+    lines += applied_section(applied)
     lines += final_pass_summary(findings, doc, sme_lines)
     lines += summary_only_sections(not_inline)
     stamp = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
@@ -670,12 +783,21 @@ def plan_and_post(doc, ctx, writer, args, endpoint_base):
     inline_left = 0 if args.summary_only else cap
     by_fp = dict((f["fingerprint"], f) for f in findings)
     pending = []
+    still_open = 0
     for f in findings:
         if f["fingerprint"] in ctx.fps:
             if f["fingerprint"] in ctx.resolved_fps:
                 skipped_resolved += 1
             else:
                 skipped_dup += 1
+            continue
+        t = thread_for(f, ctx.threads) if f.get("summary_only") is not True else None
+        if t is not None:
+            # The same point in other words: its thread already says it.
+            if t["resolved"]:
+                skipped_resolved += 1
+            else:
+                still_open += 1
             continue
         pending.append(f)
     # Repeats of one rule (merge `group`) are one comment on their first line.
@@ -744,16 +866,24 @@ def plan_and_post(doc, ctx, writer, args, endpoint_base):
                 not_inline.extend(unpack(m))
             sme_lines.extend(mentions)
 
+    head = ctx.refs.get("head_sha") or args.head_sha or ""
+    resolved_now = resolve_fixed(ctx, writer, endpoint_base, findings, args.applied_doc, head) \
+        if args.applied_doc is not None else []
+    if still_open:
+        ctx.notes.append("{} earlier comment(s) still apply. They stay in their threads.".format(still_open))
+    if resolved_now:
+        ctx.notes.append("Resolved {} earlier comment(s) that are fixed.".format(len(resolved_now)))
     deferred = len(doc.get("deferred") or [])
     body = summary_body(findings, posted, not_inline, skipped_dup, skipped_resolved, sme_lines, tier, tw_mention,
-                        ctx.refs.get("head_sha") or args.head_sha, ctx.notes, deferred, doc, first_time)
+                        head, ctx.notes, deferred, doc, first_time, args.applied_doc)
     if ctx.summary_note and ctx.summary_note.get("id"):
         writer.write("PUT", "{}/notes/{}".format(endpoint_base, ctx.summary_note["id"]), {"body": body}, "update summary")
     else:
         writer.write("POST", endpoint_base + "/notes", {"body": body}, "create summary")
     return {"inline": posted, "folded": folded, "deferred_not_posted": deferred, "skipped_duplicate": skipped_dup,
             "skipped_resolved": skipped_resolved, "mentions": budget.people, "version": ctx.version,
-            "notes": ctx.notes, "summary_action": "update" if ctx.summary_note else "create"}
+            "notes": ctx.notes, "summary_action": "update" if ctx.summary_note else "create",
+            "still_open": still_open, "resolved": resolved_now}
 
 
 def write_out(out_dir, writer, result, ctx):
@@ -798,7 +928,8 @@ def parse_args(argv):
         description="Post docs-review findings to a GitLab MR (summary note + inline suggestions), or preview them.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="Exit codes: 0 no blocker, 1 blockers found, 2 usage, environment, or API error.")
-    p.add_argument("findings", help="combined findings.json from combine_findings.py")
+    p.add_argument("findings", nargs="?", help="combined findings.json from combine_findings.py (or "
+                                               "remaining.json from collect_writers.py)")
     p.add_argument("--project", required=True, help="project path, such as group/project")
     p.add_argument("--mr", required=True, type=int, help="merge request IID")
     p.add_argument("--mode", choices=("interactive", "auto"), help="default: $DOCS_REVIEW_MODE or interactive")
@@ -814,8 +945,17 @@ def parse_args(argv):
     p.add_argument("--tw", help="technical writer for tier high or severe (default: target.technical_writer)")
     p.add_argument("--head-sha", help="reviewed head commit; inline positions use the MR diff version with this "
                                       "head (default: target.head in findings.json)")
+    p.add_argument("--applied", help="applied.json from collect_writers.py: list the fixes, resolve the threads "
+                                     "they fix, and post only what is left")
+    p.add_argument("--list-open", metavar="FILE", help="write our open threads as JSON (for the reviewers) and exit; "
+                                                       "read-only")
     p.add_argument("--glab", default=None, help="glab binary (default: $DOCS_REVIEW_GLAB or glab)")
-    return p.parse_args(argv)
+    args = p.parse_args(argv)
+    args.applied_doc = None
+    if args.applied:
+        with open(args.applied, encoding="utf-8") as fh:
+            args.applied_doc = json.load(fh)
+    return args
 
 
 def main(argv=None):
@@ -823,6 +963,22 @@ def main(argv=None):
     mode = args.mode or os.environ.get("DOCS_REVIEW_MODE") or "interactive"
     if mode not in ("interactive", "auto"):
         warn("DOCS_REVIEW_MODE must be interactive or auto")
+        return 2
+    if args.list_open:
+        api = gitlab_api.GitLab(args.glab)
+        try:
+            ctx = load_context(api, args.project, args.mr, True)
+        except gitlab_api.GlabError as exc:
+            warn(str(exc))
+            return 2
+        rows = [{"file": t["file"], "line": t["line"], "ids": t["ids"], "message": t["message"], "outdated": t["outdated"],
+                 "human_reply": t["human"]} for t in open_threads(ctx)]
+        with open(args.list_open, "w", encoding="utf-8") as fh:
+            json.dump({"open_threads": rows}, fh, indent=2)
+        sys.stdout.write("{} open thread(s) written to {}\n".format(len(rows), args.list_open))
+        return 0
+    if not args.findings:
+        warn("give the findings file, or --list-open FILE")
         return 2
     if args.dry_run and not args.out:
         warn("--dry-run needs --out DIR")
@@ -858,7 +1014,7 @@ def main(argv=None):
     if not dry and ctx.state in ("merged", "closed"):
         warn("MR !{} is {}; not posting".format(args.mr, ctx.state))
         return 1 if blockers else 0
-    writer = SafeWriter(api, dry, ctx.visibility)
+    writer = SafeWriter(api, dry, ctx.visibility, [t["id"] for t in ctx.threads if not t["human"]])
     endpoint_base = "projects/{}/merge_requests/{}".format(gitlab_api.enc(args.project), args.mr)
     try:
         result = plan_and_post(doc, ctx, writer, args, endpoint_base)

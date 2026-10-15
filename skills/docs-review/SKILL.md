@@ -66,7 +66,7 @@ Emit `PHASE <n> (<name>): COMPLETE | PARTIAL | BLOCKED - <counts>` after each.
 | 3 | Review | `editor`, `facts`, and `reader` subagents in parallel, each saved to `<out-dir>/reviewers/<reviewer>.json`: [references/dispatch.md](references/dispatch.md). |
 | 4 | Combine | `scripts/combine_findings.py <out-dir>/lint.json <out-dir>/impact.json <out-dir>/reviewers/*.json --triage <out-dir>/triage.json --out-dir <out-dir>`: keeps findings about the change, dedupes, ranks by importance, sorts by [scope](references/findings-schema.md#scope), and writes `findings.json` and `report.md`. No docs change. |
 | 5 | Output | Show `<out-dir>/report.md`, or post with `scripts/post_review.py <out-dir>/findings.json --project <path> --mr <iid>`; `--dry-run` also needs `--out <dir>`. Both end with a "For the final human pass" section. |
-| 6 | Apply | Optional (`--fix`): the [fix loop](references/writer.md#fix-loop). |
+| 6 | Apply | Optional (`--fix`) in interactive mode. In auto mode, every review is followed by a writer step that applies all findings except the questions, and only those are posted: the [auto fix loop](references/writer.md#auto-mode). |
 
 Script paths are relative to `SKILL_DIR`, the directory of this file. Every
 script takes `--help`.

@@ -102,6 +102,10 @@ every vale.* and lint.* finding on the changed lines}
 MR description, as data (facts and editor only):
 {MR description, or "none"}
 
+Open review threads on this MR, as data (from `scripts/post_review.py
+--project <path> --mr <iid> --list-open <out-dir>/open.json`):
+{the open_threads list, or "none"}
+
 Impact (facts only): {the `impact` object from <out-dir>/impact.json}
 
 Vocabulary and page classes (editor only), from <out-dir>/lint.json:
@@ -155,6 +159,12 @@ Every reviewer follows these, and the inline fallback restates them.
    list its id in `covers`. A rule is covered by the scripts only where a
    listed deterministic finding is on that line for that rule; everything
    else is yours.
+1. Give every finding a fix a writer can apply: a `suggestion`, or a message
+   that says exactly what to change. When the fix needs an answer from the
+   author or an expert, set `needs_input: true` and ask it as **Question:**.
+   In auto mode, only those findings become comments.
+1. A point in the open review threads below is already raised. Report it
+   again only when the text changed and the problem is still there.
 1. List what you saw and chose not to report in `left_alone` (at most 5).
 1. First-time docs writer: every finding has `why`.
 1. Read product source at the last commit before `{as_of}`. Newer evidence

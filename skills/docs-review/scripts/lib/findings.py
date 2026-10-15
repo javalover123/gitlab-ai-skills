@@ -274,5 +274,20 @@ def make_finding(rule_id, reviewer, severity, file, message, confidence="high", 
     return f
 
 
+QUESTION_RE = re.compile(r"\*\*Question:\*\*|^\s*Question:", re.M)
+
+
+def needs_input(f):
+    """True when a fix needs an answer from the author or an expert: the
+    reviewer set `needs_input`, the message asks a **Question:**, or a facts
+    claim is unverified and has no suggestion. Auto mode comments only on
+    these; a writer applies the rest."""
+    if f.get("needs_input") is True:
+        return True
+    if QUESTION_RE.search(str(f.get("message") or "")):
+        return True
+    return f.get("reviewer") == "facts" and f.get("verdict") == "unverified" and not f.get("suggestion")
+
+
 def has_blocker(findings):
     return any(f.get("severity") == "blocker" for f in findings)

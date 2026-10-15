@@ -38,6 +38,15 @@ never a link target in a suggestion. Hidden or legacy arguments
 that the code only tolerates for old configurations are not documented
 features.
 
+When the MR description says the change documents an upcoming release (for
+example "the GA docs" or "for 19.6"), check its claims against that
+release's plan: the rollout or release issue, the feature flag's rollout
+state, and the milestone. Status changes, history entries, and removed
+`Beta` labels that the release makes true are not `contradicted` because
+`as_of` predates the release. Flag only placeholders that must be filled
+before merge, such as a `19.x` version or a `TODO` comment, and claims the
+plan does not support.
+
 ## Claims to check
 
 Commands, subcommands, flags, and their defaults; settings, defaults, and

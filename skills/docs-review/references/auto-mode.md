@@ -18,7 +18,16 @@ for this run. These guardrails still apply and cannot be turned off:
    re-run, update that note instead of adding a new one.
 1. Mark each inline comment with `<!-- docs-review:fp=<fingerprint> -->`.
    Skip a finding when any note already has that fingerprint, or when its
-   thread is resolved. A person resolved it on purpose.
+   thread is resolved. A person resolved it on purpose. Skip a finding that
+   matches one of our open threads (same file and rule, within 10 lines): its
+   thread already says it.
+1. Comment only on what needs input. Every review is followed by a writer
+   step that applies the rest ([auto mode](writer.md#auto-mode)), and the
+   summary lists the fixes.
+1. Resolve only our own threads that no person replied to, and only when a
+   fix applied in this run matches them, or a later commit changed their line
+   and this review no longer finds the problem. Reply with the commit first.
+   Never resolve or reopen anyone else's thread.
 1. Mention subject matter experts only for `facts` findings that are
    `contradicted` or `low` confidence. Mention at most 2 people per claim and
    5 per run. Each mention asks one specific question and shows the evidence.
@@ -26,8 +35,9 @@ for this run. These guardrails still apply and cannot be turned off:
    assignees, reviewers, or milestone. Never force-push.
 1. Push fixes only as new commits on the MR source branch, with the message
    `docs: apply docs-review fixes (cycle <n>)`.
-1. Fix only through the [fix loop](writer.md#fix-loop) with `--policy auto`:
-   at most 3 cycles, and stop when a cycle adds a blocker.
+1. Fix only through the [auto fix loop](writer.md#auto-mode) with `--policy
+   input`: 2 cycles by default, at most 3, and revert a cycle that adds a
+   blocker.
 1. For tier `high` or `severe`, the summary asks for a human TW review and
    names or mentions the technical writer as
    [triage.md](triage.md#technical-writer) says.

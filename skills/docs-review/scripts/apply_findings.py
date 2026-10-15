@@ -26,13 +26,17 @@ import os
 import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "lib"))
-from findings import fingerprint, severity_rank  # noqa: E402
+from findings import fingerprint, needs_input, severity_rank  # noqa: E402
 import importance as IMP  # noqa: E402
 
 # Policies decide which findings reach writers.
-# auto: what auto mode may change without a person (suggest + high confidence).
-# all:  every finding with a file, for interactive runs where a person reviews the diff.
-POLICIES = ("auto", "all")
+# input: auto mode. Every finding about the change, except the ones that need
+#        an answer from the author or an expert (findings.needs_input). Those
+#        stay as comments.
+# safe:  only `auto` findings and `suggest` with high confidence (silent mode).
+# all:   every finding with a file, for interactive runs where a person reviews the diff.
+# `auto` is the old name of `safe`.
+POLICIES = ("input", "safe", "auto", "all")
 
 
 def load_findings(path):
@@ -72,6 +76,9 @@ def writer_allowed(f, policy):
         return False
     if policy == "all":
         return True
+    if policy == "input":
+        # Old text is not this MR's to fix; questions wait for an answer.
+        return f.get("summary_reason") != "existing" and not needs_input(f)
     if f.get("fixable") == "auto":
         return True
     return f.get("fixable") == "suggest" and f.get("confidence") == "high"
@@ -134,7 +141,8 @@ def main():
     ap.add_argument("--out", default="docs-review-out", help="output directory")
     ap.add_argument("--partition", type=int, default=5, help="maximum number of writer sets (default 5)")
     ap.add_argument("--policy", choices=POLICIES, default="auto",
-                    help="which findings reach writers: auto (default) or all")
+                    help="which findings reach writers: input (auto mode: all but questions), safe or auto "
+                         "(default: auto findings and high-confidence suggestions), or all")
     ap.add_argument("--dry-run", action="store_true", help="write a patch instead of editing files")
     args = ap.parse_args()
 
@@ -152,6 +160,10 @@ def main():
             by_file.setdefault(f["file"], []).append(f)
         elif writer_allowed(f, args.policy):
             to_writers.append(f)
+        elif args.policy == "input":
+            report["skipped"].append({"fingerprint": f["fingerprint"], "needs_input": needs_input(f),
+                                      "reason": "needs input from the author or an expert" if needs_input(f)
+                                      else "old text, not changed by this MR"})
         else:
             report["skipped"].append({"fingerprint": f["fingerprint"],
                                       "reason": "policy {} does not apply {} findings with {} confidence".format(

@@ -53,6 +53,7 @@ Contents:
 | `caused_by_line` | No | For a finding on an unchanged line, the changed line that made it wrong (`caused_by_file` when that line is on another page). See [Scope](#scope). |
 | `summary_only` | No | `true` for page-level findings. They go in the summary, never inline. |
 | `scope` | No | `line` (default), `section`, or `page`. A `page` finding is about the whole page, and is summary-only. |
+| `needs_input` | No | `true` when the fix needs an answer from the author or an expert. Write the question in `message` as **Question:**. In auto mode only these findings are posted; a writer applies the rest. `lib/findings.needs_input` also treats a **Question:** message, and an `unverified` facts claim with no suggestion, as needing input. |
 | `action` | No | `fix`, the only value. The combine step ignores any other value and notes it in `coerced`. |
 
 ## Reviewer output
@@ -130,5 +131,6 @@ When in doubt, pick the lower severity.
   list marker. The fix loop applies it.
 - `suggest`: a reviewer's rewrite. Posted as a suggestion block. The fix loop
   applies it only with `high` confidence.
-- `manual`: needs a decision, for example a structure change or a question for
-  a subject matter expert.
+- `manual`: a writer must make the edit, for example a structure change. When
+  the fix needs an answer from the author or an expert, also set
+  `needs_input: true`.

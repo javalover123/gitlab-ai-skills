@@ -47,7 +47,7 @@ Review and fix with no comments on the MR: for an author who wants a
 cleaned-up branch, not a review thread.
 
 - Run phases 0-4, then the [fix loop](writer.md#fix-loop) with `--policy
-  auto` (only `auto` findings and high-confidence suggestions), without
+  safe` (only `auto` findings and high-confidence suggestions), without
   pausing.
 - Never run `post_review.py`. Commit each cycle locally; push only if asked.
 - End with `<out-dir>/report.md`, the commits, and what was left for the

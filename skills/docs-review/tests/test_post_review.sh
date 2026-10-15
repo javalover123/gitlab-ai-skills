@@ -452,6 +452,64 @@ assert "#2" not in sent and "issues/2" not in sent and "#1" in sent and writer.r
 PY
 then ok "review findings: inert mentions in code spans, fence-proof quick actions, raw plain blocks, own fingerprints only, sink redaction"; else fail "review findings B3, M1, L3, L6, sink"; fi
 
+# Auto mode after a writer step: repeats stay in their thread, fixed threads are resolved,
+# and only our own threads that no person replied to can be resolved.
+if python3 - "$scripts" << 'PY'
+import sys
+sys.path.insert(0, sys.argv[1])
+import post_review as P
+
+me = "docs-bot"
+def thread(tid, fp, rule, file, line, extra=()):
+    notes = [{"id": 1, "system": False, "author": {"username": me}, "position": {"new_path": file, "new_line": line},
+              "body": P.PREFIX + "\n\n**Recommended:** Old point. (`%s`)\n\n<!-- docs-review:fp=%s -->" % (rule, fp * 40)}]
+    return {"id": tid, "notes": notes + list(extra)}
+changed = {"id": 9, "system": True, "author": {"username": me}, "body": "changed this line in version 2 of the diff"}
+human = {"id": 8, "system": False, "author": {"username": "author"}, "body": "Not sure about this."}
+discs = [thread("aa01", "a", "editor.style.voice", "doc/a.md", 10),             # repeated by a new finding
+         thread("aa02", "b", "editor.word-list.utilize", "doc/a.md", 20),       # fixed by an applied finding
+         thread("aa03", "c", "reader.missing-step", "doc/b.md", 5, [changed]),  # line changed, not found again
+         thread("aa04", "d", "facts.version", "doc/b.md", 40),                  # not found, line unchanged: stays
+         thread("aa05", "e", "editor.style.tense", "doc/c.md", 3, [changed, human])]  # a person replied: stays
+
+class Api(object):
+    def get(self, ep):
+        return {"user": {"username": me}, "projects/g%2Fp/merge_requests/1": {
+            "author": {"username": "author"}, "state": "opened", "references": {"full": "g/p!1"},
+            "diff_refs": {"base_sha": "1" * 40, "start_sha": "1" * 40, "head_sha": "2" * 40}}}.get(ep, {})
+    def get_pages(self, ep, **kw):
+        return [discs, None] if ep.endswith("/discussions") else [[], None]
+ctx = P.load_context(Api(), "g/p", 1, True)
+assert len(ctx.threads) == 5 and [t["human"] for t in ctx.threads] == [False] * 4 + [True], ctx.threads
+assert [t["outdated"] for t in ctx.threads] == [False, False, True, False, True]
+
+new = {"id": "editor.style.voice", "file": "doc/a.md", "line": 13, "fingerprint": "f" * 40}
+assert P.thread_for(new, ctx.threads)["id"] == "aa01"
+assert P.thread_for(dict(new, line=40), ctx.threads) is None   # too far away: a new point
+assert P.thread_for(dict(new, id="editor.other"), ctx.threads) is None
+
+writer = P.SafeWriter(None, True, None, [t["id"] for t in ctx.threads if not t["human"]])
+applied = {"applied": [{"id": "editor.word-list.utilize", "file": "doc/a.md", "line": 21, "fingerprint": "0" * 40}]}
+done = P.resolve_fixed(ctx, writer, "projects/g%2Fp/merge_requests/1", [new], applied, "3" * 40)
+assert done == ["aa02", "aa03"], done
+calls = [(c["method"], c["endpoint"].rsplit("/", 2)[-2:], c["body"]) for c in writer.planned]
+assert calls[1] == ("PUT", ["discussions", "aa02"], {"resolved": True}) and "Applied in 333333333333." in calls[0][2]["body"], calls
+assert "a later commit changed this line" in calls[2][2]["body"] and calls[3][2] == {"resolved": True}, calls
+
+for bad in (("PUT", "projects/g%2Fp/merge_requests/1/discussions/aa05", {"resolved": True}),      # a person replied
+            ("PUT", "projects/g%2Fp/merge_requests/1/discussions/ffff", {"resolved": True}),      # not ours
+            ("PUT", "projects/g%2Fp/merge_requests/1/discussions/aa01", {"resolved": False}),     # never unresolve
+            ("PUT", "projects/g%2Fp/merge_requests/1/discussions/aa01", {"body": "x"})):
+    try:
+        writer.write(bad[0], bad[1], bad[2], "bad")
+        raise AssertionError("allowed: %r" % (bad,))
+    except P.GuardrailError:
+        pass
+s = P.applied_section({"head": "3" * 40, "applied": applied["applied"]})
+assert s[0] == "<details><summary>Applied automatically in `333333333333` (1)</summary>" and "doc/a.md:21" in s[2], s
+PY
+then ok "auto mode: repeats stay in their thread, fixed threads are resolved, a person's thread stays open"; else fail "repeats and resolving"; fi
+
 if [ "$failures" -gt 0 ]; then
   echo "$failures failure(s)"
   exit 1

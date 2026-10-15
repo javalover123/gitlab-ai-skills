@@ -128,4 +128,50 @@ else
 fi
 rm -rf "$esc"
 
+# Auto mode: --policy input sends everything but questions to writers, and
+# collect_writers.py splits what was applied from what still needs a person.
+if command -v git > /dev/null 2>&1; then
+cw="$(mktemp -d)"
+git -C "$cw" init -q -b main
+mkdir -p "$cw/doc"
+printf 'Line one.\nYou can utilize it.\nPick a size.\nOld text here.\n' > "$cw/doc/a.md"
+git -C "$cw" add -A && git -C "$cw" -c user.name=t -c user.email=t@e.com -c commit.gpgsign=false commit -qm base
+cat > "$cw/f.json" << 'JSON'
+{"version": 1, "target": {"head": "x"}, "findings": [
+ {"id": "editor.word-list.utilize", "reviewer": "editor", "severity": "minor", "confidence": "medium", "file": "doc/a.md", "line": 2, "end_line": 2, "quote": "You can utilize it.", "message": "Use use.", "fixable": "suggest", "suggestion": "You can use it.", "source": "x", "deterministic": false, "importance": 2, "fingerprint": "1111111111111111111111111111111111111111"},
+ {"id": "facts.size", "reviewer": "facts", "severity": "major", "confidence": "low", "file": "doc/a.md", "line": 3, "end_line": 3, "quote": "Pick a size.", "message": "**Question:** which sizes exist?", "fixable": "manual", "source": "x", "deterministic": false, "importance": 4, "fingerprint": "2222222222222222222222222222222222222222"},
+ {"id": "editor.style.x", "reviewer": "editor", "severity": "minor", "confidence": "high", "file": "doc/a.md", "line": 4, "end_line": 4, "quote": "Old text here.", "message": "Old.", "fixable": "manual", "source": "x", "deterministic": false, "importance": 3, "summary_only": true, "summary_reason": "existing", "fingerprint": "3333333333333333333333333333333333333333"},
+ {"id": "editor.style.y", "reviewer": "editor", "severity": "minor", "confidence": "high", "file": "doc/a.md", "line": 1, "end_line": 1, "quote": "Line one.", "message": "Merge the lines.", "fixable": "manual", "source": "x", "deterministic": false, "importance": 3, "fingerprint": "4444444444444444444444444444444444444444"}]}
+JSON
+python3 "$SCRIPT" --findings "$cw/f.json" --repo "$cw" --out "$cw/apply" --policy input > /dev/null
+if python3 -c 'import json,sys; d=json.load(open(sys.argv[1])); r=json.load(open(sys.argv[2])); fps=[f["fingerprint"][0] for f in d["findings"]]; sys.exit(0 if sorted(fps)==["1","4"] and sum(1 for s in r["skipped"] if s.get("needs_input"))==1 else 1)' "$cw/apply/writer-1.json" "$cw/apply/apply-report.json"; then
+    echo "ok - --policy input sends everything but questions and old text to writers"
+else
+    echo "FAIL - --policy input sends everything but questions and old text to writers"; fail=1
+fi
+# A writer applies one finding and needs a decision on another.
+printf 'Line one.\nYou can use it.\nPick a size.\nOld text here.\n' > "$cw/doc/a.md"
+git -C "$cw" -c user.name=t -c user.email=t@e.com -c commit.gpgsign=false commit -qam fixes
+cat > "$cw/apply/writer-1-result.json" << 'JSON'
+{"writer": "writer-1", "results": [{"fingerprint": "1111111111111111111111111111111111111111", "status": "applied"},
+ {"fingerprint": "4444444444444444444444444444444444444444", "status": "skipped", "reason": "needs a decision: which line to keep"}]}
+JSON
+python3 "$HERE/../scripts/collect_writers.py" --findings "$cw/f.json" --apply-dir "$cw/apply" --repo "$cw" --head HEAD --out-dir "$cw/out" > /dev/null
+if python3 -c '
+import json,sys
+a=json.load(open(sys.argv[1])); r=json.load(open(sys.argv[2]))
+by={f["fingerprint"][0]: f for f in r["findings"]}
+ok = [x["fingerprint"][0] for x in a["applied"]] == ["1"] and sorted(by) == ["2","3","4"]
+ok = ok and by["4"].get("needs_input") and "Not applied automatically: needs a decision" in by["4"]["message"]
+ok = ok and r["target"]["head"] == a["head"] and len(a["head"]) == 40
+sys.exit(0 if ok else 1)' "$cw/out/applied.json" "$cw/out/remaining.json"; then
+    echo "ok - collect_writers splits applied from what needs a person, at the fix commit"
+else
+    echo "FAIL - collect_writers splits applied from what needs a person, at the fix commit"; fail=1
+fi
+rm -rf "$cw"
+else
+    echo "ok - skipped the collect_writers checks: git is not installed"
+fi
+
 exit "$fail"

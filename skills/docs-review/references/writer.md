@@ -7,6 +7,7 @@ never looks for new problems.
 Contents:
 
 - [Fix loop](#fix-loop)
+- [Auto mode](#auto-mode)
 - [Inputs](#inputs)
 - [Rules](#rules)
 - [Applying each kind of finding](#applying-each-kind-of-finding)
@@ -23,9 +24,11 @@ runs it; a writer only applies its own set. Each cycle:
    It applies `fixable: auto` findings whose quote still matches, then splits
    the rest into disjoint file sets, `writer-<i>.json` (at most `<n>`,
    default 5). Two writers never edit the same file.
-   - `--policy auto` (the default, and the only policy in auto mode) passes
-     writers only `auto` findings and `suggest` findings with `high`
-     confidence.
+   - `--policy safe` (the default, also called `auto`) passes writers only
+     `auto` findings and `suggest` findings with `high` confidence. Silent
+     mode uses it.
+   - `--policy input` (auto mode) passes every finding about the change
+     except the ones that need input ([auto mode](#auto-mode)).
    - `--policy all` passes every finding, for interactive runs where a
      person reviews the diff.
 1. Launch one writer per set, in parallel, with this file. Each applies its
@@ -35,6 +38,33 @@ runs it; a writer only applies its own set. Each cycle:
 1. Revert a cycle that adds a blocker, and stop. Stop after 3 cycles in any
    case. What is left stays as comments. In auto mode, push each cycle as a
    new commit ([guardrails](auto-mode.md#guardrails)).
+
+## Auto mode
+
+In auto mode, every review is followed by a writer step. A cycle:
+
+1. Review: phases 1-4 at the MR head. Pass the reviewers the open threads
+   (`post_review.py --list-open`).
+1. Write: `scripts/apply_findings.py --findings <out-dir>/findings.json
+   --policy input --out <out-dir>/apply`. Every finding about the change goes
+   to a writer, except the ones that need input
+   ([`needs_input`](findings-schema.md#finding-fields)). Run the writers as in
+   the fix loop above, and save each return contract as
+   `<out-dir>/apply/writer-<i>-result.json`.
+1. Check: re-run phase 2 on the changed lines. Revert the cycle if it adds a
+   blocker.
+1. Commit and push: `docs: apply docs-review fixes (cycle <n>)`.
+1. Collect: `scripts/collect_writers.py --findings <out-dir>/findings.json
+   --apply-dir <out-dir>/apply --repo <repo> --head <new head> --out-dir
+   <out-dir>/cycle-<n>`. It writes `applied.json`, and `remaining.json` with
+   only what needs a person, moved to the new head.
+1. Post: `scripts/post_review.py <out-dir>/cycle-<n>/remaining.json --applied
+   <out-dir>/cycle-<n>/applied.json --mode auto`. It comments only on what
+   needs input, lists the fixes in the summary, does not repeat a point that
+   already has an open thread, and resolves our threads that are fixed.
+
+Run 2 cycles by default and at most 3. The second cycle reviews the whole MR
+again, so the summary describes the latest head.
 
 ## Inputs
 
