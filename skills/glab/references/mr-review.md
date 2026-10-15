@@ -174,9 +174,7 @@ broader patterns.
 ## 3. Draft notes (batched reviews)
 
 `glab mr note draft` is **experimental** (help text: "might be unstable or removed at any
-time"). It needs glab v1.122.0 or newer: v1.119.0 to v1.121.0 had `mr note create --draft` and
-a top-level `mr note publish`, and v1.122.0 moved both under `mr note draft`. Older glab
-versions: see the raw-API fallback below. Each comment becomes a pending draft, and `publish`
+time"). It needs glab v1.122.0 or newer (older glab: see the raw-API fallback below). Each comment becomes a pending draft, and `publish`
 posts them as one review event (one notification):
 
 ```bash
@@ -189,7 +187,7 @@ Subcommands: `create`, `list`, `update <draft-id>`, `delete <draft-id>`, `publis
 an optional MR IID or branch (omit to use the current branch). `update` and `delete` take the
 MR IID first, then the draft ID: `glab mr note draft update 123 456 -m "..."`.
 
-- `--line` and `--old-line` **require `--file`**. `--file` and `--reply` are **mutually
+- `--line` and `--old-line` **require `--file`** and cannot be used together. `--file` and `--reply` are **mutually
   exclusive**. `--line` also takes a range (`10:15`).
 - Draft reply: `glab mr note draft create <iid> --reply abc12345 -m "..."` (full discussion ID
   or a unique prefix of 8+ characters).
@@ -213,8 +211,7 @@ For any single comment, prefer `glab mr note create` above.
 ### Fallback: raw API (glab without `mr note draft`)
 
 Use only on glab older than v1.122.0, where `glab mr note delete`/`update` don't work on draft
-IDs and there is no list command. I could not pin which release added `draft list|update|delete`
-(the release notes don't name it), so if one of those is missing, use this too.
+IDs and there is no list command.
 
 ```bash
 # List. Once published, this returns an empty array. A draft with .position == null is a
@@ -335,11 +332,16 @@ in review bodies are not interpolated.
 - **`resolve`/`reopen` arg order is `<mr-iid> <discussion-id>`** — the `--help` USAGE line
   reads `<discussion-id> [<id>]` which is misleading. The EXAMPLES line is correct
   (`glab mr note resolve 123 abc12345`). MR IID always first when you pass both.
+- **`draft update`/`delete` arg order is `<mr-iid> <draft-id>`** — the `--help` USAGE line
+  lists `<draft-note-id> [<id>]`, but with two arguments the last one is the draft ID. The
+  EXAMPLES line is correct (`glab mr note draft update 123 456 -m "..."`).
+- **Create drafts with `glab mr note draft create`, not the API** — it builds and validates
+  the position (version SHAs, line type) against the latest diff.
 - **`-F json` returns `null` on empty** — not `[]`. Guard `jq` pipelines with `. // []` or
   `if . == null then [] else . end` before iterating / counting.
 - **Ambiguous prefix** — `glab mr note resolve abc12345` errors if more than one discussion
   matches the prefix. Use a longer prefix or the full ID.
-- **Flag exclusivity** — `--file`, `--reply`, and `--unique` cannot be combined, To
+- **Flag exclusivity** — `--file`, `--reply`, and `--unique` cannot be combined. To
   idempotently post a diff comment, list existing notes first and check before creating.
 - **Auto-detection failure** — if the current branch has no open MR (or is detached), pass
   the MR IID as a positional argument.
@@ -347,5 +349,3 @@ in review bodies are not interpolated.
 ### `glab api .../draft_notes` (fallback for old glab)
 
 - **Draft notes are per-user** — you can only list, edit, delete, or publish YOUR drafts.
-- **Create drafts with `glab mr note draft create`, not the API** — it builds and validates
-  the position (version SHAs, line type) against the latest diff.
