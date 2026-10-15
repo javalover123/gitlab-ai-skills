@@ -84,6 +84,10 @@
       "source": "./.claude-plugin/plugins/iterate"
     },
     {
+      "name": "iteratotron",
+      "source": "./.claude-plugin/plugins/iteratotron"
+    },
+    {
       "name": "mcp-creator",
       "source": "./.claude-plugin/plugins/mcp-creator"
     },
