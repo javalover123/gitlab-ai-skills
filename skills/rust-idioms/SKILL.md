@@ -22,8 +22,9 @@ lint config) win. This covers what the compiler and `clippy::all` mostly miss.
    for literal text). Extend or call what exists. A second copy of a check
    is a smell; a third is a bug.
 2. **No dead API.** Every new `pub` or `pub(crate)` item needs a caller in
-   the same change (a test or doc example counts), or it does not ship. No "for later" methods, builders,
-   or getters. Start private; widen only when something outside needs it.
+   the same change (a test or doc example counts), or it does not ship. No
+   "for later" methods, builders, or getters. Start private; widen only when
+   something outside needs it.
 3. **Parse, don't re-check.** Validate at the boundary and hand inner code a
    typed value (see [types](references/types.md)). Inner code never
    re-validates and never silently repairs bad input.
@@ -42,8 +43,8 @@ lint config) win. This covers what the compiler and `clippy::all` mostly miss.
 - Two values of the same primitive type that must not be mixed (ids,
   units, paths vs names): a newtype.
 - Repeated literal: a named `const`, defined once.
-- Booleans that select a mode: an enum. `Option<T>` for "may be absent",
-  not sentinels (`""`, `-1`, `usize::MAX`).
+- Mode-selecting booleans: an enum. "May be absent": `Option<T>`, not a
+  sentinel (`""`, `-1`).
 - Return owned types only when the callee creates the data; else borrow.
 
 ## Allocation and iterators (details: [iterators](references/iterators.md))
@@ -63,7 +64,8 @@ lint config) win. This covers what the compiler and `clippy::all` mostly miss.
   with `source()`; a manual `From` impl (or `thiserror`'s `#[from]`) plus
   `?` to convert. Binary glue may use a boxed or context-carrying error.
 - Never swallow: `.ok()`, `unwrap_or_default()`, `let _ =` on a `Result`
-  hide failures. Propagate, or log and continue deliberately.
+  hide failures. Propagate, log and continue deliberately, or document why
+  ignoring is correct (`#[expect(..., reason = "...")]`).
 - Keep the source error when mapping; do not replace it with a string.
 - Channel disconnect and closed handles are normal states of a public API:
   model them in the return type.
@@ -74,22 +76,22 @@ lint config) win. This covers what the compiler and `clippy::all` mostly miss.
 ## Lints that are not in `clippy::all`
 
 `clippy::unwrap_used`, `expect_used`, `indexing_slicing`, `panic`,
-`let_underscore_must_use`, `unreachable`. Avoid these patterns in non-test
-code even if the project does not enable them. Tests may unwrap. Mark a truly
-infallible invariant with `#[expect(clippy::expect_used, reason = "...")]`.
+`let_underscore_must_use`, `unreachable`. Avoid them in non-test code even if
+the project does not enable them. Mark an infallible invariant with
+`#[expect(clippy::expect_used, reason = "...")]`.
 
 ## When done
 
 Re-read the diff as a reviewer: duplicate helper? Unused item? String where
-an enum fits? Eager `collect` then a loop? Panic reachable from a public
-function? Fix, then run the project's lint and tests.
+an enum fits? Eager `collect`? Panic reachable from a public function? Fix,
+then run the project's lint and tests.
 
 ## Further reading
 
 [Rust API Guidelines](https://rust-lang.github.io/api-guidelines/), [*The Rust
-Programming Language*](https://doc.rust-lang.org/book/) ch. 6, 9, 13, and
-[Rust design patterns](https://rust-unofficial.github.io/patterns/) (linked,
-not copied). Attribution: [NOTICE](references/NOTICE.md).
+Programming Language*](https://doc.rust-lang.org/book/) ch. 6, 9, 13, [Rust
+design patterns](https://rust-unofficial.github.io/patterns/). Attribution:
+[NOTICE](references/NOTICE.md).
 
 ## Contributing Improvements
 
