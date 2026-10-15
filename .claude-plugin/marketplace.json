@@ -60,6 +60,10 @@
       "source": "./.claude-plugin/plugins/gitlab-psql"
     },
     {
+      "name": "gitlab-retry-until-merged",
+      "source": "./.claude-plugin/plugins/gitlab-retry-until-merged"
+    },
+    {
       "name": "gitlab-stacked-mrs",
       "source": "./.claude-plugin/plugins/gitlab-stacked-mrs"
     },

@@ -5,13 +5,21 @@
 For each entry in `failed_jobs` where `allow_failure != true`:
 
 ```bash
-bash scripts/job_log_tail.sh "<project_encoded>" "<job_id>" 150
+python3 "$WATCH/scripts/job_log_tail.py" --hostname "<host>" "<project_encoded>" "<job_id>" 150
 ```
+
+For each entry in `failed_bridges` (a failed trigger job), the real failure is in its downstream pipeline. List that pipeline's failed jobs, then tail their logs the same way, using the downstream project ID (URL-encode it if it's a path; a numeric ID works as is):
+
+```bash
+glab api "projects/<downstream_project_id>/pipelines/<downstream_pipeline_id>/jobs?scope[]=failed"
+```
+
+Classify the trigger job by its downstream failures, and add the trigger job's own ID to `SEEN_EARLY_FAILURE_IDS` once classified.
 
 If the log tail is insufficient to classify, gather more context:
 - Run `git diff origin/main --name-only` to see which files the MR changed — compare against files mentioned in the error
 - Check if the same job name failed in other recent pipelines (indicates FLAKY or MASTER_BROKEN, not REAL_FAILURE)
-- Read the job's `failure_reason` field from the pipeline_status output (e.g. `script_failure` vs `stuck_or_timeout_failure`)
+- Read the job's `failure_reason` field from the watcher output (e.g. `script_failure` vs `stuck_or_timeout_failure`)
 
 **Classify** the failure using [references/failure-classification.md](failure-classification.md). Record the classification for each job.
 
