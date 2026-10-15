@@ -1,0 +1,3 @@
+repo=https://gitlab.com/gitlab-org/gitlab.git
+tag=v19.4.1-ee
+commit=26212baacadb5beea6664f7ef025d753dccfb0d6

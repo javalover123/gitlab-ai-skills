@@ -1,0 +1,53 @@
+{
+  "slug": "credit-caps",
+  "engine": "kokoro",
+  "voice": "af_heart",
+  "speed": 1.0,
+  "notes": "Paced recording: app/demos/credit-caps/scenario.mjs calls say(<id>) at each cue; the recorder writes out/credit-caps/cues.json and narrate.py places each line there. Build with: node harness/narrated.mjs credit-caps",
+  "cues": [
+    {
+      "id": "intro",
+      "text": "As a group Owner, you can limit how many GitLab Credits each person uses. On the GitLab Credits dashboard, select Credit caps."
+    },
+    {
+      "id": "flatCap",
+      "text": "First, set a flat cap for everyone. Enter an amount, here 400 credits, and turn on Enforce cap."
+    },
+    {
+      "id": "flatCapRules",
+      "text": "The cap is per user, per month, and counts only after someone's included credits run out. Select Save."
+    },
+    {
+      "id": "backToDash",
+      "text": "Next, go back to the dashboard and look at Usage by user."
+    },
+    {
+      "id": "blocked",
+      "text": "Priya has reached the cap, so her status shows Blocked usage."
+    },
+    {
+      "id": "openOverride",
+      "text": "To give one person more room, go back to Credit caps and select Add override."
+    },
+    {
+      "id": "overrideModal",
+      "text": "Find the user, enter a higher cap, like 600, and save. The override replaces the flat cap for that person."
+    },
+    {
+      "id": "checkAgain",
+      "text": "Now check the dashboard again."
+    },
+    {
+      "id": "unblocked",
+      "text": "Once the override takes effect, Priya is back to Regular usage."
+    },
+    {
+      "id": "hardStop",
+      "text": "Caps work from recent usage data, so a little usage can land past a cap. For a hard stop, turn off GitLab Duo."
+    },
+    {
+      "id": "outro",
+      "text": "One flat cap for everyone, and overrides for the few who need more."
+    }
+  ]
+}

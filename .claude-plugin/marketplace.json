@@ -44,6 +44,10 @@
       "source": "./.claude-plugin/plugins/gitlab-clickhouse"
     },
     {
+      "name": "gitlab-demo-videos",
+      "source": "./.claude-plugin/plugins/gitlab-demo-videos"
+    },
+    {
       "name": "gitlab-mr-description",
       "source": "./.claude-plugin/plugins/gitlab-mr-description"
     },

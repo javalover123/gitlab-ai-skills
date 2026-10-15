@@ -1,0 +1,50 @@
+<!-- Static rendering of app/views/user_settings/profiles/show.html.haml (v19.4.1-ee, HAML variant) -->
+<form class="edit-user js-edit-user gl-show-field-errors" action="/-/user_settings/profile" onsubmit="return false">
+<section class="settings-section js-search-settings-section">
+  <div class="settings-sticky-header"><h2 class="gl-heading-2 gl-mb-0">Public avatar</h2></div>
+  <div class="settings-sticky-header-description gl-mb-6"><p class="gl-text-subtle gl-mb-0">You can change your avatar here or remove the current avatar to revert to <a href="#">gravatar.com</a></p></div>
+  <div class="gl-mt-3" data-testid="settings-section-body">
+    <div class="avatar-image"><img alt="" src="/uploads/avatar.svg" class="gl-avatar gl-avatar-s96 gl-avatar-circle gl-float-left gl-mr-5" width="96" height="96"></div>
+    <h5 class="gl-mt-0">Upload new avatar</h5>
+    <div class="gl-flex gl-items-center gl-my-3">
+      <button type="button" class="gl-button btn btn-md btn-default js-choose-user-avatar-button"><span class="gl-button-text">Choose file…</span></button>
+      <span class="gl-ml-3 js-avatar-filename">No file chosen.</span>
+    </div>
+    <div class="form-text gl-text-subtle">The ideal image size is 192 x 192 pixels. The maximum file size allowed is 200 KiB.</div>
+    <a class="gl-button btn btn-md btn-danger-secondary gl-mt-3" href="#"><span class="gl-button-text">Remove avatar</span></a>
+  </div>
+</section>
+<section class="settings-section js-search-settings-section">
+  <div class="settings-sticky-header"><h2 class="gl-heading-2 gl-mb-0">Current status</h2></div>
+  <div class="settings-sticky-header-description gl-mb-6"><p class="gl-text-subtle gl-mb-0">This emoji and message will appear on your profile and throughout the interface.</p></div>
+  <div class="gl-mt-3" data-testid="settings-section-body">
+    <div class="gl-max-w-80">
+      <div class="input-group gl-mb-5">
+        <div class="input-group-prepend"><button type="button" class="gl-button btn btn-md btn-default !gl-rounded-r-none" aria-label="Add status emoji"><svg class="gl-icon s16 gl-button-icon" data-testid="slight-smile-icon"><use href="/assets/icons.svg#slight-smile"></use></svg></button></div>
+        <input type="text" class="form-control gl-form-input" placeholder="What's your status?" maxlength="100">
+      </div>
+      <div class="gl-form-checkbox custom-control custom-checkbox"><input type="checkbox" class="custom-control-input" id="busy"><label class="custom-control-label" for="busy"><span>Set yourself as busy</span><p class="help-block">Displays that you are busy.</p></label></div>
+    </div>
+  </div>
+</section>
+<section class="settings-section js-search-settings-section user-time-preferences">
+  <div class="settings-sticky-header"><h2 class="gl-heading-2 gl-mb-0">Time settings</h2></div>
+  <div class="settings-sticky-header-description gl-mb-6"><p class="gl-text-subtle gl-mb-0">Set your local time zone.</p></div>
+  <div class="gl-mt-3" data-testid="settings-section-body">
+    <label for="user_timezone">Time zone</label>
+    <div><button type="button" class="gl-button btn btn-md btn-default gl-new-dropdown-toggle"><span class="gl-button-text"><span class="gl-new-dropdown-button-text">[UTC-4] Eastern Time (US &amp; Canada)</span><svg class="gl-icon s16 gl-button-icon gl-new-dropdown-chevron"><use href="/assets/icons.svg#chevron-down"></use></svg></span></button></div>
+  </div>
+</section>
+<section class="settings-section js-search-settings-section">
+  <div class="settings-sticky-header"><h2 class="gl-heading-2 gl-mb-0">Main settings</h2></div>
+  <div class="settings-sticky-header-description gl-mb-6"><p class="gl-text-subtle gl-mb-0">This information will appear on your profile.</p></div>
+  <div class="gl-mt-3" data-testid="settings-section-body">
+    <div class="form-group gl-form-group rspec-full-name gl-max-w-80"><label for="user_name">Full name</label><input class="gl-form-input form-control" type="text" value="Alex Rivera" id="user_name"><div class="form-text gl-text-subtle">Enter your name, so people you know can recognize you. No "&lt;" or "&gt;" characters, please.</div></div>
+    <div class="form-group gl-form-group gl-md-form-input-lg"><label for="user_id">User ID</label><input class="gl-form-input form-control" readonly type="text" value="4242" id="user_id"></div>
+    <div class="form-group gl-form-group"><label for="user_pronouns">Pronouns</label><input class="gl-form-input form-control gl-md-form-input-lg" type="text" value="they/them" id="user_pronouns"><div class="form-text gl-text-subtle">Enter your pronouns to let people know how to refer to you.</div></div>
+    <div class="form-group gl-form-group"><label for="user_pronunciation">Pronunciation</label><input class="gl-form-input form-control gl-md-form-input-lg" type="text" value="" id="user_pronunciation"><div class="form-text gl-text-subtle">Enter how your name is pronounced to help people address you correctly.</div></div>
+    <div class="form-group gl-form-group"><label for="user_website_url">Website URL</label><input class="gl-form-input form-control gl-md-form-input-lg" placeholder="https://website.com" type="text" id="user_website_url"></div>
+    <div class="form-group gl-form-group"><label for="user_location">Location</label><input class="gl-form-input form-control gl-md-form-input-lg" type="text" value="Brooklyn, NY" id="user_location"></div>
+  </div>
+</section>
+</form>
