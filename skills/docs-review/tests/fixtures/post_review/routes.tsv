@@ -1,0 +1,9 @@
+# METHOD	endpoint ERE	response	exit code
+GET	^user$	responses/user.json
+GET	^projects/example-org%2Fexample-docs/merge_requests/42$	responses/mr.json
+GET	^projects/example-org%2Fexample-docs/merge_requests/42/versions(\?.*)?$	responses/versions.json
+GET	^projects/example-org%2Fexample-docs/merge_requests/42/diffs\?	responses/diffs.json
+GET	^projects/example-org%2Fexample-docs/merge_requests/42/discussions\?	responses/discussions.json
+POST	^projects/example-org%2Fexample-docs/merge_requests/42/discussions$	responses/created.json
+PUT	^projects/example-org%2Fexample-docs/merge_requests/42/notes/555$	responses/created.json
+POST	^projects/example-org%2Fexample-docs/merge_requests/42/notes$	responses/created.json

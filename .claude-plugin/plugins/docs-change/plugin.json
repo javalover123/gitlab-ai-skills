@@ -1,0 +1,10 @@
+{
+  "name": "docs-change",
+  "description": "Plans, writes, previews, and self-reviews a GitLab documentation change, then opens or updates the docs merge request. Use when asked to write docs from a prompt or spec, document a feature, flag, or code MR, restructure, move, split, or merge docs pages, rename headings or pages, add redirects, or update docs after a code change, for the gitlab doc/ tree or any project published on docs.gitlab.com. Do not use for reviewing an existing docs change (use docs-review), for only running the local docs site (use docs-preview), or for code-only changes.",
+  "version": "0.3.0",
+  "author": {
+    "name": "GitLab"
+  },
+  "license": "MIT",
+  "skills": "./"
+}

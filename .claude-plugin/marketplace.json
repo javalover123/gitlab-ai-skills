@@ -32,6 +32,18 @@
       "source": "./.claude-plugin/plugins/commit-messages"
     },
     {
+      "name": "docs-change",
+      "source": "./.claude-plugin/plugins/docs-change"
+    },
+    {
+      "name": "docs-preview",
+      "source": "./.claude-plugin/plugins/docs-preview"
+    },
+    {
+      "name": "docs-review",
+      "source": "./.claude-plugin/plugins/docs-review"
+    },
+    {
       "name": "gitlab-agent-plan",
       "source": "./.claude-plugin/plugins/gitlab-agent-plan"
     },

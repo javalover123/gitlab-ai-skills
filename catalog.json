@@ -49,6 +49,30 @@
       "path": "skills/commit-messages/SKILL.md"
     },
     {
+      "name": "docs-change",
+      "description": "Plans, writes, previews, and self-reviews a GitLab documentation change, then opens or updates the docs merge request. Use when asked to write docs from a prompt or spec, document a feature, flag, or code MR, restructure, move, split, or merge docs pages, rename headings or pages, add redirects, or update docs after a code change, for the gitlab doc/ tree or any project published on docs.gitlab.com. Do not use for reviewing an existing docs change (use docs-review), for only running the local docs site (use docs-preview), or for code-only changes.",
+      "category": "Documentation",
+      "license": "MIT",
+      "compatibility": "opencode",
+      "path": "skills/docs-change/SKILL.md"
+    },
+    {
+      "name": "docs-preview",
+      "description": "Runs the docs.gitlab.com Hugo site (docs-gitlab-com) locally for a project's documentation and verifies the rendered pages: side nav, nav trails, redirects, internal links and anchors, and cards. Use when asked to preview docs locally, run make view or the docs site, find out why a page has no side nav or sidebar, check redirects or broken anchors after moving or renaming pages, or swap a project's navigation section into a local preview. Do not use for a style or content review of a docs change (use docs-review) or for writing or restructuring docs (use docs-change).",
+      "category": "Documentation",
+      "license": "MIT",
+      "compatibility": "opencode",
+      "path": "skills/docs-preview/SKILL.md"
+    },
+    {
+      "name": "docs-review",
+      "description": "Reviews a GitLab documentation change as a GitLab technical writer does, brevity first: comments on what the change wrote or broke, ranked by importance to the reader. Runs Vale, markdownlint, and built-in checks, then three read-only reviewers: an editor, facts checked against code, and a reader who walks each task. Coaches first-time docs writers and can apply fixes in a separate phase. Use when asked to review docs, TW-review a merge request, check a docs change against the GitLab style guide, apply docs review findings, or run an automated docs review job. Do not use for writing new docs (use docs-change), previewing the docs site (use docs-preview), or reviewing code (use mr-review).",
+      "category": "Documentation",
+      "license": "MIT",
+      "compatibility": "opencode",
+      "path": "skills/docs-review/SKILL.md"
+    },
+    {
       "name": "gitlab-agent-plan",
       "description": "Read or write a GitLab work item's Workplan / Agent Plan widget \u2014 the AI work plan property \u2014 via GraphQL. Use when asked to get/show/pull or attach/set/update a work item's workplan or agent plan, as opposed to its description or comments.",
       "category": "Development Workflow",
