@@ -14,7 +14,7 @@ fn render(format: &str, rows: &[Row]) -> String {
 }
 
 // After: parse once at the edge, exhaustive match inside.
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 enum Format { Csv, Json }
 
 impl std::str::FromStr for Format {
@@ -29,7 +29,10 @@ impl std::str::FromStr for Format {
 }
 
 fn render(format: Format, rows: &[Row]) -> String {
-    match format { Format::Csv => /* ... */, Format::Json => /* ... */ }
+    match format {
+        Format::Csv => render_csv(rows),
+        Format::Json => render_json(rows),
+    }
 }
 ```
 

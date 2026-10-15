@@ -65,7 +65,9 @@ let allowed: HashSet<Id> = allowed.into_iter().collect();
   `mem::take`/`mem::replace`/`Option::take` swap a field out without
   cloning it.
 - `String` building: `write!(buf, ..)` into one buffer, or `join`, instead
-  of `format!` pieces concatenated with `+`.
+  of `format!` pieces concatenated with `+`. Writing to a `String` cannot
+  fail; mark the ignored result with
+  `#[expect(clippy::let_underscore_must_use, reason = "infallible for String")]`.
 - Optional values do not need a `Vec`: `Option<T>` for zero or one.
 - Small fixed collections (`SmallVec`, arrays) are a measured optimisation,
   not a default. Write the plain version first.

@@ -138,7 +138,7 @@ Profiles Rust compilation memory usage with rustc nightly and measureme tools, i
 
 #### rust-idioms
 
-Write, review, and refactor Rust so it survives review: Result instead of panics on caller misuse, reuse of existing helpers, no dead API, typed values over strings and magic numbers, and iterator and allocation choices. Use when adding or changing .rs files, implementing a Rust feature or fix, or reviewing a Rust change. Not for unsafe/FFI (rust-unsafe-ffi-review), build speed or runtime perf (rust-performance-optimizer), compile memory (rust-compile-memory), Cargo/CI config, or non-Rust code. → [`SKILL.md`](skills/rust-idioms/SKILL.md)
+Write, review, and refactor Rust so it survives review: Result instead of panics on caller misuse, reuse of existing helpers, no dead API, typed values over strings and magic numbers, and iterator and allocation choices. Use when adding or changing .rs files, implementing a Rust feature or fix, or reviewing a Rust change. Not for repo-wide quality or tech-debt passes (refactor), unsafe/FFI (rust-unsafe-ffi-review), build speed or runtime perf (rust-performance-optimizer), compile memory (rust-compile-memory), Cargo/CI config, or non-Rust code. → [`SKILL.md`](skills/rust-idioms/SKILL.md)
 
 #### rust-performance-optimizer
 
