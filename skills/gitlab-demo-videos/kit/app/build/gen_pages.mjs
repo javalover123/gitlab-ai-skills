@@ -9,6 +9,7 @@
 // `route` may contain :params or end in * (e.g. a vue-router app); `routes: [...]` adds aliases.
 import fs from 'node:fs';
 import path from 'node:path';
+import { pathToFileURL } from 'node:url';
 import { renderPage } from '../src/shell/layout.mjs';
 
 const APP = path.resolve(import.meta.dirname, '..');
