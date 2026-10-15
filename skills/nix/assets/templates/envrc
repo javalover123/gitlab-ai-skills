@@ -1,0 +1,12 @@
+# Rename to .envrc in the project root, then run `direnv allow` once.
+#
+# nix-direnv already watches flake.nix, flake.lock and devshell.toml. Anything
+# else the shell reads must be added with watch_file, and watch_file has to run
+# BEFORE `use flake`: the nix-direnv README says it only takes effect when
+# invoked first.
+watch_file shells/default.nix
+# watch_file gemset.nix
+# watch_file gomod2nix.toml
+
+# Loads the dev shell on cd and caches it for fast re-entry.
+use flake

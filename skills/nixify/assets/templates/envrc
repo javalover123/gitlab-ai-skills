@@ -1,8 +1,0 @@
-# Rename to .envrc in the project root, then run `direnv allow` once.
-# nix-direnv auto-loads the dev shell on cd, and caches it for instant re-entry.
-use flake
-
-# Reload the shell when committed, generated dependency files change so the
-# developer never has to think about it:
-# watch_file gemset.nix
-# watch_file gomod2nix.toml
