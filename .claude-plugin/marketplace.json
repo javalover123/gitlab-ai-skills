@@ -112,8 +112,8 @@
       "source": "./.claude-plugin/plugins/natural-writing-style"
     },
     {
-      "name": "nixify",
-      "source": "./.claude-plugin/plugins/nixify"
+      "name": "nix",
+      "source": "./.claude-plugin/plugins/nix"
     },
     {
       "name": "postgresai",

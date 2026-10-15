@@ -209,12 +209,12 @@
       "path": "skills/natural-writing-style/SKILL.md"
     },
     {
-      "name": "nixify",
-      "description": "Analyze an existing codebase or a hand-rolled build system and generate maintainable, modular, ergonomic Nix build infrastructure for it \u2014 a thin flake.nix wiring up a lib/ + pkgs/ layout via callPackage, with scoped outputs, dev shells, nix2container images, and NixOS VM test checks \u2014 in a single reviewable MR that keeps the developer's native workflow (cargo, go, bundle, poetry/uv, npm/pnpm) working unchanged. Use when the user wants to Nixify, add a flake.nix, add reproducible or hermetic builds, set up nix develop / direnv, build containers or VM tests with Nix, or replace a Make/shell/Omnibus/Docker build system with Nix \u2014 even without saying Nix, if they describe reproducible builds, pinned toolchains, or a single-command dev environment for a Ruby, Go, Rust, Python, Node, or C/C++ project.",
+      "name": "nix",
+      "description": "Write, review, and fix Nix so it is minimal, tested, and upstreamable: flakes, dev shells, nixpkgs packages, NixOS modules and system configs, language builders, and nixpkgs PRs. Use when editing flake.nix, shell.nix, default.nix, package.nix, an overlay, or a NixOS module; packaging software with mkDerivation, buildGoModule, buildPythonPackage, or buildRustPackage; reviewing or preparing a nixpkgs PR; fixing a Nix eval or build failure; or when asked to nixify a project, add reproducible builds, or set up nix develop and direnv. Not for installing Nix or general shell questions.",
       "category": "Development Workflow",
       "license": "MIT",
       "compatibility": "opencode",
-      "path": "skills/nixify/SKILL.md"
+      "path": "skills/nix/SKILL.md"
     },
     {
       "name": "opencode-refine",

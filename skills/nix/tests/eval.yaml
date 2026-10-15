@@ -1,0 +1,229 @@
+# promptfoo eval for the nix skill.
+#
+# Feeds the skill's SKILL.md plus the one reference its map routes the task to (the
+# `reference` var), then a Nix task, and asserts the answer follows the skill's rules.
+# The model never gets tools here, so these test what the skill steers an answer toward,
+# not whether commands run.
+#
+# Run: scripts/run_evals.sh nix   (needs ANTHROPIC_API_KEY)
+description: "nix skill evaluation: routing, operating rules, honest reporting"
+
+# The model sees the SKILL.md text (as it would after loading the skill) plus the one reference the
+# router sends that task to (the `reference` var), then the task. This mirrors progressive disclosure:
+# an agent reads the router, follows the route, and works from the reference it loaded. Each test names
+# the reference its row in the routing table points to.
+prompts:
+  - |
+    You have loaded this skill:
+
+    {{skill}}
+
+    ---
+
+    You followed the routing table and read this reference:
+
+    {{reference}}
+
+    ---
+
+    Task:
+
+    {{task}}
+
+providers:
+  - id: anthropic:messages:claude-haiku-4-5
+    config:
+      max_tokens: 4096
+      temperature: 0
+
+defaultTest:
+  vars:
+    skill: file://../SKILL.md
+  assert:
+    # Nothing unverified gets claimed as done
+    - type: not-contains
+      value: "production ready"
+    - type: not-contains
+      value: "production-ready"
+    - type: not-contains
+      value: "fully tested"
+
+tests:
+  - description: "Package review: catches the modern-Nix defects and cites the rules"
+    vars:
+      reference: file://../references/derivation-authoring.md
+      task: file://cases/input-01.md
+    assert:
+      - type: contains-any
+        value: ["finalAttrs"]
+      - type: contains
+        value: "nativeBuildInputs"
+      - type: contains-any
+        value: ["hostPlatform"]
+      - type: contains-any
+        value: ["tag =", "tag="]
+      - type: contains-any
+        value: ["hash =", "hash=", "SRI"]
+      - type: contains-any
+        value: ["replace-fail", "substituteInPlace"]
+      - type: not-contains
+        value: "looks good to me"
+      - type: llm-rubric
+        value: |
+          The response reviews the submitted package.nix. Issues present in the code:
+          rec and hand-built name (should be finalAttrs with pname/version); cmake in buildInputs
+          instead of nativeBuildInputs; rev = version and legacy sha256 (should be tag and SRI hash);
+          stdenv.isDarwin (deprecated, use stdenv.hostPlatform.isDarwin); darwin.apple_sdk framework
+          reference; doCheck = false with no reason; sed -i in postPatch (should be substituteInPlace
+          --replace-fail); meta with lib/with lib; incomplete meta (maintainers, mainProgram, platforms);
+          description with a leading article and trailing period; deprecated license gpl3 (gpl3Only or gpl3Plus).
+
+          Score 1.0 if it finds at least seven of these with the right fix for each and orders them by
+          consequence (build correctness before style).
+          Score 0.7 if it finds four to six with correct fixes.
+          Score 0.4 if it finds fewer than four or mostly offers style opinions.
+          Score 0.0 if it approves the package or recommends the deprecated forms.
+
+  - description: "Python package: loads the right references, plans tests and gates, doesn't overclaim platforms"
+    vars:
+      reference: file://../references/lang-python.md
+      task: file://cases/input-02.md
+    assert:
+      # A concrete verification route: the skill's script or a real build/review command.
+      - type: contains-any
+        value: ["gates.sh", "nix build", "nix-build", "nixpkgs-review"]
+      - type: contains-any
+        value: ["pythonImportsCheck", "versionCheckHook", "pytestCheckHook", "passthru.tests"]
+      - type: contains-any
+        value: ["nixpkgs-review", "not run", "couldn't run", "could not run"]
+      - type: llm-rubric
+        value: |
+          The response follows the skill's workflow for packaging in nixpkgs:
+          1. Routes to the Python and derivation-authoring references (or applies their rules)
+             instead of writing from memory.
+          2. Uses a by-name path (pkgs/by-name/..) and a modern shape: finalAttrs, pyproject = true,
+             build-system and dependencies, tag with SRI hash, pythonImportsCheck and a pytest hook
+             for the tests, full meta, an application builder for a CLI.
+          3. Names the gates to run (parse, format, build, tests, nixpkgs-review, by-name vet).
+          4. Is honest that only x86_64-linux was available: it says other platforms are not
+             verified rather than claiming them, and doesn't claim success it hasn't observed.
+
+          Score 1.0 if all four hold. Score 0.7 if three hold. Score 0.4 if it writes a plausible
+          package but ignores the gates or platform limits. Score 0.0 if it uses removed or deprecated
+          forms (format = "pyproject", cargoSha256-style attributes, stdenv.isDarwin) or claims
+          verification it couldn't have done.
+
+  - description: "NixOS module: settings pattern, secrets outside the store, test included"
+    vars:
+      reference: file://../references/nixos-modules.md
+      task: file://cases/input-03.md
+    assert:
+      - type: contains-any
+        value: ["settings", "RFC 42", "RFC 0042"]
+      - type: contains-any
+        value: ["LoadCredential", "EnvironmentFile", "tokenFile", "passwordFile", "keyFile"]
+      - type: contains-any
+        value: ["runNixOSTest", "nixosTests", "NixOS test", "nixos/tests"]
+      - type: contains-any
+        value: ["StateDirectory", "DynamicUser"]
+      - type: llm-rubric
+        value: |
+          The response designs an upstreamable module:
+          1. Uses the settings pattern (a freeform attribute set rendered with a pkgs.formats TOML
+             generator) rather than 40 individual options, with a few typed options only for things
+             the module must understand (data directory, port, token file).
+          2. Keeps the auth token out of the Nix store (a *File option read via LoadCredential,
+             EnvironmentFile, or runtime substitution) and never interpolates it into settings.
+          3. Uses systemd directives for state (StateDirectory) and a dynamic or dedicated user,
+             with hardening options.
+          4. Includes a NixOS VM test and mentions module registration and a release-note entry.
+          5. Uses mkEnableOption/mkPackageOption and doesn't use lib.mdDoc.
+
+          Score 1.0 if all five hold. Score 0.7 if four hold. Score 0.4 if it exposes dozens of
+          options or puts the token in the store. Score 0.0 if the token is written to the store.
+
+  - description: "New Go project: flakes by default, native loop preserved, dev shell first"
+    vars:
+      reference: file://../references/nixify-workflow.md
+      task: file://cases/input-04.md
+    assert:
+      - type: contains-any
+        value: ["buildGoModule"]
+      - type: contains-any
+        value: ["vendorHash"]
+      - type: contains-any
+        value: ["devShell", "nix develop"]
+      - type: contains-any
+        value: ["go build", "go test"]
+      - type: not-contains
+        value: "gomod2nix is required"
+      - type: llm-rubric
+        value: |
+          The response nixifies a new Go service without disturbing the team's workflow:
+          1. Runs detection first (scripts/detect.sh) or states what it found.
+          2. Chooses flakes for a new project and sets up a dev shell first, with go build and go
+             test working unchanged inside it.
+          3. Packages with buildGoModule and a vendorHash, and adds a check (not just a package).
+          4. Keeps flake.nix thin, with logic in per-package files, and offers a one-command way to
+             refresh vendorHash.
+          5. Does not restructure the Go source or replace the Makefile.
+
+          Score 1.0 if all five hold. Score 0.7 if four hold. Score 0.4 if it packages without a dev
+          shell or hand-lists dependencies. Score 0.0 if it breaks the native go workflow.
+
+  - description: "Dated advice: refuses to copy removed or deprecated forms"
+    vars:
+      reference: file://../references/nixos-modules.md
+      task: file://cases/input-05.md
+    assert:
+      - type: contains-any
+        value: ["mdDoc"]
+      - type: contains-any
+        value: ["pkgs.stdenv.hostPlatform"]
+      - type: not-contains
+        value: "config.nixos.hostPlatform"
+      - type: llm-rubric
+        value: |
+          The response says the snippet shouldn't be copied as is and explains why:
+          lib.mdDoc was removed (use a plain markdown string), stdenv.isLinux is deprecated
+          (use stdenv.hostPlatform.isLinux), and the types.str extraArgs option would be better as
+          It gives the corrected snippet, and says the
+          conventions come from the current tree/docs rather than the old post.
+
+          Score 1.0 if it catches both removed forms and corrects them. Score 0.6 if it catches one.
+          Score 0.0 if it says the snippet is fine.
+
+  - description: "Honest reporting: reports from the gate output without embellishing"
+    vars:
+      reference: file://../references/gates-and-tooling.md
+      task: file://cases/input-06.md
+    assert:
+      - type: contains-any
+        value: ["aarch64", "Darwin", "darwin"]
+      - type: contains-any
+        value: ["nixpkgs-review"]
+      - type: contains-any
+        value: ["nixfmt", "format"]
+      - type: not-contains
+        value: "ready to merge"
+      - type: not-contains
+        value: "all tests pass"
+      - type: not-contains
+        value: "fully verified"
+      - type: llm-rubric
+        value: |
+          The response reports on the version bump from the gate output it was given:
+          1. States what was established: parse, evaluation, meta, and the x86_64-linux build passed.
+          2. Lists what was not run or not verified, accurately: formatting (nixfmt missing), by-name
+             vet (network), aarch64-linux and aarch64-darwin builds, nixpkgs-review for the three
+             dependents, and passthru.tests/nixosTests. It does not invent results for any of these.
+          3. Does not claim the change is tested or builds on platforms it didn't build on. It may say
+             a PR can reasonably be opened with those platform boxes left unchecked and named in the
+             description, but it doesn't declare the work complete or verified.
+          4. Gives a sensible next step: run the formatter (via nix shell) before pushing, and
+             nixpkgs-review if available.
+
+          Telling the user to run the missing checks before pushing is correct, not an overclaim; only
+          asserting results that weren't observed is. Score 1.0 if all four hold. Score 0.6 if it is
+          accurate about gaps but vague on next steps or omits two of the unrun items. Score 0.3 if it lists gaps yet still asserts the change is
+          verified. Score 0.0 if it invents passing results or claims builds it didn't run.
