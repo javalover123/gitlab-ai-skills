@@ -1,0 +1,41 @@
+{
+  "slug": "credits-dashboard",
+  "engine": "kokoro",
+  "voice": "af_heart",
+  "speed": 1.0,
+  "notes": "Paced recording: app/demos/credits-dashboard/scenario.mjs calls say(<id>) at each cue; the recorder writes out/credits-dashboard/cues.json with the actual start times and narrate.py places each line there. Build with: node harness/narrated.mjs credits-dashboard",
+  "cues": [
+    {
+      "id": "intro",
+      "text": "Here's how to check your own GitLab Credits usage."
+    },
+    {
+      "id": "navigate",
+      "text": "Open your avatar menu, choose Edit profile, then pick GitLab Credits in User settings."
+    },
+    {
+      "id": "totals",
+      "text": "Up top is your total for this billing period, plus your daily average and busiest day."
+    },
+    {
+      "id": "range",
+      "text": "Use the date range to zoom in, say, to the last seven days, then switch back to this month."
+    },
+    {
+      "id": "products",
+      "text": "To focus on one product, filter by it. Here, that's just Agentic Chat."
+    },
+    {
+      "id": "tooltip",
+      "text": "Hover over any day in the chart to see exactly how many credits you used."
+    },
+    {
+      "id": "groups",
+      "text": "Belong to more than one group? Switch groups to see your usage there."
+    },
+    {
+      "id": "outro",
+      "text": "That's it. Check back anytime to keep track of your GitLab Credits."
+    }
+  ]
+}

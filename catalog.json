@@ -73,6 +73,14 @@
       "path": "skills/gitlab-clickhouse/SKILL.md"
     },
     {
+      "name": "gitlab-demo-videos",
+      "description": "Make a narrated walkthrough or demo video (MP4 with voiceover and captions) of a GitLab UI flow with synthetic data and no GitLab instance. Pages are built from GitLab's own frontend source at a pinned release tag, clicked through with Playwright, and voiced with a local text-to-speech model. Use when asked for a GitLab demo video, feature walkthrough, how-to or enablement video, a screen recording with fake data, or a voiceover for a GitLab feature, including GitLab.com-only settings and dashboards that a local instance cannot show. Not for screens outside the gitlab-org/gitlab codebase (such as the Customers Portal) or for real customer data.",
+      "category": "Documentation",
+      "license": "MIT",
+      "compatibility": "",
+      "path": "skills/gitlab-demo-videos/SKILL.md"
+    },
+    {
       "name": "gitlab-mr-description",
       "description": "Write or update a GitLab MR description. Reads the branch diff, drafts structured markdown using GitLab's standard sections, and applies conventions for feature flags, database queries, and local testing matrices. Use when opening a new MR or refreshing an existing description.",
       "category": "Development Workflow",
