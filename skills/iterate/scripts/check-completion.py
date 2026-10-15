@@ -447,15 +447,25 @@ def log_hook(skill_name: str, hook_input: Dict[str, Any], output: Dict[str, Any]
 
 
 def should_skip(hook_input: Dict[str, Any]) -> bool:
-    """Check if we should skip iteration (subagent or background task).
+    """Skip when in subagent context, or when stop_hook_active signals the
+    agent already tried to stop again with no tool call in between.
 
-    Deliberately does NOT skip on `stop_hook_active` (set by Claude Code on
-    the stop that follows a block): since every subsequent stop attempt
-    while gaps remain also carries this flag, skipping on it approves the
-    very next stop unconditionally, ending the loop after exactly one
-    block regardless of how many gaps are left — the opposite of this
-    skill's "block until every gate passes" design.
+    Per Claude Code's hooks reference, `stop_hook_active` is true only on
+    a stop attempt that follows an *immediately preceding* block with zero
+    tool calls since — it tracks the same consecutive-continuation streak
+    behind Claude Code's own 8-attempt cap, which resets on every tool
+    call. In a healthy loop (block, agent acts on a gap, agent stops
+    again), the flag is false by the next attempt because a tool call
+    happened in between, so the hook runs its normal gap check as usual.
+    It's only true when the agent ignored the block entirely and tried to
+    stop again having done nothing — approving that case is correct, not
+    a loop-ending shortcut: re-blocking an agent that isn't acting on the
+    block can't change the outcome, and Claude Code's own cap would force
+    the turn to end after 8 such attempts regardless.
     """
+    if hook_input.get("stop_hook_active"):
+        return True
+
     # Check if this is a subagent
     if hook_input.get("parent_task_id") or hook_input.get("agent_type") or hook_input.get("is_subagent", False):
         return True

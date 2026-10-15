@@ -55,10 +55,11 @@ class PathMatchesTest(unittest.TestCase):
 
 
 class ShouldSkipTest(unittest.TestCase):
-    """Fix: stop_hook_active must not cause an unconditional skip."""
+    """stop_hook_active signals a stop attempt with no tool call since the
+    last block; approving it is correct (see should_skip's docstring)."""
 
-    def test_stop_hook_active_alone_does_not_skip(self):
-        self.assertFalse(cc.should_skip({"stop_hook_active": True}))
+    def test_stop_hook_active_does_skip(self):
+        self.assertTrue(cc.should_skip({"stop_hook_active": True}))
 
     def test_subagent_still_skips(self):
         self.assertTrue(cc.should_skip({"is_subagent": True}))

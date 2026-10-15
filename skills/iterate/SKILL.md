@@ -1,7 +1,7 @@
 ---
 name: iterate
 description: "Brings projects to 100% completion through iterative cycles — implementing missing features, fixing security/correctness gaps, and refining code until all specs, ADRs, and threat model requirements are met. Runs gap analysis, prioritizes by security/correctness/quality/coverage, and auto-iterates until nothing remains. Use when completing an incomplete project, implementing remaining features from specs, addressing technical debt, or reaching production readiness. Triggers: iterate, bring to completion, implement remaining features, production readiness, gap analysis, address all gaps, complete project, iterative development."
-version: 1.0.2
+version: 1.0.3
 license: MIT
 category: Development Workflow
 compatibility: opencode
