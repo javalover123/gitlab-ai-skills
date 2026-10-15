@@ -18,7 +18,7 @@ export async function buildDemo(slug) {
   console.log(`vite build ${slug} done in ${((Date.now() - t0) / 1000).toFixed(0)}s -> app/.build/${slug}/dist`);
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (import.meta.url === pathToFileURL(process.argv[1]).href) {
   const slug = process.argv[2];
   if (!slug) {
     console.error('usage: node harness/build.mjs <slug>');
