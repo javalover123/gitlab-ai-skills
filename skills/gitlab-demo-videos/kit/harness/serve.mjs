@@ -112,7 +112,7 @@ export async function startServer(slugOrOpts = {}, portArg = 0) {
   return server;
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   const [slug, port = process.env.PORT || 0] = process.argv.slice(2);
   const s = await startServer({ slug, port: Number(port) });
   console.log(`serving ${slug} on ${s.baseUrl}`);
