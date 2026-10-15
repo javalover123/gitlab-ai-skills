@@ -1,0 +1,10 @@
+{
+  "name": "nix",
+  "description": "Write, review, and fix Nix so it is minimal, tested, and upstreamable: flakes, dev shells, nixpkgs packages, NixOS modules and system configs, language builders, and nixpkgs PRs. Use when editing flake.nix, shell.nix, default.nix, package.nix, an overlay, or a NixOS module; packaging software with mkDerivation, buildGoModule, buildPythonPackage, or buildRustPackage; reviewing or preparing a nixpkgs PR; fixing a Nix eval or build failure; or when asked to nixify a project, add reproducible builds, or set up nix develop and direnv. Not for installing Nix or general shell questions.",
+  "version": "0.1.0",
+  "author": {
+    "name": "GitLab"
+  },
+  "license": "MIT",
+  "skills": "./"
+}

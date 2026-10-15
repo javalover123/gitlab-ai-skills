@@ -5,7 +5,8 @@ Changed files are scoped to the MR's own changes (merge-base, or HEAD^1 in
 merged-results pipelines). Versions are compared against the current target
 branch tip so a version already taken there must be bumped past. Exits 2 if
 the baseline cannot be read. Fails if any skill has file changes
-without a corresponding version bump in SKILL.md frontmatter.
+without a corresponding version bump in SKILL.md frontmatter. A skill removed
+by the MR has no version left and is reported as removed, not failed.
 
 Generated files (.claude-plugin/) are excluded from the diff check since
 they are derived from SKILL.md.
@@ -252,6 +253,14 @@ def main():
             f"{skill_name}: old={old_version}, new={new_version}, "
             f"changed={len(files)} file(s)"
         )
+
+        # A skill that existed on the target and has no SKILL.md now was removed
+        # (or renamed into another skill). There's no version left to bump.
+        if old_version is not None and not os.path.isfile(
+            os.path.join(REPO_ROOT, "skills", skill_name, "SKILL.md")
+        ):
+            print(f"  OK: {skill_name} — removed (no version to bump)")
+            continue
 
         if is_version_bumped(old_version, new_version):
             print(
