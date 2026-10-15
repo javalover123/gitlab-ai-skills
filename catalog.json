@@ -289,6 +289,14 @@
       "path": "skills/rust-compile-memory/SKILL.md"
     },
     {
+      "name": "rust-idioms",
+      "description": "Write, review, and refactor Rust so it survives review: Result instead of panics on caller misuse, reuse of existing helpers, no dead API, typed values over strings and magic numbers, and iterator and allocation choices. Use when adding or changing .rs files, implementing a Rust feature or fix, or reviewing a Rust change. Not for repo-wide quality or tech-debt passes (refactor), unsafe/FFI (rust-unsafe-ffi-review), build speed or runtime perf (rust-performance-optimizer), compile memory (rust-compile-memory), Cargo/CI config, or non-Rust code.",
+      "category": "Development Workflow",
+      "license": "MIT",
+      "compatibility": "opencode",
+      "path": "skills/rust-idioms/SKILL.md"
+    },
+    {
       "name": "rust-performance-optimizer",
       "description": "Analyzes and tunes Rust project performance across build speed, runtime memory, binary size, and test throughput. Applies Cargo profile tuning, linker selection, dependency auditing, profiling, and workspace restructuring to fix bottlenecks. Use when Rust builds are slow, binaries are too large, memory is high at runtime, or CI times are painful. Triggers: \"slow rust build\", \"binary size\", \"reduce memory\", \"rust profiling\", \"cargo timing\", \"cargo flamegraph\", \"nextest\", \"dependency audit\".",
       "category": "Development Workflow",

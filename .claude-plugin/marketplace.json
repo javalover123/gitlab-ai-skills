@@ -144,6 +144,10 @@
       "source": "./.claude-plugin/plugins/rust-compile-memory"
     },
     {
+      "name": "rust-idioms",
+      "source": "./.claude-plugin/plugins/rust-idioms"
+    },
+    {
       "name": "rust-performance-optimizer",
       "source": "./.claude-plugin/plugins/rust-performance-optimizer"
     },
