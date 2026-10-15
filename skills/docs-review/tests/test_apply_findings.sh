@@ -146,6 +146,9 @@ JSON
 python3 "$SCRIPT" --findings "$cw/f.json" --repo "$cw" --out "$cw/apply" --policy input > /dev/null
 if python3 -c 'import json,sys; d=json.load(open(sys.argv[1])); r=json.load(open(sys.argv[2])); fps=[f["fingerprint"][0] for f in d["findings"]]; sys.exit(0 if sorted(fps)==["1","4"] and sum(1 for s in r["skipped"] if s.get("needs_input"))==1 else 1)' "$cw/apply/writer-1.json" "$cw/apply/apply-report.json"; then
     echo "ok - --policy input sends everything but questions and old text to writers"
+    python3 -c 'import json,sys; d=json.load(open(sys.argv[1])); d["deferred"]=[dict(d["findings"][0], fingerprint="5"*40, line=2, deferred_reason="safety-cap")]; json.dump(d, open(sys.argv[1]+".cap", "w"))' "$cw/f.json"
+    python3 "$SCRIPT" --findings "$cw/f.json.cap" --repo "$cw" --out "$cw/apply-cap" --policy input > /dev/null
+    if grep -q 5555555555 "$cw/apply-cap/writer-1.json"; then echo "ok - findings over the safety cap still go to writers"; else echo "FAIL - findings over the safety cap still go to writers"; fail=1; fi
 else
     echo "FAIL - --policy input sends everything but questions and old text to writers"; fail=1
 fi

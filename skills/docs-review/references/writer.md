@@ -48,7 +48,8 @@ In auto mode, every review is followed by a writer step. A cycle:
 1. Write: `scripts/apply_findings.py --findings <out-dir>/findings.json
    --policy input --out <out-dir>/apply`. Every finding about the change goes
    to a writer, except the ones that need input
-   ([`needs_input`](findings-schema.md#finding-fields)). Run the writers as in
+   ([`needs_input`](findings-schema.md#finding-fields)). Findings over the safety
+   cap go to writers too: the cap limits comments, not fixes. Run the writers as in
    the fix loop above, and save each return contract as
    `<out-dir>/apply/writer-<i>-result.json`.
 1. Check: re-run phase 2 on the changed lines. Revert the cycle if it adds a

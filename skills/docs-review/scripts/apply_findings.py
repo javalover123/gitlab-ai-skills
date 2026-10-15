@@ -39,7 +39,12 @@ import importance as IMP  # noqa: E402
 POLICIES = ("input", "safe", "auto", "all")
 
 
-def load_findings(path):
+# The safety cap limits comments, not fixes: in auto mode, findings deferred
+# only because of it still go to writers.
+CAP_REASONS = ("safety-cap",)
+
+
+def load_findings(path, with_capped=False):
     try:
         with open(path, encoding="utf-8") as fh:
             data = json.load(fh)
@@ -50,6 +55,9 @@ def load_findings(path):
     if not isinstance(findings, list):
         sys.stderr.write("error: {} has no `findings` list\n".format(path))
         raise SystemExit(2)
+    if with_capped and isinstance(data, dict):
+        findings = findings + [f for f in data.get("deferred") or []
+                               if isinstance(f, dict) and f.get("deferred_reason") in CAP_REASONS]
     for f in findings:
         if isinstance(f, dict) and not f.get("fingerprint"):
             f["fingerprint"] = fingerprint(f)
@@ -149,7 +157,7 @@ def main():
     if args.partition < 1:
         print("error: --partition must be 1 or more", file=sys.stderr)
         return 2
-    findings = load_findings(args.findings)
+    findings = load_findings(args.findings, with_capped=args.policy == "input")
     os.makedirs(args.out, exist_ok=True)
 
     report = {"applied": [], "skipped": [], "conflicts": [], "writer_sets": []}

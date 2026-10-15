@@ -109,7 +109,8 @@ def main(argv=None):
         return cache[path]
 
     applied, remaining, dropped = [], [], []
-    for f in doc["findings"]:
+    capped = [f for f in doc.get("deferred") or [] if f.get("deferred_reason") == "safety-cap"]
+    for f in doc["findings"] + capped:
         fp = f.get("fingerprint") or F.fingerprint(f)
         r = results.get(fp) or {}
         status = r.get("status")
@@ -118,6 +119,7 @@ def main(argv=None):
                             "message": f.get("message"), "importance": f.get("importance")})
             continue
         g = dict(f)
+        g.pop("deferred_reason", None)  # a capped finding is a finding again; post_review applies its own cap
         reason = str(r.get("reason") or "")
         if status == "skipped" and reason.startswith("low importance"):
             g["summary_only"], g["summary_reason"] = True, "polish"
@@ -139,7 +141,8 @@ def main(argv=None):
     with open(os.path.join(args.out_dir, "applied.json"), "w", encoding="utf-8") as fh:
         json.dump({"head": head, "applied": applied, "dropped": dropped}, fh, indent=2)
     target = dict(doc.get("target") or {}, head=head)
-    out = dict(doc, target=target, findings=remaining)
+    out = dict(doc, target=target, findings=remaining,
+               deferred=[f for f in doc.get("deferred") or [] if f.get("deferred_reason") != "safety-cap"])
     F.dump(out, os.path.join(args.out_dir, "remaining.json"))
     sys.stdout.write("applied {}, left {} ({} need input), dropped {} (text changed); fixes in {}\n".format(
         len(applied), len(remaining), sum(1 for g in remaining if F.needs_input(g) and not g.get("summary_only")),
