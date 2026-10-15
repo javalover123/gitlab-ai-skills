@@ -63,7 +63,8 @@ def span(f):
 
 
 def is_mechanical(f):
-    return f.get("fixable") == "auto" and isinstance(f.get("suggestion"), str) and span(f)
+    # No quote means no check that the lines still say what was reviewed: a writer handles it.
+    return f.get("fixable") == "auto" and isinstance(f.get("suggestion"), str) and span(f) and bool(f.get("quote"))
 
 
 def writer_allowed(f, policy):
@@ -157,8 +158,14 @@ def main():
                                           args.policy, f.get("fixable"), f.get("confidence"))})
 
     patches = []
+    root = os.path.realpath(args.repo)
     for rel, items in sorted(by_file.items()):
         path = os.path.join(args.repo, rel)
+        real = os.path.realpath(path)
+        if os.path.isabs(rel) or os.path.commonpath([root, real]) != root:
+            for f in items:
+                report["skipped"].append({"fingerprint": f["fingerprint"], "reason": "file outside the repo: " + rel})
+            continue
         if not os.path.isfile(path):
             for f in items:
                 report["skipped"].append({"fingerprint": f["fingerprint"], "reason": "file not found: " + rel})

@@ -1,0 +1,59 @@
+#!/usr/bin/env bash
+# Fake glab for the docs-review tests. No network.
+#
+# Routes live in "$STUB_DIR/routes", one per line, tab separated:
+#   METHOD <tab> ERE matched against the endpoint <tab> response file [<tab> exit code]
+# METHOD is GET, POST, PUT, ... for `glab api`, or ORBIT for `glab orbit query`.
+# The first matching route wins. A response file path is relative to STUB_DIR.
+# With a non-zero exit code the response goes to stderr, like a glab API error.
+# Every call is appended to "$STUB_DIR/calls" as "METHOD endpoint", and every
+# --input body is copied to "$STUB_DIR/bodies/<call number>.json".
+set -Eeuo pipefail
+
+dir="${STUB_DIR:?STUB_DIR is not set}"
+method="GET"
+endpoint=""
+input=""
+if [ "${1:-}" = "orbit" ]; then
+  method="ORBIT"
+  shift
+  endpoint="$*"
+elif [ "${1:-}" = "api" ]; then
+  endpoint="${2:-}"
+  shift 2
+  while [ $# -gt 0 ]; do
+    case "$1" in
+      --method | -X) method="$2"; shift 2 ;;
+      --input) input="$2"; shift 2 ;;
+      --header | -H | --hostname) shift 2 ;;
+      *) shift ;;
+    esac
+  done
+else
+  echo "glab stub: unsupported command: $*" >&2
+  exit 2
+fi
+
+: >> "$dir/calls"
+n=$(($(wc -l < "$dir/calls") + 1))
+printf '%s %s\n' "$method" "$endpoint" >> "$dir/calls"
+if [ -n "$input" ]; then
+  mkdir -p "$dir/bodies"
+  cp "$input" "$dir/bodies/$n.json"
+fi
+
+tab="$(printf '\t')"
+while IFS="$tab" read -r m re file code; do
+  case "$m" in "" | "#"*) continue ;; esac
+  if [ "$m" = "$method" ] && [[ "$endpoint" =~ $re ]]; then
+    if [ "${code:-0}" != "0" ]; then
+      cat "$dir/$file" >&2
+      exit "$code"
+    fi
+    cat "$dir/$file"
+    exit 0
+  fi
+done < "$dir/routes"
+
+echo "glab stub: no route for $method $endpoint" >&2
+exit 1

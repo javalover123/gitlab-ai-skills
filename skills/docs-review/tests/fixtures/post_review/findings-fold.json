@@ -1,0 +1,27 @@
+{
+  "version": 1,
+  "target": {"project": "example-org/example-docs", "mr": 42, "tier": "medium",
+             "head": "dddddddddddddddddddddddddddddddddddddddd"},
+  "findings": [
+    {"id": "style.list-lead-in", "reviewer": "style", "severity": "minor", "confidence": "high", "file": "doc/a.md",
+     "line": 2, "end_line": 2, "quote": "new2", "message": "Do not complete the lead-in.", "suggestion": "Use these items:",
+     "fixable": "suggest", "source": "https://docs.gitlab.com/s", "deterministic": false,
+     "alternatives": [{"id": "brevity.cut", "reviewer": "brevity", "message": "Cut the windup.", "suggestion": "Items:"}]},
+    {"id": "word-list.once", "reviewer": "word-list", "severity": "nit", "confidence": "high", "file": "doc/a.md",
+     "line": 2, "end_line": 2, "quote": "new2", "message": "Use after.", "suggestion": "after new2", "fixable": "auto",
+     "source": "https://docs.gitlab.com/w", "deterministic": true},
+    {"id": "brevity.long-intro", "reviewer": "brevity", "severity": "nit", "confidence": "high", "file": "doc/a.md",
+     "line": 3, "end_line": 3, "quote": "new3", "message": "The intro is 120 words.", "suggestion": null,
+     "fixable": "manual", "source": "https://docs.gitlab.com/b", "deterministic": true, "summary_only": true},
+    {"id": "facts.default", "reviewer": "facts", "severity": "major", "confidence": "high", "file": "doc/a.md",
+     "line": 4, "end_line": 4, "quote": "line4", "message": "The code turns this off by default.", "suggestion": null,
+     "fixable": "manual", "source": "https://docs.gitlab.com/f", "deterministic": false, "verdict": "contradicted",
+     "evidence": "app/models/setting.rb:10",
+     "sme": [{"username": "mr-author", "reason": "commits"}, {"username": "sme-ok", "reason": "commits"}]}
+  ],
+  "deferred": [
+    {"id": "style.deferred-only", "reviewer": "style", "severity": "nit", "confidence": "low", "file": "doc/a.md",
+     "line": 1, "end_line": 1, "quote": "line1", "message": "Lower priority.", "suggestion": null, "fixable": "manual",
+     "source": null, "deterministic": false}
+  ]
+}

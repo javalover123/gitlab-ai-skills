@@ -23,7 +23,8 @@ Configure it with `.docs-review.yml` ([keys](references/config.md)).
 
 ## Development
 
-The source, full tests, and evals live in
+Change the skill here. `tests/` covers the posting guardrails. The full
+tests and the replay eval live in
 [gabrielengel_gl/docs-skills-lab](https://gitlab.com/gabrielengel_gl/docs-skills-lab).
 
 Recall is 0.59 on 16 replayed MRs ([results](https://gitlab.com/gabrielengel_gl/docs-skills-lab/-/blob/main/dev/evals/results/2026-10-15-distillation.md)). Use interactive mode: the auto mode targets are not met.

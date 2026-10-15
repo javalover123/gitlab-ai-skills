@@ -60,7 +60,7 @@ Emit `PHASE <n> (<name>): COMPLETE | PARTIAL | BLOCKED - <counts>` after each.
 
 | # | Phase | How |
 |---|-------|-----|
-| 0 | Context | Resolve the MR, branch, or paths, the base and head SHAs, and `.docs-review.yml` ([keys](references/config.md)). Pick one `<out-dir>` for every output, for example `docs-review-out/`, outside the docs tree. |
+| 0 | Context | Resolve the MR, branch, or paths, the base and head SHAs, and `.docs-review.yml` at the base SHA (`git show BASE:.docs-review.yml`), never the MR head ([keys](references/config.md)). Pick one `<out-dir>` for every output, for example `docs-review-out/`, outside the docs tree. |
 | 1 | Triage | `scripts/triage.py --base BASE --project <path> --mr <iid> --out <out-dir>/triage.json` (no MR yet: `--author <username>` instead of `--mr`): the tier, the reader scope, the technical writer, and whether the author is a first-time docs writer ([references/triage.md](references/triage.md)). |
 | 2 | Mechanical | `scripts/docs_lint.py --diff BASE...HEAD --out <out-dir>/lint.json` (Vale with GitLab's rules, refreshed weekly; markdownlint; metadata, history, flags, links) and `scripts/impact.py --base BASE --project <path> --out <out-dir>/impact.json` (renamed headings, moved pages). |
 | 3 | Review | `editor`, `facts`, and `reader` subagents in parallel, each saved to `<out-dir>/reviewers/<reviewer>.json`: [references/dispatch.md](references/dispatch.md). |
@@ -91,4 +91,5 @@ Offline runs set `DOCS_REVIEW_OFFLINE=1` and pass `impact.py --offline`.
 
 ## Contributing Improvements
 
-Change this skill in [gabrielengel_gl/docs-skills-lab](https://gitlab.com/gabrielengel_gl/docs-skills-lab).
+Change this skill here, with a test in `tests/`. The full test suite and the replay eval
+that scores reviewer changes are in [gabrielengel_gl/docs-skills-lab](https://gitlab.com/gabrielengel_gl/docs-skills-lab).

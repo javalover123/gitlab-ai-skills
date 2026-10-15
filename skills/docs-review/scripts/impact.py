@@ -1051,11 +1051,6 @@ def main(argv=None):
     if git.run("rev-parse", "--git-dir", check=False).returncode != 0:
         warn("{} is not a git checkout".format(repo))
         return 2
-    try:
-        conf = lint_config.load(os.path.join(repo, lint_config.CONFIG_NAME), warn)
-    except lint_config.ConfigError as exc:
-        warn("{}: {}; using defaults".format(lint_config.CONFIG_NAME, exc))
-        conf = {}
     notes = []
     api = None if args.offline else gitlab_api.GitLab(args.glab, delay=SEARCH_DELAY, timeout=API_TIMEOUT)
 
@@ -1085,6 +1080,12 @@ def main(argv=None):
                  "`git fetch origin refs/merge-requests/<iid>/head`".format(rev, repo))
             return 2
     base, head = git.resolve(base), git.resolve(head)
+    try:
+        # At the base, so the change cannot configure its own impact check.
+        conf = lint_config.load_at(repo, base, warn)
+    except lint_config.ConfigError as exc:
+        warn("{}: {}; using defaults".format(lint_config.CONFIG_NAME, exc))
+        conf = {}
 
     docs_root = args.docs_root or conf.get("docs_root")
     if not docs_root:

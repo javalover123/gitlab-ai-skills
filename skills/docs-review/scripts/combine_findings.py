@@ -1485,18 +1485,25 @@ def load_triage(path):
     return data if isinstance(data, dict) else {}
 
 
-def read_config(args):
-    """`.docs-review.yml` as a dict. A config that does not parse is a warning:
+def read_config(args, base=None):
+    """`.docs-review.yml` as a dict, read at the base of the change, so the MR
+    under review cannot change its own importance or safety cap. `--config`
+    is an explicit local override. A config that does not parse is a warning:
     triage already failed on it, and the review should still finish."""
-    path = args.config or os.path.join(args.repo, CONFIG_NAME)
-    if not os.path.isfile(path):
-        if args.config:
+    if args.config:
+        if not os.path.isfile(args.config):
             raise ValueError("cannot read --config {}".format(args.config))
-        return {}
-    with open(path, encoding="utf-8", errors="replace") as fh:
-        text = fh.read()
+        with open(args.config, encoding="utf-8", errors="replace") as fh:
+            text = fh.read()
+        try:
+            return lint_config.parse(text)
+        except lint_config.ConfigError as exc:
+            warn("{}: {}; using defaults".format(args.config, exc))
+            return {}
+    if base is None and (args.diff or args.diff_file):
+        warn("{} read from the working tree: the base of the change is unknown".format(CONFIG_NAME))
     try:
-        return lint_config.parse(text)
+        return lint_config.load_at(args.repo, base, warn)
     except lint_config.ConfigError as exc:
         warn("{}: {}; using defaults".format(CONFIG_NAME, exc))
         return {}
@@ -1509,13 +1516,8 @@ def main(argv=None):
         return 2
     try:
         inp = load_inputs(args.inputs)
-        config = read_config(args)
-    except (OSError, ValueError) as exc:
-        warn(str(exc))
-        return 2
-    try:
         triage_doc = load_triage(args.triage)
-    except ValueError as exc:
+    except (OSError, ValueError) as exc:
         warn(str(exc))
         return 2
     if not (args.diff or args.diff_file) and triage_doc.get("base"):
@@ -1529,6 +1531,12 @@ def main(argv=None):
         except ValueError as exc:
             warn(str(exc))
             return 2
+    base = triage_doc.get("base") or (lint_config.base_of(args.repo, args.diff) if args.diff else None)
+    try:
+        config = read_config(args, base)
+    except (OSError, ValueError) as exc:
+        warn(str(exc))
+        return 2
     findings, praise, dropped, targets = inp.findings, inp.praise, inp.dropped, inp.targets
     phases, verified = inp.phases, inp.verified
     for d in dropped:

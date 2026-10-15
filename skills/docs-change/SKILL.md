@@ -82,4 +82,4 @@ Running headless in CI, tokens, and the job example: [references/automation.md](
 
 ## Contributing Improvements
 
-Change this skill in [gabrielengel_gl/docs-skills-lab](https://gitlab.com/gabrielengel_gl/docs-skills-lab).
+Change this skill here. Its full tests are in [gabrielengel_gl/docs-skills-lab](https://gitlab.com/gabrielengel_gl/docs-skills-lab).

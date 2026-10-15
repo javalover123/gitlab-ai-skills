@@ -779,8 +779,10 @@ def main(argv=None):
             except OSError as exc:
                 raise UsageError("cannot read config: %s" % exc)
         else:
-            text = show_file(repo, base_ref, ".docs-review.yml")
-            config = load_config(text or "", ".docs-review.yml")
+            try:
+                config = lint_config.load_at(repo, base_ref)
+            except lint_config.ConfigError as exc:
+                raise UsageError("config .docs-review.yml: %s" % exc)
         first_time = first_time_writer(args, config)
         result = Triage(config, repo, base_ref, head_ref, first_time).run(files)
     except UsageError as exc:

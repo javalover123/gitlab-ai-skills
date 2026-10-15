@@ -15,6 +15,6 @@ rendered pages.
 
 ## Development
 
-Source and tests:
+Change the skill here. Full tests:
 [gabrielengel_gl/docs-skills-lab](https://gitlab.com/gabrielengel_gl/docs-skills-lab).
 Every script prints its usage with `--help`.

@@ -76,7 +76,7 @@ Follow these instructions exactly:
 
 {content of references/reviewers/<reviewer>.md}
 
-Project config (.docs-review.yml, may be empty):
+Project config (.docs-review.yml at the base SHA, may be empty):
 {config}
 
 Review tier: {tier}. Signals: {signals}.

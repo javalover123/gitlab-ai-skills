@@ -15,7 +15,7 @@ updates the docs MR.
 
 ## Development
 
-Source, tests, and evals:
+Change the skill here. Full tests and evals:
 [gabrielengel_gl/docs-skills-lab](https://gitlab.com/gabrielengel_gl/docs-skills-lab).
 Review quality is measured through `docs-review`
 ([development](../docs-review/README.md#development)).

@@ -18,6 +18,8 @@ import json
 import os
 import re
 
+from lib import gitdiff
+
 CONFIG_NAME = ".docs-review.yml"
 
 # Every key `.docs-review.yml` may set (references/config.md).
@@ -195,13 +197,44 @@ def parse(text):
     return data
 
 
+def _known(data, source, warn):
+    for key in data:
+        if key not in KNOWN_KEYS and warn:
+            warn("{}: unknown key `{}` ignored".format(source, key))
+    return data
+
+
 def load(path, warn=None):
     """Parse a config file. Returns {} if `path` is None or missing."""
     if not path or not os.path.isfile(path):
         return {}
     with open(path, encoding="utf-8") as fh:
         data = parse(fh.read())
-    for key in data:
-        if key not in KNOWN_KEYS and warn:
-            warn("{}: unknown key `{}` ignored".format(os.path.basename(path), key))
-    return data
+    return _known(data, os.path.basename(path), warn)
+
+
+def base_of(repo, spec):
+    """The commit a `BASE..HEAD` or `BASE...HEAD` range compares from: BASE, or
+    the merge base for three dots. None when the range does not resolve."""
+    try:
+        base, head, dots = gitdiff.split_range(spec)
+    except ValueError:
+        return None
+    args = ["merge-base", base, head] if dots == "..." else ["rev-parse", "--verify", base + "^{commit}"]
+    res = gitdiff.run(repo, args, check=False)
+    if res.returncode != 0:
+        return None
+    return res.stdout.strip() or None
+
+
+def load_at(repo, ref, warn=None):
+    """`.docs-review.yml` as committed at `ref`, the base of the change, or {}
+    when it is not there. The change under review must not configure its own
+    review: importance, auto mode, the commands the facts reviewer may run.
+    With no ref (a local review with no base), the working tree copy."""
+    if ref is None:
+        return load(os.path.join(repo, CONFIG_NAME), warn) if repo else {}
+    res = gitdiff.run(repo, ["show", "{}:{}".format(ref, CONFIG_NAME)], check=False)
+    if res.returncode != 0:
+        return {}
+    return _known(parse(res.stdout), "{} at {}".format(CONFIG_NAME, str(ref)[:12]), warn)

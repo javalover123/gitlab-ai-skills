@@ -3,6 +3,9 @@
 Put `.docs-review.yml` in the root of the docs project. Every key is optional.
 An unknown key gets a warning and is ignored.
 
+Every script reads the file as committed at the base of the change, so an MR
+cannot change its own review. `--config` is an explicit local override.
+
 ```yaml
 docs_root: doc                  # docs/source for a standalone project
 url_prefix: ""                  # docs.gitlab.com path prefix, for example orbit/

@@ -79,4 +79,4 @@ Emit `PHASE <n> (<name>): COMPLETE | PARTIAL | BLOCKED - <counts>` after each.
 
 ## Contributing Improvements
 
-Change this skill in [gabrielengel_gl/docs-skills-lab](https://gitlab.com/gabrielengel_gl/docs-skills-lab).
+Change this skill here. Its full tests are in [gabrielengel_gl/docs-skills-lab](https://gitlab.com/gabrielengel_gl/docs-skills-lab).

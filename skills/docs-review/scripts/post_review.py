@@ -88,15 +88,28 @@ def untrusted(text):
     return QUICK_ACTION_RE.sub(lambda m: m.group(1) + "\\/", text)
 
 
+OPEN_FENCE_RE = re.compile(r"^(`{3,})[^`]*$")  # CommonMark: a backtick fence's info string has no backtick
+CLOSE_FENCE_RE = re.compile(r"^(`{3,})[ \t]*$")
+
+
+def one_line(text):
+    """Untrusted text on one line, so it cannot open a fence or start a line."""
+    return R.one_line(text, untrusted)
+
+
 def _code_lines(lines):
     """Indexes of lines inside closed ``` fences that start at column 0: the only
-    blocks GitLab's quick action parser skips."""
+    blocks GitLab's quick action parser skips. A line that only looks like a
+    fence, such as ```a`b, is paragraph text, so it is not counted."""
     inside, start, fence = set(), None, None
     for i, line in enumerate(lines):
-        m = re.match(r"^(`{3,})", line)
-        if fence is None and m:
-            start, fence = i, m.group(1)
-        elif fence is not None and m and len(m.group(1)) >= len(fence) and not line[len(m.group(1)):].strip():
+        if fence is None:
+            m = OPEN_FENCE_RE.match(line)
+            if m:
+                start, fence = i, m.group(1)
+            continue
+        m = CLOSE_FENCE_RE.match(line)
+        if m and len(m.group(1)) >= len(fence):
             inside.update(range(start, i + 1))
             start, fence = None, None
     return inside
@@ -123,9 +136,11 @@ def check_body(body):
 class SafeWriter(object):
     """Allowlisted writes only. In dry-run it records and never calls."""
 
-    def __init__(self, api, dry_run):
+    def __init__(self, api, dry_run, vis=None):
         self.api = api
         self.dry_run = dry_run
+        self.vis = vis
+        self.redacted = 0
         self.planned = []
 
     def write(self, method, endpoint, body, label):
@@ -133,6 +148,13 @@ class SafeWriter(object):
             raise GuardrailError("write not allowed: {} {}".format(method, endpoint))
         if set(body) - set(["body", "position"]):
             raise GuardrailError("unexpected body keys: {}".format(sorted(set(body) - set(["body", "position"]))))
+        if self.vis is not None:
+            # The last gate: no rendered text names a reference that is not
+            # confirmed public, whatever field it came from.
+            text, n = visibility.redact_text(body["body"], self.vis)
+            if n:
+                body = dict(body, body=text)
+                self.redacted += n
         check_body(body["body"])
         self.planned.append({"method": method, "endpoint": endpoint, "body": body, "label": label})
         if self.dry_run:
@@ -181,6 +203,7 @@ class Context(object):
         self.inline_ok = True     # False when the reviewed head is not an MR version
         self.positions_error = None  # set when no diff could be read for positions
         self.visibility = None
+        self.project_path = None  # group/project, for same-project references
 
 
 def sha_match(a, b):
@@ -237,6 +260,8 @@ def load_context(api, project, mr, dry_run, head_sha=None):
     info = read(lambda: api.get(base), "merge request")
     if isinstance(info, dict):
         ctx.author = (info.get("author") or {}).get("username")
+        full = str((info.get("references") or {}).get("full") or "")
+        ctx.project_path = full.rsplit("!", 1)[0] or None
         ctx.state = info.get("state")
         ctx.refs = dict(info.get("diff_refs") or {})
     # Long-lived MRs have many versions: read them all, or the reviewed head is missed.
@@ -296,6 +321,9 @@ def load_context(api, project, mr, dry_run, head_sha=None):
                     summary_candidates.append({"id": n.get("id"), "discussion_id": disc.get("id"),
                                                "created_at": n.get("created_at") or ""})
                     continue
+            if not body.startswith(PREFIX) or (ctx.me is not None
+                                               and (n.get("author") or {}).get("username") != ctx.me):
+                continue  # only our own comments count, or anyone could hide a finding
             for group in FP_RE.findall(body.rstrip()):
                 for fp in group.split(","):
                     ctx.fps.add(fp)
@@ -361,8 +389,10 @@ def preservation_details(rows):
 
 
 def plain_block(text):
-    """Untrusted suggestion text shown as a plain code block, not a suggestion."""
-    return R.fenced(untrusted(text), "markdown", fence=R.fence_for(text))
+    """Untrusted suggestion text shown as a plain code block, not a suggestion.
+    The fence is longer than any backtick run in the text, so nothing inside can
+    close it, and GitLab neither links mentions nor runs quick actions in it."""
+    return R.fenced(str(text), "markdown", fence=R.fence_for(text))
 
 
 def line_label(a):
@@ -461,8 +491,8 @@ def inline_body(group, mention_lines, by_fp=None, coaching=False):
     numbers, and a coaching line for a first-time docs writer."""
     f = group[0]
     parts = [PREFIX, ""]
-    parts.append("**{}:** {} (`{}`)".format(IMPORTANCE_LABELS[IMP.level(f)], untrusted(f["message"]),
-                                           untrusted(f["id"])))
+    parts.append("**{}:** {} (`{}`)".format(IMPORTANCE_LABELS[IMP.level(f)], one_line(f["message"]),
+                                           one_line(f["id"])))
     shown = False
     if f.get("suggestion") is not None and f.get("fixable") in ("auto", "suggest"):
         parts += [""] + R.suggestion_block(f["suggestion"], F.line_range(f))
@@ -478,7 +508,7 @@ def inline_body(group, mention_lines, by_fp=None, coaching=False):
         rng = F.line_range(other)
         where = " Line {}:".format(rng[0]) if rng and rng != primary_rng else ""
         parts += ["", "**{}:**{} {} (`{}`)".format(IMPORTANCE_LABELS[IMP.level(other)], where,
-                                                 untrusted(other["message"]), untrusted(other["id"]))]
+                                                 one_line(other["message"]), one_line(other["id"]))]
         if other.get("suggestion") is not None and not shown and other.get("fixable") in ("auto", "suggest"):
             parts += ["", "Suggested text:", ""] + plain_block(other["suggestion"])
             shown = True
@@ -817,7 +847,8 @@ def main(argv=None):
     except gitlab_api.GlabError as exc:
         warn(str(exc))
         return 2
-    ctx.visibility = visibility.Visibility(api)
+    project_path = ctx.project_path or (args.project if "/" in str(args.project) else None)
+    ctx.visibility = visibility.Visibility(api, project_path)
     if ctx.positions_error and not args.summary_only:
         # Never move every finding to the summary without saying so.
         bar = "!" * 72
@@ -827,7 +858,7 @@ def main(argv=None):
     if not dry and ctx.state in ("merged", "closed"):
         warn("MR !{} is {}; not posting".format(args.mr, ctx.state))
         return 1 if blockers else 0
-    writer = SafeWriter(api, dry)
+    writer = SafeWriter(api, dry, ctx.visibility)
     endpoint_base = "projects/{}/merge_requests/{}".format(gitlab_api.enc(args.project), args.mr)
     try:
         result = plan_and_post(doc, ctx, writer, args, endpoint_base)

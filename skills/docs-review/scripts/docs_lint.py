@@ -1116,6 +1116,12 @@ def run_vale(ctx, files):
                "--no-exit"] + relpaths
         res = subprocess.run(cmd, cwd=ctx.repo or os.getcwd(), stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                              universal_newlines=True)
+        if res.returncode != 0 or not (res.stdout or "").strip():
+            # With --no-exit, alerts do not change the exit code: this is a broken Vale, not a clean page.
+            msg = (res.stderr or res.stdout or "no output").strip()[:300]
+            info("Vale did not run (exit {}): {}".format(res.returncode, msg))
+            tool["error"] = "exit {}: {}".format(res.returncode, msg)
+            return
         try:
             data = json.loads(res.stdout or "{}")
         except ValueError:
@@ -1661,8 +1667,11 @@ def main(argv=None):
     if args.config and not os.path.isfile(args.config):
         info("config not found: {}".format(args.config))
         return 2
+    # With --diff, read the config at the base of the change, so the change
+    # cannot turn off its own checks (`lint_disable`, `product_terms`).
+    base = lint_config.base_of(ctx.repo, args.diff) if (args.diff and ctx.repo and not args.config) else None
     try:
-        ctx.config = lint_config.load(cfg_path, warn=info)
+        ctx.config = lint_config.load_at(ctx.repo, base, warn=info) if base else lint_config.load(cfg_path, warn=info)
     except lint_config.ConfigError as exc:
         info("{}: {}".format(cfg_path, exc))
         return 2
