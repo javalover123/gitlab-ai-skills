@@ -1,0 +1,10 @@
+{
+  "name": "docs-review",
+  "description": "Reviews a GitLab documentation change as a GitLab technical writer does, brevity first: comments on what the change wrote or broke, ranked by importance to the reader. Runs Vale, markdownlint, and built-in checks, then three read-only reviewers: an editor, facts checked against code, and a reader who walks each task. Coaches first-time docs writers and can apply fixes in a separate phase. Use when asked to review docs, TW-review a merge request, check a docs change against the GitLab style guide, apply docs review findings, or run an automated docs review job. Do not use for writing new docs (use docs-change), previewing the docs site (use docs-preview), or reviewing code (use mr-review).",
+  "version": "0.4.0",
+  "author": {
+    "name": "GitLab"
+  },
+  "license": "MIT",
+  "skills": "./"
+}

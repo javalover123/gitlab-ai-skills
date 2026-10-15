@@ -1,0 +1,10 @@
+{
+  "name": "docs-preview",
+  "description": "Runs the docs.gitlab.com Hugo site (docs-gitlab-com) locally for a project's documentation and verifies the rendered pages: side nav, nav trails, redirects, internal links and anchors, and cards. Use when asked to preview docs locally, run make view or the docs site, find out why a page has no side nav or sidebar, check redirects or broken anchors after moving or renaming pages, or swap a project's navigation section into a local preview. Do not use for a style or content review of a docs change (use docs-review) or for writing or restructuring docs (use docs-change).",
+  "version": "0.2.0",
+  "author": {
+    "name": "GitLab"
+  },
+  "license": "MIT",
+  "skills": "./"
+}
