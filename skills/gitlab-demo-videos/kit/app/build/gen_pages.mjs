@@ -56,7 +56,7 @@ export async function genPages(slug) {
   return { pages, routes };
 }
 
-if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+if (process.argv[1] && import.meta.url === pathToFileURL(fs.realpathSync(process.argv[1])).href) {
   const slug = process.argv[2] || process.env.DEMO;
   if (!slug) {
     console.error('usage: node build/gen_pages.mjs <slug>');
