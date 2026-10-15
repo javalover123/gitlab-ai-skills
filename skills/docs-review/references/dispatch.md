@@ -144,7 +144,7 @@ Every reviewer follows these, and the inline fallback restates them.
    A point in another reviewer's area goes in `notes`, not in `findings`:
    that reviewer reports it, and two comments on one point are noise.
 1. One spot, one finding, one suggestion. A repeated issue is one finding
-   with `occurrences`. Adjacent lines that make one point are one finding.
+   with `occurrences`, and its message must be true of every occurrence. Adjacent lines that make one point are one finding.
 1. Every finding has `importance` (1-5) and `importance_why`, from the
    rubric in [findings-schema.md](findings-schema.md#importance). Most
    wording findings are 2. An incomplete pointer sentence is never a

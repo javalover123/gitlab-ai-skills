@@ -928,6 +928,14 @@ def expand_occurrences(findings, head_text=None):
             g["suggestion"] = sugg if isinstance(sugg, str) else None
             if g["suggestion"] is None and g.get("fixable") in ("auto", "suggest"):
                 g["fixable"] = "manual"
+            # The primary's details describe its own lines: an occurrence keeps
+            # them only when it says so, or another page gets the wrong advice.
+            msg = o.get("message")
+            if isinstance(msg, str) and msg.strip():
+                g["message"] = msg
+            g["preservation"] = o.get("preservation") if isinstance(o.get("preservation"), list) else None
+            if g["preservation"] is None:
+                g.pop("preservation")
             g["occurrence_of"] = f["id"]
             out.append(g)
     return out, notes

@@ -37,7 +37,7 @@ Contents:
 | `importance` | Reviewers: yes | 1 to 5: how much the finding matters to the reader. See [Importance](#importance). Scripts set a default per rule. The combine step fills it when it is missing. |
 | `importance_why` | With `importance` | One sentence, from the reader's side, that explains the level. |
 | `why` | First-time writer | Editor and reader: one plain sentence on why the rule exists, for coaching. `source` is the link. |
-| `occurrences` | No | The other lines of a repeated issue, `[{line, end_line, quote, suggestion, file}]`, always a list of objects. The combine step expands them into one finding each (`occurrence_of`), which group into one comment. A bare line number, or an object without `quote`, takes the quote from that line of the file, with a warning. A count instead of a list is ignored. |
+| `occurrences` | No | The other lines of a repeated issue, `[{line, end_line, quote, suggestion, file, message}]`, always a list of objects. The finding's `message` must be true of every occurrence; give an occurrence its own `message` when the specifics differ, for example another page. Occurrences do not inherit `preservation`. The combine step expands them into one finding each (`occurrence_of`), which group into one comment. A bare line number, or an object without `quote`, takes the quote from that line of the file, with a warning. A count instead of a list is ignored. |
 | `covers` | No | Ids of other findings on the same lines that this finding's suggestion also fixes. They fold into it. |
 | `confidence` | Yes | `high`, `medium`, or `low`. |
 | `file`, `line`, `end_line` | Yes | Path relative to the repo root. Lines in the head revision. |
@@ -67,7 +67,7 @@ JSON object with these fields:
   link), `fixable` (`auto`, `suggest`, or `manual`), and
   `deterministic: false`.
 - Optional: `suggestion` (the full replacement, `null`, or `""` to delete),
-  `occurrences` (`[{line, end_line, quote, suggestion}]`), `covers`,
+  `occurrences` (`[{line, end_line, quote, suggestion, file, message}]`), `covers`,
   `caused_by_line` and `caused_by_file`, `old_text: true` for a problem the
   old version also had (it goes to the summary), and `scope: "page"` for a
   page-level finding (no other value).
