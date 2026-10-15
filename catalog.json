@@ -73,6 +73,14 @@
       "path": "skills/gitlab-clickhouse/SKILL.md"
     },
     {
+      "name": "gitlab-frontend-conventions",
+      "description": "Review and clean up frontend code in the GitLab monolith (Vue, Apollo, Jest/VTU/MSW, JS utilities) against rules distilled from real merge request reviews, fixing typical AI-generated slop such as scoped styles, imperative Apollo queries, reactive constants, hand-set Apollo data in specs, and defensive optional chaining. Use when writing or reviewing code under app/assets/javascripts, ee/app/assets/javascripts, spec/frontend or ee/spec/frontend, or when asked to unslop, lint the Vue, or prep a frontend MR for review. Not for MR sequencing, review workflow, or backend code.",
+      "category": "Development Workflow",
+      "license": "MIT",
+      "compatibility": "opencode",
+      "path": "skills/gitlab-frontend-conventions/SKILL.md"
+    },
+    {
       "name": "gitlab-mr-description",
       "description": "Write or update a GitLab MR description. Reads the branch diff, drafts structured markdown using GitLab's standard sections, and applies conventions for feature flags, database queries, and local testing matrices. Use when opening a new MR or refreshing an existing description.",
       "category": "Development Workflow",
