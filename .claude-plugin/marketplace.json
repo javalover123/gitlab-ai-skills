@@ -44,6 +44,10 @@
       "source": "./.claude-plugin/plugins/gitlab-clickhouse"
     },
     {
+      "name": "gitlab-data-retention-policy",
+      "source": "./.claude-plugin/plugins/gitlab-data-retention-policy"
+    },
+    {
       "name": "gitlab-mr-description",
       "source": "./.claude-plugin/plugins/gitlab-mr-description"
     },
