@@ -89,6 +89,40 @@ class CheckVersionBumpTest(unittest.TestCase):
         code, out = self.run_check()
         self.assertEqual(code, 0, out)
 
+    def test_deleted_skill_passes(self):
+        """Removing a whole skill has no version to bump, so the gate must not fail it."""
+        self.feature_branch()
+        self.git("rm", "-r", "-q", "skills/alpha")
+        self.commit("remove skill")
+        code, out = self.run_check()
+        self.assertEqual(code, 0, out)
+        self.assertIn("alpha", out)
+        self.assertIn("removed", out)
+
+    def test_deleting_one_skill_does_not_hide_another_skills_missing_bump(self):
+        self.write_skill("beta", "0.4.0")
+        self.commit("add beta")
+        self.sync_origin()
+        self.feature_branch()
+        self.git("rm", "-r", "-q", "skills/alpha")
+        self.write_skill("beta", "0.4.0", "changed without a bump")
+        self.commit("remove alpha, edit beta")
+        code, out = self.run_check()
+        self.assertEqual(code, 1, out)
+        self.assertIn("beta", out)
+        self.assertIn("version unchanged", out)
+
+    def test_replacing_a_skill_with_a_new_one_passes(self):
+        """The nixify -> nix shape: one skill removed, a differently named one added."""
+        self.feature_branch()
+        self.git("rm", "-r", "-q", "skills/alpha")
+        self.write_skill("omega", "0.1.0")
+        self.commit("replace alpha with omega")
+        code, out = self.run_check()
+        self.assertEqual(code, 0, out)
+        self.assertIn("removed", out)
+        self.assertIn("new", out)
+
     def test_merged_results_ignores_target_drift(self):
         base = self.git("rev-parse", "HEAD")
         self.feature_branch()
