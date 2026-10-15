@@ -510,6 +510,20 @@ assert s[0] == "<details><summary>Applied automatically in `333333333333` (1)</s
 PY
 then ok "auto mode: repeats stay in their thread, fixed threads are resolved, a person's thread stays open"; else fail "repeats and resolving"; fi
 
+# One question repeated on many pages posts once, with the other places listed.
+if python3 - "$scripts" << 'PY'
+import sys
+sys.path.insert(0, sys.argv[1])
+import post_review as P
+f = {"id": "facts.version", "file": "a.md", "line": 3, "fingerprint": "a" * 40}
+also = [{"id": "facts.version", "file": "b.md", "line": 9, "fingerprint": "b" * 40},
+        {"id": "facts.version", "file": "a.md", "line": 30, "fingerprint": "c" * 40}]
+out = P.repeats_line(dict(f, _also=also))
+assert out[1] == "Also in `b.md:9`, `a.md:30`.", out
+assert P.repeats_line(dict(f, _also=also[1:]))[1] == "Also on lines 30.", out
+PY
+then ok "a question on many pages is one comment that lists the other places"; else fail "cross-page repeats"; fi
+
 if [ "$failures" -gt 0 ]; then
   echo "$failures failure(s)"
   exit 1

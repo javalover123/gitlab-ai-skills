@@ -574,10 +574,18 @@ def alternatives_line(members):
     return out
 
 
+MAX_ALSO = 12
+
+
 def repeats_line(f):
-    also = f.get("_also") or []
-    lines = [str(F.line_range(a)[0]) for a in also if F.line_range(a)]
-    return ["", "Also on lines {}.".format(", ".join(lines))] if lines else []
+    also = [a for a in f.get("_also") or [] if F.line_range(a)]
+    if not also:
+        return []
+    if all(a.get("file") == f.get("file") for a in also):
+        return ["", "Also on lines {}.".format(", ".join(str(F.line_range(a)[0]) for a in also))]
+    where = [R.code(untrusted("{}:{}".format(a["file"], F.line_range(a)[0]))) for a in also[:MAX_ALSO]]
+    more = " and {} more".format(len(also) - MAX_ALSO) if len(also) > MAX_ALSO else ""
+    return ["", "Also in {}{}.".format(", ".join(where), more)]
 
 
 def inline_body(group, mention_lines, by_fp=None, coaching=False):
@@ -634,6 +642,10 @@ SUMMARY_SECTIONS = (
     ("reader", "### Reader questions", "Lower-importance questions from the first-time-reader pass.", False),
     ("polish", "Optional polish", "Wording ideas without a specific style guide rule. Take them or leave them.",
      True),
+    ("generated", "Fix in the generated source",
+     "These are in generated blocks. Fix them in the source the block is generated from.", True),
+    ("moved", "Questions whose text changed",
+     "The text these questions were about changed in the fix commit. Check that the answer still matters.", True),
     ("existing", "Existing issues on this page",
      "These were on the page before this change. They are not blockers for this MR. Fix them here if it is "
      "easy, or in a follow-up.", True),
@@ -682,7 +694,14 @@ def applied_section(applied):
             "{}:{}".format(a.get("file"), a.get("line")))), R.one_line(a.get("message"), untrusted)))
     if len(items) > MAX_APPLIED_LINES:
         out.append("- And {} more in the job report.".format(len(items) - MAX_APPLIED_LINES))
-    return out + ["", "</details>", ""]
+    out += ["", "</details>", ""]
+    wrong = (applied or {}).get("invalid") or []
+    if wrong:
+        out += ["<details><summary>Not applied: the writer found these findings wrong ({})</summary>".format(len(wrong)), ""]
+        out += ["- `{}` in {}: {}".format(untrusted(w.get("id")), R.code(untrusted("{}:{}".format(w.get("file"), w.get("line")))),
+                                         R.one_line(w.get("reason"), untrusted)) for w in wrong[:MAX_APPLIED_LINES]]
+        out += ["", "</details>", ""]
+    return out
 
 
 def summary_body(findings, posted, not_inline, skipped_dup, skipped_resolved, sme_lines, tier, tw_mention, head,
@@ -800,6 +819,12 @@ def plan_and_post(doc, ctx, writer, args, endpoint_base):
                 still_open += 1
             continue
         pending.append(f)
+    # One question asked on many pages is one comment: the answer is the same.
+    for f in pending:
+        if not f.get("group") and F.needs_input(f) and f.get("summary_only") is not True:
+            core = str(f.get("message") or "").split(" Not applied automatically:", 1)[0]
+            f["group"] = "input:" + (f.get("occurrence_root") or "{}:{}".format(
+                f["id"], " ".join(core.lower().split())[:200]))
     # Repeats of one rule (merge `group`) are one comment on their first line.
     carriers, first = [], {}
     for f in sorted(pending, key=lambda x: (x.get("group") or "", x["file"], x.get("line") or 0)):

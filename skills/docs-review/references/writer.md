@@ -143,8 +143,8 @@ Return only this JSON object:
   "writer": "writer-1",
   "files": ["doc/user/project/branches.md"],
   "results": [
-    {"fingerprint": "<sha1>", "status": "applied | skipped | conflict",
-     "reason": "One line. Required for skipped and conflict, and for an adapted suggestion.",
+    {"fingerprint": "<sha1>", "status": "applied | skipped | conflict | invalid | generated",
+     "reason": "One line. Required for every status but applied, and for an adapted suggestion.",
      "lines_changed": [12, 14]}
   ],
   "notes": "Anything outside the findings that a person should look at, or empty.",
@@ -153,6 +153,12 @@ Return only this JSON object:
 ```
 
 - One result for every finding you received.
+- `invalid`: the finding is wrong, for example a correct word flagged as a
+  misspelling, or a rule that does not apply here. Say why. It is not posted.
+- `generated`: the text is in a generated block (a "Do not edit by hand"
+  marker), so the fix belongs in its source. It goes to the summary.
+- `skipped` with "needs a decision: ..." is for a fix that needs the author or
+  an expert. Only these, and conflicts, become comments in auto mode.
 - `skipped_low_importance` lists the importance 1 and 2 findings you
   skipped on purpose, so the final human pass can see them.
 - `lines_changed` is the line range in the new file, or `[]` when skipped.

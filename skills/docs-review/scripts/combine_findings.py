@@ -899,6 +899,7 @@ def expand_occurrences(findings, head_text=None):
         out.append(f)
         if occ is None:
             continue
+        f["occurrence_root"] = f.get("fingerprint") or F.fingerprint(f)
         if not isinstance(occ, list):
             notes.append("{}: `occurrences` is not a list of lines; ignored".format(f["id"]))
             continue
@@ -932,7 +933,9 @@ def expand_occurrences(findings, head_text=None):
             # them only when it says so, or another page gets the wrong advice.
             msg = o.get("message")
             if isinstance(msg, str) and msg.strip():
-                g["message"] = msg
+                # The shared message is true of every occurrence; this adds what differs here.
+                g["message"] = "{} On this page: {}".format(f["message"].rstrip(), msg.strip())
+            g["occurrence_root"] = f.get("fingerprint") or F.fingerprint(f)
             g["preservation"] = o.get("preservation") if isinstance(o.get("preservation"), list) else None
             if g["preservation"] is None:
                 g.pop("preservation")

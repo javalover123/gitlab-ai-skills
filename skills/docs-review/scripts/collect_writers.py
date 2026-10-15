@@ -108,7 +108,7 @@ def main(argv=None):
             cache[path] = res.stdout if res.returncode == 0 else None
         return cache[path]
 
-    applied, remaining, dropped = [], [], []
+    applied, remaining, dropped, invalid = [], [], [], []
     capped = [f for f in doc.get("deferred") or [] if f.get("deferred_reason") == "safety-cap"]
     for f in doc["findings"] + capped:
         fp = f.get("fingerprint") or F.fingerprint(f)
@@ -121,6 +121,13 @@ def main(argv=None):
         g = dict(f)
         g.pop("deferred_reason", None)  # a capped finding is a finding again; post_review applies its own cap
         reason = str(r.get("reason") or "")
+        if status == "invalid":
+            invalid.append({"fingerprint": fp, "id": f["id"], "file": f["file"], "line": f.get("line"),
+                            "reason": reason})
+            continue
+        if status == "generated":
+            g["summary_only"], g["summary_reason"] = True, "generated"
+            g["message"] = "{} Fix it in the source of the generated block.".format(f["message"].rstrip())
         if status == "skipped" and reason.startswith("low importance"):
             g["summary_only"], g["summary_reason"] = True, "polish"
         elif status in ("skipped", "conflict") and not F.needs_input(f) and reason \
@@ -139,14 +146,14 @@ def main(argv=None):
 
     os.makedirs(args.out_dir, exist_ok=True)
     with open(os.path.join(args.out_dir, "applied.json"), "w", encoding="utf-8") as fh:
-        json.dump({"head": head, "applied": applied, "dropped": dropped}, fh, indent=2)
+        json.dump({"head": head, "applied": applied, "dropped": dropped, "invalid": invalid}, fh, indent=2)
     target = dict(doc.get("target") or {}, head=head)
     out = dict(doc, target=target, findings=remaining,
                deferred=[f for f in doc.get("deferred") or [] if f.get("deferred_reason") != "safety-cap"])
     F.dump(out, os.path.join(args.out_dir, "remaining.json"))
-    sys.stdout.write("applied {}, left {} ({} need input), dropped {} (text changed); fixes in {}\n".format(
+    sys.stdout.write("applied {}, left {} ({} need input), dropped {} (text changed), {} wrong; fixes in {}\n".format(
         len(applied), len(remaining), sum(1 for g in remaining if F.needs_input(g) and not g.get("summary_only")),
-        len(dropped), head[:12]))
+        len(dropped), len(invalid), head[:12]))
     return 0
 
 
