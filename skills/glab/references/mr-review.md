@@ -1,11 +1,9 @@
 # MR Review — Notes, Code Suggestions, Discussions
 
 **Default to `glab mr note` for every MR-comment operation** — read, write, reply, resolve,
-and batch drafts. The raw `glab api` paths exist only for these cases:
+and batch drafts. The raw `glab api` path exists only for this case:
 
-1. **Pending drafts on older glab** (Section 3) — only when `glab mr note draft` doesn't
-   exist (glab older than v1.122.0).
-2. **Raw discussion JSON / position metadata** (Section 4) — when you need fields that
+1. **Raw discussion JSON / position metadata** (Section 4) — when you need fields that
    `glab mr note list -F json` doesn't surface (e.g. full position diff refs).
 
 If your task is "list / post / reply / resolve a single MR comment", use Section 1. **Do not
@@ -174,8 +172,8 @@ broader patterns.
 ## 3. Draft notes (batched reviews)
 
 `glab mr note draft` is **experimental** (help text: "might be unstable or removed at any
-time"). It needs glab v1.122.0 or newer (older glab: see the raw-API fallback below). Each comment becomes a pending draft, and `publish`
-posts them as one review event (one notification):
+time"). `mr note create` has no `--draft` flag; if `glab mr note draft` is missing, upgrade glab.
+Each comment becomes a pending draft, and `publish` posts them as one review event (one notification):
 
 ```bash
 glab mr note draft create <iid> --file path/to/file --line 42 -m "$(cat "$MSG")"
@@ -207,32 +205,6 @@ glab mr note draft delete <iid> <draft-id> --yes
 ```
 
 For any single comment, prefer `glab mr note create` above.
-
-### Fallback: raw API (glab without `mr note draft`)
-
-Use only on glab older than v1.122.0, where `glab mr note delete`/`update` don't work on draft
-IDs and there is no list command.
-
-```bash
-# List. Once published, this returns an empty array. A draft with .position == null is a
-# general note or a reply; drafts on removed lines have old_line set and new_line null.
-glab api --method GET --paginate \
-  "projects/<project_id>/merge_requests/<mr_iid>/draft_notes" \
-  | jq '.[] | {id, path: .position.new_path, new_line: .position.new_line, old_line: .position.old_line, reply_to: .discussion_id, note: .note[0:40]}'
-
-# Edit the text of one draft
-glab api --method PUT \
-  "projects/<project_id>/merge_requests/<mr_iid>/draft_notes/<draft_id>" \
-  -F "note=@$MSG"
-
-# Delete one draft
-glab api --method DELETE \
-  "projects/<project_id>/merge_requests/<mr_iid>/draft_notes/<draft_id>"
-
-# Publish all of your drafts
-glab api --method POST \
-  "projects/<project_id>/merge_requests/<mr_iid>/draft_notes/bulk_publish"
-```
 
 ---
 
@@ -345,7 +317,3 @@ in review bodies are not interpolated.
   idempotently post a diff comment, list existing notes first and check before creating.
 - **Auto-detection failure** — if the current branch has no open MR (or is detached), pass
   the MR IID as a positional argument.
-
-### `glab api .../draft_notes` (fallback for old glab)
-
-- **Draft notes are per-user** — you can only list, edit, delete, or publish YOUR drafts.

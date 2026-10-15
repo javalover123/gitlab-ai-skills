@@ -208,7 +208,7 @@ agents should run it):
 
 !`glab mr note --help`
 
-For **batched draft reviews** (several inline comments published together as one review), use the experimental `glab mr note draft create` for each comment, then `glab mr note draft publish <iid> --yes` (`--yes` is required without a TTY). `draft list|update|delete` manage pending drafts, and `publish` sends **all** your pending drafts on the MR. `mr note create` has no `--draft` flag. Needs glab v1.122.0+; older versions use the raw `glab api .../draft_notes` fallback.
+For **batched draft reviews** (several inline comments published together as one review), use the experimental `glab mr note draft create` for each comment, then `glab mr note draft publish <iid> --yes` (`--yes` is required without a TTY). `draft list|update|delete` manage pending drafts, and `publish` sends **all** your pending drafts on the MR. `mr note create` has no `--draft` flag; if `glab mr note draft` is missing, upgrade glab.
 
 Full reference (all flags, code suggestions, batched drafts): **[references/mr-review.md](references/mr-review.md)**
 
