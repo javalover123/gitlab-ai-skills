@@ -118,6 +118,8 @@ validating that outputs make sense, and it's an extra input. A one-liner does
 the job with zero dependencies — see `assets/templates/lib/eachSystem.nix`:
 
 ```nix
-# lib/eachSystem.nix
-systems: f: nixpkgs.lib.genAttrs systems (system: f system)
+# lib/eachSystem.nix; flake.nix calls it as
+#   eachSystem = import ./lib/eachSystem.nix { inherit lib systems; };
+{ lib, systems }:
+f: lib.genAttrs systems (system: f system)
 ```

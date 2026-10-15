@@ -56,7 +56,7 @@ State a short plan, then generate the files in the same turn. Stop and ask only 
 
 Get `nix develop` working before you package anything. It pins the toolchain and gives a one-command environment, and it's the lowest-risk first change.
 
-1. Scaffold the thin `flake.nix` and `lib/eachSystem.nix` from `assets/templates/`, then fix the package wiring as shown under Stage 2 (the template's `newScope` wiring fails `nix flake check`; see the dated-advice list).
+1. Scaffold the thin `flake.nix`, `lib/eachSystem.nix`, and `shells/default.nix` from `assets/templates/`.
 2. Add `devShells.default` with the project's native toolchain, pinned. Per-language toolchain notes are in the `lang-*.md` files (for Rust, oxalica `rust-overlay` reading `rust-toolchain.toml`). Use `mkShell` when anything compiles C, links through `cc` or builds native extensions; `mkShellNoCC` otherwise. See [choosing a track](choosing-a-track.md#mkshell-or-mkshellnocc).
 3. Add `.envrc` with `use flake` so nix-direnv loads the shell. Put any `watch_file` lines before `use flake`; nix-direnv's README says they only take effect when invoked first, and it already tracks `flake.nix`, `flake.lock` and `.envrc`.
 4. Add treefmt-nix for formatting and git-hooks.nix for hooks, wired as `formatter` plus a `checks` entry. See [dev shells and ergonomics](dev-shells-and-ergonomics.md) and [gates and tooling](gates-and-tooling.md).
@@ -90,7 +90,7 @@ Add the reproducible build, validation, and optionally an image, each as a scope
 
 Other ecosystems are routed in [lang-other-ecosystems.md](lang-other-ecosystems.md).
 
-The wiring below was evaluated with `nix flake check` and the packages built, including a dependency between two packages resolved through the overlay. It differs from the template on purpose (explanation after the snippet).
+The wiring below is a single-file form of the `assets/templates/flake.nix` wiring. It was evaluated with `nix flake check` and the packages built, including a dependency between two packages resolved through the overlay.
 
 ```nix
 {
@@ -155,9 +155,9 @@ The wiring below was evaluated with `nix flake check` and the packages built, in
 }
 ```
 
-What changed from `assets/templates/flake.nix`, and why:
+Why the wiring looks like this:
 
-- `lib.packagesFromDirectoryRecursive` called with `newScope` returns a scope: it wraps the directory in `makeScope` and `recurseIntoAttrs`, so the result also holds `callPackage`, `newScope`, `overrideScope`, `packages` and `recurseForDerivations`. Measured on the template's wiring: `nix flake check` failed with "packages.x86_64-linux.recurseForDerivations is not a derivation", and with `newScope` in the overlay, evaluating any package hit "stack overflow; max-call-depth exceeded". Dropping `newScope` from the overlay alone fixed the overflow. Pass only `callPackage`. Siblings still resolve, because `final.callPackage` sees the overlay's own packages.
+- `lib.packagesFromDirectoryRecursive` called with `newScope` returns a scope: it wraps the directory in `makeScope` and `recurseIntoAttrs`, so the result also holds `callPackage`, `newScope`, `overrideScope`, `packages` and `recurseForDerivations`. Measured: `nix flake check` failed with "packages.x86_64-linux.recurseForDerivations is not a derivation", and with `newScope` in the overlay, evaluating any package hit "stack overflow; max-call-depth exceeded". Dropping `newScope` from the overlay alone fixed the overflow. Pass only `callPackage`. Siblings still resolve, because `final.callPackage` sees the overlay's own packages.
 - Every `.nix` file under `pkgs/` is called as a package, and a directory without `package.nix` becomes a nested attribute set. Measured: a `pkgs/_shell/shell.nix` produced `packages.<system>._shell`, and `nix flake check` failed with "is not a derivation". Keep non-package files (shells, checks, publish helpers) outside `pkgs/`; this layout uses `shells/`, `checks/` and `publish/`.
 - `packages` must be a flat attribute set of derivations ([scoped outputs](scoped-outputs.md)). If `pkgs/` ever needs a namespace directory, filter or flatten before assigning it.
 - `checks` includes every package, so `nix flake check` builds them (it never builds `packages` by itself).
@@ -276,15 +276,12 @@ Counts are from `scripts/find-rules.py` and describe nixpkgs review comments, no
 
 ## Dated advice to ignore
 
-- **Reference names.** The original skill and `scripts/detect.sh` cite `references/ruby.md`, `go.md`, `rust.md`, `python.md`, `nodejs.md`, `c-cpp.md` and `references/ergonomics.md`. In this skill they're `lang-ruby.md` and so on, and `dev-shells-and-ergonomics.md`.
-- **`newScope` wiring in `assets/templates/flake.nix`.** The original template wraps `packagesFromDirectoryRecursive` in `makeScope` and passes `newScope` in both `packages` and `overlays.default`. Measured failures: the stack overflow from `newScope` in the overlay, and non-derivation attributes in `packages`. Use the wiring in Stage 2. If the template still has the old form when you copy it, replace it.
-- **`pkgs/_shell/shell.nix` under the autoloaded directory.** It becomes `packages.<system>._shell`, a non-derivation. Keep the shell in `shells/default.nix` (or any directory that isn't passed to `packagesFromDirectoryRecursive`).
-- **`runNixOSTest` as a `callPackage` argument.** The original SKILL, `assets/templates/checks/integration.nix` and [VM tests](vm-tests.md) take `{ runNixOSTest, ... }:`. `pkgs.runNixOSTest` doesn't exist (measured: `Function called without required argument "runNixOSTest"`). Take `testers` and call `testers.runNixOSTest`. `testers.testVersion` is current.
-- **`watch_file` after `use flake`.** The template `.envrc` and the ergonomics reference put it second. nix-direnv's README says `watch_file` must be invoked before `use flake` or `use nix` to take effect.
-- **`programs.ruff.enable` in the treefmt template.** treefmt-nix no longer has a `ruff` program (the file 404s upstream); use `ruff-format` and `ruff-check`. `nixfmt`, `rustfmt`, `gofmt`, `rufo`, `prettier` and `clang-format` still exist.
+- **`runNixOSTest` as a `callPackage` argument.** Older examples take `{ runNixOSTest, ... }:`. `pkgs.runNixOSTest` doesn't exist (measured: `Function called without required argument "runNixOSTest"`). Take `testers` and call `testers.runNixOSTest`. `testers.testVersion` is current.
+- **`watch_file` after `use flake`.** Many guides put it second. nix-direnv's README says `watch_file` must be invoked before `use flake` or `use nix` to take effect.
+- **`programs.ruff.enable` in treefmt-nix configs.** treefmt-nix no longer has a `ruff` program (the file 404s upstream); use `ruff-format` and `ruff-check`. `nixfmt`, `rustfmt`, `gofmt`, `rufo`, `prettier` and `clang-format` still exist.
 - **`nixfmt-rfc-style`.** Now a `warnAlias` for `nixfmt` in `pkgs/top-level/aliases.nix`; use `nixfmt`. `nixfmt-classic` is a `throw`.
 - **`poetry2nix` for Poetry projects.** Its README marks it unmaintained and recommends uv2nix for new projects. Treat Poetry as a decision for the user: migrate to uv, or accept an unmaintained tool.
-- **"Crane, poetry2nix and uv2nix are IFD."** The original skill and [transforms and IFD](transforms-and-ifd.md) say so flatly. [lang-rust.md](lang-rust.md) notes the read happens at eval time and is IFD only when the lockfile sits in a fetched source. Check with the `allow-import-from-derivation` run above.
+- **"Crane, poetry2nix and uv2nix are IFD."** Older guides say so flatly. [lang-rust.md](lang-rust.md) notes the read happens at eval time and is IFD only when the lockfile sits in a fetched source. Check with the `allow-import-from-derivation` run above.
 - **`dockerTools.buildImage` with `contents`.** Deprecated there in favour of `copyToRoot`; the evaluator warns. `streamLayeredImage` and `buildLayeredImage` still take `contents`.
 - **nix2container as a plain input.** Its README uses `nix2container.packages.${system}.nix2container.buildImage`, and `tag` defaults to the image's output hash, so you don't need `tag = "latest"`.
 - **`pkgs.system`.** Deprecated (the evaluator prints "renamed to/replaced by 'stdenv.hostPlatform.system'"). Use `pkgs.stdenv.hostPlatform.system`.
