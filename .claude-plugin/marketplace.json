@@ -60,6 +60,10 @@
       "source": "./.claude-plugin/plugins/gitlab-psql"
     },
     {
+      "name": "gitlab-rails-fix",
+      "source": "./.claude-plugin/plugins/gitlab-rails-fix"
+    },
+    {
       "name": "gitlab-stacked-mrs",
       "source": "./.claude-plugin/plugins/gitlab-stacked-mrs"
     },
