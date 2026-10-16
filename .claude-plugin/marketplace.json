@@ -48,6 +48,10 @@
       "source": "./.claude-plugin/plugins/gitlab-demo-videos"
     },
     {
+      "name": "gitlab-implement",
+      "source": "./.claude-plugin/plugins/gitlab-implement"
+    },
+    {
       "name": "gitlab-mr-description",
       "source": "./.claude-plugin/plugins/gitlab-mr-description"
     },

@@ -1,0 +1,10 @@
+{
+  "name": "gitlab-implement",
+  "description": "End-to-end feature implementation workflow for a GitLab issue or epic \u2014 scopes it, asks clarifying questions, writes and adversarially reviews a plan, posts the plan on the issue and waits for approval, then implements, verifies, commits, and opens an MR. Use when asked to build or implement a GitLab feature end-to-end, from issue or epic to open MR.",
+  "version": "1.0.0",
+  "author": {
+    "name": "GitLab"
+  },
+  "license": "MIT",
+  "skills": "./"
+}
