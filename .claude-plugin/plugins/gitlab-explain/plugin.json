@@ -1,0 +1,10 @@
+{
+  "name": "gitlab-explain",
+  "description": "Explain a GitLab issue, epic, or merge request to a competent reader with no context in the area: one sentence, a bounded analogy, a dependency graph, the layers and repos touched marked new/changed/reused/untouched, where the work happens, how we will know it worked, and what is out of scope. Produces one self-contained HTML page from a fixed template with Mermaid diagrams and optional Chart.js charts. Read-only against GitLab; writes one local file for review. Use when asked to explain an issue/epic/MR, make an explainer, brief someone new on a change, or produce a shareable overview for a reviewer, manager, or onboarding engineer.",
+  "version": "1.0.0",
+  "author": {
+    "name": "GitLab"
+  },
+  "license": "MIT",
+  "skills": "./"
+}
